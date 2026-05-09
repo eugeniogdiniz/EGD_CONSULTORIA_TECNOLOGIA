@@ -17,7 +17,6 @@ Para ativar no GitHub:
 A publicacao envia:
 
 - `index.html`
-- `cases.html`
 - `contato.html`
 - `produtos.html`
 - `servicos.html`

@@ -39,7 +39,6 @@ const NAV_LINKS = [
   { href: "index.html",     label: "Início",   match: ["index.html", "/"] },
   { href: "servicos.html",  label: "Serviços", match: ["servicos.html"] },
   { href: "produtos.html",  label: "Produtos", match: ["produtos.html"] },
-  { href: "cases.html",     label: "Cases",    match: ["cases.html"] },
   { href: "sobre.html",     label: "Sobre",    match: ["sobre.html"] },
   { href: "contato.html",   label: "Contato",  match: ["contato.html"] }
 ];

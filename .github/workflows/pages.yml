@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist/assets
-          cp index.html cases.html contato.html produtos.html servicos.html sobre.html .nojekyll dist/
+          cp index.html contato.html produtos.html servicos.html sobre.html .nojekyll dist/
           cp -R assets/. dist/assets/
 
       - name: Setup Pages
