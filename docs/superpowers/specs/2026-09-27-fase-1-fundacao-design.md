@@ -279,7 +279,7 @@ Uma base única com dois temas: **público** (mais expressivo) e **portais** (ma
 
 ### 7.1 Coolify
 
-Três recursos no mesmo projeto Coolify:
+O Coolify ainda não está instalado no VPS; o plano de implementação inclui a instalação e a criação do projeto. Três recursos no mesmo projeto Coolify:
 
 1. **App Next.js:** build via `Dockerfile` multi-stage do repositório (output `standalone`), deploy automático a cada push na `main`. Healthcheck em `/api/health`.
 2. **PostgreSQL 16:** backup diário pelo Coolify para destino escolhido pelo usuário (S3-compatível ou local; definido na configuração).
@@ -287,7 +287,7 @@ Três recursos no mesmo projeto Coolify:
 
 ### 7.2 Domínios e TLS
 
-Site e portais no mesmo domínio, separados por caminho. Certificados Let's Encrypt automáticos do Coolify. O domínio final será informado pelo usuário na configuração.
+Domínio: **egdsystem.com.br** (com redirecionamento de `www` para o apex). Site e portais no mesmo domínio, separados por caminho: `/`, `/portal`, `/admin`. Console do MinIO em `minio.egdsystem.com.br`, restrito por senha. Certificados Let's Encrypt automáticos do Coolify. O DNS do domínio deve apontar para o IP do VPS antes do primeiro deploy.
 
 ### 7.3 Migrations
 
@@ -295,7 +295,7 @@ Rodam na inicialização do container (`drizzle-kit migrate` antes de `node serv
 
 ### 7.4 Segredos
 
-Somente em variáveis de ambiente do Coolify. `.env.example` documenta as chaves: `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`, `ADMIN_NOTIFY_EMAIL`, `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`. Validadas na inicialização por `lib/env.ts` com Zod; chave ausente derruba o processo com mensagem clara.
+Somente em variáveis de ambiente do Coolify. `.env.example` documenta as chaves: `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (`https://egdsystem.com.br` em produção), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`, `ADMIN_NOTIFY_EMAIL`, `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`. Validadas na inicialização por `lib/env.ts` com Zod; chave ausente derruba o processo com mensagem clara.
 
 ### 7.5 Desenvolvimento local
 
