@@ -131,7 +131,42 @@
   .foot ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
   .foot-bottom { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 18px; display: flex; justify-content: space-between; font-family: var(--mono); font-size: .75rem; color: var(--fg-faint); }
   @media (max-width: 960px) { .hero-inner, .head, .body { grid-template-columns: 1fr; } .servicos { grid-template-columns: 1fr; } .produtos, .cases { grid-template-columns: 1fr; } .cotas { grid-template-columns: 1fr 1fr; } .cta { grid-template-columns: 1fr; padding: 32px; } .links { display: none; } .foot { grid-template-columns: 1fr 1fr; } }
-  @media (prefers-reduced-motion: reduce) { .eyebrow .dot { animation: none; } }
+
+  /* reveal ao rolar */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s cubic-bezier(.2,.6,.2,1), transform .7s cubic-bezier(.2,.6,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .reveal[data-delay="1"] { transition-delay: .12s } .reveal[data-delay="2"] { transition-delay: .24s } .reveal[data-delay="3"] { transition-delay: .36s }
+
+  /* terminal */
+  .terminal { margin-top: 18px; border: 1px solid var(--line-2); border-radius: 12px; background: #050d16; box-shadow: 0 30px 60px -30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.05); overflow: hidden; font-family: var(--mono); font-size: .78rem; }
+  .term-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); color: var(--fg-faint); }
+  .term-head i { width: 10px; height: 10px; border-radius: 50%; background: #2a3d52; display: inline-block; }
+  .term-head i:nth-child(1) { background: #ff5d5d } .term-head i:nth-child(2) { background: #ffc44d } .term-head i:nth-child(3) { background: #3ddc97 }
+  .term-title { margin-left: 6px; }
+  .term-body { padding: 12px 14px 14px; min-height: 176px; color: var(--fg-muted); line-height: 1.7; }
+  .ln { display: flex; gap: 12px; white-space: pre; }
+  .lno { color: #34506b; user-select: none; }
+  .prompt { color: var(--cyan-2); } .ok { color: var(--ok); } .num { color: var(--orange); } .key { color: #fff; }
+  .cur::after { content: "\258d"; color: var(--cyan-2); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0 } }
+
+  /* ticker */
+  .ticker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 34px; }
+  .tick { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: rgba(15,34,54,.6); display: flex; flex-direction: column; gap: 4px; }
+  .tick .k { font-family: var(--mono); font-size: .68rem; color: var(--fg-faint); letter-spacing: .04em; }
+  .tick .v { font-family: var(--mono); font-size: 1.05rem; color: #fff; font-variant-numeric: tabular-nums; }
+  .tick .v i { font-style: normal; color: var(--fg-faint); font-size: .75rem; margin-left: 3px; }
+  .tick .v.up { color: var(--ok); }
+
+  /* arquitetura */
+  .arch { margin-top: 40px; border: 1px solid var(--line-2); border-radius: 14px; background: linear-gradient(180deg, rgba(20,48,74,.55), rgba(10,26,42,.85)); padding: 24px; position: relative; overflow: hidden; }
+  .arch::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(84,190,255,.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(84,190,255,.07) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none; }
+  .arch svg { position: relative; display: block; width: 100%; height: auto; }
+  .legend { position: relative; display: flex; gap: 22px; flex-wrap: wrap; margin-top: 14px; font-family: var(--mono); font-size: .75rem; color: var(--fg-muted); }
+  .legend .status { font-family: var(--mono); font-size: .75rem; }
+  .legend .status.warn::before { background: var(--orange); box-shadow: 0 0 10px var(--orange); }
+  @media (max-width: 960px) { .ticker { grid-template-columns: 1fr 1fr; } }
+  @media (prefers-reduced-motion: reduce) { .eyebrow .dot, .cur::after { animation: none; } .reveal { opacity: 1; transform: none; transition: none; } }
 </style>
 </head>
 <body>
@@ -154,6 +189,12 @@
         <div class="acoes">
           <a class="btn btn-cyan" href="#">Conversar sobre um projeto <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="btn btn-ghost" href="#">Ver os cases</a>
+        </div>
+        <div class="ticker reveal" data-delay="2" id="ticker">
+          <div class="tick"><span class="k">vistorias sincronizadas / hoje</span><span class="v" data-tick="vist">248</span></div>
+          <div class="tick"><span class="k">relatórios enviados / semana</span><span class="v" data-tick="rel">1.140</span></div>
+          <div class="tick"><span class="k">documentos no SIGD</span><span class="v" data-tick="docs">38.912</span></div>
+          <div class="tick"><span class="k">automações ativas</span><span class="v up">62 <i>online</i></span></div>
         </div>
       </div>
 
@@ -195,58 +236,106 @@
     </div>
 
     <div class="container">
+      <div class="terminal reveal" data-delay="1" aria-label="Log de execução do pipeline">
+        <div class="term-head"><i></i><i></i><i></i><span class="term-title">~ /egd/pipelines/urbhis/run.log</span><span style="margin-left:auto">live</span></div>
+        <div class="term-body" id="term"></div>
+      </div>
       <div class="cotas">
-        <div class="cota"><div class="valor">13</div><div class="linha"></div><div class="rotulo">clientes atendidos</div></div>
-        <div class="cota"><div class="valor">27</div><div class="linha"></div><div class="rotulo">sistemas em produção</div></div>
-        <div class="cota"><div class="valor">62</div><div class="linha"></div><div class="rotulo">automações entregues</div></div>
-        <div class="cota"><div class="valor">R$ 1,03<small>mi/ano</small></div><div class="linha"></div><div class="rotulo">em economia medida</div></div>
+        <div class="cota reveal"><div class="valor" data-count="13">0</div><div class="linha"></div><div class="rotulo">clientes atendidos</div></div>
+        <div class="cota reveal" data-delay="1"><div class="valor" data-count="27">0</div><div class="linha"></div><div class="rotulo">sistemas em produção</div></div>
+        <div class="cota reveal" data-delay="2"><div class="valor" data-count="62">0</div><div class="linha"></div><div class="rotulo">automações entregues</div></div>
+        <div class="cota reveal" data-delay="3"><div class="valor">R$ <span data-count="1.03" data-decimals="2">0,00</span><small>mi/ano</small></div><div class="linha"></div><div class="rotulo">em economia medida</div></div>
       </div>
       <p class="nota">// economia = horas por mês eliminadas × custo do responsável × 12, conforme planilha de CAPEX de cada cliente</p>
     </div>
   </section>
 
   <section class="section container">
-    <div class="head"><div><div class="tag">01 / SERVIÇOS</div><h2>O que entregamos</h2></div><p class="lead" style="margin:0">Seis frentes que funcionam sozinhas ou combinadas. Em todas, o código, os dados e os acessos ficam com você.</p></div>
-    <div class="body">
+    <div class="head reveal"><div><div class="tag">01 / SERVIÇOS</div><h2>O que entregamos</h2></div><p class="lead" style="margin:0">Seis frentes que funcionam sozinhas ou combinadas. Em todas, o código, os dados e os acessos ficam com você.</p></div>
+    <div class="body reveal" data-delay="1">
       <div class="aside"><a href="#">Ver todos os serviços <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
       <div class="servicos">
-        <a class="svc" href="#"><div class="num">01</div><h3>Desenvolvimento de sistemas</h3><p>Sistemas web e aplicativos sob medida: gestão documental, controle de processos, cadastros de campo.</p><div class="tags"><span>Power Apps</span><span>Next.js</span><span>Supabase</span></div></a>
-        <a class="svc" href="#"><div class="num">02</div><h3>Automação de processos</h3><p>Relatórios, aprovações e integrações que hoje dependem de alguém copiar e colar.</p><div class="tags"><span>Power Automate</span><span>n8n</span><span>Python</span></div></a>
-        <a class="svc" href="#"><div class="num">03</div><h3>Dados e painéis</h3><p>Modelagem, carga e painéis em Power BI que a diretoria abre toda semana.</p><div class="tags"><span>Power BI</span><span>Postgres</span><span>SQL</span></div></a>
-        <a class="svc" href="#"><div class="num">04</div><h3>Agentes de IA</h3><p>Assistentes que leem seus documentos e respondem com a fonte, dentro do seu ambiente.</p><div class="tags"><span>Azure OpenAI</span><span>Bedrock</span><span>pgvector</span></div></a>
-        <a class="svc" href="#"><div class="num">05</div><h3>Governança de dados</h3><p>Quem acessa o quê, de onde veio cada número e como ele é validado. Inclui LGPD.</p><div class="tags"><span>Purview</span><span>dbt</span></div></a>
-        <a class="svc" href="#"><div class="num">06</div><h3>Gestão de projetos de tecnologia</h3><p>Levantamento, priorização e acompanhamento com o cliente na mesa. Cadência quinzenal.</p><div class="tags"><span>Planner</span><span>Jira</span></div></a>
+        <a class="svc reveal" href="#"><div class="num">01</div><h3>Desenvolvimento de sistemas</h3><p>Sistemas web e aplicativos sob medida: gestão documental, controle de processos, cadastros de campo.</p><div class="tags"><span>Power Apps</span><span>Next.js</span><span>Supabase</span></div></a>
+        <a class="svc reveal" href="#"><div class="num">02</div><h3>Automação de processos</h3><p>Relatórios, aprovações e integrações que hoje dependem de alguém copiar e colar.</p><div class="tags"><span>Power Automate</span><span>n8n</span><span>Python</span></div></a>
+        <a class="svc reveal" href="#"><div class="num">03</div><h3>Dados e painéis</h3><p>Modelagem, carga e painéis em Power BI que a diretoria abre toda semana.</p><div class="tags"><span>Power BI</span><span>Postgres</span><span>SQL</span></div></a>
+        <a class="svc reveal" href="#"><div class="num">04</div><h3>Agentes de IA</h3><p>Assistentes que leem seus documentos e respondem com a fonte, dentro do seu ambiente.</p><div class="tags"><span>Azure OpenAI</span><span>Bedrock</span><span>pgvector</span></div></a>
+        <a class="svc reveal" href="#"><div class="num">05</div><h3>Governança de dados</h3><p>Quem acessa o quê, de onde veio cada número e como ele é validado. Inclui LGPD.</p><div class="tags"><span>Purview</span><span>dbt</span></div></a>
+        <a class="svc reveal" href="#"><div class="num">06</div><h3>Gestão de projetos de tecnologia</h3><p>Levantamento, priorização e acompanhamento com o cliente na mesa. Cadência quinzenal.</p><div class="tags"><span>Planner</span><span>Jira</span></div></a>
       </div>
     </div>
   </section>
 
   <section class="section container">
-    <div class="head"><div><div class="tag">02 / PRODUTOS</div><h2>Prontos para implantar</h2></div><p class="lead" style="margin:0">Sistemas que já rodam em clientes. Adaptamos ao seu contrato em semanas.</p></div>
-    <div class="body">
+    <div class="head reveal"><div><div class="tag">02 / ARQUITETURA</div><h2>Do campo ao painel, em uma plataforma observável</h2></div><p class="lead" style="margin:0">Fluxo de referência que aplicamos nos consórcios: captura em campo, documentos e processos, automação e painéis. Adaptado ao ambiente do cliente (Microsoft 365, Azure, AWS ou código aberto).</p></div>
+    <div class="arch reveal" data-delay="1">
+      <svg viewBox="0 0 1120 300" aria-hidden="true">
+        <defs><filter id="g2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <g font-family="JetBrains Mono" font-size="10.5" fill="#6f8aa3" letter-spacing="2">
+          <text x="100" y="26" text-anchor="middle">FONTES</text><text x="330" y="26" text-anchor="middle">CAPTURA E INTEGRAÇÃO</text><text x="560" y="26" text-anchor="middle">DADOS</text><text x="790" y="26" text-anchor="middle">PROCESSAMENTO</text><text x="1020" y="26" text-anchor="middle">CONSUMO</text>
+        </g>
+        <g stroke="rgba(84,190,255,.28)" stroke-width="1" fill="none">
+          <path d="M150 80 C230 80 250 100 280 100"/><path d="M150 140 C230 140 250 100 280 100"/><path d="M150 200 C230 200 250 160 280 160"/><path d="M150 260 C230 260 250 220 280 220"/>
+          <path d="M380 100 C450 100 470 100 510 100"/><path d="M380 160 C450 160 470 100 510 100"/><path d="M380 220 C450 220 470 160 510 160"/>
+          <path d="M610 100 C680 100 700 100 740 100"/><path d="M610 160 C680 160 700 160 740 160"/><path d="M610 100 C680 100 700 220 740 220"/>
+          <path d="M840 100 C910 100 930 100 970 100"/><path d="M840 160 C910 160 930 160 970 160"/><path d="M840 220 C910 220 930 220 970 220"/>
+        </g>
+        <g fill="#7fe0ff" filter="url(#g2)">
+          <circle r="3"><animateMotion dur="3s" repeatCount="indefinite" path="M150 80 C230 80 250 100 280 100"/></circle>
+          <circle r="3"><animateMotion dur="3.4s" begin=".6s" repeatCount="indefinite" path="M150 200 C230 200 250 160 280 160"/></circle>
+          <circle r="3"><animateMotion dur="3s" begin=".3s" repeatCount="indefinite" path="M380 100 C450 100 470 100 510 100"/></circle>
+          <circle r="3"><animateMotion dur="3s" begin="1s" repeatCount="indefinite" path="M610 160 C680 160 700 160 740 160"/></circle>
+          <circle r="3"><animateMotion dur="3s" begin="1.4s" repeatCount="indefinite" path="M840 100 C910 100 930 100 970 100"/></circle>
+          <circle r="3" fill="#ff7a1a"><animateMotion dur="3.6s" begin=".9s" repeatCount="indefinite" path="M840 160 C910 160 930 160 970 160"/></circle>
+        </g>
+        <g font-family="Archivo" font-size="12" font-weight="600" fill="#e9f3fb" text-anchor="middle">
+          <g transform="translate(100 80)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="rgba(84,190,255,.5)"/><text y="4">Apps de campo</text></g>
+          <g transform="translate(100 140)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="rgba(84,190,255,.5)"/><text y="4">SharePoint</text></g>
+          <g transform="translate(100 200)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="rgba(84,190,255,.5)"/><text y="4">Planilhas</text></g>
+          <g transform="translate(100 260)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="rgba(84,190,255,.5)"/><text y="4">ERP e e-mail</text></g>
+          <g transform="translate(330 100)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="#36c6ff"/><text y="4">Power Automate</text></g>
+          <g transform="translate(330 160)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="#36c6ff"/><text y="4">n8n</text></g>
+          <g transform="translate(330 220)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="#36c6ff"/><text y="4">APIs</text></g>
+          <g transform="translate(560 100)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="#36c6ff"/><text y="4">Postgres</text></g>
+          <g transform="translate(560 160)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="#36c6ff"/><text y="4">SIGD</text></g>
+          <g transform="translate(790 100)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="#36c6ff"/><text y="4">Python</text></g>
+          <g transform="translate(790 160)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="#36c6ff"/><text y="4">dbt</text></g>
+          <g transform="translate(790 220)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#0f2236" stroke="#36c6ff"/><text y="4">Validações</text></g>
+          <g transform="translate(1020 100)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#14304a" stroke="#ff7a1a"/><text y="4">Power BI</text></g>
+          <g transform="translate(1020 160)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#14304a" stroke="#ff7a1a"/><text y="4">Agentes de IA</text></g>
+          <g transform="translate(1020 220)"><rect x="-50" y="-16" width="100" height="32" rx="6" fill="#14304a" stroke="#ff7a1a"/><text y="4">Portal do cliente</text></g>
+        </g>
+      </svg>
+      <div class="legend"><span class="status info">Fluxo contínuo (campo e integrações)</span><span class="status ok">Rotinas agendadas (relatórios)</span><span class="status warn">Consumo (painéis, agentes, portal)</span></div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="head reveal"><div><div class="tag">03 / PRODUTOS</div><h2>Prontos para implantar</h2></div><p class="lead" style="margin:0">Sistemas que já rodam em clientes. Adaptamos ao seu contrato em semanas.</p></div>
+    <div class="body reveal" data-delay="1">
       <div class="aside"><a href="#">Ver os produtos</a></div>
       <div class="produtos">
-        <a class="prod" href="#"><div><h3>SIGD: gestão documental e de processos</h3><p>Documentos, revisões, fluxos de aprovação e trilha de auditoria.</p><span class="status ok">Em produção em cinco consórcios</span></div><span class="chip">3–6 sem</span></a>
-        <a class="prod" href="#"><div><h3>Sistema de campo: vistorias e fiscalização</h3><p>Checklists, fotos com localização e assinatura. Funciona sem sinal.</p><span class="status ok">Em produção</span></div><span class="chip">4–6 sem</span></a>
-        <a class="prod" href="#"><div><h3>Gestão de contratos</h3><p>Vigência, aditivos, alertas de vencimento e indicadores por contrato.</p><span class="status info">Pronto para implantar</span></div><span class="chip">2–4 sem</span></a>
-        <a class="prod" href="#"><div><h3>Central de chamados</h3><p>Abertura, prazo e histórico de atendimentos, com base de conhecimento.</p><span class="status info">Pronto para implantar</span></div><span class="chip">2–3 sem</span></a>
+        <a class="prod reveal" href="#"><div><h3>SIGD: gestão documental e de processos</h3><p>Documentos, revisões, fluxos de aprovação e trilha de auditoria.</p><span class="status ok">Em produção em cinco consórcios</span></div><span class="chip">3–6 sem</span></a>
+        <a class="prod reveal" href="#"><div><h3>Sistema de campo: vistorias e fiscalização</h3><p>Checklists, fotos com localização e assinatura. Funciona sem sinal.</p><span class="status ok">Em produção</span></div><span class="chip">4–6 sem</span></a>
+        <a class="prod reveal" href="#"><div><h3>Gestão de contratos</h3><p>Vigência, aditivos, alertas de vencimento e indicadores por contrato.</p><span class="status info">Pronto para implantar</span></div><span class="chip">2–4 sem</span></a>
+        <a class="prod reveal" href="#"><div><h3>Central de chamados</h3><p>Abertura, prazo e histórico de atendimentos, com base de conhecimento.</p><span class="status info">Pronto para implantar</span></div><span class="chip">2–3 sem</span></a>
       </div>
     </div>
   </section>
 
   <section class="section container">
-    <div class="head"><div><div class="tag">03 / CASES</div><h2>Onde já está rodando</h2></div><p class="lead" style="margin:0">Consórcios de habitação e engenharia, operações de energia e regularização fundiária. Custos e economia de cada projeto na página de cases.</p></div>
-    <div class="body">
+    <div class="head reveal"><div><div class="tag">04 / CASES</div><h2>Onde já está rodando</h2></div><p class="lead" style="margin:0">Consórcios de habitação e engenharia, operações de energia e regularização fundiária. Custos e economia de cada projeto na página de cases.</p></div>
+    <div class="body reveal" data-delay="1">
       <div class="aside"><a href="#">Ver todos os cases</a></div>
       <div class="cases">
-        <article class="case"><div class="corpo"><h3>Consórcio BJMM</h3><div class="muted" style="font-size:.9rem">Habitação e engenharia</div><div class="eco">R$ 459 mil<small>por ano</small></div><ul><li>GED corporativo</li><li>Sistema de vistoria em campo</li><li>15 relatórios automatizados</li></ul></div><div class="carimbo"><div><div class="k">SISTEMAS</div><div class="v">3</div></div><div><div class="k">AUTOM.</div><div class="v">15</div></div><div><div class="k">STATUS</div><div class="v"><span class="status ok" style="font-family:var(--font);font-size:.8rem">Produção</span></div></div></div></article>
-        <article class="case"><div class="corpo"><h3>Consórcio HABITA GERENCIAL</h3><div class="muted" style="font-size:.9rem">Habitação social</div><div class="eco">R$ 228 mil<small>por ano</small></div><ul><li>SIGD de gerenciamento</li><li>Controle de recibos</li><li>Sistema de campo</li></ul></div><div class="carimbo"><div><div class="k">SISTEMAS</div><div class="v">3</div></div><div><div class="k">AUTOM.</div><div class="v">4</div></div><div><div class="k">STATUS</div><div class="v"><span class="status ok" style="font-family:var(--font);font-size:.8rem">Produção</span></div></div></div></article>
-        <article class="case"><div class="corpo"><h3>Consórcio URBHIS</h3><div class="muted" style="font-size:.9rem">Urbanismo e habitação</div><div class="eco">R$ 200 mil<small>por ano</small></div><ul><li>Power Apps integrados</li><li>Atendimento de plantão</li><li>Power BI com mapa de conteúdo</li></ul></div><div class="carimbo"><div><div class="k">SISTEMAS</div><div class="v">4</div></div><div><div class="k">AUTOM.</div><div class="v">12</div></div><div><div class="k">STATUS</div><div class="v"><span class="status ok" style="font-family:var(--font);font-size:.8rem">Produção</span></div></div></div></article>
+        <article class="case reveal"><div class="corpo"><h3>Consórcio BJMM</h3><div class="muted" style="font-size:.9rem">Habitação e engenharia</div><div class="eco">R$ 459 mil<small>por ano</small></div><ul><li>GED corporativo</li><li>Sistema de vistoria em campo</li><li>15 relatórios automatizados</li></ul></div><div class="carimbo"><div><div class="k">SISTEMAS</div><div class="v">3</div></div><div><div class="k">AUTOM.</div><div class="v">15</div></div><div><div class="k">STATUS</div><div class="v"><span class="status ok" style="font-family:var(--font);font-size:.8rem">Produção</span></div></div></div></article>
+        <article class="case reveal"><div class="corpo"><h3>Consórcio HABITA GERENCIAL</h3><div class="muted" style="font-size:.9rem">Habitação social</div><div class="eco">R$ 228 mil<small>por ano</small></div><ul><li>SIGD de gerenciamento</li><li>Controle de recibos</li><li>Sistema de campo</li></ul></div><div class="carimbo"><div><div class="k">SISTEMAS</div><div class="v">3</div></div><div><div class="k">AUTOM.</div><div class="v">4</div></div><div><div class="k">STATUS</div><div class="v"><span class="status ok" style="font-family:var(--font);font-size:.8rem">Produção</span></div></div></div></article>
+        <article class="case reveal"><div class="corpo"><h3>Consórcio URBHIS</h3><div class="muted" style="font-size:.9rem">Urbanismo e habitação</div><div class="eco">R$ 200 mil<small>por ano</small></div><ul><li>Power Apps integrados</li><li>Atendimento de plantão</li><li>Power BI com mapa de conteúdo</li></ul></div><div class="carimbo"><div><div class="k">SISTEMAS</div><div class="v">4</div></div><div><div class="k">AUTOM.</div><div class="v">12</div></div><div><div class="k">STATUS</div><div class="v"><span class="status ok" style="font-family:var(--font);font-size:.8rem">Produção</span></div></div></div></article>
       </div>
     </div>
   </section>
 
   <section class="container">
-    <div class="cta">
+    <div class="cta reveal">
       <div><div class="tag" style="font-family:var(--mono);font-size:.78rem;color:var(--orange);letter-spacing:.06em;margin-bottom:12px">CONTATO</div><h2>Conte qual processo hoje toma mais tempo da sua equipe.</h2><p>Respondemos em até um dia útil com uma leitura inicial e os próximos passos.</p></div>
       <div class="acoes"><a class="mono" href="mailto:contato@egdsystem.com.br" style="color:var(--cyan-2)">contato@egdsystem.com.br</a><a class="btn btn-cyan" href="#">Falar com a EGD</a></div>
     </div>
@@ -262,5 +351,63 @@
   </div>
   <div class="foot-bottom"><span>© 2026 EGD CONSULTORIA &amp; TECNOLOGIA</span><span>egdsystem.com.br · v1.0</span></div>
 </div></footer>
+<script>
+(function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // reveal ao rolar
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+  // contagem das cotas
+  const fmt = (n, d) => n.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const co = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return; co.unobserve(e.target);
+    const el = e.target, end = parseFloat(el.dataset.count), d = parseInt(el.dataset.decimals || '0'), t0 = performance.now();
+    if (reduce) { el.textContent = fmt(end, d); return; }
+    const step = (t) => { const p = Math.min(1, (t - t0) / 1400), k = 1 - Math.pow(1 - p, 3); el.textContent = fmt(end * k, d); if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }), { threshold: .5 });
+  document.querySelectorAll('[data-count]').forEach((el) => co.observe(el));
+  // ticker vivo
+  const base = { vist: 248, rel: 1140, docs: 38912 }; let tick = 0;
+  setInterval(() => { tick++; const set = (k, v) => { const el = document.querySelector('[data-tick="' + k + '"]'); if (el) el.textContent = fmt(v, 0); };
+    set('vist', base.vist + Math.floor(tick / 3)); set('rel', base.rel + tick); set('docs', base.docs + tick * 2); }, 1500);
+  // terminal com log animado
+  const LINES = [
+    { p: 'egd@urbhis:~$ ', in: 'egd pipeline run --contrato=URBHIS --hoje' },
+    { out: '→ sincronizando vistorias do app de campo ........ ', tail: '248 OK' },
+    { out: '→ SIGD: revisões pendentes classificadas ........ ', tail: '17 OK' },
+    { out: '→ relatórios semanais gerados e enviados ........ ', tail: '12 OK' },
+    { out: '→ painel Power BI atualizado ..................... ', tail: 'OK' },
+    { sp: true },
+    { out: '✓ pipeline ', em: 'urbhis-diario', out2: ' concluído em ', em2: '1m 47s' },
+    { out: '  ↳ economia acumulada no mês: ', em2: 'R$ 16.643' },
+    { sp: true },
+    { p: 'egd@urbhis:~$ ', cursor: true },
+  ];
+  const term = document.getElementById('term'); if (!term) return;
+  let i = 0;
+  function line(l, n, typing) {
+    const d = document.createElement('div'); if (l.sp) { d.style.height = '8px'; return d; }
+    d.className = 'ln'; const no = document.createElement('span'); no.className = 'lno'; no.textContent = String(n + 1).padStart(2, '0'); d.appendChild(no);
+    const c = document.createElement('span');
+    if (l.p) { c.innerHTML = '<span class="prompt">' + l.p + '</span><span class="' + (typing || l.cursor ? 'cur' : '') + '">' + (l.in || '') + '</span>'; }
+    else { c.innerHTML = '<span>' + (l.out || '') + '</span>' + (l.em ? '<span class="key">' + l.em + '</span>' : '') + (l.out2 ? '<span>' + l.out2 + '</span>' : '') + (l.em2 ? '<span class="num">' + l.em2 + '</span>' : '') + (l.tail ? '<span class="ok">[ ' + l.tail + ' ]</span>' : ''); }
+    d.appendChild(c); return d;
+  }
+  function render(typed) {
+    term.innerHTML = '';
+    LINES.slice(0, i).forEach((l, n) => { term.appendChild(line(l, n, false)); });
+    if (i < LINES.length && LINES[i].in && !LINES[i].cursor) term.appendChild(line({ p: LINES[i].p, in: typed }, i, true));
+  }
+  function next() {
+    if (i >= LINES.length) { setTimeout(() => { i = 0; next(); }, 7000); return; }
+    const l = LINES[i];
+    if (l.in && !l.cursor && !reduce) { let k = 0; const t = setInterval(() => { k++; render(l.in.slice(0, k)); if (k >= l.in.length) { clearInterval(t); setTimeout(() => { i++; render(''); next(); }, 380); } }, 26); }
+    else { setTimeout(() => { i++; render(''); next(); }, l.sp ? 80 : (reduce ? 0 : 220)); }
+  }
+  next();
+})();
+
+</script>
 </body>
 </html>
