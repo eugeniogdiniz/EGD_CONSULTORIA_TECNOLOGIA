@@ -47,15 +47,18 @@ test.describe.serial("admin", () => {
     await expect(page.getByRole("row").filter({ hasText: `Lead ${stamp}` })).toBeVisible();
   });
 
-  test("upload de arquivo interno gera link de download assinado", async ({ page, context }) => {
+  test("upload de arquivo interno gera link de download assinado", async ({ page }) => {
     await loginAs(page, ADMIN.email, ADMIN.password);
     await page.goto("/admin/arquivos");
     await page.setInputFiles('input[type="file"]', { name: `teste-${stamp}.txt`, mimeType: "text/plain", buffer: Buffer.from("ok") });
     await page.getByRole("button", { name: /^enviar$/i }).click();
     await expect(page.getByText(`teste-${stamp}.txt`)).toBeVisible();
     const row = page.getByRole("row").filter({ hasText: `teste-${stamp}.txt` });
-    const [popup] = await Promise.all([context.waitForEvent("page"), row.getByRole("link", { name: /baixar/i }).click()]);
-    await popup.waitForLoadState();
-    expect(popup.url()).toContain("X-Amz-Signature");
+    const href = await row.getByRole("link", { name: /baixar/i }).getAttribute("href");
+    expect(href).toMatch(/\/admin\/arquivos\/[0-9a-f-]+\/baixar$/);
+    // o link abre um download (Content-Disposition: attachment); verificamos o redirect assinado direto
+    const res = await page.request.get(href!, { maxRedirects: 0 });
+    expect(res.status()).toBe(302);
+    expect(res.headers()["location"]).toContain("X-Amz-Signature");
   });
 });

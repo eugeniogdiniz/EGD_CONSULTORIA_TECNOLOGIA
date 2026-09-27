@@ -5,6 +5,8 @@
  */
 export type RateLimiter = {
   hit(key: string, now?: number): { allowed: boolean; remaining: number };
+  /** Zera o contador de uma chave (ex.: após login bem-sucedido). */
+  reset(key: string): void;
 };
 
 export function createRateLimiter({ windowMs, max }: { windowMs: number; max: number }): RateLimiter {
@@ -27,6 +29,9 @@ export function createRateLimiter({ windowMs, max }: { windowMs: number; max: nu
       hits.set(key, recent);
       if (hits.size > 10_000) sweep(now);
       return { allowed: true, remaining: max - recent.length };
+    },
+    reset(key) {
+      hits.delete(key);
     },
   };
 }

@@ -7,6 +7,9 @@ import { env } from "@/lib/env";
 import { beforeHook } from "@/modules/auth/hooks";
 import { sendPasswordResetEmail } from "@/modules/mail/send";
 import { audit } from "@/modules/audit/log";
+import { loginByEmail } from "@/modules/auth/login-limiter";
+import { eq } from "drizzle-orm";
+import { users } from "@/db/schema";
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
@@ -50,6 +53,9 @@ export const auth = betterAuth({
     session: {
       create: {
         after: async (session) => {
+          // login bem-sucedido zera o contador de tentativas do e-mail (só falhas consecutivas contam)
+          const u = await db.query.users.findFirst({ where: eq(users.id, session.userId), columns: { email: true } });
+          if (u) loginByEmail.reset(u.email);
           await audit({
             actorId: session.userId,
             action: "auth.login",

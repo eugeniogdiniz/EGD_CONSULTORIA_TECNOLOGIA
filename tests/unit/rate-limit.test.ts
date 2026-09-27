@@ -27,4 +27,12 @@ describe("createRateLimiter", () => {
     expect(rl.hit("a", 1).remaining).toBe(1);
     expect(rl.hit("a", 2).remaining).toBe(0);
   });
+
+  it("reset zera o contador da chave", () => {
+    const rl = createRateLimiter({ windowMs: 1000, max: 1 });
+    rl.hit("a", 0);
+    expect(rl.hit("a", 1).allowed).toBe(false);
+    rl.reset("a");
+    expect(rl.hit("a", 2).allowed).toBe(true);
+  });
 });

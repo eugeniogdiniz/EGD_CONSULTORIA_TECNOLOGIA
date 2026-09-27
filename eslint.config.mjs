@@ -25,6 +25,11 @@ const eslintConfig = defineConfig([
     // Site estático antigo (React via CDN, globais definidos por <script>):
     // não é código da aplicação Next.js e não segue as mesmas convenções.
     "legacy/**",
+    // Saídas de teste e do MCP do Playwright (HTML/JS minificado).
+    "test-results/**",
+    "playwright-report/**",
+    ".playwright-mcp/**",
+    ".superpowers/**",
   ]),
 ]);
 
