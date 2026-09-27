@@ -30,6 +30,7 @@ Ao terminar, abra `http://IP-DO-VPS:8000`, crie a conta de administrador, e em *
 | A | `www` | IP do VPS | 300 |
 | A | `coolify` | IP do VPS | 300 |
 | A | `storage` | IP do VPS | 300 |
+| A | `storage-console` | IP do VPS | 300 |
 
 Confirme com `nslookup egdsystem.com.br` antes de seguir. O Coolify emite certificados Let's Encrypt automaticamente quando o domínio aponta para o VPS.
 
@@ -49,7 +50,7 @@ As imagens do MinIO saíram dos registros públicos; usamos RustFS, que expõe a
 - **New Resource → Docker Image**, imagem `rustfs/rustfs:latest`, nome `egd-storage`.
 - Variáveis: `RUSTFS_ACCESS_KEY` e `RUSTFS_SECRET_KEY` com valores longos gerados por `openssl rand -hex 24` cada um; `RUSTFS_CONSOLE_ENABLE=true`.
 - Volume persistente: `/data`.
-- Portas: 9000 (API) só na rede interna; 9001 (console) com domínio `https://storage.egdsystem.com.br` para você administrar. O app fala com a API pelo endereço interno `http://egd-storage:9000`.
+- Portas e domínios: **9000 (API S3) com domínio `https://storage.egdsystem.com.br`** e 9001 (console) com domínio `https://storage-console.egdsystem.com.br`. A API precisa ser pública porque os links de download são URLs assinadas que o navegador do cliente abre direto no storage (validade de 5 minutos, assinatura por arquivo). O app faz uploads pelo endereço interno `http://egd-storage:9000` e assina os downloads com o endereço público.
 - O bucket `egd` é criado pelo próprio app na primeira gravação; não precisa criar à mão.
 
 ### 4.3 Aplicação
@@ -76,14 +77,15 @@ Em **Environment Variables** da aplicação, marque todas como **Build & Runtime
 | `SMTP_PASS` | senha da caixa |
 | `MAIL_FROM` | `EGD <no-reply@egdsystem.com.br>` |
 | `ADMIN_NOTIFY_EMAIL` | seu e-mail para receber leads |
-| `S3_ENDPOINT` | `http://egd-storage:9000` |
+| `S3_ENDPOINT` | `http://egd-storage:9000` (rede interna: uploads) |
+| `S3_PUBLIC_ENDPOINT` | `https://storage.egdsystem.com.br` (assina os links de download) |
 | `S3_BUCKET` | `egd` |
 | `S3_ACCESS_KEY` | mesmo valor de `RUSTFS_ACCESS_KEY` |
 | `S3_SECRET_KEY` | mesmo valor de `RUSTFS_SECRET_KEY` |
 | `SEED_ADMIN_EMAIL` | seu e-mail de admin (só para o passo 7; remover depois) |
 | `SEED_ADMIN_PASSWORD` | senha inicial forte (só para o passo 7; remover depois) |
 
-Se algum nome ausente ou inválido, o container sai na inicialização com a mensagem `Variáveis de ambiente inválidas` listando a chave.
+Se alguma variável estiver ausente ou inválida, o servidor falha ao iniciar com a mensagem `Variáveis de ambiente inválidas` listando a chave, e o healthcheck (`/api/health`, que também testa o banco) fica vermelho: o Coolify não troca a versão anterior.
 
 ## 6. Primeiro deploy
 
@@ -125,18 +127,22 @@ Em **egd-db → Backups**: agende backup diário às 03:00, retenção de 14 dia
 3. Criar uma organização e convidar um e-mail real seu; o e-mail chega com o link `/convite/...`.
 4. Aceitar o convite em outra janela anônima; o portal mostra só aquela organização.
 5. Enviar o formulário de contato em produção: aparece em `/admin/leads` e chega o e-mail em `ADMIN_NOTIFY_EMAIL`.
-6. Em `/admin/arquivos`, enviar um arquivo e baixar pelo link.
+6. Em `/admin/arquivos`, enviar um arquivo e baixar pelo link **de uma máquina fora do VPS** (o link abre `storage.egdsystem.com.br`).
 7. `/admin/auditoria` lista os eventos acima.
 
 ## 10. Desligar o GitHub Pages
 
 No repositório: **Settings → Pages → Source: None**. Depois execute a Task 18 do plano (remove `legacy/` e `.github/workflows/pages.yml`).
 
-## 11. Rollback
+## 11. Proxy e IP do cliente
+
+O Traefik do Coolify deve ser a única porta de entrada (80/443) para o container: o app confia no primeiro valor de `x-forwarded-for` para limitar envios do formulário de contato e tentativas de login. Não exponha a porta 3000 do container publicamente.
+
+## 12. Rollback
 
 **Application → Deployments**: escolha um deploy anterior e clique em **Redeploy**. Migrations são aditivas na Fase 1; um rollback de app não exige rollback de banco.
 
-## 12. Operação do dia a dia
+## 13. Operação do dia a dia
 
 - Logs: **Application → Logs** (o app escreve JSON, uma linha por evento; erros trazem `digest`, que é o código que a tela de erro mostra ao usuário).
 - Atualizar: push na `main` dispara deploy; falha de migration mantém a versão anterior no ar.

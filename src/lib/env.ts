@@ -12,6 +12,8 @@ const schema = z.object({
   MAIL_FROM: z.string().min(3),
   ADMIN_NOTIFY_EMAIL: z.email(),
   S3_ENDPOINT: z.url(),
+  /** URL do storage alcançável pelo navegador (assina os links de download). Padrão: S3_ENDPOINT. */
+  S3_PUBLIC_ENDPOINT: z.url().optional(),
   S3_BUCKET: z.string().min(1),
   S3_ACCESS_KEY: z.string().min(1),
   S3_SECRET_KEY: z.string().min(1),

@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { safeNextPath } from "@/modules/auth/safe-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,8 +43,7 @@ export function LoginForm() {
       return;
     }
     const role = (data?.user as { role?: string } | undefined)?.role;
-    const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
-    router.push(safeNext ?? (role === "admin" ? "/admin" : "/portal"));
+    router.push(safeNextPath(next) ?? (role === "admin" ? "/admin" : "/portal"));
     router.refresh();
   }
 

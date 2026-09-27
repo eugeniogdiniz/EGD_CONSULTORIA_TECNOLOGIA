@@ -3,12 +3,13 @@ import { db } from "@/lib/db";
 import { organizations, memberships, invitations, users } from "@/db/schema";
 import type { AdminContext } from "@/modules/auth/context";
 import { hashToken } from "./tokens";
+import { isUuid } from "@/lib/uuid";
 
 export const listOrganizations = (_ctx: AdminContext) =>
   db.select().from(organizations).orderBy(asc(organizations.name));
 
 export const getOrganization = (_ctx: AdminContext, id: string) =>
-  db.query.organizations.findFirst({ where: eq(organizations.id, id) });
+  isUuid(id) ? db.query.organizations.findFirst({ where: eq(organizations.id, id) }) : Promise.resolve(undefined);
 
 export const countOrganizations = async () => (await db.select({ n: count() }).from(organizations))[0].n;
 

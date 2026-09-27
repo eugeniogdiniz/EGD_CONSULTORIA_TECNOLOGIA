@@ -11,6 +11,7 @@ import { organizationSchema, inviteSchema, acceptInvitationSchema, type Organiza
 import { slugify } from "./slug";
 import { generateToken } from "./tokens";
 import { getInvitationByToken } from "./queries";
+import { isUuid } from "@/lib/uuid";
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -45,6 +46,7 @@ export async function updateOrganization(
   id: string,
   input: OrganizationInput,
 ): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Organização não encontrada.");
   const parsed = organizationSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
   const slug = parsed.data.slug ?? slugify(parsed.data.name);
@@ -71,6 +73,7 @@ export async function setOrganizationStatus(
   id: string,
   status: "active" | "inactive",
 ): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Organização não encontrada.");
   await db.update(organizations).set({ status }).where(eq(organizations.id, id));
   await audit({
     actorId: ctx.user.id,
@@ -128,6 +131,7 @@ export async function inviteUser(
 }
 
 export async function resendInvitation(ctx: AdminContext, invitationId: string): Promise<ActionResult<null>> {
+  if (!isUuid(invitationId)) return fail("Convite não encontrado ou já aceito.");
   const inv = await db.query.invitations.findFirst({ where: eq(invitations.id, invitationId) });
   if (!inv || inv.acceptedAt) return fail("Convite não encontrado ou já aceito.");
   const org = await db.query.organizations.findFirst({ where: eq(organizations.id, inv.organizationId) });
@@ -204,6 +208,7 @@ export async function acceptInvitation(
 }
 
 export async function setUserActive(ctx: AdminContext, userId: string, active: boolean): Promise<ActionResult<null>> {
+  if (!isUuid(userId)) return fail("Usuário não encontrado.");
   if (userId === ctx.user.id) return fail("Você não pode desativar a própria conta.");
   await db.update(users).set({ active }).where(eq(users.id, userId));
   if (!active) {

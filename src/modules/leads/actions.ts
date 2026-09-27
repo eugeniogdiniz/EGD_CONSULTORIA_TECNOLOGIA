@@ -1,8 +1,9 @@
 "use server";
 
-import { createHash } from "node:crypto";
+import { createHmac } from "node:crypto";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
+import { env } from "@/lib/env";
 import { leads } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { createRateLimiter } from "@/lib/rate-limit";
@@ -23,7 +24,8 @@ const contactLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 3 });
 async function clientIpHash(): Promise<string> {
   const h = await headers();
   const ip = h.get("x-forwarded-for")?.split(",")[0].trim() || h.get("x-real-ip") || "unknown";
-  return createHash("sha256").update(ip).digest("hex").slice(0, 32);
+  // HMAC com chave: o espaço IPv4 é pequeno demais para um hash sem sal ser pseudonimização
+  return createHmac("sha256", env.BETTER_AUTH_SECRET).update(ip).digest("hex").slice(0, 32);
 }
 
 export async function submitContact(_prev: ContactState, formData: FormData): Promise<ContactState> {

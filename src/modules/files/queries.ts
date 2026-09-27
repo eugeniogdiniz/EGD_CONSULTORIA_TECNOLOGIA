@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { files } from "@/db/schema";
 import type { AdminContext, PortalContext } from "@/modules/auth/context";
+import { isUuid } from "@/lib/uuid";
 
 /** Admin vê todos os arquivos; portal vê só os da organização ativa. */
 export function listFiles(ctx: AdminContext | PortalContext) {
@@ -12,6 +13,7 @@ export function listFiles(ctx: AdminContext | PortalContext) {
 
 /** Retorna o arquivo só se o contexto pode vê-lo; null caso contrário (sem distinguir "não existe" de "não é seu"). */
 export async function getFileForContext(ctx: AdminContext | PortalContext, id: string) {
+  if (!isUuid(id)) return null;
   const f = await db.query.files.findFirst({ where: eq(files.id, id) });
   if (!f) return null;
   if (ctx.kind === "portal" && f.organizationId !== ctx.organization.id) return null;

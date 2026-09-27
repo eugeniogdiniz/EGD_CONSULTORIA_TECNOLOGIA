@@ -9,13 +9,19 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
-/** Cliente S3 apontado para o armazenamento S3-compatível (RustFS). */
-export const s3 = new S3Client({
-  endpoint: env.S3_ENDPOINT,
-  region: "us-east-1",
-  forcePathStyle: true,
-  credentials: { accessKeyId: env.S3_ACCESS_KEY, secretAccessKey: env.S3_SECRET_KEY },
-});
+const credentials = { accessKeyId: env.S3_ACCESS_KEY, secretAccessKey: env.S3_SECRET_KEY };
+
+/** Cliente S3 pela rede interna (uploads, criação de bucket). */
+export const s3 = new S3Client({ endpoint: env.S3_ENDPOINT, region: "us-east-1", forcePathStyle: true, credentials });
+
+/**
+ * Cliente usado só para assinar URLs de download: a assinatura inclui o host,
+ * então precisa ser o endereço que o navegador do cliente alcança.
+ */
+const s3Public =
+  env.S3_PUBLIC_ENDPOINT && env.S3_PUBLIC_ENDPOINT !== env.S3_ENDPOINT
+    ? new S3Client({ endpoint: env.S3_PUBLIC_ENDPOINT, region: "us-east-1", forcePathStyle: true, credentials })
+    : s3;
 
 let bucketReady: Promise<void> | null = null;
 
@@ -43,7 +49,7 @@ export async function putObject(key: string, body: Buffer, contentType: string):
 /** URL assinada de download, válida por 5 minutos, com nome original no Content-Disposition. */
 export function getSignedDownloadUrl(key: string, filename: string): Promise<string> {
   return getSignedUrl(
-    s3,
+    s3Public,
     new GetObjectCommand({
       Bucket: env.S3_BUCKET,
       Key: key,

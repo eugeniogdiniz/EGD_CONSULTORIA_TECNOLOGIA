@@ -11,8 +11,8 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self'",
       "img-src 'self' data: blob:",
       "connect-src 'self'",
       "frame-ancestors 'none'",
@@ -23,6 +23,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   agentRules: false,
   output: "standalone",
+  // upload de arquivos via server action: spec permite até 50 MB
+  experimental: { serverActions: { bodySizeLimit: "52mb" } },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
