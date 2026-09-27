@@ -52,7 +52,8 @@ test.describe.serial("admin", () => {
     await page.goto("/admin/arquivos");
     await page.setInputFiles('input[type="file"]', { name: `teste-${stamp}.txt`, mimeType: "text/plain", buffer: Buffer.from("ok") });
     await page.getByRole("button", { name: /^enviar$/i }).click();
-    await expect(page.getByText(`teste-${stamp}.txt`)).toBeVisible();
+    // em dev a re-renderização após a action pode passar de 5 s; em produção é bem menor
+    await expect(page.getByText(`teste-${stamp}.txt`)).toBeVisible({ timeout: 20_000 });
     const row = page.getByRole("row").filter({ hasText: `teste-${stamp}.txt` });
     const href = await row.getByRole("link", { name: /baixar/i }).getAttribute("href");
     expect(href).toMatch(/\/admin\/arquivos\/[0-9a-f-]+\/baixar$/);
