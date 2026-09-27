@@ -6,6 +6,7 @@ import * as schema from "@/db/schema";
 import { env } from "@/lib/env";
 import { beforeHook } from "@/modules/auth/hooks";
 import { sendPasswordResetEmail } from "@/modules/mail/send";
+import { audit } from "@/modules/audit/log";
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
@@ -45,6 +46,21 @@ export const auth = betterAuth({
     },
   },
   hooks: { before: beforeHook },
+  databaseHooks: {
+    session: {
+      create: {
+        after: async (session) => {
+          await audit({
+            actorId: session.userId,
+            action: "auth.login",
+            entityType: "user",
+            entityId: session.userId,
+            metadata: { ip: session.ipAddress ?? null },
+          });
+        },
+      },
+    },
+  },
   plugins: [nextCookies()], // deve ser o último plugin
 });
 
