@@ -14,6 +14,7 @@ import { users } from "@/db/schema";
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
+  trustedOrigins: (env.BETTER_AUTH_TRUSTED_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
   database: drizzleAdapter(db, { provider: "pg", schema, usePlural: true }),
   advanced: {
     database: { generateId: "uuid" },

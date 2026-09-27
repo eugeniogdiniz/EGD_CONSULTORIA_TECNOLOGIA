@@ -5,6 +5,8 @@ const schema = z.object({
   DATABASE_URL: z.url(),
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.url(),
+  /** Origens extras confiáveis para login (ex.: domínio temporário antes do DNS), separadas por vírgula. */
+  BETTER_AUTH_TRUSTED_ORIGINS: z.string().optional(),
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.coerce.number().int().positive(),
   SMTP_USER: z.string().default(""),
