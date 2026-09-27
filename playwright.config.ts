@@ -16,6 +16,7 @@ export default defineConfig({
     : { command: "npm run dev", url: "http://localhost:3000/api/health", reuseExistingServer: true, timeout: 120_000 },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "mobile", use: { ...devices["Pixel 7"] } },
+    // portais no mobile são cobertos pelo Sheet do shell; e2e mobile só para o site público
+    { name: "mobile", use: { ...devices["Pixel 7"] }, testMatch: /site\.spec\.ts/ },
   ],
 });

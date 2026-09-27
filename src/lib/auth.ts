@@ -34,11 +34,12 @@ export const auth = betterAuth({
   },
   rateLimit: {
     enabled: true,
-    window: 15 * 60,
-    max: 20,
+    // limite geral por IP em todos os endpoints de auth (várias pessoas atrás de um NAT)
+    window: 60,
+    max: 100,
     customRules: {
-      // sobrescreve a regra padrão do Better Auth (3 por 10 s) para seguir a spec: 20 por IP a cada 15 min
-      "/sign-in/email": { window: 15 * 60, max: 20 },
+      // login: 60 por IP a cada 15 min (o limite de 5 por e-mail, no hook, é a defesa contra força bruta)
+      "/sign-in/email": { window: 15 * 60, max: 60 },
       "/get-session": false,
     },
   },

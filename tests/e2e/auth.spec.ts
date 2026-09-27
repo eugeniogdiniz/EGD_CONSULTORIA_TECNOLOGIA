@@ -14,7 +14,7 @@ test("admin entra e cai no /admin; /entrar com sessão redireciona", async ({ pa
   await loginAs(page, ADMIN.email, ADMIN.password);
   await expect(page).toHaveURL(/\/admin/);
   await page.goto("/entrar");
-  await expect(page).not.toHaveURL(/\/entrar/);
+  await expect(page).toHaveURL(/\/admin/);
 });
 
 test("recuperação de senha envia e-mail e redefine", async ({ page }) => {
