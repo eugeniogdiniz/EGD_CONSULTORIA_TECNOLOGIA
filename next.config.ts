@@ -21,6 +21,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  agentRules: false,
   output: "standalone",
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
