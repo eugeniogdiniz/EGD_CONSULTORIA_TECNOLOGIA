@@ -33,9 +33,9 @@ test.describe.serial("admin", () => {
     await page.goto("/contato");
     await page.getByLabel(/^nome$/i).fill(`Lead ${stamp}`);
     await page.getByLabel(/e-mail/i).fill(`lead${stamp}@test.local`);
-    await page.getByLabel(/mensagem/i).fill("Mensagem de teste para o admin marcar como visto.");
+    await page.getByLabel(/conta o desafio/i).fill("Mensagem de teste para o admin marcar como visto.");
     await page.getByRole("button", { name: /enviar mensagem/i }).click();
-    await expect(page.getByText(/recebemos sua mensagem/i)).toBeVisible();
+    await expect(page.getByText(/mensagem recebida/i)).toBeVisible();
 
     await loginAs(page, ADMIN.email, ADMIN.password);
     await page.goto("/admin/leads?status=new");
