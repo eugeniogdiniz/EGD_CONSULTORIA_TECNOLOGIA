@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Início (blueprint escuro) · EGD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06111c; --bg-2: #0a1a2a; --surface: #0f2236; --surface-2: #14304a;
+    --line: rgba(84,190,255,.16); --line-2: rgba(84,190,255,.32); --line-3: rgba(84,190,255,.55);
+    --fg: #e9f3fb; --fg-muted: #a7bdd2; --fg-faint: #6f8aa3;
+    --cyan: #36c6ff; --cyan-2: #7fe0ff; --cyan-soft: rgba(54,198,255,.14); --cyan-glow: rgba(54,198,255,.45);
+    --orange: #ff7a1a; --orange-soft: rgba(255,122,26,.16);
+    --ok: #3ddc97; --warn: #ffc44d; --err: #ff5d5d;
+    --font: "Archivo", sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
+    --container: 1200px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 17px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(900px 520px at 85% -10%, rgba(54,198,255,.16), transparent 60%), radial-gradient(700px 480px at -10% 20%, rgba(255,122,26,.10), transparent 60%); }
+  a { color: inherit; text-decoration: none; }
+  .container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 28px; position: relative; z-index: 1; }
+  h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+  h2 { font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem); line-height: 1.1; font-variation-settings: "wdth" 106; }
+  h3 { font-size: 1.25rem; line-height: 1.25; }
+  .lead { font-size: 1.2rem; color: var(--fg-muted); max-width: 40rem; }
+  .mono { font-family: var(--mono); font-size: .85rem; }
+  .muted { color: var(--fg-muted); } .faint { color: var(--fg-faint); }
+  .grad { background: linear-gradient(92deg, var(--cyan) 0%, var(--cyan-2) 45%, #ffffff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* nav */
+  .nav { height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--line); }
+  .logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em; }
+  .logo .mark { width: 28px; height: 28px; border: 2px solid var(--cyan); border-radius: 6px; position: relative; box-shadow: 0 0 18px var(--cyan-glow); }
+  .logo .mark::after { content: ""; position: absolute; inset: 6px; background: var(--orange); border-radius: 2px; }
+  .logo small { font-weight: 400; color: var(--fg-muted); font-size: .85rem; margin-left: 2px; }
+  .links { display: flex; gap: 30px; }
+  .links a { color: var(--fg-muted); font-size: .95rem; font-weight: 500; }
+  .links a[aria-current] { color: var(--fg); text-shadow: 0 0 12px var(--cyan-glow); box-shadow: inset 0 -2px 0 var(--cyan); padding-bottom: 2px; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0 20px; border-radius: 8px; font-weight: 600; font-size: .95rem; border: 1px solid transparent; transition: transform .16s, box-shadow .16s, background .16s; }
+  .btn-cyan { background: var(--cyan); color: #06111c; box-shadow: 0 0 0 1px rgba(54,198,255,.3), 0 10px 30px -10px var(--cyan-glow); }
+  .btn-cyan:hover { transform: translateY(-1px); box-shadow: 0 0 0 1px rgba(54,198,255,.5), 0 16px 40px -10px var(--cyan-glow); }
+  .btn-ghost { border-color: var(--line-2); color: var(--fg); background: rgba(255,255,255,.02); }
+  .btn-ghost:hover { border-color: var(--line-3); background: var(--cyan-soft); }
+  .btn-sm { height: 38px; padding: 0 14px; font-size: .9rem; }
+  .btn svg { width: 16px; height: 16px; }
+
+  /* hero */
+  .hero { padding: 88px 0 72px; position: relative; }
+  .hero-grid { position: absolute; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, rgba(84,190,255,.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(84,190,255,.07) 1px, transparent 1px);
+    background-size: 48px 48px; mask-image: radial-gradient(900px 600px at 70% 20%, #000 30%, transparent 80%); }
+  .hero-inner { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: .8rem; color: var(--cyan-2); letter-spacing: .04em; }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 12px var(--ok); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { transform: scale(1); opacity: 1 } 50% { transform: scale(.7); opacity: .6 } }
+  .display { font-size: clamp(2.6rem, 1.6rem + 3.6vw, 4.4rem); line-height: 1.0; font-weight: 800; font-variation-settings: "wdth" 110; letter-spacing: -0.03em; margin-top: 22px; }
+  .hero .lead { margin-top: 26px; }
+  .acoes { display: flex; gap: 14px; margin-top: 36px; flex-wrap: wrap; }
+
+  /* prancha */
+  .prancha { position: relative; border: 1px solid var(--line-2); border-radius: 14px; background: linear-gradient(180deg, rgba(20,48,74,.75), rgba(10,26,42,.9)); box-shadow: 0 0 0 1px rgba(54,198,255,.08), 0 40px 80px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06); overflow: hidden; }
+  .prancha::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(84,190,255,.10) 1px, transparent 1px), linear-gradient(to bottom, rgba(84,190,255,.10) 1px, transparent 1px); background-size: 24px 24px; pointer-events: none; }
+  .prancha-head { position: relative; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: .78rem; color: var(--fg-muted); }
+  .prancha-head b { color: var(--cyan-2); font-weight: 500; }
+  .prancha svg { display: block; width: 100%; height: auto; position: relative; }
+  .carimbo { position: relative; display: grid; grid-template-columns: 2.2fr 1.8fr .8fr .8fr 1.6fr; border-top: 1px solid var(--line-2); background: rgba(6,17,28,.55); }
+  .carimbo > div { padding: 10px 14px; border-right: 1px solid var(--line); }
+  .carimbo > div:last-child { border-right: 0; }
+  .carimbo .k { font-size: .72rem; color: var(--fg-faint); font-family: var(--mono); }
+  .carimbo .v { font-family: var(--mono); font-size: .8rem; color: var(--fg); margin-top: 3px; }
+  .status { display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; font-weight: 500; color: var(--fg-muted); }
+  .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--fg-faint); }
+  .status.ok::before { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+  .status.info::before { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+
+  /* cotas */
+  .cotas { margin-top: 72px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; border-top: 1px solid var(--line); padding-top: 34px; }
+  .cota .valor { font-size: 2.9rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; font-variation-settings: "wdth" 108; font-variant-numeric: tabular-nums; color: #fff; text-shadow: 0 0 24px var(--cyan-glow); }
+  .cota .valor small { font-size: 1rem; font-weight: 500; color: var(--cyan-2); margin-left: 6px; text-shadow: none; }
+  .cota .linha { position: relative; height: 12px; margin: 12px 0 10px; }
+  .cota .linha::before { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 1px; background: linear-gradient(90deg, var(--orange), var(--cyan)); }
+  .cota .linha::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 12px; border-left: 2px solid var(--orange); border-right: 2px solid var(--cyan); }
+  .cota .rotulo { color: var(--fg-muted); font-size: .95rem; }
+  .nota { margin-top: 18px; font-family: var(--mono); font-size: .75rem; color: var(--fg-faint); }
+
+  /* seções */
+  .section { padding: 96px 0 0; }
+  .head { display: grid; grid-template-columns: 3fr 9fr; gap: 28px; border-top: 1px solid var(--line); padding-top: 28px; align-items: start; }
+  .head .tag { font-family: var(--mono); font-size: .78rem; color: var(--orange); letter-spacing: .06em; margin-bottom: 10px; }
+  .body { display: grid; grid-template-columns: 3fr 9fr; gap: 28px; margin-top: 40px; }
+  .aside a { color: var(--cyan-2); font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+  .servicos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  .svc { position: relative; padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(180deg, rgba(15,34,54,.8), rgba(10,26,42,.6)); transition: border-color .16s, transform .16s, box-shadow .16s; overflow: hidden; }
+  .svc::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--cyan), transparent); opacity: .7; }
+  .svc:hover { border-color: var(--line-3); transform: translateY(-2px); box-shadow: 0 20px 50px -30px var(--cyan-glow); }
+  .svc .num { font-family: var(--mono); font-size: .75rem; color: var(--fg-faint); }
+  .svc h3 { margin-top: 10px; }
+  .svc p { margin: 10px 0 0; color: var(--fg-muted); font-size: .97rem; }
+  .svc .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 16px; }
+  .svc .tags span { font-family: var(--mono); font-size: .72rem; padding: 4px 8px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--cyan-2); background: var(--cyan-soft); }
+
+  .produtos { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .prod { border: 1px solid var(--line); border-radius: 12px; padding: 24px; background: var(--surface); display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; transition: border-color .16s; }
+  .prod:hover { border-color: var(--line-3); }
+  .prod p { margin: 8px 0 0; color: var(--fg-muted); }
+  .prod .status { margin-top: 14px; }
+  .prod .chip { font-family: var(--mono); font-size: .72rem; padding: 6px 10px; border-radius: 6px; background: var(--orange-soft); color: var(--orange); border: 1px solid rgba(255,122,26,.35); white-space: nowrap; }
+
+  .cases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .case { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+  .case .corpo { padding: 22px; }
+  .case .eco { margin-top: 14px; font-size: 2rem; font-weight: 800; letter-spacing: -.03em; color: #fff; text-shadow: 0 0 20px var(--cyan-glow); }
+  .case .eco small { font-size: .85rem; color: var(--fg-muted); font-weight: 400; margin-left: 8px; text-shadow: none; }
+  .case ul { margin: 12px 0 0; padding-left: 18px; color: var(--fg-muted); font-size: .92rem; }
+  .case .carimbo { grid-template-columns: 1fr 1fr 1.4fr; }
+
+  .cta { margin-top: 96px; border-radius: 18px; padding: 64px; position: relative; overflow: hidden; border: 1px solid var(--line-2);
+    background: radial-gradient(800px 300px at 20% 0%, rgba(54,198,255,.22), transparent 60%), radial-gradient(500px 300px at 95% 100%, rgba(255,122,26,.18), transparent 60%), var(--surface); display: grid; grid-template-columns: 7fr 5fr; gap: 28px; align-items: end; }
+  .cta h2 { max-width: 18ch; }
+  .cta p { color: var(--fg-muted); margin-top: 16px; max-width: 34rem; }
+  .cta .acoes { justify-content: flex-end; margin-top: 0; align-items: center; }
+  footer { margin-top: 96px; border-top: 1px solid var(--line); padding: 56px 0 28px; color: var(--fg-muted); font-size: .92rem; }
+  .foot { display: grid; grid-template-columns: 4fr 2.5fr 2.5fr 3fr; gap: 28px; }
+  .foot h4 { margin: 0 0 12px; color: var(--fg); font-size: .95rem; }
+  .foot ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .foot-bottom { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 18px; display: flex; justify-content: space-between; font-family: var(--mono); font-size: .75rem; color: var(--fg-faint); }
+  @media (max-width: 960px) { .hero-inner, .head, .body { grid-template-columns: 1fr; } .servicos { grid-template-columns: 1fr; } .produtos, .cases { grid-template-columns: 1fr; } .cotas { grid-template-columns: 1fr 1fr; } .cta { grid-template-columns: 1fr; padding: 32px; } .links { display: none; } .foot { grid-template-columns: 1fr 1fr; } }
+  @media (prefers-reduced-motion: reduce) { .eyebrow .dot { animation: none; } }
+</style>
+</head>
+<body>
+<header class="container">
+  <nav class="nav" aria-label="Principal">
+    <a class="logo" href="#"><span class="mark"></span>EGD <small>Consultoria &amp; Tecnologia</small></a>
+    <div class="links"><a href="#" aria-current="page">Início</a><a href="#">Serviços</a><a href="#">Produtos</a><a href="#">Cases</a><a href="#">Sobre</a><a href="#">Contato</a></div>
+    <div style="display:flex;gap:18px;align-items:center"><a class="muted" href="#" style="font-size:.95rem;font-weight:500">Entrar</a><a class="btn btn-cyan btn-sm" href="#">Falar com a EGD</a></div>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="container hero-inner">
+      <div>
+        <span class="eyebrow"><span class="dot"></span>13 clientes · 27 sistemas em produção</span>
+        <h1 class="display">Sistemas e automação para quem gerencia <span class="grad">obras, contratos e habitação</span>.</h1>
+        <p class="lead">Construímos sistemas de gestão documental, aplicativos de campo e relatórios automáticos para consórcios de engenharia, habitação e energia. Cada projeto entra em produção com custo e economia registrados em planilha.</p>
+        <div class="acoes">
+          <a class="btn btn-cyan" href="#">Conversar sobre um projeto <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="btn btn-ghost" href="#">Ver os cases</a>
+        </div>
+      </div>
+
+      <figure class="prancha" aria-label="Fluxo de dados de um consórcio de habitação">
+        <div class="prancha-head"><span><b>FL-01</b> · Fluxo de dados · Consórcio URBHIS</span><span class="status ok" style="font-family:var(--font)">Em produção</span></div>
+        <svg viewBox="0 0 560 300" role="img" aria-hidden="true">
+          <defs>
+            <linearGradient id="lg" x1="0" x2="1"><stop offset="0" stop-color="#36c6ff" stop-opacity=".15"/><stop offset=".5" stop-color="#36c6ff"/><stop offset="1" stop-color="#36c6ff" stop-opacity=".15"/></linearGradient>
+            <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <!-- linhas -->
+          <path d="M92 90 H190 M282 90 H380 M472 90 H520" stroke="url(#lg)" stroke-width="1.5" stroke-dasharray="3 5"/>
+          <path d="M136 122 V190 H420 V122" stroke="rgba(84,190,255,.35)" stroke-width="1" fill="none" stroke-dasharray="3 5"/>
+          <!-- pulsos -->
+          <circle r="3.5" fill="#7fe0ff" filter="url(#glow)"><animateMotion dur="2.4s" repeatCount="indefinite" path="M92 90 H190"/></circle>
+          <circle r="3.5" fill="#7fe0ff" filter="url(#glow)"><animateMotion dur="2.4s" begin=".8s" repeatCount="indefinite" path="M282 90 H380"/></circle>
+          <circle r="3.5" fill="#ff7a1a" filter="url(#glow)"><animateMotion dur="3.2s" begin=".4s" repeatCount="indefinite" path="M136 122 V190 H420 V122"/></circle>
+          <!-- nós -->
+          <g font-family="Archivo" font-size="12" font-weight="600" fill="#e9f3fb" text-anchor="middle">
+            <g transform="translate(46 90)"><rect x="-46" y="-32" width="92" height="64" rx="8" fill="#0f2236" stroke="#36c6ff" stroke-opacity=".8"/><text y="-6">Campo</text><text y="12" font-size="10" font-weight="400" fill="#a7bdd2">app de vistoria</text></g>
+            <g transform="translate(236 90)"><rect x="-46" y="-32" width="92" height="64" rx="8" fill="#0f2236" stroke="#36c6ff" stroke-opacity=".8"/><text y="-6">SIGD</text><text y="12" font-size="10" font-weight="400" fill="#a7bdd2">docs e aprovações</text></g>
+            <g transform="translate(426 90)"><rect x="-46" y="-32" width="92" height="64" rx="8" fill="#0f2236" stroke="#36c6ff" stroke-opacity=".8"/><text y="-6">Relatórios</text><text y="12" font-size="10" font-weight="400" fill="#a7bdd2">rotina automática</text></g>
+            <g transform="translate(520 90)"><rect x="-32" y="-32" width="64" height="64" rx="8" fill="#14304a" stroke="#ff7a1a"/><text y="-6">Painel</text><text y="12" font-size="10" font-weight="400" fill="#a7bdd2">Power BI</text></g>
+          </g>
+          <!-- cota -->
+          <g stroke="#ff7a1a" stroke-width="1"><line x1="46" y1="238" x2="520" y2="238"/><line x1="46" y1="230" x2="46" y2="246"/><line x1="520" y1="230" x2="520" y2="246"/></g>
+          <rect x="190" y="228" width="186" height="20" fill="#0a1a2a"/>
+          <text x="283" y="242" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffb37a">12 automações · 4 sistemas · 1 consórcio</text>
+          <text x="46" y="280" font-family="JetBrains Mono" font-size="10" fill="#6f8aa3">stream: campo → sigd → relatórios → painel · latência do dado: mesmo dia</text>
+        </svg>
+        <figcaption class="carimbo">
+          <div><div class="k">PROJETO</div><div class="v">SIGD + campo</div></div>
+          <div><div class="k">CLIENTE</div><div class="v">Consórcio URBHIS</div></div>
+          <div><div class="k">FOLHA</div><div class="v">1/1</div></div>
+          <div><div class="k">REV.</div><div class="v">03</div></div>
+          <div><div class="k">ECONOMIA/ANO</div><div class="v" style="color:var(--cyan-2)">R$ 199.727</div></div>
+        </figcaption>
+      </figure>
+    </div>
+
+    <div class="container">
+      <div class="cotas">
+        <div class="cota"><div class="valor">13</div><div class="linha"></div><div class="rotulo">clientes atendidos</div></div>
+        <div class="cota"><div class="valor">27</div><div class="linha"></div><div class="rotulo">sistemas em produção</div></div>
+        <div class="cota"><div class="valor">62</div><div class="linha"></div><div class="rotulo">automações entregues</div></div>
+        <div class="cota"><div class="valor">R$ 1,03<small>mi/ano</small></div><div class="linha"></div><div class="rotulo">em economia medida</div></div>
+      </div>
+      <p class="nota">// economia = horas por mês eliminadas × custo do responsável × 12, conforme planilha de CAPEX de cada cliente</p>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="head"><div><div class="tag">01 / SERVIÇOS</div><h2>O que entregamos</h2></div><p class="lead" style="margin:0">Seis frentes que funcionam sozinhas ou combinadas. Em todas, o código, os dados e os acessos ficam com você.</p></div>
+    <div class="body">
+      <div class="aside"><a href="#">Ver todos os serviços <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="servicos">
+        <a class="svc" href="#"><div class="num">01</div><h3>Desenvolvimento de sistemas</h3><p>Sistemas web e aplicativos sob medida: gestão documental, controle de processos, cadastros de campo.</p><div class="tags"><span>Power Apps</span><span>Next.js</span><span>Supabase</span></div></a>
+        <a class="svc" href="#"><div class="num">02</div><h3>Automação de processos</h3><p>Relatórios, aprovações e integrações que hoje dependem de alguém copiar e colar.</p><div class="tags"><span>Power Automate</span><span>n8n</span><span>Python</span></div></a>
+        <a class="svc" href="#"><div class="num">03</div><h3>Dados e painéis</h3><p>Modelagem, carga e painéis em Power BI que a diretoria abre toda semana.</p><div class="tags"><span>Power BI</span><span>Postgres</span><span>SQL</span></div></a>
+        <a class="svc" href="#"><div class="num">04</div><h3>Agentes de IA</h3><p>Assistentes que leem seus documentos e respondem com a fonte, dentro do seu ambiente.</p><div class="tags"><span>Azure OpenAI</span><span>Bedrock</span><span>pgvector</span></div></a>
+        <a class="svc" href="#"><div class="num">05</div><h3>Governança de dados</h3><p>Quem acessa o quê, de onde veio cada número e como ele é validado. Inclui LGPD.</p><div class="tags"><span>Purview</span><span>dbt</span></div></a>
+        <a class="svc" href="#"><div class="num">06</div><h3>Gestão de projetos de tecnologia</h3><p>Levantamento, priorização e acompanhamento com o cliente na mesa. Cadência quinzenal.</p><div class="tags"><span>Planner</span><span>Jira</span></div></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="head"><div><div class="tag">02 / PRODUTOS</div><h2>Prontos para implantar</h2></div><p class="lead" style="margin:0">Sistemas que já rodam em clientes. Adaptamos ao seu contrato em semanas.</p></div>
+    <div class="body">
+      <div class="aside"><a href="#">Ver os produtos</a></div>
+      <div class="produtos">
+        <a class="prod" href="#"><div><h3>SIGD: gestão documental e de processos</h3><p>Documentos, revisões, fluxos de aprovação e trilha de auditoria.</p><span class="status ok">Em produção em cinco consórcios</span></div><span class="chip">3–6 sem</span></a>
+        <a class="prod" href="#"><div><h3>Sistema de campo: vistorias e fiscalização</h3><p>Checklists, fotos com localização e assinatura. Funciona sem sinal.</p><span class="status ok">Em produção</span></div><span class="chip">4–6 sem</span></a>
+        <a class="prod" href="#"><div><h3>Gestão de contratos</h3><p>Vigência, aditivos, alertas de vencimento e indicadores por contrato.</p><span class="status info">Pronto para implantar</span></div><span class="chip">2–4 sem</span></a>
+        <a class="prod" href="#"><div><h3>Central de chamados</h3><p>Abertura, prazo e histórico de atendimentos, com base de conhecimento.</p><span class="status info">Pronto para implantar</span></div><span class="chip">2–3 sem</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="head"><div><div class="tag">03 / CASES</div><h2>Onde já está rodando</h2></div><p class="lead" style="margin:0">Consórcios de habitação e engenharia, operações de energia e regularização fundiária. Custos e economia de cada projeto na página de cases.</p></div>
+    <div class="body">
+      <div class="aside"><a href="#">Ver todos os cases</a></div>
+      <div class="cases">
+        <article class="case"><div class="corpo"><h3>Consórcio BJMM</h3><div class="muted" style="font-size:.9rem">Habitação e engenharia</div><div class="eco">R$ 459 mil<small>por ano</small></div><ul><li>GED corporativo</li><li>Sistema de vistoria em campo</li><li>15 relatórios automatizados</li></ul></div><div class="carimbo"><div><div class="k">SISTEMAS</div><div class="v">3</div></div><div><div class="k">AUTOM.</div><div class="v">15</div></div><div><div class="k">STATUS</div><div class="v"><span class="status ok" style="font-family:var(--font);font-size:.8rem">Produção</span></div></div></div></article>
+        <article class="case"><div class="corpo"><h3>Consórcio HABITA GERENCIAL</h3><div class="muted" style="font-size:.9rem">Habitação social</div><div class="eco">R$ 228 mil<small>por ano</small></div><ul><li>SIGD de gerenciamento</li><li>Controle de recibos</li><li>Sistema de campo</li></ul></div><div class="carimbo"><div><div class="k">SISTEMAS</div><div class="v">3</div></div><div><div class="k">AUTOM.</div><div class="v">4</div></div><div><div class="k">STATUS</div><div class="v"><span class="status ok" style="font-family:var(--font);font-size:.8rem">Produção</span></div></div></div></article>
+        <article class="case"><div class="corpo"><h3>Consórcio URBHIS</h3><div class="muted" style="font-size:.9rem">Urbanismo e habitação</div><div class="eco">R$ 200 mil<small>por ano</small></div><ul><li>Power Apps integrados</li><li>Atendimento de plantão</li><li>Power BI com mapa de conteúdo</li></ul></div><div class="carimbo"><div><div class="k">SISTEMAS</div><div class="v">4</div></div><div><div class="k">AUTOM.</div><div class="v">12</div></div><div><div class="k">STATUS</div><div class="v"><span class="status ok" style="font-family:var(--font);font-size:.8rem">Produção</span></div></div></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="container">
+    <div class="cta">
+      <div><div class="tag" style="font-family:var(--mono);font-size:.78rem;color:var(--orange);letter-spacing:.06em;margin-bottom:12px">CONTATO</div><h2>Conte qual processo hoje toma mais tempo da sua equipe.</h2><p>Respondemos em até um dia útil com uma leitura inicial e os próximos passos.</p></div>
+      <div class="acoes"><a class="mono" href="mailto:contato@egdsystem.com.br" style="color:var(--cyan-2)">contato@egdsystem.com.br</a><a class="btn btn-cyan" href="#">Falar com a EGD</a></div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="container">
+  <div class="foot">
+    <div><a class="logo" href="#"><span class="mark"></span>EGD</a><p style="max-width:30rem;margin-top:14px">Sistemas de gestão, apps de campo e automação de relatórios para consórcios de engenharia, habitação e energia.</p></div>
+    <div><h4>Serviços</h4><ul><li>Desenvolvimento de sistemas</li><li>Automação de processos</li><li>Dados e painéis</li><li>Agentes de IA</li><li>Governança de dados</li><li>Gestão de projetos</li></ul></div>
+    <div><h4>Empresa</h4><ul><li>Produtos</li><li>Cases</li><li>Sobre</li><li>Contato</li><li>Entrar no portal</li></ul></div>
+    <div><h4>Contato</h4><ul><li>contato@egdsystem.com.br</li><li>São Paulo, Brasil</li></ul></div>
+  </div>
+  <div class="foot-bottom"><span>© 2026 EGD CONSULTORIA &amp; TECNOLOGIA</span><span>egdsystem.com.br · v1.0</span></div>
+</div></footer>
+</body>
+</html>
