@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Portal do cliente · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .dois { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 960px) { .dois { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu do portal">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#" aria-current="page">Início</a>
+    <a class="item" href="#">Minha conta</a>
+    <div class="rodape">Portal do cliente</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo">Início</div>
+      <div class="user">
+        <button class="org-select" aria-label="Organização">Consórcio URBHIS</button>
+        <span>João Silva</span><span class="avatar">JS</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <div><h1 class="h1">Olá, João.</h1><p class="muted" style="margin-top:6px">Você está no portal do Consórcio URBHIS.</p></div>
+
+      <div class="dois">
+        <section class="card">
+          <h3>Em breve neste portal</h3>
+          <p class="muted" style="margin-top:8px">Acompanhamento dos projetos, abertura de solicitações e download dos documentos entregues. Estamos preparando essas áreas.</p>
+          <ul class="small muted" style="margin:16px 0 0;padding-left:18px;display:grid;gap:6px"><li>Projetos, fases e marcos</li><li>Solicitações com histórico</li><li>Documentos e entregáveis</li></ul>
+        </section>
+        <section class="card">
+          <h3>Precisa de algo agora?</h3>
+          <p class="muted" style="margin-top:8px">Escreva para <a class="link" href="mailto:contato@egdsystem.com.br">contato@egdsystem.com.br</a>. Respondemos em até um dia útil.</p>
+        </section>
+      </div>
+
+      <section class="bloco">
+        <div class="bloco-head"><h3>Referência: Minha conta e seletor de organização</h3></div>
+        <div class="bloco-body dois">
+          <form style="display:grid;gap:12px">
+            <h4 class="small" style="font-weight:600">Nome de exibição</h4>
+            <div class="field"><label for="n">Nome</label><input class="input" id="n" value="João Silva"></div>
+            <div><button class="btn btn-primary btn-sm" type="submit">Salvar</button></div>
+            <div class="alert ok" role="status">Nome atualizado.</div>
+          </form>
+          <form style="display:grid;gap:12px">
+            <h4 class="small" style="font-weight:600">Senha</h4>
+            <div class="field"><label for="a">Senha atual</label><input class="input" id="a" type="password"></div>
+            <div class="field"><label for="b">Nova senha</label><input class="input" id="b" type="password"><span class="hint">Mínimo 10 caracteres.</span></div>
+            <div><button class="btn btn-primary btn-sm" type="submit">Salvar nova senha</button></div>
+            <p class="micro faint" style="font-weight:400">Ao salvar, as outras sessões abertas são encerradas.</p>
+          </form>
+        </div>
+        <div class="bloco-body" style="border-top:1px solid var(--border)">
+          <div class="small muted" style="margin-bottom:8px">Seletor aberto (só aparece com mais de uma organização)</div>
+          <div style="width:260px;border:1px solid var(--border-strong);border-radius:2px;background:var(--surface);box-shadow:var(--shadow-float);padding:4px">
+            <div style="padding:8px 10px;border-radius:2px;background:var(--link-soft);color:var(--link);font-size:var(--text-small);font-weight:500">Consórcio URBHIS</div>
+            <div style="padding:8px 10px;font-size:var(--text-small);font-weight:500">Consórcio HABITA GERENCIAL</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloco">
+        <div class="bloco-head"><h3>Referência: sem organização ativa (/portal/sem-acesso)</h3></div>
+        <div class="bloco-body"><div class="empty" style="padding:8px 0"><h3>Sua conta não está vinculada a nenhuma organização ativa.</h3><p>Fale com a EGD para regularizar o acesso.</p><div><a class="btn btn-secondary btn-sm" href="#">Sair</a></div></div></div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

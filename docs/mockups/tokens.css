@@ -1,0 +1,85 @@
+/* EGD design tokens — proposta Fase 1 (ver docs/specs/design-system.md) */
+:root {
+  /* primitivas */
+  --papel-100: #eef1f2;
+  --papel-50: #f7f8f9;
+  --folha: #ffffff;
+  --tinta-900: #10202c;
+  --tinta-800: #1b3040;
+  --tinta-600: #4b5b67;
+  --tinta-400: #7d8b95;
+  --regua-300: #c8d1d6;
+  --regua-500: #9fadb6;
+  --sinal-500: #e4571b;
+  --sinal-700: #b9440f;
+  --sinal-100: #fcebe2;
+  --projeto-600: #1c4f8a;
+  --projeto-100: #e3ecf6;
+  --aprovado-600: #1e7a4b;
+  --aprovado-100: #e1f2e8;
+  --atencao-600: #b07600;
+  --atencao-100: #fbf1d9;
+  --erro-600: #b4271f;
+  --erro-100: #fbe5e3;
+
+  /* semânticas (tema público por padrão) */
+  --bg: var(--papel-100);
+  --bg-subtle: var(--papel-50);
+  --surface: var(--folha);
+  --fg: var(--tinta-900);
+  --fg-muted: var(--tinta-600);
+  --fg-faint: var(--tinta-400);
+  --border: var(--regua-300);
+  --border-strong: var(--regua-500);
+  --accent: var(--sinal-500);
+  --accent-strong: var(--sinal-700);
+  --accent-soft: var(--sinal-100);
+  --link: var(--projeto-600);
+  --link-soft: var(--projeto-100);
+  --ring: var(--projeto-600);
+  --success: var(--aprovado-600);
+  --success-soft: var(--aprovado-100);
+  --warning: var(--atencao-600);
+  --warning-soft: var(--atencao-100);
+  --danger: var(--erro-600);
+  --danger-soft: var(--erro-100);
+
+  /* tipografia */
+  --font-sans: "Archivo", "Archivo Fallback", sans-serif;
+  --font-mono: "Fragment Mono", ui-monospace, monospace;
+  --text-display: clamp(2.25rem, 1.5rem + 3vw, 3.5rem);
+  --text-h1: clamp(1.875rem, 1.4rem + 1.8vw, 2.5rem);
+  --text-h2: clamp(1.5rem, 1.3rem + 0.8vw, 1.75rem);
+  --text-h3: 1.25rem;
+  --text-lead: 1.1875rem;
+  --text-body: 1.0625rem;
+  --text-small: 0.875rem;
+  --text-micro: 0.8125rem;
+
+  /* forma */
+  --radius-control: 2px;
+  --radius-surface: 4px;
+  --shadow-float: 0 24px 48px -24px rgb(16 32 44 / 0.35);
+
+  /* espaço */
+  --container: 1180px;
+  --gutter: 24px;
+  --section-y: 96px;
+
+  /* movimento */
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+  --dur: 160ms;
+}
+
+.theme-app {
+  --bg: var(--folha);
+  --text-body: 0.9375rem;
+  --section-y: 32px;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --section-y: 64px;
+    --gutter: 20px;
+  }
+}

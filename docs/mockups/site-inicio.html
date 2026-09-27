@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Início · EGD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .hero { padding-block: 72px 56px; }
+  .hero-grid { display: grid; grid-template-columns: 6fr 6fr; gap: 48px; align-items: start; }
+  .hero .lead { margin-top: 24px; }
+  .hero .acoes { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+  .hero-cotas { margin-top: 72px; border-top: 1px solid var(--border); padding-top: 32px; }
+  @media (max-width: 960px) { .hero-grid { grid-template-columns: 1fr; } .hero { padding-block: 40px 56px; } }
+</style>
+</head>
+<body class="theme-site">
+<header class="container">
+  <nav class="nav" aria-label="Principal">
+    <a class="logo" href="#"><span class="mark"></span>EGD <small>Consultoria &amp; Tecnologia</small></a>
+    <div class="nav-links">
+      <a href="#" aria-current="page">Início</a><a href="#">Serviços</a><a href="#">Produtos</a><a href="#">Cases</a><a href="#">Sobre</a><a href="#">Contato</a>
+    </div>
+    <div class="nav-actions">
+      <a class="entrar" href="#">Entrar</a>
+      <a class="btn btn-primary btn-sm" href="#">Falar com a EGD</a>
+      <button class="burger" aria-label="Abrir menu"><span></span></button>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="hero container">
+    <div class="hero-grid">
+      <div>
+        <h1 class="display">Sistemas e automação para quem gerencia obras, contratos e habitação.</h1>
+        <p class="lead">Construímos sistemas de gestão documental, aplicativos de campo e relatórios automáticos para consórcios de engenharia, habitação e energia. Cada projeto entra em produção com custo e economia registrados em planilha.</p>
+        <div class="acoes">
+          <a class="btn btn-primary btn-lg" href="#">Conversar sobre um projeto</a>
+          <a class="btn btn-secondary btn-lg" href="#">Ver os cases</a>
+        </div>
+      </div>
+
+      <figure class="folha" aria-label="Folha de projeto: fluxo de dados de um consórcio de habitação">
+        <div class="grade"></div>
+        <div class="conteudo">
+          <div class="titulo"><span>Fluxo de dados de um consórcio de habitação</span><span class="mono faint">FL-01</span></div>
+          <div class="fluxo grid5">
+            <div class="no"><b>Campo</b><span>App de vistoria, fotos com localização</span></div><div class="seta"></div>
+            <div class="no"><b>SIGD</b><span>Documentos, revisões, aprovações</span></div><div class="seta"></div>
+            <div class="no"><b>Relatórios</b><span>Gerados e enviados por rotina</span></div><div class="seta"></div>
+            <div class="no"><b>Painel</b><span>Power BI por contrato e região</span></div>
+          </div>
+          <svg class="cota-svg draw" viewBox="0 0 560 34" preserveAspectRatio="none" aria-hidden="true">
+            <line x1="1" y1="10" x2="1" y2="30"/><line x1="559" y1="10" x2="559" y2="30"/><line x1="1" y1="20" x2="559" y2="20"/>
+            <rect x="200" y="12" width="160" height="16" fill="var(--surface)" stroke="none"/>
+            <text x="280" y="24" text-anchor="middle">12 automações, 4 sistemas, 1 consórcio</text>
+          </svg>
+        </div>
+        <figcaption class="carimbo">
+          <div><div class="k">Projeto</div><div class="v">SIGD + sistema de campo</div></div>
+          <div><div class="k">Cliente</div><div class="v">Consórcio URBHIS</div></div>
+          <div><div class="k">Folha</div><div class="v">1/1</div></div>
+          <div><div class="k">Rev.</div><div class="v">03</div></div>
+          <div><div class="k">Status</div><div class="v"><span class="status ok">Em produção</span></div></div>
+        </figcaption>
+      </figure>
+    </div>
+
+    <div class="hero-cotas">
+      <div class="cotas">
+        <div class="cota"><div class="valor">13</div><div class="linha"></div><div class="rotulo">clientes atendidos</div></div>
+        <div class="cota"><div class="valor">27</div><div class="linha"></div><div class="rotulo">sistemas em produção</div></div>
+        <div class="cota"><div class="valor">62</div><div class="linha"></div><div class="rotulo">automações entregues</div></div>
+        <div class="cota"><div class="valor">R$ 1,03<small>mi/ano</small></div><div class="linha"></div><div class="rotulo">em economia medida</div></div>
+      </div>
+      <p class="cotas-nota">Economia = horas por mês eliminadas × custo do responsável × 12, conforme planilha de CAPEX de cada cliente.</p>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="sheet-head">
+      <div><h2>O que entregamos</h2></div>
+      <p class="lead" style="margin-top:0">Seis frentes que funcionam sozinhas ou combinadas. Em todas, o código, os dados e os acessos ficam com você.</p>
+    </div>
+    <div class="sheet-body">
+      <div class="aside"><a class="link" href="#">Ver todos os serviços</a></div>
+      <div class="lista-servicos">
+        <div class="item"><h3>Desenvolvimento de sistemas</h3><p>Sistemas web e aplicativos sob medida: gestão documental, controle de processos, cadastros de campo. Do primeiro protótipo ao uso diário da equipe.</p></div>
+        <div class="item"><h3>Automação de processos</h3><p>Relatórios, aprovações e integrações que hoje dependem de alguém copiar e colar. Power Automate, n8n e scripts em Python.</p></div>
+        <div class="item"><h3>Dados e painéis</h3><p>Modelagem, carga e painéis em Power BI que a diretoria abre toda semana. Todos os painéis leem da mesma base.</p></div>
+        <div class="item"><h3>Agentes de IA</h3><p>Assistentes que leem seus documentos e respondem com a fonte. Implantados dentro do seu ambiente, com registro de cada resposta.</p></div>
+        <div class="item"><h3>Governança de dados</h3><p>Quem acessa o quê, de onde veio cada número e como ele é validado. Inclui adequação à LGPD.</p></div>
+        <div class="item"><h3>Gestão de projetos de tecnologia</h3><p>Levantamento, priorização e acompanhamento de entregas com o cliente na mesa. Cadência quinzenal, escopo escrito.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="sheet-head">
+      <div><h2>Produtos prontos para implantar</h2></div>
+      <p class="lead" style="margin-top:0">Sistemas que já rodam em clientes. Adaptamos ao seu contrato em semanas.</p>
+    </div>
+    <div class="sheet-body">
+      <div class="aside"><a class="link" href="#">Ver os produtos</a></div>
+      <div class="produtos">
+        <article class="produto"><h3>SIGD: gestão documental e de processos</h3><p class="muted">Documentos, revisões, fluxos de aprovação e trilha de auditoria.</p><span class="status ok">Em produção em cinco consórcios</span></article>
+        <article class="produto"><h3>Sistema de campo: vistorias e fiscalização</h3><p class="muted">Checklists, fotos com localização e assinatura. Funciona sem sinal e sincroniza depois.</p><span class="status ok">Em produção</span></article>
+        <article class="produto"><h3>Gestão de contratos</h3><p class="muted">Vigência, aditivos, alertas de vencimento e indicadores por contrato.</p><span class="status info">Pronto para implantar</span></article>
+        <article class="produto"><h3>Central de chamados</h3><p class="muted">Abertura, prazo e histórico de atendimentos, com base de conhecimento.</p><span class="status info">Pronto para implantar</span></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="sheet-head">
+      <div><h2>Onde já está rodando</h2></div>
+      <p class="lead" style="margin-top:0">Consórcios de habitação e engenharia, operações de energia e regularização fundiária. Detalhes, custos e economia de cada projeto na página de cases.</p>
+    </div>
+    <div class="sheet-body">
+      <div class="aside"><a class="link" href="#">Ver todos os cases</a></div>
+      <div class="destaques">
+        <article class="case"><div class="corpo"><h3>Consórcio BJMM</h3><p class="small muted">Habitação e engenharia</p><div class="eco">R$ 459 mil<small>por ano</small></div><ul><li>GED corporativo</li><li>Sistema de vistoria em campo</li><li>15 relatórios automatizados</li></ul></div>
+          <div class="carimbo"><div><div class="k">Sistemas</div><div class="v">3</div></div><div><div class="k">Automações</div><div class="v">15</div></div><div><div class="k">Status</div><div class="v"><span class="status ok">Produção</span></div></div></div></article>
+        <article class="case"><div class="corpo"><h3>Consórcio HABITA GERENCIAL</h3><p class="small muted">Habitação social</p><div class="eco">R$ 228 mil<small>por ano</small></div><ul><li>SIGD de gerenciamento</li><li>Controle de recibos</li><li>Sistema de campo</li></ul></div>
+          <div class="carimbo"><div><div class="k">Sistemas</div><div class="v">3</div></div><div><div class="k">Automações</div><div class="v">4</div></div><div><div class="k">Status</div><div class="v"><span class="status ok">Produção</span></div></div></div></article>
+        <article class="case"><div class="corpo"><h3>Consórcio URBHIS</h3><p class="small muted">Urbanismo e habitação</p><div class="eco">R$ 200 mil<small>por ano</small></div><ul><li>Power Apps integrados</li><li>Atendimento de plantão</li><li>Power BI com mapa de conteúdo</li></ul></div>
+          <div class="carimbo"><div><div class="k">Sistemas</div><div class="v">4</div></div><div><div class="k">Automações</div><div class="v">12</div></div><div><div class="k">Status</div><div class="v"><span class="status ok">Produção</span></div></div></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="cta">
+      <div><h2>Conte qual processo hoje toma mais tempo da sua equipe.</h2><p>Respondemos em até um dia útil com uma leitura inicial e os próximos passos.</p></div>
+      <div class="acoes"><a class="mail" href="mailto:contato@egdsystem.com.br">contato@egdsystem.com.br</a><a class="btn btn-primary btn-lg" href="#">Falar com a EGD</a></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot">
+      <div><a class="logo" href="#"><span class="mark"></span>EGD</a><p>Sistemas de gestão, apps de campo e automação de relatórios para consórcios de engenharia, habitação e energia.</p></div>
+      <div><h4>Serviços</h4><ul><li><a href="#">Desenvolvimento de sistemas</a></li><li><a href="#">Automação de processos</a></li><li><a href="#">Dados e painéis</a></li><li><a href="#">Agentes de IA</a></li><li><a href="#">Governança de dados</a></li><li><a href="#">Gestão de projetos</a></li></ul></div>
+      <div><h4>Empresa</h4><ul><li><a href="#">Produtos</a></li><li><a href="#">Cases</a></li><li><a href="#">Sobre</a></li><li><a href="#">Contato</a></li><li><a href="#">Entrar no portal</a></li></ul></div>
+      <div><h4>Contato</h4><ul><li><a href="mailto:contato@egdsystem.com.br">contato@egdsystem.com.br</a></li><li><span class="muted">São Paulo, Brasil</span></li><li><a href="#">LinkedIn</a></li></ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 EGD Consultoria &amp; Tecnologia. CNPJ 00.000.000/0001-00</span><a href="#">Política de privacidade</a></div>
+  </div>
+</footer>
+</body>
+</html>

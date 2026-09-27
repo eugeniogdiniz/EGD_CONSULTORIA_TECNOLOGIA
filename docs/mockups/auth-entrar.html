@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Entrar · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  body { background: var(--papel-100); }
+  .auth-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; align-items: start; width: 100%; max-width: 1320px; }
+  .auth .card h2 { font-size: 1.5rem; margin-top: 20px; }
+  .rotulo-mock { font-size: var(--text-micro); color: var(--fg-faint); font-weight: 500; margin-bottom: 8px; }
+  @media (max-width: 960px) { .auth-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="theme-app">
+<main class="auth">
+  <div class="auth-grid">
+    <div>
+      <div class="rotulo-mock">/entrar</div>
+      <div class="card">
+        <a class="logo" href="#"><span class="mark"></span>EGD</a>
+        <h2>Entrar no portal</h2>
+        <form>
+          <div class="field"><label for="e1">E-mail</label><input class="input" id="e1" type="email" autocomplete="email"></div>
+          <div class="field"><label for="p1">Senha</label><input class="input" id="p1" type="password" autocomplete="current-password"></div>
+          <p class="erro-msg" role="alert" style="font-size:var(--text-small)">E-mail ou senha incorretos.</p>
+          <button class="btn btn-primary" type="submit" style="width:100%">Entrar</button>
+          <a class="link small" href="#">Esqueci minha senha</a>
+        </form>
+        <p class="rodape">Acesso por convite. Se você é cliente e ainda não tem acesso, fale com a EGD.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="rotulo-mock">/recuperar-senha</div>
+      <div class="card">
+        <a class="logo" href="#"><span class="mark"></span>EGD</a>
+        <h2>Recuperar senha</h2>
+        <p class="lead">Informe o e-mail da sua conta. Se ele existir, enviamos um link válido por 1 hora.</p>
+        <form>
+          <div class="field"><label for="e2">E-mail</label><input class="input" id="e2" type="email"></div>
+          <button class="btn btn-primary" type="submit" style="width:100%">Enviar link</button>
+        </form>
+        <div class="alert ok" role="status" style="margin-top:20px">Se o e-mail existir, enviamos um link válido por 1 hora. Verifique também a caixa de spam.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="rotulo-mock">/redefinir-senha</div>
+      <div class="card">
+        <a class="logo" href="#"><span class="mark"></span>EGD</a>
+        <h2>Definir nova senha</h2>
+        <form>
+          <div class="field"><label for="n1">Nova senha</label><input class="input" id="n1" type="password" autocomplete="new-password"><span class="hint">Mínimo 10 caracteres. Evite senhas usadas em outros serviços.</span></div>
+          <div class="field"><label for="n2">Confirmar nova senha</label><input class="input" id="n2" type="password" autocomplete="new-password"></div>
+          <button class="btn btn-primary" type="submit" style="width:100%">Salvar nova senha</button>
+        </form>
+        <div class="alert err" role="alert" style="margin-top:20px">Este link não é mais válido. <a class="link" href="#">Pedir um novo link</a></div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

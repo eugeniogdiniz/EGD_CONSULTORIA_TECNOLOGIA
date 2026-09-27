@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Contato · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .page-title { padding-block: 64px 40px; }
+  .page-title .lead { margin-top: 20px; }
+  .contato { display: grid; grid-template-columns: 7fr 4fr; gap: 48px; align-items: start; padding-bottom: var(--section-y); }
+  .contato form { display: grid; gap: 20px; }
+  .contato .card { padding: 32px; }
+  .info { display: grid; gap: 0; border-top: 1px solid var(--border); }
+  .info > div { padding: 20px 0; border-bottom: 1px solid var(--border); }
+  .info h3 { font-size: var(--text-small); font-weight: 500; color: var(--fg-muted); }
+  .info .v { margin-top: 4px; font-weight: 500; }
+  .info .d { margin-top: 2px; color: var(--fg-muted); font-size: var(--text-small); }
+  .estados { margin: 48px 0 var(--section-y); display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 960px) { .contato, .estados { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="theme-site">
+<header class="container"><nav class="nav" aria-label="Principal">
+  <a class="logo" href="#"><span class="mark"></span>EGD <small>Consultoria &amp; Tecnologia</small></a>
+  <div class="nav-links"><a href="#">Início</a><a href="#">Serviços</a><a href="#">Produtos</a><a href="#">Cases</a><a href="#">Sobre</a><a href="#" aria-current="page">Contato</a></div>
+  <div class="nav-actions"><a class="entrar" href="#">Entrar</a><a class="btn btn-primary btn-sm" href="#">Falar com a EGD</a><button class="burger" aria-label="Abrir menu"><span></span></button></div>
+</nav></header>
+
+<main class="container">
+  <section class="page-title">
+    <h1>Conte o problema. Respondemos em um dia útil.</h1>
+    <p class="lead">Quanto mais contexto, melhor a resposta. Se preferir, escreva direto para <a class="link" href="mailto:contato@egdsystem.com.br">contato@egdsystem.com.br</a>.</p>
+  </section>
+
+  <section class="contato">
+    <div class="card">
+      <form>
+        <div class="form-grid">
+          <div class="field"><label for="nome">Nome</label><input class="input" id="nome" autocomplete="name"></div>
+          <div class="field"><label for="email">E-mail</label><input class="input erro" id="email" type="email" value="ana@empresa" aria-invalid="true" aria-describedby="email-erro"><span class="erro-msg" id="email-erro" role="alert">E-mail inválido</span></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label for="empresa">Empresa <span class="hint">opcional</span></label><input class="input" id="empresa" autocomplete="organization"></div>
+          <div class="field"><label for="tel">Telefone <span class="hint">opcional</span></label><input class="input" id="tel" type="tel" autocomplete="tel"></div>
+        </div>
+        <div class="field"><label for="msg">Mensagem</label><textarea class="textarea" id="msg" placeholder="Qual processo, quem faz hoje, quanto tempo leva e o que você espera."></textarea></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+          <span class="micro faint" style="font-weight:400">Usamos seus dados só para responder a esta mensagem.</span>
+          <button class="btn btn-primary btn-lg" type="submit">Enviar mensagem</button>
+        </div>
+      </form>
+    </div>
+    <aside class="info">
+      <div><h3>E-mail</h3><div class="v">contato@egdsystem.com.br</div><div class="d">Resposta em até um dia útil.</div></div>
+      <div><h3>Atendimento</h3><div class="v">Segunda a sexta, 9h às 18h</div><div class="d">Horário de Brasília.</div></div>
+      <div><h3>Onde</h3><div class="v">São Paulo</div><div class="d">Trabalho remoto em todo o Brasil; presencial quando o projeto pede.</div></div>
+    </aside>
+  </section>
+
+  <section class="container" style="padding:0">
+    <div class="sheet-head"><div><h2 class="h3">Estados do formulário</h2></div><p class="muted small" style="margin-top:0">Referência para implementação: sucesso e limite de envios.</p></div>
+    <div class="estados">
+      <div class="card" role="status"><h3>Recebemos sua mensagem.</h3><p class="muted" style="margin-top:8px">Respondemos em até um dia útil, no e-mail informado.</p></div>
+      <div class="alert err" role="alert">Recebemos várias mensagens deste endereço. Tente novamente em uma hora.</div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="container"><div class="foot">
+  <div><a class="logo" href="#"><span class="mark"></span>EGD</a><p>Sistemas de gestão, apps de campo e automação de relatórios para consórcios de engenharia, habitação e energia.</p></div>
+  <div><h4>Serviços</h4><ul><li><a href="#">Desenvolvimento de sistemas</a></li><li><a href="#">Automação de processos</a></li><li><a href="#">Dados e painéis</a></li><li><a href="#">Agentes de IA</a></li><li><a href="#">Governança de dados</a></li><li><a href="#">Gestão de projetos</a></li></ul></div>
+  <div><h4>Empresa</h4><ul><li><a href="#">Produtos</a></li><li><a href="#">Cases</a></li><li><a href="#">Sobre</a></li><li><a href="#">Contato</a></li><li><a href="#">Entrar no portal</a></li></ul></div>
+  <div><h4>Contato</h4><ul><li><a href="#">contato@egdsystem.com.br</a></li><li><span class="muted">São Paulo, Brasil</span></li><li><a href="#">LinkedIn</a></li></ul></div>
+</div><div class="foot-bottom"><span>© 2026 EGD Consultoria &amp; Tecnologia. CNPJ 00.000.000/0001-00</span><a href="#">Política de privacidade</a></div></div></footer>
+</body>
+</html>
