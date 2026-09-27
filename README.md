@@ -7,7 +7,7 @@ no GitHub Pages até o novo site entrar no ar.
 ## Requisitos
 
 - Node 24
-- Docker (para Postgres, MinIO e MailHog locais)
+- Docker (para Postgres, RustFS e Mailpit locais)
 
 ## Rodar local
 

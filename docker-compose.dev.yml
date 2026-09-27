@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: egd
+      POSTGRES_PASSWORD: egd
+      POSTGRES_DB: egd
+    ports:
+      - "5432:5432"
+    volumes:
+      - egd_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U egd -d egd"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Armazenamento S3-compatível. As imagens do MinIO saíram dos registros
+  # públicos em 2026; RustFS expõe a mesma API S3 (porta 9000) e console (9001).
+  # O bucket é criado pelo próprio app na primeira gravação (ensureBucket).
+  storage:
+    image: rustfs/rustfs:latest
+    environment:
+      RUSTFS_ACCESS_KEY: minio
+      RUSTFS_SECRET_KEY: minio12345
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - egd_storage:/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  egd_pg: {}
+  egd_storage: {}
