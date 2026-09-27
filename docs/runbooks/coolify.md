@@ -4,23 +4,18 @@ Passo a passo para colocar a Fase 1 no ar num VPS Hostinger com Coolify. Os pass
 
 Referências: spec `docs/superpowers/specs/2026-09-27-fase-1-fundacao-design.md` §7, `Dockerfile`, `.env.example`.
 
-## 1. VPS
+## 1. VPS (estado real em 2026-09-27)
 
-- Plano Hostinger com Ubuntu 24.04, mínimo 2 vCPU e 4 GB de RAM (o build do Next.js consome memória; 8 GB é mais confortável).
-- Acesso SSH por chave. No VPS:
+- `srv1906344`, IP `187.127.51.52`, Ubuntu 24.04, **1 vCPU, 3,8 GB de RAM**, 48 GB de disco. Acesso SSH por chave (`ssh egd-vps` na máquina do Eugênio).
+- O VPS é **compartilhado**: já roda o Coolify 4.3 com outros projetos (uma API, um site e dois Postgres). Nada desses recursos deve ser alterado.
+- Com 1 vCPU, **a imagem não é construída no VPS**: o CI do GitHub constrói e publica em `ghcr.io/eugeniogdiniz/egd-app` (tags `main`, `sha-<commit>` e `latest`), e o Coolify faz o deploy a partir da imagem pronta.
+- Firewall `ufw` está inativo; o Traefik do Coolify expõe 80/443. Recomendado ativar `ufw` liberando só 22, 80 e 443 quando conveniente (avaliar impacto nos outros projetos antes).
 
-```bash
-apt update && apt upgrade -y
-ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp && ufw enable
-```
+## 2. Coolify
 
-## 2. Instalar o Coolify
+Já instalado (painel em `http://187.127.51.52:8000`, conta de administrador existente). Opcional: em **Settings** definir o domínio do painel como `https://coolify.egdsystem.com.br` após o DNS. Ative 2FA na conta.
 
-```bash
-curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
-```
-
-Ao terminar, abra `http://IP-DO-VPS:8000`, crie a conta de administrador, e em **Settings** defina o domínio do painel como `https://coolify.egdsystem.com.br` (depois do DNS do passo 3). Ative 2FA na sua conta do Coolify.
+Para automação (o Claude configura os recursos pela API): **Keys & Tokens → API tokens → Create** com permissão de escrita.
 
 ## 3. DNS (painel do domínio egdsystem.com.br)
 
@@ -55,11 +50,10 @@ As imagens do MinIO saíram dos registros públicos; usamos RustFS, que expõe a
 
 ### 4.3 Aplicação
 
-- Instale o **GitHub App do Coolify** no repositório `eugeniogdiniz/EGD_CONSULTORIA_TECNOLOGIA` (Sources → GitHub).
-- **New Resource → Application → GitHub App**, repositório acima, branch `main`, **Build Pack: Dockerfile**, porta `3000`.
-- Domínio: `https://egdsystem.com.br`. Em **Settings → Domains** adicione também `https://www.egdsystem.com.br` e marque redirecionamento para o apex (ou configure o redirect no proxy).
+- **New Resource → Application → Docker Image**, imagem `ghcr.io/eugeniogdiniz/egd-app:main` (pacote público; se ficar privado, cadastre as credenciais do GHCR no Coolify), porta `3000`.
+- Domínio: `https://egdsystem.com.br`. Em **Settings → Domains** adicione também `https://www.egdsystem.com.br` e marque redirecionamento para o apex.
 - Healthcheck: path `/api/health`, porta 3000.
-- Deploy automático: ligado (webhook do GitHub em push na `main`).
+- Redeploy: após cada push na `main` o CI publica a imagem nova; dispare o deploy pelo botão **Redeploy** ou pelo webhook de deploy da aplicação (Coolify → Application → Webhooks), que pode ser chamado pelo CI com um token de API guardado como secret do GitHub (`COOLIFY_DEPLOY_URL`, `COOLIFY_TOKEN`).
 
 ## 5. Variáveis de ambiente da aplicação
 
