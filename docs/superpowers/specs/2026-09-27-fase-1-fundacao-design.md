@@ -1,7 +1,7 @@
 # EGD Consultoria & Tecnologia — Fase 1: Fundação
 
 **Data:** 2026-09-27
-**Status:** aprovado em conversa, aguardando revisão do documento
+**Status:** implementado em 2026-09-27 (branch fase-1-fundacao; deploy no Coolify em 187.127.51.52, aguardando DNS)
 **Escopo:** primeira de seis fases do sistema EGD (site + portal do cliente + portal administrativo)
 
 ---

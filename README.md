@@ -47,4 +47,4 @@ Ver `docs/runbooks/coolify.md`. A imagem é construída pelo `Dockerfile`; o `do
 
 ## Site antigo
 
-A pasta `legacy/` guarda o site estático anterior, ainda publicado pelo GitHub Pages até o novo responder no domínio. Será removida na Task 18 do plano.
+O site estático anterior (HTML + React via CDN, publicado no GitHub Pages) foi removido do repositório ao fim da Fase 1; ele continua no histórico do git até o commit `90cfda2`. Desative o GitHub Pages em Settings → Pages quando o domínio apontar para o VPS.
