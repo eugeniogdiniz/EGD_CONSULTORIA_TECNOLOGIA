@@ -52,11 +52,13 @@ Cada fase terá spec e plano próprios.
 | ORM | Drizzle ORM + postgres.js | Prisma |
 | Autenticação | Better Auth, e-mail + senha, autogerido | Link mágico; OAuth Google/Microsoft; Clerk/Auth0 |
 | UI | Tailwind 4 + shadcn/ui com tema próprio | — |
-| Arquivos | MinIO no Coolify, acesso só por URL assinada | Disco local do container |
+| Arquivos | Armazenamento S3-compatível no Coolify (RustFS; ver emenda abaixo), acesso só por URL assinada | Disco local do container; MinIO (imagens saíram dos registros públicos em 2026-09) |
 | E-mail | SMTP da Hostinger, abstraído em módulo `mail` | Resend (fallback se entregabilidade decepcionar) |
 | Testes | Vitest (unidade) + Playwright (ponta a ponta e visual) | — |
 
 Versões exatas de bibliotecas serão confirmadas via context7 na escrita do plano de implementação.
+
+**Emenda (2026-09-27, durante a implementação):** as imagens `minio/minio` e `minio/mc` deixaram de estar disponíveis no Docker Hub e no quay.io. O armazenamento passa a ser **RustFS** (`rustfs/rustfs`), que expõe a mesma API S3 nas mesmas portas (9000 API, 9001 console). O código usa só o AWS SDK, então nada muda na aplicação; o bucket é criado pelo próprio app na primeira gravação. Onde este documento diz MinIO, leia RustFS.
 
 ---
 
