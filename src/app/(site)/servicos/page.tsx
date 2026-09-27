@@ -1,64 +1,88 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Container, CtaBand, PageTitle } from "@/components/site/section";
-import { SERVICOS } from "@/content/servicos";
+import { Arrow, Icon } from "@/components/legacy/ui";
+import { SERVICES } from "@/content/legacy-pages";
 
-export const metadata: Metadata = {
-  title: "Serviços",
-  description: "Desenvolvimento de sistemas, automação, dados e painéis, agentes de IA, governança e gestão de projetos de tecnologia.",
-};
+export const metadata: Metadata = { title: "Serviços", description: "Seis frentes especializadas: desenvolvimento, automação, dados e BI, agentes de IA, governança e projetos ágeis." };
 
 export default function ServicosPage() {
   return (
     <>
-      <PageTitle title="Do sistema ao painel, com a mesma equipe." lead="Seis frentes de trabalho. Cada uma tem escopo, prazo típico e a stack que usamos de fato.">
-        <nav aria-label="Serviços nesta página" className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-          {SERVICOS.map((s) => (
-            <a key={s.slug} href={`#${s.slug}`} className="font-medium text-link underline decoration-1 underline-offset-[3px] hover:text-signal-strong">
-              {s.titulo}
-            </a>
+      <section className="page-head">
+        <div className="grid-bg"></div>
+        <div className="container">
+          <div className="reveal in">
+            <div className="crumbs"><Link href="/">/</Link><span className="sep">→</span><span>SERVIÇOS</span></div>
+            <h1 style={{ marginTop: 24 }}>
+              Tecnologia ponta-a-ponta —<br />
+              do <span className="italic-grad">código</span> à decisão.
+            </h1>
+            <p className="lead">Seis frentes especializadas que somam capacidade de delivery sobre as principais clouds (AWS, Azure) e o ecossistema open-source moderno (Apache, Power Platform, Python).</p>
+          </div>
+          <div className="reveal" style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 32 }}>
+            {SERVICES.map((s) => (
+              <a key={s.id} href={`#${s.id}`} className="tag accent" style={{ padding: "8px 14px" }}>
+                <span style={{ color: "var(--fg-faint)" }}>{s.num}</span> {s.title.split(" ")[0]}
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          {SERVICES.map((s) => (
+            <article className="svc-deep" id={s.id} key={s.id}>
+              <div className="svc-deep-head">
+                <div className="svc-deep-num">SERVIÇO {s.num}/06</div>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                    <div className="icon-tile lg accent"><Icon d={s.icon} size={26} /></div>
+                    <h2>{s.title}</h2>
+                  </div>
+                  <p className="lead">{s.lead}</p>
+                </div>
+              </div>
+              <div className="svc-deep-body">
+                <ul className="cap-list">
+                  {s.capabilities.map((c, i) => (
+                    <li key={i}>
+                      <span className="cn">{String(i + 1).padStart(2, "0")}</span>
+                      <div>
+                        <div className="ct">{c.t}</div>
+                        <div className="cd">{c.d}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <div className="svc-stack-card">
+                  <div className="h">Stack &amp; delivery</div>
+                  {s.stack.aws.length > 0 && <div className="row"><span className="k">AWS</span><span className="v">{s.stack.aws.join(" · ")}</span></div>}
+                  {s.stack.azure.length > 0 && <div className="row"><span className="k">Azure</span><span className="v">{s.stack.azure.join(" · ")}</span></div>}
+                  {s.stack.apache.length > 0 && <div className="row"><span className="k">Apache</span><span className="v">{s.stack.apache.join(" · ")}</span></div>}
+                  {s.stack.outros.length > 0 && <div className="row"><span className="k">Outros</span><span className="v">{s.stack.outros.join(" · ")}</span></div>}
+                  <div className="row" style={{ marginTop: 14 }}><span className="k">delivery</span><span className="v accent">{s.delivery}</span></div>
+                  <div className="row"><span className="k">squad</span><span className="v">{s.squad}</span></div>
+                </div>
+              </div>
+            </article>
           ))}
-        </nav>
-      </PageTitle>
+        </div>
+      </section>
 
-      <Container>
-        {SERVICOS.map((s) => (
-          <article key={s.slug} id={s.slug} className="grid scroll-mt-20 gap-6 border-t border-border py-10 md:grid-cols-[3fr_6fr_3fr] md:pb-12">
-            <div>
-              <h2 className="type-h2">{s.titulo}</h2>
-              <p className="type-lead mt-3 text-muted-foreground">{s.lead}</p>
+      <section className="cta-final">
+        <div className="container">
+          <div className="cta-card reveal">
+            <span className="eyebrow">CONTATO</span>
+            <h2 style={{ marginTop: 22 }}>Qual frente faz<br />sentido para o seu momento?</h2>
+            <p style={{ marginTop: 22, fontSize: 17, maxWidth: 620 }}>Em 30 minutos podemos mapear gargalos e oportunidades. Sem compromisso.</p>
+            <div className="cta-actions">
+              <Link href="/contato" className="btn btn-primary">Agendar conversa <Arrow /></Link>
+              <Link href="/produtos" className="btn btn-ghost">Ver produtos prontos</Link>
             </div>
-            <ul className="grid content-start gap-2">
-              {s.entregas.map((e) => (
-                <li key={e} className="relative pl-4 text-muted-foreground before:absolute before:top-[0.65em] before:left-0 before:h-px before:w-2 before:bg-foreground">
-                  {e}
-                </li>
-              ))}
-            </ul>
-            <dl className="h-fit rounded-lg border border-border bg-card text-sm">
-              <div className="border-b border-border px-4 py-3">
-                <dt className="type-micro text-faint">Stack</dt>
-                <dd className="mt-0.5">{s.stack}</dd>
-              </div>
-              <div className="px-4 py-3">
-                <dt className="type-micro text-faint">Prazo típico</dt>
-                <dd className="mt-0.5">{s.prazo}</dd>
-              </div>
-            </dl>
-          </article>
-        ))}
-      </Container>
-
-      <CtaBand
-        title="Qual dessas frentes resolve o problema de hoje?"
-        text="Respondemos em até um dia útil com uma leitura inicial e os próximos passos."
-        action={{ href: "/contato", label: "Falar com a EGD" }}
-        secondary={
-          <Link href="/produtos" className="font-medium text-card underline decoration-1 underline-offset-[3px] hover:text-card/80">
-            Ver produtos prontos
-          </Link>
-        }
-      />
+          </div>
+        </div>
+      </section>
     </>
   );
 }

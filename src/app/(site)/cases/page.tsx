@@ -1,113 +1,199 @@
 import type { Metadata } from "next";
-import { Container, Cota, CtaBand, PageTitle, SheetSection, Status } from "@/components/site/section";
-import { CLIENTES, TOTAIS, brl, brlCurto } from "@/content/cases";
+import Link from "next/link";
+import { Arrow } from "@/components/legacy/ui";
+import { CLIENTES, TOTAIS } from "@/content/cases";
 
-export const metadata: Metadata = {
-  title: "Cases",
-  description: "13 clientes, 27 sistemas, 62 automações. Porte, escopo, investimento e economia anual de cada projeto.",
-};
+export const metadata: Metadata = { title: "Cases", description: "13 clientes, 27 sistemas e 62 automações em produção, com CAPEX e economia medida." };
+
+const fmtBRL = (n: number) => "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const fmtBRLk = (n: number) => (n >= 1_000_000 ? "R$ " + (n / 1_000_000).toFixed(2).replace(".", ",") + "M" : n >= 1000 ? "R$ " + (n / 1000).toFixed(1).replace(".", ",") + "k" : fmtBRL(n));
+const abbr = (nome: string) =>
+  nome
+    .replace(/^Consórcio\s+/i, "")
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("");
+
+function KpiCell({ label, value, prefix, suffix }: { label: string; value: string | number; prefix?: string; suffix?: string }) {
+  return (
+    <div className="kpi-cell">
+      <div className="num">
+        {prefix && <small style={{ marginRight: 4 }}>{prefix}</small>}
+        {value}
+        {suffix && <small>{suffix}</small>}
+      </div>
+      <div className="lbl">{label}</div>
+    </div>
+  );
+}
 
 export default function CasesPage() {
-  const destaques = CLIENTES.filter((c) => c.destaque);
-  const ordenados = [...CLIENTES].sort((a, b) => b.economia - a.economia);
+  const featured = CLIENTES.filter((c) => c.destaque);
+  const sorted = [...CLIENTES].sort((a, b) => b.economia - a.economia);
+  const sectors = [...new Set(CLIENTES.map((c) => c.setor.split(" e ")[0]))];
+  const featuredTotal = featured.reduce((a, c) => a + c.economia, 0);
+
   return (
     <>
-      <PageTitle
-        title={`${TOTAIS.clientes} clientes, ${TOTAIS.sistemas} sistemas, ${TOTAIS.automacoes} automações.`}
-        lead="Cada projeto entregue tem porte, escopo, investimento e economia anual registrados. A tabela abaixo reproduz a planilha de CAPEX de cada cliente."
-      >
-        <div className="mt-12 grid grid-cols-2 gap-6 border-t border-border pt-8 md:grid-cols-4">
-          <Cota value={String(TOTAIS.clientes)} label="clientes atendidos" />
-          <Cota value={String(TOTAIS.sistemas)} label="sistemas em produção" />
-          <Cota value={String(TOTAIS.automacoes)} label="automações entregues" />
-          <Cota value={brlCurto(TOTAIS.economia)} suffix="/ano" label="em economia medida" />
-        </div>
-      </PageTitle>
-
-      <SheetSection title="Destaques" lead="Os três projetos com maior economia anual medida.">
-        <div className="grid gap-6 md:grid-cols-3">
-          {destaques.map((c) => (
-            <article key={c.id} id={c.id} className="scroll-mt-20 overflow-hidden rounded-lg border border-border bg-card">
-              <div className="p-5 pb-4">
-                <h3 className="type-h3">{c.nome}</h3>
-                <p className="text-sm text-muted-foreground">{c.setor}</p>
-                <div className="mt-3 text-[1.75rem] font-semibold tracking-[-0.02em] tabular-nums [font-variation-settings:'wdth'_106]"><span className="whitespace-nowrap">
-                  {brlCurto(c.economia)}</span>
-                  <small className="ml-1.5 text-sm font-normal text-muted-foreground [font-variation-settings:'wdth'_100]">por ano</small>
-                </div>
-                <ul className="mt-3 list-disc pl-4 text-sm text-muted-foreground">
-                  {c.entregas.map((e) => (
-                    <li key={e}>{e}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="carimbo grid-cols-[1fr_1fr_1.5fr]">
-                <div><div className="carimbo-k">Sistemas</div><div className="carimbo-v">{c.sistemas}</div></div>
-                <div><div className="carimbo-k">Automações</div><div className="carimbo-v">{c.automacoes}</div></div>
-                <div><div className="carimbo-k">Porte</div><div className="carimbo-v">{c.porte}</div></div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </SheetSection>
-
-      <Container className="pb-4">
-        <div className="sheet-head">
-          <h2 className="type-h2">Todos os projetos</h2>
-          <p className="type-lead max-w-[38rem] text-muted-foreground">Ordenados por economia anual. Investimento é a parcela de desenvolvimento.</p>
-        </div>
-        <div className="mt-8 overflow-x-auto rounded-lg border border-border bg-card">
-          <table className="w-full text-sm">
-            <caption className="sr-only">Clientes, sistemas, automações, investimento e economia anual</caption>
-            <thead>
-              <tr className="bg-subtle text-left text-muted-foreground">
-                <th scope="col" className="h-10 px-4 font-medium">Cliente</th>
-                <th scope="col" className="h-10 px-4 font-medium">Setor</th>
-                <th scope="col" className="h-10 px-4 font-medium">Porte</th>
-                <th scope="col" className="h-10 px-4 text-right font-medium">Sist.</th>
-                <th scope="col" className="h-10 px-4 text-right font-medium">Autom.</th>
-                <th scope="col" className="h-10 px-4 text-right font-medium">Investimento</th>
-                <th scope="col" className="h-10 px-4 text-right font-medium">Economia/ano</th>
-                <th scope="col" className="h-10 px-4 text-right font-medium">Retorno 12 m</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ordenados.map((c) => {
-                const roi = c.capex > 0 ? Math.round((c.economia / c.capex) * 100) : 0;
-                return (
-                  <tr key={c.id} id={c.destaque ? undefined : c.id} className="border-t border-border hover:bg-subtle">
-                    <td className="h-12 px-4 font-medium whitespace-nowrap">{c.nome}</td>
-                    <td className="h-12 px-4 text-muted-foreground">{c.setor}</td>
-                    <td className="h-12 px-4">{c.status ? <Status tone="warn">{c.status}</Status> : c.porte}</td>
-                    <td className="type-data h-12 px-4 text-right">{c.sistemas}</td>
-                    <td className="type-data h-12 px-4 text-right">{c.automacoes}</td>
-                    <td className="type-data h-12 px-4 text-right text-muted-foreground">{c.capex > 0 ? brl(c.capex) : "—"}</td>
-                    <td className="type-data h-12 px-4 text-right">{c.economia > 0 ? brl(c.economia) : <span className="text-faint">em curso</span>}</td>
-                    <td className="type-data h-12 px-4 text-right">{roi > 0 ? `${roi}%` : "—"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr className="border-t border-strong bg-subtle font-medium">
-                <td className="h-12 px-4" colSpan={3}>Totais</td>
-                <td className="type-data h-12 px-4 text-right">{TOTAIS.sistemas}</td>
-                <td className="type-data h-12 px-4 text-right">{TOTAIS.automacoes}</td>
-                <td className="h-12 px-4" />
-                <td className="type-data h-12 px-4 text-right">{brl(TOTAIS.economia)}</td>
-                <td className="h-12 px-4" />
-              </tr>
-            </tfoot>
-          </table>
-          <div className="flex flex-wrap gap-6 border-t border-border px-4 py-3 text-[0.8125rem] text-faint">
-            <span>Investimento = parcela de desenvolvimento, à vista ou diluída em 12 a 24 meses.</span>
-            <span>Economia = horas por mês eliminadas × custo do responsável × 12.</span>
+      <section className="page-head">
+        <div className="grid-bg"></div>
+        <div className="container">
+          <div className="crumbs reveal in"><Link href="/">EGD</Link><span className="sep">/</span><span>Cases</span></div>
+          <h1 className="reveal in">
+            {TOTAIS.clientes} clientes. {TOTAIS.sistemas} sistemas.<br />
+            <span className="italic-grad">{TOTAIS.automacoes} automações em produção.</span>
+          </h1>
+          <p className="lead reveal">Cada projeto entregue está consolidado num ledger técnico — porte, escopo, CAPEX e ROI mensurado. O retrato fiel do que já rodou em produção sob nossa engenharia.</p>
+          <div className="cases-kpis reveal" style={{ marginTop: 48 }}>
+            <KpiCell label="CLIENTES ATENDIDOS" value={TOTAIS.clientes} />
+            <KpiCell label="SISTEMAS / ERPS" value={TOTAIS.sistemas} suffix="+" />
+            <KpiCell label="AUTOMAÇÕES EM PROD." value={TOTAIS.automacoes} suffix="+" />
+            <KpiCell label="ECONOMIA ANUAL TOTAL" value={fmtBRLk(TOTAIS.economia).replace("R$ ", "")} prefix="R$" />
           </div>
         </div>
-        <p className="mt-6 text-sm text-muted-foreground">Publicamos novos cases aqui conforme concluímos projetos.</p>
-      </Container>
+      </section>
 
-      <CtaBand title="Seu projeto entra na próxima linha desta tabela." text="Diagnóstico, escopo e proposta em até um dia útil, com investimento e economia estimada por escrito." action={{ href: "/contato", label: "Falar com a EGD" }} />
+      <section className="section-tight" style={{ borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)" }}>
+        <div className="container">
+          <div className="sectors-wrap reveal">
+            <div className="sectors-label">SETORES ATENDIDOS</div>
+            <div className="sectors-list">{sectors.map((s) => <span key={s} className="sector-chip">{s}</span>)}</div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="destaques">
+        <div className="container">
+          <div className="section-head row reveal">
+            <div>
+              <span className="eyebrow">CASES EM DESTAQUE · TOP 3 EM ROI</span>
+              <h2>Três programas. {fmtBRLk(featuredTotal)}<br />em economia anual proposta.</h2>
+              <p className="lead">Os projetos com maior densidade de entregas e retorno mensurado — combinando sistemas dedicados e portfólio amplo de automações de relatório, vistoria e gestão.</p>
+            </div>
+            <a href="#ledger" className="btn btn-ghost">Ver todos <Arrow /></a>
+          </div>
+          <div className="featured-grid reveal">
+            {featured.map((c, idx) => (
+              <article className="feat-card" key={c.id}>
+                <div className="fc-head">
+                  <div className="fc-num">CASE / 0{idx + 1}</div>
+                  <span className="status"><span className="dot"></span>EM PRODUÇÃO</span>
+                </div>
+                <div className="fc-mark"><span>{abbr(c.nome)}</span></div>
+                <h3 className="fc-name">{c.nome}</h3>
+                <div className="fc-sector">{c.setor}</div>
+                <div className="fc-eco">
+                  <div className="fc-eco-lbl">ECONOMIA ANUAL PROPOSTA</div>
+                  <div className="fc-eco-val">{fmtBRL(c.economia)}</div>
+                </div>
+                <div className="fc-stats">
+                  <div><span className="n">{c.sistemas}</span><span className="l">SISTEMAS</span></div>
+                  <div><span className="n">{c.automacoes}</span><span className="l">AUTOMAÇÕES</span></div>
+                  <div><span className="n">{c.porte}</span><span className="l">PORTE</span></div>
+                </div>
+                <ul className="fc-bullets">{c.entregas.map((h, i) => <li key={i}>{h}</li>)}</ul>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="clientes" style={{ borderTop: "1px solid var(--line)", background: "var(--bg-2)" }}>
+        <div className="container">
+          <div className="section-head reveal">
+            <span className="eyebrow">CLIENTES / PORTFÓLIO COMPLETO</span>
+            <h2>Quem confiou na operação.</h2>
+            <p className="lead">De pequenos consórcios a grandes operadores de habitação, energia e infraestrutura — cada cliente tem uma trilha técnica documentada e mensurável.</p>
+          </div>
+          <div className="client-grid reveal">
+            {CLIENTES.map((c) => (
+              <a key={c.id} href={`#${c.id}`} className="client-card">
+                <div className="cc-mark"><span>{abbr(c.nome)}</span></div>
+                <div className="cc-body">
+                  <div className="cc-name">{c.nome}</div>
+                  <div className="cc-sector">{c.setor}</div>
+                  <div className="cc-meta">
+                    <span className="tag tag-sm">{c.porte}</span>
+                    {c.status && <span className="tag tag-sm" style={{ color: "var(--warn)", borderColor: "color-mix(in oklab, var(--warn) 30%, transparent)" }}>{c.status.toLowerCase()}</span>}
+                  </div>
+                </div>
+                <div className="cc-stats">
+                  <div><span className="n">{c.sistemas}</span><span className="l">SIST.</span></div>
+                  <div><span className="n">{c.automacoes}</span><span className="l">AUT.</span></div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="ledger">
+        <div className="container">
+          <div className="section-head reveal">
+            <span className="eyebrow">LEDGER TÉCNICO · DADOS REAIS</span>
+            <h2>O retrato completo,<br />ordenado por retorno.</h2>
+            <p className="lead">Todas as entregas em uma única tabela. Ordenado por economia anual proposta — extraído da planilha mestra de CAPEX.</p>
+          </div>
+          <div className="ledger-wrap reveal">
+            <div className="ledger-head">
+              <span>cases.ledger</span>
+              <span className="ld-meta">{CLIENTES.length} registros · atualizado mensalmente</span>
+            </div>
+            <table className="ledger-table">
+              <thead>
+                <tr><th>#</th><th>CLIENTE</th><th>SETOR</th><th>PORTE</th><th className="num">SIST.</th><th className="num">AUTOM.</th><th className="num">CAPEX (R$)</th><th className="num">ECONOMIA ANUAL</th><th className="num">ROI 12M</th></tr>
+              </thead>
+              <tbody>
+                {sorted.map((c, i) => {
+                  const roi = c.capex > 0 ? (c.economia / c.capex) * 100 : 0;
+                  return (
+                    <tr key={c.id} id={c.id}>
+                      <td className="lo-idx">{String(i + 1).padStart(2, "0")}</td>
+                      <td className="lo-name"><span className="lo-mark">{abbr(c.nome)}</span><span>{c.nome}</span></td>
+                      <td className="lo-sector">{c.setor}</td>
+                      <td><span className="tag tag-sm">{c.porte}</span></td>
+                      <td className="num">{c.sistemas}</td>
+                      <td className="num">{c.automacoes}</td>
+                      <td className="num lo-mute">{c.capex > 0 ? fmtBRL(c.capex) : "—"}</td>
+                      <td className="num lo-eco">{c.economia > 0 ? fmtBRL(c.economia) : <span className="lo-pending">— em curso</span>}</td>
+                      <td className="num">{roi > 0 ? <span className="lo-roi">{roi.toFixed(0)}%</span> : <span className="lo-mute">—</span>}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={4}>TOTAIS</td>
+                  <td className="num">{TOTAIS.sistemas}</td>
+                  <td className="num">{TOTAIS.automacoes}</td>
+                  <td className="num lo-mute">—</td>
+                  <td className="num lo-eco">{fmtBRL(TOTAIS.economia)}</td>
+                  <td className="num">—</td>
+                </tr>
+              </tfoot>
+            </table>
+            <div className="ledger-foot">
+              <span>* CAPEX = parcela de desenvolvimento (à vista ou diluído em 12–24 meses)</span>
+              <span>* Economia = horas/mês × custo do responsável manual × 12, conforme planilha</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="cta-final">
+        <div className="container">
+          <div className="cta-card reveal">
+            <span className="eyebrow">SEU PROJETO É O PRÓXIMO?</span>
+            <h2 style={{ marginTop: 22 }}>Construímos o seu case<br />com o mesmo método.</h2>
+            <p style={{ marginTop: 22, fontSize: 17, maxWidth: 620 }}>Diagnóstico, escopo e proposta em até 48h. Cada projeto entra no ledger com CAPEX claro e ROI mensurado.</p>
+            <div className="cta-actions">
+              <Link href="/contato" className="btn btn-primary">Iniciar diagnóstico <Arrow /></Link>
+              <Link href="/servicos" className="btn btn-ghost">Ver capacidades</Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

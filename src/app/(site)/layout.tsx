@@ -1,12 +1,16 @@
-import { Navbar } from "@/components/site/navbar";
-import { Footer } from "@/components/site/footer";
+import "@/styles/site-legacy.css";
+import { Navbar } from "@/components/legacy/navbar";
+import { Footer } from "@/components/legacy/footer";
+import { RevealObserver } from "@/components/legacy/reveal";
 
+/** Site público com a identidade original (dark tech). O CSS é escopado sob .site-root. */
 export default function SiteLayout({ children }: LayoutProps<"/">) {
   return (
-    <div className="theme-site flex min-h-full flex-1 flex-col">
+    <div className="site-root">
       <Navbar />
-      <main className="flex-1">{children}</main>
+      {children}
       <Footer />
+      <RevealObserver />
     </div>
   );
 }

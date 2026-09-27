@@ -1,23 +1,25 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/site/navbar";
-import { Footer } from "@/components/site/footer";
-import { Container } from "@/components/site/section";
+import "@/styles/site-legacy.css";
+import { Navbar } from "@/components/legacy/navbar";
+import { Footer } from "@/components/legacy/footer";
+import { Arrow } from "@/components/legacy/ui";
 
-/** 404 global (rotas inexistentes). Usa o chrome do site. */
+/** 404 global (rotas inexistentes), com o chrome do site. */
 export default function NotFound() {
   return (
-    <div className="theme-site flex min-h-full flex-1 flex-col">
+    <div className="site-root">
       <Navbar />
-      <main className="flex-1">
-        <Container className="py-24">
-          <h1 className="type-h1">Página não encontrada.</h1>
-          <p className="type-lead mt-4 text-muted-foreground">Verifique o endereço ou volte ao início.</p>
-          <div className="mt-8">
-            <Button render={<Link href="/" />}>Ir para o início</Button>
+      <section className="page-head">
+        <div className="grid-bg"></div>
+        <div className="container">
+          <div className="crumbs"><Link href="/">/</Link><span className="sep">→</span><span>404</span></div>
+          <h1 style={{ marginTop: 24 }}>Página não encontrada.</h1>
+          <p className="lead">Verifique o endereço ou volte ao início.</p>
+          <div style={{ marginTop: 32 }}>
+            <Link href="/" className="btn btn-primary">Ir para o início <Arrow /></Link>
           </div>
-        </Container>
-      </main>
+        </div>
+      </section>
       <Footer />
     </div>
   );

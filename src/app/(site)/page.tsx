@@ -1,147 +1,166 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Container, Cota, CtaBand, SheetSection, Status } from "@/components/site/section";
-import { Folha, Fluxo, CotaSvg } from "@/components/site/folha";
-import { METRICS, METRICS_NOTE, SITE } from "@/content/site";
-import { SERVICOS } from "@/content/servicos";
-import { PRODUTOS } from "@/content/produtos";
-import { CLIENTES, brlCurto } from "@/content/cases";
-
-const FLUXO = [
-  { titulo: "Campo", texto: "App de vistoria, fotos com localização" },
-  { titulo: "SIGD", texto: "Documentos, revisões, aprovações" },
-  { titulo: "Relatórios", texto: "Gerados e enviados por rotina" },
-  { titulo: "Painel", texto: "Power BI por contrato e região" },
-];
+import { Arrow, Icon } from "@/components/legacy/ui";
+import { Terminal } from "@/components/legacy/home/terminal";
+import { Ticker } from "@/components/legacy/home/ticker";
+import { DiagMini, ArchDiagram } from "@/components/legacy/home/diagrams";
+import { FinalCTA } from "@/components/legacy/home/final-cta";
+import { SVC, PRODUCTS, STACK_GROUPS } from "@/content/legacy-home";
 
 export default function HomePage() {
-  const destaques = CLIENTES.filter((c) => c.destaque);
   return (
     <>
-      <Container className="pt-10 pb-14 md:pt-18 md:pb-14">
-        <div className="grid items-start gap-10 md:grid-cols-2 md:gap-12">
-          <div>
-            <h1 className="type-display max-w-[14ch]">Sistemas e automação para quem gerencia obras, contratos e habitação.</h1>
-            <p className="type-lead mt-6 max-w-[38rem] text-muted-foreground">
-              Construímos sistemas de gestão documental, aplicativos de campo e relatórios automáticos para consórcios de
-              engenharia, habitação e energia. Cada projeto entra em produção com custo e economia registrados em planilha.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button size="lg" render={<Link href="/contato" />}>
-                Conversar sobre um projeto
-              </Button>
-              <Button size="lg" variant="outline" render={<Link href="/cases" />}>
-                Ver os cases
-              </Button>
+      <section className="hero" id="top">
+        <div className="hero-bg"></div>
+        <div className="hero-grid"></div>
+        <div className="container hero-inner">
+          <div className="hero-grid-2col">
+            <div>
+              <div className="hero-status reveal in">
+                <span className="status"><span className="dot"></span>Operando · 99.97%</span>
+                <span className="eyebrow no-dot"><span style={{ color: "var(--fg-faint)" }}>v5.0</span> <span className="slash">/</span> SP · BR</span>
+              </div>
+
+              <h1 className="reveal in" style={{ marginTop: 28 }}>
+                Engenharia de <span className="italic-grad">dados</span>,<br />
+                sistemas e automação<br />
+                que <span className="italic-grad">escalam</span>.
+              </h1>
+
+              <p className="hero-sub reveal in">
+                Construímos plataformas, pipelines e produtos digitais sobre AWS, Azure e o stack Apache. Da arquitetura à entrega — com squads ágeis, governança e observabilidade desde o primeiro commit.
+              </p>
+
+              <div className="hero-cta reveal in">
+                <Link href="/contato" className="btn btn-primary">Iniciar um projeto <Arrow /></Link>
+                <Link href="/servicos" className="btn btn-ghost">Ver capacidades</Link>
+              </div>
+
+              <div className="hero-tickers reveal">
+                <Ticker />
+              </div>
+            </div>
+
+            <div className="hero-right reveal in">
+              <Terminal />
+              <div className="diag-mini">
+                <DiagMini />
+              </div>
             </div>
           </div>
-          <Folha
-            title="Fluxo de dados de um consórcio de habitação"
-            code="FL-01"
-            label="Folha de projeto: fluxo de dados de um consórcio de habitação"
-            carimbo={[
-              { k: "Projeto", v: "SIGD + sistema de campo" },
-              { k: "Cliente", v: "Consórcio URBHIS" },
-              { k: "Folha", v: "1/1" },
-              { k: "Rev.", v: "03" },
-              { k: "Status", v: <Status tone="ok">Em produção</Status> },
-            ]}
-          >
-            <Fluxo nos={FLUXO} />
-            <CotaSvg text="12 automações, 4 sistemas, 1 consórcio" />
-          </Folha>
-        </div>
 
-        <div className="mt-14 border-t border-border pt-8 md:mt-16">
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-            {METRICS.map((m) => (
-              <Cota key={m.label} value={m.value} suffix={"suffix" in m ? m.suffix : undefined} label={m.label} />
+          <div className="hero-meta reveal">
+            <div className="meta-item"><div className="num">+120<small>%</small></div><div className="lbl">RETORNO MÉDIO EM AUTOMAÇÕES</div></div>
+            <div className="meta-item"><div className="num">8<small>+</small></div><div className="lbl">ANOS DE CONSULTORIA</div></div>
+            <div className="meta-item"><div className="num">40<small>+</small></div><div className="lbl">PROJETOS ENTREGUES</div></div>
+            <div className="meta-item"><div className="num">99,9<small>%</small></div><div className="lbl">SLA MÉDIO DAS SOLUÇÕES</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="servicos-preview">
+        <div className="container">
+          <div className="section-head row reveal">
+            <div>
+              <span className="eyebrow">SERVIÇOS · 06 FRENTES</span>
+              <h2>Capacidades que cobrem<br />o ciclo completo de tecnologia.</h2>
+              <p className="lead">Atuamos do código à arquitetura de decisão. Cada frente entrega valor isolada — ou soma capacidade quando combinada num programa de transformação.</p>
+            </div>
+            <Link href="/servicos" className="btn btn-ghost">Ver tudo <Arrow /></Link>
+          </div>
+
+          <div className="grid-services reveal">
+            {SVC.map((s, i) => (
+              <Link className="svc" key={s.id} href={`/servicos#${s.id}`}>
+                <div className="svc-num">{String(i + 1).padStart(2, "0")} / 06</div>
+                <div className="icon-tile"><Icon d={s.icon} /></div>
+                <h3>{s.title}</h3>
+                <p>{s.desc}</p>
+                <div className="svc-tags">
+                  {s.tags.map((t) => <span className="tag" key={t}>{t}</span>)}
+                </div>
+                <div className="svc-cta">explorar <Arrow size={12} /></div>
+              </Link>
             ))}
           </div>
-          <p className="mt-5 max-w-[60ch] text-[0.8125rem] text-faint">{METRICS_NOTE}</p>
         </div>
-      </Container>
+      </section>
 
-      <SheetSection
-        title="O que entregamos"
-        lead="Seis frentes que funcionam sozinhas ou combinadas. Em todas, o código, os dados e os acessos ficam com você."
-        aside={{ href: "/servicos", label: "Ver todos os serviços" }}
-      >
-        <div className="grid border-t border-border md:grid-cols-2">
-          {SERVICOS.map((s, i) => (
-            <Link
-              key={s.slug}
-              href={`/servicos#${s.slug}`}
-              className={`group block border-b border-border py-6 text-foreground hover:text-foreground ${i % 2 === 0 ? "md:border-r md:pr-8" : "md:pl-8"}`}
-            >
-              <h3 className="type-h3 group-hover:text-signal-strong">{s.titulo}</h3>
-              <p className="mt-2 max-w-[30rem] text-muted-foreground">{s.resumo}</p>
-            </Link>
-          ))}
+      <section className="section" style={{ borderTop: "1px solid var(--line)", background: "var(--bg-2)" }}>
+        <div className="container">
+          <div className="section-head reveal">
+            <span className="eyebrow">ARQUITETURA / FLUXO DE REFERÊNCIA</span>
+            <h2>Da fonte ao agente,<br />em uma plataforma observável.</h2>
+            <p className="lead">Pipeline padrão que aplicamos em projetos de dados — adaptado ao stack do cliente (AWS, Azure, ou híbrido) e à maturidade do time.</p>
+          </div>
+
+          <div className="arch-card reveal">
+            <ArchDiagram />
+            <div className="arch-legend">
+              <div><span className="status"><span className="dot"></span>Stream</span> Apache Kafka, Kinesis, Event Hubs</div>
+              <div><span className="status"><span className="dot"></span>Batch</span> Airflow, ADF, AWS Glue</div>
+              <div><span className="status warn"><span className="dot"></span>ML/IA</span> Bedrock, Azure OpenAI, modelos próprios</div>
+            </div>
+          </div>
         </div>
-      </SheetSection>
+      </section>
 
-      <SheetSection
-        title="Produtos prontos para implantar"
-        lead="Sistemas que já rodam em clientes. Adaptamos ao seu contrato em semanas."
-        aside={{ href: "/produtos", label: "Ver os produtos" }}
-        className="pt-0 md:pt-0"
-      >
-        <div className="grid gap-6 md:grid-cols-2">
-          {PRODUTOS.map((p) => (
-            <Link key={p.slug} href={`/produtos#${p.slug}`} className="group flex flex-col gap-2.5 rounded-lg border border-border bg-card p-6 text-foreground hover:border-strong hover:text-foreground">
-              <h3 className="type-h3 group-hover:text-signal-strong">{p.titulo}</h3>
-              <p className="text-muted-foreground">{p.resumo}</p>
-              <div className="mt-auto pt-3">
-                <Status tone={p.status.tone}>{p.status.label}</Status>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </SheetSection>
-
-      <SheetSection
-        title="Onde já está rodando"
-        lead="Consórcios de habitação e engenharia, operações de energia e regularização fundiária. Detalhes, custos e economia de cada projeto na página de cases."
-        aside={{ href: "/cases", label: "Ver todos os cases" }}
-        className="pt-0 md:pt-0"
-      >
-        <div className="grid gap-6 md:grid-cols-3">
-          {destaques.map((c) => (
-            <article key={c.id} className="overflow-hidden rounded-lg border border-border bg-card">
-              <div className="p-5 pb-4">
-                <h3 className="type-h3">{c.nome}</h3>
-                <p className="text-sm text-muted-foreground">{c.setor}</p>
-                <div className="mt-3 text-[1.75rem] font-semibold tracking-[-0.02em] tabular-nums [font-variation-settings:'wdth'_106]"><span className="whitespace-nowrap">
-                  {brlCurto(c.economia)}</span>
-                  <small className="ml-1.5 text-sm font-normal text-muted-foreground [font-variation-settings:'wdth'_100]">por ano</small>
+      <section className="section" id="produtos-preview">
+        <div className="container">
+          <div className="section-head row reveal">
+            <div>
+              <span className="eyebrow">PRODUTOS / VERTICAIS PRONTOS</span>
+              <h2>Soluções verticais prontas<br />para implantação acelerada.</h2>
+              <p className="lead">Aceleradores construídos sobre Power Platform, AWS e open-source moderno. Implantação em semanas, customização sob medida, dados sempre seus.</p>
+            </div>
+            <Link href="/produtos" className="btn btn-ghost">Catálogo completo <Arrow /></Link>
+          </div>
+          <div className="prod-preview-grid reveal">
+            {PRODUCTS.map((p, i) => (
+              <Link key={p.id} href={`/produtos#${p.id}`} className="prod-preview">
+                <div className="pp-head">
+                  <span className="pp-num">P/{String(i + 1).padStart(2, "0")}</span>
+                  <span className="tag tag-sm">{p.tag}</span>
                 </div>
-                <ul className="mt-3 list-disc pl-4 text-sm text-muted-foreground">
-                  {c.entregas.map((e) => (
-                    <li key={e}>{e}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="carimbo grid-cols-[1fr_1fr_1.5fr]">
-                <div><div className="carimbo-k">Sistemas</div><div className="carimbo-v">{c.sistemas}</div></div>
-                <div><div className="carimbo-k">Automações</div><div className="carimbo-v">{c.automacoes}</div></div>
-                <div><div className="carimbo-k">Status</div><div className="carimbo-v"><Status tone="ok">Produção</Status></div></div>
-              </div>
-            </article>
-          ))}
+                <h3>{p.title}</h3>
+                <p>{p.desc}</p>
+                <div className="pp-foot">ver detalhes <Arrow size={12} /></div>
+              </Link>
+            ))}
+          </div>
         </div>
-      </SheetSection>
+      </section>
 
-      <CtaBand
-        title="Conte qual processo hoje toma mais tempo da sua equipe."
-        text="Respondemos em até um dia útil com uma leitura inicial e os próximos passos."
-        action={{ href: "/contato", label: "Falar com a EGD" }}
-        secondary={
-          <a href={`mailto:${SITE.email}`} className="type-data text-card hover:text-card/80">
-            {SITE.email}
-          </a>
-        }
-      />
+      <section className="section" id="stack" style={{ borderTop: "1px solid var(--line)" }}>
+        <div className="container">
+          <div className="section-head reveal">
+            <span className="eyebrow">STACK / TECNOLOGIA</span>
+            <h2>O ferramental que escolhemos<br />para mover sua operação.</h2>
+            <p className="lead">Combinamos as principais clouds, o ecossistema Apache e Power Platform com open-source moderno. Tecnologia agnóstica — orientada ao seu contexto.</p>
+          </div>
+
+          <div className="stack-groups reveal">
+            {STACK_GROUPS.map((g) => (
+              <div className="stack-group" key={g.name}>
+                <div className="sg-head">
+                  <span className="sg-bullet" style={{ background: g.color }}></span>
+                  <span className="sg-name">{g.name}</span>
+                  <span className="sg-count">{g.items.length} ferramentas</span>
+                </div>
+                <div className="sg-grid">
+                  {g.items.map((it) => (
+                    <div className="sg-item" key={it.n}>
+                      <div className="sg-n">{it.n}</div>
+                      <div className="sg-d">{it.d}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <FinalCTA />
     </>
   );
 }

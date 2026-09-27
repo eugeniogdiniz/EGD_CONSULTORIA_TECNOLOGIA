@@ -1,47 +1,72 @@
 import type { Metadata } from "next";
-import { Container, PageTitle } from "@/components/site/section";
-import { ContactForm } from "@/components/site/contact-form";
+import Link from "next/link";
+import { ContactForm } from "@/components/legacy/contact-form";
 import { SITE } from "@/content/site";
 
-export const metadata: Metadata = {
-  title: "Contato",
-  description: "Conte o problema. Respondemos em até um dia útil.",
-};
+export const metadata: Metadata = { title: "Contato", description: "Conta o seu desafio — respondemos em 48h." };
 
 export default function ContatoPage() {
   return (
     <>
-      <PageTitle title="Conte o problema. Respondemos em um dia útil.">
-        <p className="type-lead mt-5 max-w-[44rem] text-muted-foreground">
-          Quanto mais contexto, melhor a resposta. Se preferir, escreva direto para{" "}
-          <a href={`mailto:${SITE.email}`} className="font-medium text-link underline decoration-1 underline-offset-[3px] hover:text-signal-strong">
-            {SITE.email}
-          </a>
-          .
-        </p>
-      </PageTitle>
-      <Container className="pb-16 md:pb-24">
-        <div className="grid items-start gap-10 md:grid-cols-[7fr_4fr] md:gap-12">
-          <ContactForm />
-          <dl className="border-t border-border">
-            <div className="border-b border-border py-5">
-              <dt className="text-sm font-medium text-muted-foreground">E-mail</dt>
-              <dd className="mt-1 font-medium">{SITE.email}</dd>
-              <dd className="mt-0.5 text-sm text-muted-foreground">{SITE.responseTime}</dd>
-            </div>
-            <div className="border-b border-border py-5">
-              <dt className="text-sm font-medium text-muted-foreground">Atendimento</dt>
-              <dd className="mt-1 font-medium">{SITE.hours}</dd>
-              <dd className="mt-0.5 text-sm text-muted-foreground">{SITE.hoursNote}</dd>
-            </div>
-            <div className="border-b border-border py-5">
-              <dt className="text-sm font-medium text-muted-foreground">Onde</dt>
-              <dd className="mt-1 font-medium">São Paulo</dd>
-              <dd className="mt-0.5 text-sm text-muted-foreground">{SITE.whereNote}</dd>
-            </div>
-          </dl>
+      <section className="page-head">
+        <div className="grid-bg"></div>
+        <div className="container">
+          <div className="reveal in">
+            <div className="crumbs"><Link href="/">/</Link><span className="sep">→</span><span>CONTATO</span></div>
+            <h1 style={{ marginTop: 24 }}>
+              Conta o seu desafio —<br />
+              <span className="italic-grad">respondemos em 48h</span>.
+            </h1>
+            <p className="lead">Quanto mais contexto você der, mais útil será nosso retorno. Se preferir, escreva direto: {SITE.email}</p>
+          </div>
         </div>
-      </Container>
+      </section>
+
+      <section className="section section-tight">
+        <div className="container">
+          <div className="contact-grid">
+            <ContactForm />
+
+            <div className="contact-info reveal">
+              <div className="ci-block">
+                <h4>E-mail</h4>
+                <div className="v">{SITE.email}</div>
+                <div className="d">Resposta em até 48h úteis.</div>
+              </div>
+              <div className="ci-block">
+                <h4>Atendimento</h4>
+                <div className="v">Seg–Sex · 9h às 18h</div>
+                <div className="d">Horário de Brasília (BRT).</div>
+              </div>
+              <div className="ci-block">
+                <h4>Endereço</h4>
+                <div className="v">São Paulo · BR</div>
+                <div className="d">Atuamos remoto em todo o Brasil. Presencial sob demanda.</div>
+              </div>
+              <div className="ci-block">
+                <h4>Portal do cliente</h4>
+                <div className="v">egdsystem.com.br/portal</div>
+                <div className="d">Acompanhamento de projetos e documentos para clientes com acesso.</div>
+                <Link href="/entrar" className="btn btn-ghost btn-sm" style={{ marginTop: 14 }}>Entrar no portal</Link>
+              </div>
+
+              <div className="terminal" style={{ marginTop: 8 }}>
+                <div className="term-head">
+                  <div className="term-dots"><i></i><i></i><i></i></div>
+                  <div className="term-title">~ /egd/status</div>
+                  <div className="term-meta">live</div>
+                </div>
+                <div className="term-body" style={{ minHeight: 0 }}>
+                  <div className="ln"><span className="lno">01</span><div><span className="prompt">$ </span><span>curl status.egdsystem.com.br</span></div></div>
+                  <div className="ln"><span className="lno">02</span><div><span className="out">→ all systems </span><span className="ok">[ OK ]</span></div></div>
+                  <div className="ln"><span className="lno">03</span><div><span className="out">→ avg response: </span><span className="num">31h</span></div></div>
+                  <div className="ln"><span className="lno">04</span><div><span className="out">→ booking slots open: </span><span className="num">7</span><span className="out"> / próx. 14d</span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
