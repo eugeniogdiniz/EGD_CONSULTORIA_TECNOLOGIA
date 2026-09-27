@@ -29,9 +29,8 @@ jobs:
       - name: Prepare static site
         shell: bash
         run: |
-          mkdir -p dist/assets
-          cp index.html contato.html produtos.html servicos.html sobre.html .nojekyll dist/
-          cp -R assets/. dist/assets/
+          mkdir -p dist
+          cp -R legacy/. dist/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

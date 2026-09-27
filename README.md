@@ -1,26 +1,36 @@
-﻿# EGD Consultoria
+# EGD Consultoria & Tecnologia
 
-Site estatico institucional preparado para deploy no GitHub Pages.
+Sistema full-stack (portal cliente + portal admin) construído em Next.js. O site
+institucional antigo (estático) foi preservado em `legacy/` e continua publicado
+no GitHub Pages até o novo site entrar no ar.
 
-## Publicacao
+## Requisitos
 
-O repositorio inclui a workflow `.github/workflows/pages.yml`, que publica automaticamente as paginas HTML do root e a pasta `assets/`.
+- Node 24
+- Docker (para Postgres, MinIO e MailHog locais)
 
-Para ativar no GitHub:
+## Rodar local
 
-1. Suba o repositorio para o GitHub.
-2. Em `Settings > Pages`, selecione `GitHub Actions` como source.
-3. Faca push para a branch `main` ou `master`.
+```bash
+docker compose -f docker-compose.dev.yml up -d
+cp .env.example .env
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
 
-## Escopo do deploy
+A aplicação sobe em `http://localhost:3000`. A rota `GET /api/health` retorna
+`{ "ok": true, "ts": "..." }` para checagens de disponibilidade.
 
-A publicacao envia:
+## Testes
 
-- `index.html`
-- `contato.html`
-- `produtos.html`
-- `servicos.html`
-- `sobre.html`
-- `assets/`
+```bash
+npm test          # testes unitários (Vitest)
+npm run test:watch
+npm run typecheck
+npm run lint
+```
 
-As pastas `export/` e `uploads/` nao entram no artifact do GitHub Pages.
+## Deploy
+
+Ver `docs/runbooks/coolify.md`.
