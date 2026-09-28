@@ -83,3 +83,25 @@ export function stripInternalNotes(description: string | null): string | null {
   const visible = (idx === -1 ? description : description.slice(0, idx)).trim();
   return visible === "" ? null : visible;
 }
+
+export const PROJECT_STATUS_LABEL: Record<string, string> = {
+  planning: "Planejamento",
+  active: "Em execução",
+  on_hold: "Em espera",
+  delivered: "Entregue",
+  cancelled: "Cancelado",
+};
+
+/** Estilo do selo (mesmas classes do admin) por status de projeto ou entrega. */
+export const STATUS_STYLE: Record<string, string> = {
+  planning: "border-border bg-subtle text-muted-foreground",
+  active: "border-link bg-link-soft text-link",
+  on_hold: "border-warning bg-warning-soft text-warning",
+  delivered: "border-success bg-success-soft text-success",
+  cancelled: "border-danger bg-danger-soft text-danger",
+  todo: "border-border bg-subtle text-muted-foreground",
+  doing: "border-link bg-link-soft text-link",
+  review: "border-strong bg-card text-foreground",
+  done: "border-success bg-success-soft text-success",
+  blocked: "border-warning bg-warning-soft text-warning",
+};

@@ -217,3 +217,46 @@ export async function listPortalComments(ctx: PortalContext, deliverableId: stri
     .orderBy(asc(projectDeliverableComment.createdAt));
   return rows.map((r) => ({ ...r, body: r.deletedAt ? null : r.body }));
 }
+
+/** Entrega visível na organização ativa (só ids). Base das validações de escrita. */
+export async function findVisibleDeliverable(ctx: PortalContext, deliverableId: string) {
+  if (!isUuid(deliverableId)) return null;
+  const [row] = await db
+    .select({ id: projectDeliverable.id, projectId: projectDeliverable.projectId })
+    .from(projectDeliverable)
+    .innerJoin(project, eq(projectDeliverable.projectId, project.id))
+    .innerJoin(crmCompany, eq(project.companyId, crmCompany.id))
+    .where(
+      and(
+        eq(projectDeliverable.id, deliverableId),
+        eq(projectDeliverable.visibleToClient, true),
+        inOrganization(ctx),
+      ),
+    )
+    .limit(1);
+  return row ?? null;
+}
+
+/**
+ * Arquivo anexado a uma entrega visível da organização ativa. O único caminho
+ * de download do portal: valida arquivo → entrega visível → projeto → empresa → organização.
+ */
+export async function getPortalDeliverableFile(ctx: PortalContext, projectId: string, deliverableId: string) {
+  if (!isUuid(projectId) || !isUuid(deliverableId)) return null;
+  const [row] = await db
+    .select({ id: files.id, bucketKey: files.bucketKey, originalName: files.originalName })
+    .from(projectDeliverable)
+    .innerJoin(project, eq(projectDeliverable.projectId, project.id))
+    .innerJoin(crmCompany, eq(project.companyId, crmCompany.id))
+    .innerJoin(files, eq(projectDeliverable.fileId, files.id))
+    .where(
+      and(
+        eq(projectDeliverable.id, deliverableId),
+        eq(projectDeliverable.projectId, projectId),
+        eq(projectDeliverable.visibleToClient, true),
+        inOrganization(ctx),
+      ),
+    )
+    .limit(1);
+  return row ?? null;
+}

@@ -19,8 +19,21 @@ export type CommentRow = {
   deletedAt: Date | string | null;
   authorId: string;
   authorName: string;
+  authorRole?: "admin" | "client";
   createdAt: Date | string;
   updatedAt: Date | string;
+};
+
+export type CommentActions = {
+  create: (prev: ActionResult<{ id: string }> | null, fd: FormData) => Promise<ActionResult<{ id: string }> | null>;
+  update: (prev: ActionResult<null> | null, fd: FormData) => Promise<ActionResult<null> | null>;
+  remove: (fd: FormData) => Promise<void>;
+};
+
+const ADMIN_ACTIONS: CommentActions = {
+  create: createCommentForm,
+  update: updateCommentForm,
+  remove: deleteCommentForm,
 };
 
 function initials(name: string): string {
@@ -40,11 +53,15 @@ export function CommentThread({
   deliverableId,
   comments,
   currentUserId,
+  actions = ADMIN_ACTIONS,
+  showTeamBadge = false,
 }: {
   projectId: string;
   deliverableId: string;
   comments: CommentRow[];
   currentUserId: string;
+  actions?: CommentActions;
+  showTeamBadge?: boolean;
 }) {
   const roots = comments.filter((c) => c.parentId === null);
   const repliesByParent = new Map<string, CommentRow[]>();
@@ -68,9 +85,11 @@ export function CommentThread({
           comment={root}
           replies={repliesByParent.get(root.id) ?? []}
           currentUserId={currentUserId}
+          actions={actions}
+          showTeamBadge={showTeamBadge}
         />
       ))}
-      <ComposerForm projectId={projectId} deliverableId={deliverableId} />
+      <ComposerForm projectId={projectId} deliverableId={deliverableId} actions={actions} />
     </div>
   );
 }
@@ -81,12 +100,16 @@ function CommentItem({
   comment,
   replies,
   currentUserId,
+  actions,
+  showTeamBadge,
 }: {
   projectId: string;
   deliverableId: string;
   comment: CommentRow;
   replies: CommentRow[];
   currentUserId: string;
+  actions: CommentActions;
+  showTeamBadge: boolean;
 }) {
   const [replying, setReplying] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -101,6 +124,11 @@ function CommentItem({
       <div>
         <div className="flex items-baseline gap-2 text-sm">
           <b className="font-medium">{comment.authorName}</b>
+          {showTeamBadge && comment.authorRole === "admin" && (
+            <span className="rounded-sm border border-border bg-subtle px-1.5 text-[0.65rem] font-medium text-muted-foreground">
+              Equipe EGD
+            </span>
+          )}
           <span className="type-data text-xs text-faint">{formatDate(toDate(comment.createdAt))}</span>
           {comment.updatedAt && toDate(comment.updatedAt).getTime() !== toDate(comment.createdAt).getTime() && !isDeleted && (
             <span className="type-micro text-faint">editado</span>
@@ -111,6 +139,8 @@ function CommentItem({
         ) : editing ? (
           <EditCommentForm
             projectId={projectId}
+            deliverableId={deliverableId}
+            actions={actions}
             comment={comment}
             onDone={() => setEditing(false)}
           />
@@ -129,9 +159,10 @@ function CommentItem({
                 <button type="button" onClick={() => setEditing(true)} className="text-muted-foreground hover:text-foreground">
                   Editar
                 </button>
-                <form action={deleteCommentForm} className="contents">
+                <form action={actions.remove} className="contents">
                   <input type="hidden" name="id" value={comment.id} />
                   <input type="hidden" name="projectId" value={projectId} />
+                  <input type="hidden" name="deliverableId" value={deliverableId} />
                   <button type="submit" className="text-muted-foreground hover:text-danger">
                     Excluir
                   </button>
@@ -150,6 +181,8 @@ function CommentItem({
                 comment={r}
                 replies={[]}
                 currentUserId={currentUserId}
+                actions={actions}
+                showTeamBadge={showTeamBadge}
               />
             ))}
           </div>
@@ -159,6 +192,7 @@ function CommentItem({
             <ComposerForm
               projectId={projectId}
               deliverableId={deliverableId}
+              actions={actions}
               parentId={comment.id}
               onDone={() => setReplying(false)}
             />
@@ -172,18 +206,20 @@ function CommentItem({
 function ComposerForm({
   projectId,
   deliverableId,
+  actions,
   parentId,
   onDone,
 }: {
   projectId: string;
   deliverableId: string;
+  actions: CommentActions;
   parentId?: string;
   onDone?: () => void;
 }) {
   const [body, setBody] = useState("");
   const [state, formAction, pending] = useActionState<ActionResult<{ id: string }> | null, FormData>(
     async (prev, fd) => {
-      const r = await createCommentForm(prev, fd);
+      const r = await actions.create(prev, fd);
       if (r?.ok) {
         setBody("");
         onDone?.();
@@ -220,17 +256,21 @@ function ComposerForm({
 
 function EditCommentForm({
   projectId,
+  deliverableId,
+  actions,
   comment,
   onDone,
 }: {
   projectId: string;
+  deliverableId: string;
+  actions: CommentActions;
   comment: CommentRow;
   onDone: () => void;
 }) {
   const [body, setBody] = useState(comment.body ?? "");
   const [state, formAction, pending] = useActionState<ActionResult<null> | null, FormData>(
     async (prev, fd) => {
-      const r = await updateCommentForm(prev, fd);
+      const r = await actions.update(prev, fd);
       if (r?.ok) onDone();
       return r;
     },
@@ -240,6 +280,7 @@ function EditCommentForm({
     <form action={formAction} className={cn("mt-2 grid gap-2")}>
       <input type="hidden" name="id" value={comment.id} />
       <input type="hidden" name="projectId" value={projectId} />
+      <input type="hidden" name="deliverableId" value={deliverableId} />
       <Textarea name="body" value={body} onChange={(e) => setBody(e.target.value)} rows={3} required />
       {state && !state.ok && <p role="alert" className="text-xs text-danger">{state.error}</p>}
       <div className="flex justify-end gap-2">
