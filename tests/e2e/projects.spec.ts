@@ -1,0 +1,84 @@
+import { test, expect } from "@playwright/test";
+import { loginAs, ADMIN } from "./helpers";
+
+test.describe.serial("projects", () => {
+  const stamp = Date.now();
+  const empresaNome = `Projetos E2E ${stamp}`;
+  const oppTitulo = `Op ${stamp}`;
+  const faseNome = `Fase Kickoff ${stamp}`;
+  const entregaTitulo = `Entrega alfa ${stamp}`;
+
+  test("admin cria empresa → oportunidade → marca ganha → cria projeto", async ({ page }) => {
+    await loginAs(page, ADMIN.email, ADMIN.password);
+
+    // 1) Empresa
+    await page.goto("/admin/crm/empresas/nova");
+    await page.getByLabel(/^nome$/i).fill(empresaNome);
+    await page.getByRole("button", { name: /criar empresa/i }).click();
+    await expect(page.getByRole("heading", { level: 1, name: empresaNome })).toBeVisible();
+
+    // 2) Oportunidade
+    await page.getByRole("button", { name: /nova oportunidade/i }).click();
+    const oppDialog = page.getByRole("dialog");
+    await oppDialog.getByLabel(/^título$/i).fill(oppTitulo);
+    await oppDialog.getByLabel(/valor/i).fill("5500000");
+    await oppDialog.getByRole("button", { name: /^criar$/i }).click();
+    await expect(page.getByRole("heading", { level: 1, name: oppTitulo })).toBeVisible();
+
+    // 3) Ganhar
+    await page.getByRole("button", { name: /marcar como ganha/i }).click();
+    await expect(page.getByRole("button", { name: /criar projeto/i })).toBeVisible();
+
+    // 4) Criar projeto
+    await page.getByRole("button", { name: /^criar projeto$/i }).click();
+    const dlg = page.getByRole("dialog");
+    // título default vem preenchido
+    await dlg.getByRole("button", { name: /^criar projeto$/i }).click();
+    await expect(page).toHaveURL(/\/admin\/projetos\/[0-9a-f-]+/);
+    await expect(page.getByRole("heading", { level: 1, name: oppTitulo })).toBeVisible();
+  });
+
+  test("adiciona fase, marco e entrega; muda status via diálogo", async ({ page }) => {
+    await loginAs(page, ADMIN.email, ADMIN.password);
+    await page.goto("/admin/projetos");
+    await page.getByRole("link", { name: oppTitulo }).click();
+
+    // Fase
+    await page.getByRole("button", { name: /nova fase/i }).click();
+    let dialog = page.getByRole("dialog");
+    await dialog.getByLabel(/^nome$/i).fill(faseNome);
+    await dialog.getByRole("button", { name: /^criar$/i }).click();
+    await expect(page.getByText(faseNome)).toBeVisible({ timeout: 10_000 });
+
+    // Marco
+    await page.getByRole("button", { name: /novo marco/i }).click();
+    dialog = page.getByRole("dialog");
+    await dialog.getByLabel(/^nome$/i).fill(`Marco ${stamp}`);
+    await dialog.getByLabel(/^data$/i).fill("2030-12-31");
+    await dialog.getByRole("button", { name: /^criar$/i }).click();
+    await expect(page.getByText(`Marco ${stamp}`)).toBeVisible({ timeout: 10_000 });
+
+    // Entrega — via kanban
+    await page.getByRole("link", { name: /^kanban$/i }).click();
+    await page.getByRole("button", { name: /nova entrega/i }).click();
+    dialog = page.getByRole("dialog");
+    await dialog.getByLabel(/^título$/i).fill(entregaTitulo);
+    await dialog.getByRole("button", { name: /^criar$/i }).click();
+    await expect(page.getByText(entregaTitulo)).toBeVisible({ timeout: 10_000 });
+
+    // Muda status via diálogo
+    await page.getByText(entregaTitulo).click();
+    dialog = page.getByRole("dialog");
+    await dialog.getByLabel(/^status$/i).selectOption("done");
+    await dialog.getByRole("button", { name: /^aplicar$/i }).click();
+    await dialog.getByRole("button", { name: /^fechar$/i }).click();
+    // Card agora aparece na coluna "Feita"
+    await expect(page.getByRole("heading", { name: /^feita$/i })).toBeVisible();
+  });
+
+  test("/admin/projetos sem sessão redireciona para /entrar", async ({ request }) => {
+    const res = await request.get("/admin/projetos", { maxRedirects: 0, failOnStatusCode: false });
+    expect([307, 302, 308]).toContain(res.status());
+    expect(res.headers()["location"]).toMatch(/\/entrar/);
+  });
+});

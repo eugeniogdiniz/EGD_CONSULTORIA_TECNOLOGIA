@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Projetos · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .tabs-status { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .tabs-status a { padding: 10px 14px; font-size: var(--text-small); font-weight: 500; color: var(--fg-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs-status a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--fg); }
+  .selo { display: inline-flex; align-items: center; padding: 2px 8px; height: 22px; border-radius: 2px; font-size: var(--text-micro); font-weight: 500; border: 1px solid var(--border); }
+  .selo.active { background: var(--link-soft); color: var(--link); border-color: var(--link); }
+  .selo.planning { background: var(--bg-subtle); color: var(--fg-muted); }
+  .selo.on_hold { background: var(--warning-soft); color: var(--warning); border-color: var(--warning); }
+  .selo.delivered { background: var(--success-soft); color: var(--success); border-color: var(--success); }
+  .selo.cancelled { background: var(--danger-soft); color: var(--danger); border-color: var(--danger); }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu do administrador">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <div class="group" data-open="true">
+      <button class="group-head" type="button" aria-expanded="true" style="display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:2px;font-family:var(--font-mono);font-size:var(--text-micro);color:var(--fg-muted);background:transparent;border:0;width:100%;text-align:left">
+        <span style="flex:1">CRM</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" style="transform:rotate(90deg);color:var(--fg-faint)" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <a class="item" href="#" style="padding-left:24px">Empresas</a>
+        <a class="item" href="#" style="padding-left:24px">Contatos</a>
+        <a class="item" href="#" style="padding-left:24px">Funil</a>
+        <a class="item" href="#" style="padding-left:24px">Propostas</a>
+      </div>
+    </div>
+    <a class="item" href="#">Organizações</a>
+    <a class="item" href="admin-projetos-lista.html" aria-current="page">Projetos</a>
+    <a class="item" href="#">Leads <span class="badge badge-novo" style="margin-left:auto">3</span></a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a class="link" href="admin-projetos-lista.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Projetos</a></div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Projetos</h1>
+          <div class="small muted" style="margin-top:6px">Execução dos negócios ganhos. Novos projetos nascem de <a class="link" href="#">oportunidades ganhas no CRM</a>.</div>
+        </div>
+      </div>
+
+      <nav class="tabs-status" aria-label="Filtro por status">
+        <a href="#" aria-current="page">Ativos <span class="mono muted" style="margin-left:4px">4</span></a>
+        <a href="#">Planejamento <span class="mono muted" style="margin-left:4px">2</span></a>
+        <a href="#">Em espera <span class="mono muted" style="margin-left:4px">1</span></a>
+        <a href="#">Entregues <span class="mono muted" style="margin-left:4px">7</span></a>
+        <a href="#">Cancelados <span class="mono muted" style="margin-left:4px">2</span></a>
+        <a href="#">Todos</a>
+      </nav>
+
+      <form style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+        <input type="search" placeholder="Buscar por título ou empresa" style="height:36px;padding:0 10px;border:1px solid var(--border-strong);border-radius:2px;background:var(--surface);font:inherit;font-size:var(--text-small);min-width:280px">
+        <label class="small muted" style="display:inline-flex;align-items:center;gap:6px;height:36px"><input type="checkbox"> Mostrar arquivados</label>
+        <button class="btn btn-secondary btn-sm" type="submit">Filtrar</button>
+      </form>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Título</th><th>Empresa</th><th>Status</th><th class="num">Fases</th><th class="num">Abertas</th><th>Atualizado</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><a class="link" href="admin-projeto-detalhe.html">Laudo de infra TI — URBHIS</a><div class="micro faint" style="margin-top:2px">iniciado 03/10/2026 · previsto 12/12/2026</div></td>
+              <td><a class="link" href="#">Consórcio URBHIS</a></td>
+              <td><span class="selo active">Em execução</span></td>
+              <td class="num mono">3</td>
+              <td class="num mono">7</td>
+              <td class="muted">hoje, 14:30</td>
+            </tr>
+            <tr>
+              <td><a class="link" href="#">Piloto de inventário — COHAB Santos</a></td>
+              <td><a class="link" href="#">COHAB Santos</a></td>
+              <td><span class="selo planning">Planejamento</span></td>
+              <td class="num mono">2</td>
+              <td class="num mono">3</td>
+              <td class="muted">ontem</td>
+            </tr>
+            <tr>
+              <td><a class="link" href="#">Migração Postgres — Construtora Sul</a></td>
+              <td><a class="link" href="#">Construtora Sul</a></td>
+              <td><span class="selo on_hold">Em espera</span></td>
+              <td class="num mono">4</td>
+              <td class="num mono">2</td>
+              <td class="muted">26/09/2026</td>
+            </tr>
+            <tr>
+              <td><a class="link" href="#" style="color:var(--fg-muted)">Diagnóstico inicial — Habita SP</a></td>
+              <td><a class="link" href="#">Habita SP</a></td>
+              <td><span class="selo delivered">Entregue</span></td>
+              <td class="num mono">2</td>
+              <td class="num mono">0</td>
+              <td class="muted">20/09/2026</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <section class="bloco" style="margin-top:32px">
+        <div class="bloco-head"><h3>Por que não tem botão "Novo projeto"?</h3></div>
+        <div class="bloco-body small muted" style="max-width:56rem;line-height:1.6">
+          Projeto nasce a partir de uma <strong style="color:var(--fg);font-weight:500">oportunidade ganha</strong> no CRM. No detalhe da oportunidade, quando o estágio é "Ganho" e ainda não há projeto, aparece o botão <em>Criar projeto</em>; se já existe, vira <em>Ver projeto</em>. Isso preserva a rastreabilidade funil → execução e evita projetos avulsos sem origem comercial. Se precisar de projeto interno (sem cliente), crie oportunidade "interna", marque como ganha e crie o projeto a partir dela.
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

@@ -15,6 +15,8 @@ import { OpportunityFormDialog } from "@/modules/crm/components/opportunity-form
 import { InteractionFormDialog } from "@/modules/crm/components/interaction-form";
 import { LostDialog } from "@/modules/crm/components/lost-dialog";
 import { ProposalFormDialog } from "@/modules/crm/components/proposal-form";
+import { getProjectByOpportunity } from "@/modules/projects/queries";
+import { CreateProjectDialog } from "@/modules/projects/components/create-project-dialog";
 import { formatBrlCents, formatDate, formatIsoDate } from "@/lib/format";
 
 const STAGES: Array<"new" | "qualified" | "meeting" | "proposal" | "won" | "lost"> = [
@@ -61,9 +63,10 @@ export default async function OportunidadeDetalhePage({
   const opp = row.opportunity;
   const company = row.company;
   const contacts = await listContactsByCompany(ctx, company.id);
-  const [interactions, proposals] = await Promise.all([
+  const [interactions, proposals, linkedProject] = await Promise.all([
     listInteractions(ctx, { opportunityId: opp.id, limit: 30 }),
     listProposals(ctx, { opportunityId: opp.id }),
+    getProjectByOpportunity(ctx, opp.id),
   ]);
 
   const stageIndex = STAGES.indexOf(opp.stage);
@@ -104,6 +107,19 @@ export default async function OportunidadeDetalhePage({
               }}
               trigger={<Button variant="secondary" size="sm" type="button">Editar</Button>}
             />
+            {opp.stage === "won" && !linkedProject && (
+              <CreateProjectDialog
+                opportunityId={opp.id}
+                defaultTitle={opp.title}
+                valueCents={opp.valueCents}
+                trigger={<Button size="sm" type="button">Criar projeto</Button>}
+              />
+            )}
+            {linkedProject && (
+              <Button variant="secondary" size="sm" render={<Link href={`/admin/projetos/${linkedProject.id}`} />}>
+                Ver projeto ({linkedProject.status})
+              </Button>
+            )}
             {!isClosed && (
               <>
                 <form action={changeOpportunityStageForm}>
