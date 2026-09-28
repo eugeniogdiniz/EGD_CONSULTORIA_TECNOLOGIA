@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · CRM · Funil · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  /* Sub-navegação do CRM (spec §6.2) */
+  .crm-tabs { display: flex; gap: 4px; margin: 0 0 24px; border-bottom: 1px solid var(--border); }
+  .crm-tabs a { padding: 10px 14px; font-size: var(--text-small); font-weight: 500; color: var(--fg-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .crm-tabs a:hover { color: var(--fg); }
+  .crm-tabs a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent-strong); }
+
+  /* Filtros do funil */
+  .funil-filtros { display: flex; gap: 12px; align-items: end; margin-bottom: 16px; flex-wrap: wrap; }
+  .funil-filtros .field { min-width: 0; }
+  .funil-filtros .field label { display: block; font-size: var(--text-micro); color: var(--fg-muted); font-weight: 500; margin-bottom: 4px; }
+  .funil-filtros .field select, .funil-filtros .field input { height: 36px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: 2px; background: var(--surface); font: inherit; font-size: var(--text-small); }
+  .funil-filtros .field input { width: 240px; }
+  .funil-filtros .toggle { display: inline-flex; align-items: center; gap: 8px; font-size: var(--text-small); color: var(--fg-muted); padding: 0 2px; height: 36px; }
+  .funil-filtros .toggle input { margin: 0; }
+
+  /* Kanban */
+  .kanban { display: grid; grid-template-columns: repeat(6, minmax(240px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 8px; }
+  .col { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 4px; display: flex; flex-direction: column; min-height: 480px; }
+  .col-head { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .col-head .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); }
+  .col-head h3 { font-size: var(--text-small); font-weight: 600; color: var(--fg); margin: 0; }
+  .col-head .count { margin-left: auto; font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted); }
+  .col-head .valor { display: block; font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-faint); font-variant-numeric: tabular-nums; }
+  .col-body { padding: 8px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .col[data-stage="won"] .pip { background: var(--success); }
+  .col[data-stage="lost"] .pip { background: var(--danger); }
+  .col[data-stage="proposal"] .pip { background: var(--accent); }
+  .col[data-stage="meeting"] .pip { background: var(--link); }
+  .col[data-stage="qualified"] .pip { background: var(--link); opacity: 0.6; }
+
+  /* Card de oportunidade */
+  .opp { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 12px; cursor: grab; }
+  .opp:hover { border-color: var(--border-strong); }
+  .opp .titulo { font-size: var(--text-small); font-weight: 500; color: var(--fg); line-height: 1.35; margin-bottom: 4px; }
+  .opp .empresa { font-size: var(--text-micro); color: var(--fg-muted); margin-bottom: 8px; }
+  .opp .empresa a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--border-strong); }
+  .opp .valor { font-family: var(--font-mono); font-size: var(--text-small); color: var(--fg); font-variant-numeric: tabular-nums; margin-bottom: 8px; }
+  .opp .step { display: flex; align-items: center; gap: 6px; font-size: var(--text-micro); color: var(--fg-muted); border-top: 1px solid var(--border); padding-top: 8px; }
+  .opp .step .data { font-family: var(--font-mono); }
+  .opp .step.atrasada { color: var(--warning); }
+  .opp .step.atrasada .data { color: var(--warning); font-weight: 500; }
+  .opp .arquivada { display: inline-flex; align-items: center; padding: 0 6px; height: 18px; border: 1px solid var(--border-strong); border-radius: 2px; font-size: var(--text-micro); color: var(--fg-muted); margin-left: 6px; }
+
+  /* Colunas fechadas colapsam */
+  .col[data-collapsed="true"] .col-body { display: none; }
+  .col[data-collapsed="true"] { min-height: 0; }
+  .col[data-collapsed="true"] .col-head { border-bottom: 0; }
+
+  .col-empty { padding: 24px 8px; text-align: center; font-size: var(--text-micro); color: var(--fg-faint); border: 1px dashed var(--border); border-radius: 4px; }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu do administrador">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <div class="group" data-open="true">
+      <button class="group-head" type="button" aria-expanded="true" style="display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:2px;font-family:var(--font-mono);font-size:var(--text-micro);color:var(--fg-muted);background:transparent;border:0;width:100%;text-align:left">
+        <span style="flex:1">CRM</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" style="transform:rotate(90deg);color:var(--fg-faint)" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <a class="item" href="#" style="padding-left:24px">Empresas</a>
+        <a class="item" href="#" style="padding-left:24px">Contatos</a>
+        <a class="item" href="admin-crm-funil.html" style="padding-left:24px" aria-current="page">Funil</a>
+        <a class="item" href="#" style="padding-left:24px">Propostas</a>
+      </div>
+    </div>
+    <a class="item" href="#">Organizações</a>
+    <a class="item" href="#">Leads <span class="badge badge-novo" style="margin-left:auto">3</span></a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a class="link" href="#" style="text-decoration:none;color:var(--fg-muted);font-weight:500">CRM</a> <span class="faint" style="margin:0 8px">/</span> Funil</div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <nav class="crm-tabs" aria-label="Sub-navegação do CRM">
+        <a href="admin-crm-empresa.html">Empresas</a>
+        <a href="#">Contatos</a>
+        <a href="admin-crm-funil.html" aria-current="page">Funil</a>
+        <a href="#">Propostas</a>
+      </nav>
+
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Funil</h1>
+          <div class="small muted" style="margin-top:6px">Arraste os cartões entre colunas para mudar o estágio. Marcar como perdida pede motivo.</div>
+        </div>
+        <div class="linha-acoes">
+          <a class="btn btn-secondary btn-sm" href="admin-crm-empresa.html">Nova empresa</a>
+        </div>
+      </div>
+
+      <div class="funil-filtros">
+        <div class="field"><label for="f-owner">Owner</label>
+          <select id="f-owner"><option>Eugênio</option><option>Todos</option></select>
+        </div>
+        <div class="field"><label for="f-busca">Buscar por título ou empresa</label>
+          <input id="f-busca" type="search" placeholder="Ex.: URBHIS">
+        </div>
+        <label class="toggle"><input type="checkbox" checked> Esconder ganhas e perdidas</label>
+      </div>
+
+      <div class="kanban" role="list">
+        <section class="col" data-stage="new" role="listitem">
+          <div class="col-head">
+            <span class="pip" aria-hidden="true"></span>
+            <div><h3>Novo</h3><span class="valor">R$ 128.000,00</span></div>
+            <span class="count">3</span>
+          </div>
+          <div class="col-body">
+            <article class="opp" draggable="true" tabindex="0">
+              <div class="titulo">Consórcio URBHIS — laudo TI</div>
+              <div class="empresa"><a href="admin-crm-empresa.html">Consórcio URBHIS</a></div>
+              <div class="valor">R$ 42.000,00</div>
+              <div class="step"><span>Próximo:</span> <span>Confirmar escopo com o Marcos</span> <span class="data" style="margin-left:auto">amanhã</span></div>
+            </article>
+            <article class="opp" draggable="true" tabindex="0">
+              <div class="titulo">COHAB Santos — diagnóstico</div>
+              <div class="empresa"><a href="#">COHAB Santos</a></div>
+              <div class="valor">R$ 38.000,00</div>
+              <div class="step atrasada"><span>Próximo:</span> <span>Reagendar reunião</span> <span class="data" style="margin-left:auto">27/09</span></div>
+            </article>
+            <article class="opp" draggable="true" tabindex="0">
+              <div class="titulo">Construtora Sul — GED por obra</div>
+              <div class="empresa"><a href="#">Construtora Sul</a></div>
+              <div class="valor">R$ 48.000,00</div>
+              <div class="step"><span>Próximo:</span> <span>Enviar material inicial</span> <span class="data" style="margin-left:auto">02/10</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="col" data-stage="qualified" role="listitem">
+          <div class="col-head">
+            <span class="pip" aria-hidden="true"></span>
+            <div><h3>Qualificado</h3><span class="valor">R$ 94.000,00</span></div>
+            <span class="count">2</span>
+          </div>
+          <div class="col-body">
+            <article class="opp" draggable="true" tabindex="0">
+              <div class="titulo">Habita SP — portal do beneficiário</div>
+              <div class="empresa"><a href="#">Habita SP</a></div>
+              <div class="valor">R$ 62.000,00</div>
+              <div class="step"><span>Próximo:</span> <span>Reunião técnica</span> <span class="data" style="margin-left:auto">01/10</span></div>
+            </article>
+            <article class="opp" draggable="true" tabindex="0">
+              <div class="titulo">Consórcio BJMM — sistema de vistoria</div>
+              <div class="empresa"><a href="#">Consórcio BJMM</a></div>
+              <div class="valor">R$ 32.000,00</div>
+              <div class="step"><span>Próximo:</span> <span>Enviar case de referência</span> <span class="data" style="margin-left:auto">30/09</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="col" data-stage="meeting" role="listitem">
+          <div class="col-head">
+            <span class="pip" aria-hidden="true"></span>
+            <div><h3>Reunião</h3><span class="valor">R$ 55.000,00</span></div>
+            <span class="count">1</span>
+          </div>
+          <div class="col-body">
+            <article class="opp" draggable="true" tabindex="0">
+              <div class="titulo">Consórcio URBHIS — laudo TI</div>
+              <div class="empresa"><a href="admin-crm-empresa.html">Consórcio URBHIS</a></div>
+              <div class="valor">R$ 55.000,00</div>
+              <div class="step atrasada"><span>Próximo:</span> <span>Consolidar ata e enviar</span> <span class="data" style="margin-left:auto">hoje</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="col" data-stage="proposal" role="listitem">
+          <div class="col-head">
+            <span class="pip" aria-hidden="true"></span>
+            <div><h3>Proposta</h3><span class="valor">R$ 174.000,00</span></div>
+            <span class="count">2</span>
+          </div>
+          <div class="col-body">
+            <article class="opp" draggable="true" tabindex="0">
+              <div class="titulo">Prefeitura de Osasco — GED</div>
+              <div class="empresa"><a href="#">Prefeitura de Osasco</a></div>
+              <div class="valor">R$ 96.000,00</div>
+              <div class="step"><span>Próximo:</span> <span>Follow-up da proposta</span> <span class="data" style="margin-left:auto">03/10</span></div>
+            </article>
+            <article class="opp" draggable="true" tabindex="0">
+              <div class="titulo">SANASA — integração de dados</div>
+              <div class="empresa"><a href="#">SANASA</a> <span class="arquivada" title="Empresa arquivada">empresa arquivada</span></div>
+              <div class="valor">R$ 78.000,00</div>
+              <div class="step"><span>Próximo:</span> <span>Aguardar retorno jurídico</span> <span class="data" style="margin-left:auto">08/10</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="col" data-stage="won" data-collapsed="true" role="listitem">
+          <div class="col-head">
+            <span class="pip" aria-hidden="true"></span>
+            <div><h3>Ganho</h3><span class="valor">R$ 84.000,00 · este ano</span></div>
+            <span class="count">4</span>
+          </div>
+          <div class="col-body"><div class="col-empty">Coluna colapsada. Filtro "Esconder ganhas e perdidas" está ligado.</div></div>
+        </section>
+
+        <section class="col" data-stage="lost" data-collapsed="true" role="listitem">
+          <div class="col-head">
+            <span class="pip" aria-hidden="true"></span>
+            <div><h3>Perdido</h3><span class="valor">R$ 42.000,00 · este ano</span></div>
+            <span class="count">2</span>
+          </div>
+          <div class="col-body"><div class="col-empty">Coluna colapsada. Filtro "Esconder ganhas e perdidas" está ligado.</div></div>
+        </section>
+      </div>
+
+      <section class="bloco" style="margin-top:32px">
+        <div class="bloco-head"><h3>Comportamentos do funil</h3><span class="small muted">para o time saber o que esperar</span></div>
+        <div class="bloco-body small" style="display:grid;gap:10px;max-width:56rem;color:var(--fg-muted);line-height:1.6">
+          <p><strong style="color:var(--fg);font-weight:500">Arrastar entre colunas</strong> muda o estágio na hora. Se o destino for "Perdido", um diálogo pede o motivo antes de confirmar (obrigatório).</p>
+          <p><strong style="color:var(--fg);font-weight:500">Próximo passo em vermelho suave</strong> significa que <span class="mono">next_step_at ≤ hoje</span>. Não é bloqueio — é lembrete visual.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Empresa arquivada</strong> aparece com selo em oportunidades que continuam abertas. O funil não fecha a oportunidade sozinho.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Mobile</strong> troca o drag por menu "Mover para..." em cada card (sem drag & drop em tela pequena).</p>
+          <p><strong style="color:var(--fg);font-weight:500">Contador e soma</strong> no cabeçalho da coluna mostram o número de oportunidades e o total <span class="mono">value_cents</span> do estágio, em Fragment Mono tabular.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

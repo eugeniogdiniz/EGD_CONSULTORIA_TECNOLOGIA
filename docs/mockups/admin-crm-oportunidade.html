@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · CRM · Oportunidade · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .crm-tabs { display: flex; gap: 4px; margin: 0 0 24px; border-bottom: 1px solid var(--border); }
+  .crm-tabs a { padding: 10px 14px; font-size: var(--text-small); font-weight: 500; color: var(--fg-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .crm-tabs a:hover { color: var(--fg); }
+  .crm-tabs a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent-strong); }
+
+  .op-cabecalho { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end; }
+  .op-titulo h1 { margin: 0; }
+  .op-titulo .empresa { font-size: var(--text-small); color: var(--fg-muted); margin-bottom: 8px; }
+  .op-titulo .empresa a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .op-metricas { display: flex; gap: 24px; }
+  .op-metricas .m { text-align: right; }
+  .op-metricas .m .label { font-size: var(--text-micro); color: var(--fg-muted); }
+  .op-metricas .m .valor { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 500; color: var(--fg); font-variant-numeric: tabular-nums; margin-top: 2px; line-height: 1; }
+  .op-metricas .m .valor.small { font-size: var(--text-body); font-weight: 400; }
+
+  /* Estágio como sequência visível (Fase 1: "cotas") */
+  .estagios {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;
+    margin: 24px 0 0;
+  }
+  .estagio {
+    padding: 12px 12px; border: 1px solid var(--border); border-radius: 2px;
+    background: var(--surface); font-size: var(--text-micro); color: var(--fg-muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .estagio::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); }
+  .estagio.done { color: var(--fg); }
+  .estagio.done::before { background: var(--link); }
+  .estagio.active {
+    color: var(--fg); font-weight: 600;
+    border-color: var(--accent-strong); background: var(--accent-soft);
+  }
+  .estagio.active::before { background: var(--accent-strong); }
+
+  .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 1180px) { .grid-2 { grid-template-columns: 1fr; } .estagios { grid-template-columns: repeat(3, 1fr); } }
+
+  .kv { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; font-size: var(--text-small); }
+  .kv dt { color: var(--fg-muted); font-weight: 500; }
+  .kv dd { margin: 0; color: var(--fg); }
+  .kv dd.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .kv .destaque { color: var(--warning); font-weight: 500; }
+
+  /* Proposta na lista */
+  .propostas { display: flex; flex-direction: column; }
+  .propostas .item { display: grid; grid-template-columns: 110px 1fr auto; gap: 16px; padding: 12px 0; border-top: 1px solid var(--border); align-items: center; }
+  .propostas .item:first-child { border-top: 0; padding-top: 0; }
+  .propostas .num { font-family: var(--font-mono); font-size: var(--text-small); color: var(--fg); font-variant-numeric: tabular-nums; }
+  .propostas .titulo { font-size: var(--text-small); font-weight: 500; color: var(--fg); }
+  .propostas .meta { font-size: var(--text-micro); color: var(--fg-muted); margin-top: 2px; }
+  .propostas .val { font-family: var(--font-mono); font-size: var(--text-small); color: var(--fg); font-variant-numeric: tabular-nums; text-align: right; }
+  .propostas .val .acao { display: block; margin-top: 4px; }
+
+  /* Timeline (mesma da tela de empresa) */
+  .timeline { display: flex; flex-direction: column; }
+  .timeline .item {
+    display: grid; grid-template-columns: 96px 1fr; gap: 20px;
+    padding: 16px 0; border-top: 1px solid var(--border);
+  }
+  .timeline .item:first-child { border-top: 0; padding-top: 4px; }
+  .timeline .quando { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+  .timeline .quando .hora { color: var(--fg-faint); display: block; margin-top: 2px; }
+  .timeline .cabecalho { display: flex; align-items: center; gap: 8px; font-size: var(--text-small); margin-bottom: 4px; }
+  .timeline .tipo { display: inline-flex; align-items: center; gap: 6px; color: var(--fg-muted); font-size: var(--text-micro); }
+  .timeline .tipo::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--fg-faint); }
+  .timeline .tipo.call::before { background: var(--link); }
+  .timeline .tipo.email::before { background: var(--accent); }
+  .timeline .tipo.meeting::before { background: var(--success); }
+  .timeline .por { color: var(--fg-muted); font-size: var(--text-micro); }
+  .timeline .por::before { content: "·"; margin: 0 6px; color: var(--fg-faint); }
+  .timeline .resumo { color: var(--fg); font-weight: 500; }
+  .timeline .corpo { margin-top: 6px; color: var(--fg-muted); font-size: var(--text-small); line-height: 1.55; max-width: 44rem; }
+
+  .selo-status { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 2px; font-size: var(--text-micro); font-weight: 500; }
+  .selo-status.draft { background: var(--bg-subtle); color: var(--fg-muted); border: 1px solid var(--border); }
+  .selo-status.sent { background: var(--accent-soft); color: var(--accent-strong); }
+  .selo-status.accepted { background: var(--success-soft); color: var(--success); }
+  .selo-status.rejected { background: var(--danger-soft); color: var(--danger); }
+  .selo-status.expired { background: var(--warning-soft); color: var(--warning); }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu do administrador">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <div class="group" data-open="true">
+      <button class="group-head" type="button" aria-expanded="true" style="display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:2px;font-family:var(--font-mono);font-size:var(--text-micro);color:var(--fg-muted);background:transparent;border:0;width:100%;text-align:left">
+        <span style="flex:1">CRM</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" style="transform:rotate(90deg);color:var(--fg-faint)" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <a class="item" href="admin-crm-empresa.html" style="padding-left:24px">Empresas</a>
+        <a class="item" href="#" style="padding-left:24px">Contatos</a>
+        <a class="item" href="admin-crm-funil.html" style="padding-left:24px" aria-current="page">Funil</a>
+        <a class="item" href="admin-crm-proposta.html" style="padding-left:24px">Propostas</a>
+      </div>
+    </div>
+    <a class="item" href="#">Organizações</a>
+    <a class="item" href="#">Leads <span class="badge badge-novo" style="margin-left:auto">3</span></a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo">
+        <a class="link" href="admin-crm-funil.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">CRM</a>
+        <span class="faint" style="margin:0 8px">/</span>
+        <a class="link" href="admin-crm-funil.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Funil</a>
+        <span class="faint" style="margin:0 8px">/</span>
+        Laudo de infra TI
+      </div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <nav class="crm-tabs" aria-label="Sub-navegação do CRM">
+        <a href="admin-crm-empresa.html">Empresas</a>
+        <a href="#">Contatos</a>
+        <a href="admin-crm-funil.html" aria-current="page">Funil</a>
+        <a href="admin-crm-proposta.html">Propostas</a>
+      </nav>
+
+      <div class="op-cabecalho">
+        <div class="op-titulo">
+          <div class="empresa"><a href="admin-crm-empresa.html">Consórcio URBHIS</a> · contato principal: Marcos Ferreira</div>
+          <h1 class="h1">Laudo de infra TI</h1>
+        </div>
+        <div class="linha-acoes">
+          <a class="btn btn-secondary btn-sm" href="#">Editar</a>
+          <a class="btn btn-primary btn-sm" href="#">Marcar como ganha</a>
+          <a class="btn btn-danger btn-sm" href="#">Marcar como perdida</a>
+        </div>
+      </div>
+
+      <div class="estagios" aria-label="Estágios do funil">
+        <div class="estagio done">Novo</div>
+        <div class="estagio done">Qualificado</div>
+        <div class="estagio active">Reunião</div>
+        <div class="estagio">Proposta</div>
+        <div class="estagio">Ganho</div>
+        <div class="estagio">Perdido</div>
+      </div>
+
+      <div class="op-metricas" style="margin-top:24px;justify-content:flex-end">
+        <div class="m"><div class="label">Valor</div><div class="valor">R$ 55.000,00</div></div>
+        <div class="m"><div class="label">Previsão de fechamento</div><div class="valor small">15/10/2026</div></div>
+        <div class="m"><div class="label">Owner</div><div class="valor small">Eugênio</div></div>
+      </div>
+
+      <div class="grid-2" style="margin-top:24px">
+        <section class="bloco">
+          <div class="bloco-head"><h3>Detalhes</h3></div>
+          <div class="bloco-body">
+            <dl class="kv">
+              <dt>Próximo passo</dt><dd>Consolidar ata da reunião de descoberta e enviar por e-mail.</dd>
+              <dt>Data do próximo passo</dt><dd class="destaque">Hoje, 27/09/2026</dd>
+              <dt>Moeda</dt><dd class="mono">BRL</dd>
+              <dt>Criada em</dt><dd class="mono">23/09/2026 · a partir do lead do site</dd>
+              <dt>Última atualização</dt><dd class="mono">27/09/2026 14:20</dd>
+            </dl>
+            <div class="micro faint" style="margin-top:16px;font-weight:400;line-height:1.55;max-width:36rem">
+              Notas: escopo dividido em três frentes (inventário, backup gerenciado, monitoramento). Time do cliente pequeno, sem SRE. Janela de manutenção só aos sábados. Aval final passa pela Ana Beatriz (financeiro).
+            </div>
+          </div>
+        </section>
+
+        <section class="bloco">
+          <div class="bloco-head"><h3>Propostas</h3><a class="btn btn-secondary btn-sm" href="admin-crm-proposta.html">Nova proposta</a></div>
+          <div class="bloco-body">
+            <div class="propostas">
+              <div class="item">
+                <div class="num">PROP-26-014</div>
+                <div>
+                  <div class="titulo"><a class="link" href="admin-crm-proposta.html">Laudo de infra TI — v1</a></div>
+                  <div class="meta"><span class="selo-status draft">Rascunho</span> · sem anexo</div>
+                </div>
+                <div class="val">R$ 55.000,00<span class="acao"><a class="link small" href="admin-crm-proposta.html">Abrir</a></span></div>
+              </div>
+              <div class="item">
+                <div class="num">PROP-26-009</div>
+                <div>
+                  <div class="titulo"><a class="link" href="#">Piloto de inventário</a></div>
+                  <div class="meta"><span class="selo-status sent">Enviada</span> · em 12/09/2026 · válida até 12/10/2026</div>
+                </div>
+                <div class="val">R$ 18.000,00<span class="acao"><a class="link small" href="#">Baixar anexo</a></span></div>
+              </div>
+              <div class="item">
+                <div class="num">PROP-26-004</div>
+                <div>
+                  <div class="titulo"><a class="link" href="#" style="color:var(--fg-muted)">Diagnóstico inicial</a></div>
+                  <div class="meta"><span class="selo-status accepted">Aceita</span> · em 05/09/2026</div>
+                </div>
+                <div class="val" style="color:var(--fg-muted)">R$ 12.000,00<span class="acao"><a class="link small" href="#">Baixar anexo</a></span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="bloco" style="margin-top:24px">
+        <div class="bloco-head">
+          <h3>Interações desta oportunidade</h3>
+          <div class="linha-acoes">
+            <a class="btn btn-secondary btn-sm" href="#">Ligação</a>
+            <a class="btn btn-secondary btn-sm" href="#">E-mail</a>
+            <a class="btn btn-secondary btn-sm" href="#">Reunião</a>
+            <a class="btn btn-primary btn-sm" href="#">Nota</a>
+          </div>
+        </div>
+        <div class="bloco-body">
+          <div class="timeline">
+            <div class="item">
+              <div class="quando">27/09/2026 <span class="hora">14:20</span></div>
+              <div>
+                <div class="cabecalho"><span class="tipo meeting">Reunião</span><span class="por">Eugênio · com Marcos Ferreira</span></div>
+                <div class="resumo">Reunião de descoberta técnica.</div>
+                <p class="corpo">Fechado o escopo em três frentes. Marcos pediu ata em 24 h com uma linha por frente. Próxima conversa com a Ana (financeiro) na semana que vem.</p>
+              </div>
+            </div>
+            <div class="item">
+              <div class="quando">26/09/2026 <span class="hora">09:05</span></div>
+              <div>
+                <div class="cabecalho"><span class="tipo call">Ligação</span><span class="por">Eugênio · com Marcos Ferreira</span></div>
+                <div class="resumo">Alinhamento da agenda da reunião de descoberta.</div>
+              </div>
+            </div>
+            <div class="item">
+              <div class="quando">24/09/2026 <span class="hora">18:47</span></div>
+              <div>
+                <div class="cabecalho"><span class="tipo email">E-mail</span><span class="por">Eugênio · para Marcos Ferreira</span></div>
+                <div class="resumo">Material inicial e agenda proposta.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>
