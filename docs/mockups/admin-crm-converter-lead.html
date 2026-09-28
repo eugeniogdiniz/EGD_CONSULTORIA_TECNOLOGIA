@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Converter lead em CRM · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  /* Dialog do fluxo */
+  .dialog-cover { position: relative; height: 720px; border: 1px solid var(--border); border-radius: 4px; background: color-mix(in srgb, var(--fg) 12%, transparent); overflow: hidden; }
+  .dialog-lg {
+    position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+    width: min(640px, 92%); background: var(--surface); border-radius: 4px;
+    box-shadow: 0 24px 48px -24px rgb(16 32 44 / 0.35); overflow: hidden;
+  }
+  .dialog-lg header {
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .dialog-lg header h3 { margin: 0; }
+  .dialog-lg header .fechar {
+    margin-left: auto; background: transparent; border: 0; color: var(--fg-muted);
+    width: 32px; height: 32px; border-radius: 2px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dialog-lg .steps {
+    display: flex; gap: 6px; padding: 12px 24px; border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted);
+  }
+  .dialog-lg .steps .step { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 2px; }
+  .dialog-lg .steps .step::before {
+    content: attr(data-n); width: 18px; height: 18px; border-radius: 50%;
+    background: var(--bg-subtle); color: var(--fg-muted); display: inline-flex;
+    align-items: center; justify-content: center; font-size: 10px; font-weight: 600;
+    border: 1px solid var(--border-strong);
+  }
+  .dialog-lg .steps .step.done::before { background: var(--link); color: var(--surface); border-color: var(--link); }
+  .dialog-lg .steps .step.active { color: var(--fg); background: var(--link-soft); }
+  .dialog-lg .steps .step.active::before { background: var(--link); color: var(--surface); border-color: var(--link); }
+  .dialog-lg .corpo { padding: 20px 24px 24px; }
+  .dialog-lg footer {
+    padding: 16px 24px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px; background: var(--bg-subtle);
+  }
+  .dialog-lg footer .esq { margin-right: auto; font-size: var(--text-micro); color: var(--fg-muted); }
+
+  .lead-card {
+    padding: 12px 14px; background: var(--bg-subtle); border: 1px solid var(--border);
+    border-radius: 2px; font-size: var(--text-small);
+  }
+  .lead-card .linha { display: grid; grid-template-columns: 100px 1fr; gap: 6px; padding: 4px 0; }
+  .lead-card .linha:first-child { padding-top: 0; }
+  .lead-card .linha:last-child { padding-bottom: 0; }
+  .lead-card dt { color: var(--fg-muted); font-weight: 500; font-size: var(--text-micro); padding-top: 2px; }
+  .lead-card dd { margin: 0; color: var(--fg); }
+  .lead-card .mensagem { line-height: 1.55; }
+  .lead-card .mono { font-family: var(--font-mono); }
+
+  .escolha { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .escolha label {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 14px; border: 1px solid var(--border-strong); border-radius: 2px;
+    cursor: pointer; font-size: var(--text-small);
+  }
+  .escolha label:hover { background: var(--bg-subtle); }
+  .escolha input[type="radio"] { margin-top: 3px; }
+  .escolha label.recomendado {
+    border-color: var(--link); background: var(--link-soft);
+  }
+  .escolha .titulo { font-weight: 500; color: var(--fg); }
+  .escolha .meta { color: var(--fg-muted); font-size: var(--text-micro); margin-top: 2px; }
+  .escolha .marca { display: inline-flex; padding: 0 6px; height: 18px; align-items: center; border-radius: 2px; background: var(--link); color: var(--surface); font-size: 10px; font-family: var(--font-mono); font-weight: 500; margin-left: 6px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin-top: 16px; }
+  .form-grid .field.full { grid-column: 1 / -1; }
+  .field label { display: block; font-size: var(--text-micro); color: var(--fg-muted); font-weight: 500; margin-bottom: 4px; }
+  .field input, .field select, .field textarea {
+    width: 100%; height: 36px; padding: 0 10px; border: 1px solid var(--border-strong);
+    border-radius: 2px; background: var(--surface); font: inherit; font-size: var(--text-small);
+  }
+  .field textarea { height: 80px; padding: 8px 10px; resize: vertical; }
+
+  .confirmacao {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px;
+  }
+  .confirmacao .card {
+    padding: 12px; border: 1px solid var(--border); border-radius: 2px; background: var(--bg-subtle);
+  }
+  .confirmacao .card .rot { font-size: var(--text-micro); color: var(--fg-muted); font-family: var(--font-mono); }
+  .confirmacao .card .nome { font-size: var(--text-small); font-weight: 500; color: var(--fg); margin-top: 4px; }
+  .confirmacao .card .meta { font-size: var(--text-micro); color: var(--fg-muted); margin-top: 2px; }
+
+  .aviso-linha {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; background: var(--warning-soft);
+    border-left: 3px solid var(--warning); border-radius: 2px;
+    font-size: var(--text-small); color: var(--fg); margin-top: 12px;
+  }
+  .aviso-linha .rot { font-family: var(--font-mono); font-weight: 600; color: var(--warning); font-size: var(--text-micro); }
+
+  /* Estados alternativos */
+  .estados { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px; }
+  .estados .caixa { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .estados .caixa .head { padding: 8px 12px; background: var(--bg-subtle); border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted); }
+  .estados .caixa .body { padding: 16px; font-size: var(--text-small); color: var(--fg-muted); line-height: 1.6; }
+  .estados .caixa .body strong { color: var(--fg); font-weight: 500; }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu do administrador">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <div class="group" data-open="true">
+      <button class="group-head" type="button" aria-expanded="true" style="display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:2px;font-family:var(--font-mono);font-size:var(--text-micro);color:var(--fg-muted);background:transparent;border:0;width:100%;text-align:left">
+        <span style="flex:1">CRM</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" style="transform:rotate(90deg);color:var(--fg-faint)" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <a class="item" href="admin-crm-empresa.html" style="padding-left:24px">Empresas</a>
+        <a class="item" href="#" style="padding-left:24px">Contatos</a>
+        <a class="item" href="admin-crm-funil.html" style="padding-left:24px">Funil</a>
+        <a class="item" href="admin-crm-proposta.html" style="padding-left:24px">Propostas</a>
+      </div>
+    </div>
+    <a class="item" href="#">Organizações</a>
+    <a class="item" href="#" aria-current="page">Leads <span class="badge badge-novo" style="margin-left:auto">3</span></a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo">
+        <a class="link" href="#" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Leads</a>
+        <span class="faint" style="margin:0 8px">/</span>
+        Converter em CRM
+      </div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Converter lead em empresa</h1>
+          <div class="small muted" style="margin-top:6px">
+            Diálogo em quatro passos aberto sobre a tela <a class="link" href="#">/admin/leads</a>. Se cancelado, nada é gravado; se confirmado, tudo entra em uma transação e o admin vai para o detalhe da empresa.
+          </div>
+        </div>
+      </div>
+
+      <div class="dialog-cover" role="presentation">
+        <div class="dialog-lg" role="dialog" aria-labelledby="cv-title">
+          <header>
+            <div>
+              <div class="micro faint" style="font-weight:500;font-family:var(--font-mono);color:var(--fg-muted)">Lead · recebido em 27/09/2026 · 14:02</div>
+              <h3 id="cv-title" style="margin-top:2px">Converter Ana Ribeiro em empresa</h3>
+            </div>
+            <button class="fechar" type="button" aria-label="Fechar">×</button>
+          </header>
+
+          <nav class="steps" aria-label="Etapas">
+            <span class="step active" data-n="1">Empresa</span>
+            <span class="step" data-n="2">Contato</span>
+            <span class="step" data-n="3">Oportunidade</span>
+            <span class="step" data-n="4">Confirmar</span>
+          </nav>
+
+          <div class="corpo">
+            <div class="lead-card">
+              <div class="linha"><dt>Nome</dt><dd>Ana Ribeiro</dd></div>
+              <div class="linha"><dt>E-mail</dt><dd class="mono">ana@construtorasul.com.br</dd></div>
+              <div class="linha"><dt>Empresa</dt><dd>Construtora Sul</dd></div>
+              <div class="linha"><dt>Mensagem</dt><dd class="mensagem">Temos 40 vistorias por semana em papel e o relatório sai com 3 dias de atraso. Precisamos automatizar o fluxo por obra. Podemos conversar essa semana?</dd></div>
+            </div>
+
+            <h4 class="h3" style="margin:16px 0 4px;font-size:var(--text-small);text-transform:none">Sugestão do CRM</h4>
+            <p class="small muted" style="margin:0">Encontramos uma empresa com o mesmo domínio de e-mail (<span class="mono">construtorasul.com.br</span>). Você pode vincular o lead a ela ou criar uma nova.</p>
+
+            <div class="escolha">
+              <label class="recomendado">
+                <input type="radio" name="modo" checked>
+                <div>
+                  <div class="titulo">Vincular a "Construtora Sul" <span class="marca">Recomendado</span></div>
+                  <div class="meta">Empresa já cadastrada em 12/09/2026 · 2 contatos · 1 oportunidade aberta</div>
+                </div>
+              </label>
+              <label>
+                <input type="radio" name="modo">
+                <div>
+                  <div class="titulo">Criar empresa nova</div>
+                  <div class="meta">Preencher CNPJ, site, setor e tamanho no passo seguinte.</div>
+                </div>
+              </label>
+            </div>
+
+            <div class="aviso-linha">
+              <span class="rot">nota</span>
+              <div><strong>O lead sobrevive.</strong> A linha em <span class="mono">/admin/leads</span> passa para o filtro "Convertidos" e ganha um link para a empresa; os campos originais ficam guardados para auditoria.</div>
+            </div>
+          </div>
+
+          <footer>
+            <div class="esq">Passo 1 de 4</div>
+            <button class="btn btn-secondary btn-sm" type="button">Cancelar</button>
+            <button class="btn btn-primary btn-sm" type="button">Avançar</button>
+          </footer>
+        </div>
+      </div>
+
+      <section class="bloco" style="margin-top:32px">
+        <div class="bloco-head"><h3>Passos seguintes (visão rápida)</h3><span class="small muted">para o time saber o que esperar em 2, 3 e 4</span></div>
+        <div class="bloco-body">
+          <div class="estados">
+            <div class="caixa">
+              <div class="head">Passo 2 · Contato</div>
+              <div class="body">
+                <strong>Nome</strong> pré-preenchido com "Ana Ribeiro". <strong>E-mail</strong> com o do lead, normalizado. <strong>Papel</strong> default <em>Principal</em>. Se a empresa escolhida já tem um principal ativo, muda para <em>Outro</em> automaticamente para não violar a regra de unicidade.
+              </div>
+            </div>
+            <div class="caixa">
+              <div class="head">Passo 3 · Oportunidade</div>
+              <div class="body">
+                <strong>Título</strong> pré-preenchido com "Contato pelo site — Ana Ribeiro". <strong>Estágio</strong> fixo em <em>Novo</em>. <strong>Valor</strong> em branco. <strong>Próximo passo</strong> em branco (aparece no funil como pendente).
+              </div>
+            </div>
+            <div class="caixa" style="grid-column:1 / -1">
+              <div class="head">Passo 4 · Confirmar</div>
+              <div class="body">
+                Mostra os três cards abaixo (empresa, contato, oportunidade) com o que vai ser gravado. Ao confirmar, tudo entra em uma <span class="mono">db.transaction</span>: se qualquer insert falhar, nada persiste. Auditoria grava <span class="mono">crm.company.created</span> (se aplicável), <span class="mono">crm.contact.created</span>, <span class="mono">crm.opportunity.created</span> e <span class="mono">crm.lead.converted</span> com os três ids em <span class="mono">metadata</span>.
+                <div class="confirmacao">
+                  <div class="card">
+                    <div class="rot">empresa · vincular</div>
+                    <div class="nome">Construtora Sul</div>
+                    <div class="meta">nenhum dado alterado</div>
+                  </div>
+                  <div class="card">
+                    <div class="rot">contato · novo</div>
+                    <div class="nome">Ana Ribeiro · Outro</div>
+                    <div class="meta">ana@construtorasul.com.br</div>
+                  </div>
+                  <div class="card">
+                    <div class="rot">oportunidade · nova</div>
+                    <div class="nome">Contato pelo site — Ana Ribeiro</div>
+                    <div class="meta">Novo · sem valor</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloco" style="margin-top:24px">
+        <div class="bloco-head"><h3>Casos de borda tratados</h3></div>
+        <div class="bloco-body small" style="color:var(--fg-muted);line-height:1.6;max-width:56rem">
+          <p><strong style="color:var(--fg);font-weight:500">Lead já convertido</strong> — o botão "Converter" some da linha; no lugar aparece o nome da empresa como link.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Domínio público</strong> (gmail, hotmail, ...) — pulamos a sugestão e vamos direto para "Criar empresa nova", com campo <em>Nome da empresa</em> em branco (não usamos o campo do formulário do site para gerar sugestão automática nesses casos).</p>
+          <p><strong style="color:var(--fg);font-weight:500">Corrida entre duas abas</strong> — se dois cliques de "Converter" acontecem simultaneamente, o segundo cai na mensagem "Este lead já foi convertido em '{nome}'." com link para a empresa.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Múltiplas empresas com o mesmo domínio</strong> — não sugerimos automaticamente. Aparece só a opção "Criar empresa nova" com uma linha extra: "Encontramos {N} empresas com este domínio. Vincule manualmente depois se for o caso."</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

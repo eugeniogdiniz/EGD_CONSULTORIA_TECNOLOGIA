@@ -1,20 +1,22 @@
-/* EGD design tokens — proposta Fase 1 (ver docs/specs/design-system.md) */
+/* EGD design tokens — rebrand 2026-09-27 (ver docs/brand/manual-da-marca.md).
+   As semânticas abaixo continuam iguais; só as primitivas mudaram para bater
+   com src/app/globals.css. */
 :root {
-  /* primitivas */
-  --papel-100: #eef1f2;
-  --papel-50: #f7f8f9;
+  /* primitivas — brand manual v1.0 */
+  --papel-100: #f4f3ed;
+  --papel-50: #faf9f5;
   --folha: #ffffff;
-  --tinta-900: #10202c;
-  --tinta-800: #1b3040;
-  --tinta-600: #4b5b67;
-  --tinta-400: #7d8b95;
-  --regua-300: #c8d1d6;
-  --regua-500: #9fadb6;
-  --sinal-500: #e4571b;
-  --sinal-700: #b9440f;
-  --sinal-100: #fcebe2;
-  --projeto-600: #1c4f8a;
-  --projeto-100: #e3ecf6;
+  --tinta-900: #142d32;
+  --tinta-800: #24474b;
+  --tinta-600: #506164;
+  --tinta-400: #647477;
+  --regua-300: #d0d7d2;
+  --regua-500: #8b9b96;
+  --sinal-500: #df542e;
+  --sinal-700: #ad381a;
+  --sinal-100: #fbe9e1;
+  --projeto-600: #245e60;
+  --projeto-100: #e4eeea;
   --aprovado-600: #1e7a4b;
   --aprovado-100: #e1f2e8;
   --atencao-600: #b07600;

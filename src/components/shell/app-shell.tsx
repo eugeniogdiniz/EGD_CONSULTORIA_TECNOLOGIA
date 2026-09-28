@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { SidebarNav, type NavItem } from "./sidebar";
+import { SidebarNav, type NavEntry } from "./sidebar";
 import { UserMenu, MobileNav } from "./user-menu";
 
 /** Layout dos portais: sidebar 240 px em papel, topbar 56 px, conteúdo em branco. */
@@ -12,7 +12,7 @@ export function AppShell({
   topRight,
   children,
 }: {
-  nav: NavItem[];
+  nav: NavEntry[];
   footer: string;
   user: { name: string; email: string };
   accountHref: string;

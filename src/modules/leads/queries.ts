@@ -1,10 +1,28 @@
 import { count, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { leads } from "@/db/schema";
+import { crmCompany, leads } from "@/db/schema";
 import type { AdminContext } from "@/modules/auth/context";
 
-export function listLeads(_ctx: AdminContext, opts: { status?: "new" | "seen" } = {}) {
-  const base = db.select().from(leads);
+export type LeadStatus = "new" | "seen" | "converted";
+
+export function listLeads(_ctx: AdminContext, opts: { status?: LeadStatus } = {}) {
+  const base = db
+    .select({
+      id: leads.id,
+      name: leads.name,
+      email: leads.email,
+      company: leads.company,
+      phone: leads.phone,
+      message: leads.message,
+      source: leads.source,
+      status: leads.status,
+      createdAt: leads.createdAt,
+      convertedAt: leads.convertedAt,
+      convertedCompanyId: leads.convertedCompanyId,
+      convertedCompanyName: crmCompany.name,
+    })
+    .from(leads)
+    .leftJoin(crmCompany, eq(leads.convertedCompanyId, crmCompany.id));
   const scoped = opts.status ? base.where(eq(leads.status, opts.status)) : base;
   return scoped.orderBy(desc(leads.createdAt)).limit(200);
 }

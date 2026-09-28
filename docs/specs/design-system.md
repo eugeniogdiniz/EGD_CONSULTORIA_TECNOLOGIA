@@ -154,3 +154,24 @@ Regras: sentence case em tudo, inclusive labels e botões. Nada em caixa alta co
 ## 10. Anti-padrões proibidos (do CLAUDE.md global e desta spec)
 
 Fontes Inter, Roboto, Arial, Helvetica, system-ui como principal. Gradiente roxo ou qualquer gradiente decorativo. Grid de três cards com ícone genérico. Emoji em título. Textos vagos. Eyebrow em caixa alta. Numeração em conteúdo não sequencial. Seta "→" em texto de link. Sombra difusa em card. Animação de entrada por seção. Fundo quase-preto com acento neon. Tickers ou métricas inventadas.
+
+## 11. Emenda — Fase 2: grupo colapsável na sidebar admin
+
+Introduzido para o CRM (Fase 2), aprovado no mockup `docs/mockups/admin-shell-crm.html`. Padrão reutilizável para qualquer módulo que agrupe mais de dois sub-itens na sidebar do admin.
+
+**Anatomia.** Um grupo é um item de sidebar com cabeçalho não navegável e uma lista de sub-itens. O grupo aparece na mesma coluna dos itens flat; o que muda é o cabeçalho (não é link) e o recuo dos sub-itens.
+
+**Cabeçalho.** Texto em **Fragment Mono 0.8125rem (`--text-micro`)**, sentence case, cor `--fg-muted`, altura 36 px como um `.item` normal, padding horizontal 12 px, sem sublinhado. Chevron 12 px à direita, cor `--fg-faint`, orientado à direita quando fechado e para baixo quando aberto. `role="button"`, `aria-expanded`, `aria-controls`. Hover: cor `--fg`. Sem `aria-current`; o cabeçalho nunca é a página ativa.
+
+**Sub-itens.** Herdam de `.sidebar .item`. Recuo adicional de 12 px à esquerda (padding-left 24 px). Regras de ativo (`aria-current="page"`) e hover são idênticas. Selo `.badge` continua permitido à direita.
+
+**Comportamento.**
+1. Estado inicial fechado se o usuário nunca abriu o grupo.
+2. Toggle persiste em `localStorage`, chave `egd_admin_nav`, valor JSON `{ groups: { crm: "open" | "closed" } }`.
+3. Sub-item ativo (URL bate com prefixo de qualquer sub-item) força o grupo aberto e ignora o estado persistido enquanto durar a navegação.
+4. Toggle é instantâneo: sub-itens aparecem/somem sem animação de altura. Motivo: manter a regra do §8 ("só cor, borda e opacidade").
+5. `prefers-reduced-motion` não muda nada aqui (não havia movimento a reduzir).
+
+**Nunca fazer.** Aninhar mais de um nível (sub-item de sub-item). Colocar contador agregado no cabeçalho do grupo (o dado vive no sub-item). Usar chevron em `.item` flat (é reservado ao grupo).
+
+**Onde aplicar.** Sidebar do admin. Não aplicar na sidebar do portal do cliente (regras 1–3 assumem operação diária; portal do cliente é raso).
