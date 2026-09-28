@@ -49,6 +49,7 @@ export const createProjectFromOpportunitySchema = z.object({
     .union([z.literal("on"), z.literal("off"), z.boolean()])
     .optional()
     .transform((v) => v === true || v === "on"),
+  templateId: optionalUuid,
 });
 export type CreateProjectFromOpportunityInput = z.input<typeof createProjectFromOpportunitySchema>;
 
@@ -95,3 +96,96 @@ export const changeDeliverableStatusSchema = z
     path: ["blockReason"],
   });
 export type ChangeDeliverableStatusInput = z.input<typeof changeDeliverableStatusSchema>;
+
+// ── Fase 3.5 (extras) ───────────────────────────────────────────────────────
+
+const isoDateTimeRequired = z
+  .string()
+  .trim()
+  .min(1, "Data e hora obrigatórias")
+  .refine((v) => !Number.isNaN(new Date(v).getTime()), "Data/hora inválida")
+  .transform((v) => new Date(v));
+
+export const dependencySchema = z
+  .object({
+    predecessorId: z.uuid(),
+    successorId: z.uuid(),
+  })
+  .refine((v) => v.predecessorId !== v.successorId, {
+    error: "Entrega não pode depender de si mesma.",
+    path: ["successorId"],
+  });
+export type DependencyInput = z.input<typeof dependencySchema>;
+
+export const commentSchema = z.object({
+  deliverableId: z.uuid(),
+  parentId: optionalUuid,
+  body: z.string().trim().min(1, "Comentário vazio.").max(4000, "Máximo 4000 caracteres"),
+});
+export type CommentInput = z.input<typeof commentSchema>;
+
+export const updateCommentSchema = z.object({
+  body: z.string().trim().min(1, "Comentário vazio.").max(4000, "Máximo 4000 caracteres"),
+});
+export type UpdateCommentInput = z.input<typeof updateCommentSchema>;
+
+export const startTimerSchema = z.object({
+  deliverableId: z.uuid(),
+  notes: optionalText(1000),
+});
+export type StartTimerInput = z.input<typeof startTimerSchema>;
+
+export const manualTimeSchema = z
+  .object({
+    deliverableId: z.uuid(),
+    startedAt: isoDateTimeRequired,
+    endedAt: isoDateTimeRequired,
+    notes: optionalText(1000),
+  })
+  .refine((v) => v.endedAt.getTime() > v.startedAt.getTime(), {
+    error: "Fim precisa ser depois do início.",
+    path: ["endedAt"],
+  })
+  .refine((v) => v.endedAt.getTime() <= Date.now(), {
+    error: "Fim não pode estar no futuro.",
+    path: ["endedAt"],
+  });
+export type ManualTimeInput = z.input<typeof manualTimeSchema>;
+
+export const expenseSchema = z.object({
+  projectId: z.uuid(),
+  description: z.string().trim().min(2, "Mínimo 2 caracteres").max(200, "Máximo 200 caracteres"),
+  amountCents: z.coerce
+    .number()
+    .int("Somente valor inteiro em centavos.")
+    .min(0, "Valor não pode ser negativo."),
+  kind: z.enum(["travel", "service", "equipment", "other"]).default("other"),
+  dateAt: isoDateRequired,
+  notes: optionalText(2000),
+});
+export type ExpenseInput = z.input<typeof expenseSchema>;
+
+export const templateSchema = z.object({
+  name: z.string().trim().min(2, "Mínimo 2 caracteres").max(200, "Máximo 200 caracteres"),
+  description: optionalText(4000),
+});
+export type TemplateInput = z.input<typeof templateSchema>;
+
+export const createTemplateFromProjectSchema = templateSchema;
+export type CreateTemplateFromProjectInput = z.input<typeof createTemplateFromProjectSchema>;
+
+export const reorderDeliverableSchema = z.object({
+  deliverableId: z.uuid(),
+  toStatus: z.enum(["todo", "doing", "review", "done", "blocked"]),
+  toPosition: z.coerce.number().int().min(0),
+  blockReason: optionalText(1000),
+});
+export type ReorderDeliverableInput = z.input<typeof reorderDeliverableSchema>;
+
+export const updateAccountRateSchema = z.object({
+  hourlyRateCents: z
+    .union([z.literal("").transform(() => null), z.null(), z.coerce.number().int().min(0)])
+    .optional()
+    .transform((v) => (v === undefined ? null : v)),
+});
+export type UpdateAccountRateInput = z.input<typeof updateAccountRateSchema>;

@@ -2,11 +2,19 @@ import { describe, it, expect } from "vitest";
 import {
   changeDeliverableStatusSchema,
   changeProjectStatusSchema,
+  commentSchema,
   createProjectFromOpportunitySchema,
   deliverableSchema,
+  dependencySchema,
+  expenseSchema,
+  manualTimeSchema,
   milestoneSchema,
   phaseSchema,
   projectSchema,
+  reorderDeliverableSchema,
+  startTimerSchema,
+  templateSchema,
+  updateAccountRateSchema,
 } from "@/modules/projects/validation";
 
 const uuid = "11111111-1111-4111-8111-111111111111";
@@ -76,5 +84,171 @@ describe("changeProjectStatusSchema", () => {
   });
   it("rejeita status desconhecido", () => {
     expect(changeProjectStatusSchema.safeParse({ to: "shipped" }).success).toBe(false);
+  });
+});
+
+// ── Fase 3.5 (extras) ───────────────────────────────────────────────────────
+
+const uuid2 = "22222222-2222-4222-8222-222222222222";
+
+describe("dependencySchema", () => {
+  it("rejeita predecessor == successor", () => {
+    const r = dependencySchema.safeParse({ predecessorId: uuid, successorId: uuid });
+    expect(r.success).toBe(false);
+  });
+  it("aceita par distinto", () => {
+    expect(dependencySchema.safeParse({ predecessorId: uuid, successorId: uuid2 }).success).toBe(true);
+  });
+});
+
+describe("commentSchema", () => {
+  it("aceita raiz (sem parent)", () => {
+    const out = commentSchema.parse({ deliverableId: uuid, body: "olá" });
+    expect(out.parentId).toBeNull();
+  });
+  it("aceita resposta (com parent)", () => {
+    const out = commentSchema.parse({ deliverableId: uuid, parentId: uuid2, body: "resposta" });
+    expect(out.parentId).toBe(uuid2);
+  });
+  it("body vazio recusado", () => {
+    expect(commentSchema.safeParse({ deliverableId: uuid, body: "   " }).success).toBe(false);
+  });
+});
+
+describe("startTimerSchema", () => {
+  it("aceita apenas deliverableId", () => {
+    expect(startTimerSchema.parse({ deliverableId: uuid }).notes).toBeNull();
+  });
+});
+
+describe("manualTimeSchema", () => {
+  const past = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const later = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+
+  it("aceita janela passada com end > start", () => {
+    const r = manualTimeSchema.safeParse({
+      deliverableId: uuid,
+      startedAt: past,
+      endedAt: later,
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it("recusa end <= start", () => {
+    const r = manualTimeSchema.safeParse({
+      deliverableId: uuid,
+      startedAt: later,
+      endedAt: past,
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it("recusa end no futuro", () => {
+    const futureEnd = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const r = manualTimeSchema.safeParse({
+      deliverableId: uuid,
+      startedAt: past,
+      endedAt: futureEnd,
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe("expenseSchema", () => {
+  it("aceita despesa mínima", () => {
+    const r = expenseSchema.safeParse({
+      projectId: uuid,
+      description: "Viagem",
+      amountCents: 5000,
+      dateAt: "2026-10-01",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.kind).toBe("other");
+    }
+  });
+  it("recusa amount negativo", () => {
+    expect(
+      expenseSchema.safeParse({
+        projectId: uuid,
+        description: "X",
+        amountCents: -1,
+        dateAt: "2026-10-01",
+      }).success,
+    ).toBe(false);
+  });
+  it("recusa data em formato errado", () => {
+    expect(
+      expenseSchema.safeParse({
+        projectId: uuid,
+        description: "Y",
+        amountCents: 100,
+        dateAt: "10/2026/01",
+      }).success,
+    ).toBe(false);
+  });
+  it("recusa kind desconhecido", () => {
+    expect(
+      expenseSchema.safeParse({
+        projectId: uuid,
+        description: "Y",
+        amountCents: 100,
+        dateAt: "2026-10-01",
+        kind: "bribe",
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("templateSchema", () => {
+  it("nome mínimo 2", () => {
+    expect(templateSchema.safeParse({ name: "A" }).success).toBe(false);
+    expect(templateSchema.safeParse({ name: "OK" }).success).toBe(true);
+  });
+});
+
+describe("createProjectFromOpportunitySchema com templateId", () => {
+  it("templateId opcional; ausente vira null", () => {
+    const out = createProjectFromOpportunitySchema.parse({ title: "Piloto" });
+    expect(out.templateId).toBeNull();
+  });
+  it("templateId inválido é recusado", () => {
+    expect(
+      createProjectFromOpportunitySchema.safeParse({ title: "Piloto", templateId: "abc" }).success,
+    ).toBe(false);
+  });
+});
+
+describe("reorderDeliverableSchema", () => {
+  it("aceita drop simples", () => {
+    const out = reorderDeliverableSchema.parse({
+      deliverableId: uuid,
+      toStatus: "doing",
+      toPosition: 2,
+    });
+    expect(out.toPosition).toBe(2);
+  });
+  it("drop em blocked sem motivo passa (motivo cobrado na action)", () => {
+    // A validação de motivo continua em changeDeliverableStatusSchema;
+    // reorder existe pra pura ordenação. Aqui garante que o schema aceita.
+    expect(
+      reorderDeliverableSchema.safeParse({
+        deliverableId: uuid,
+        toStatus: "blocked",
+        toPosition: 0,
+      }).success,
+    ).toBe(true);
+  });
+});
+
+describe("updateAccountRateSchema", () => {
+  it("string vazia vira null", () => {
+    expect(updateAccountRateSchema.parse({ hourlyRateCents: "" }).hourlyRateCents).toBeNull();
+  });
+  it("número aceito", () => {
+    expect(updateAccountRateSchema.parse({ hourlyRateCents: 12000 }).hourlyRateCents).toBe(12000);
+  });
+  it("negativo recusado", () => {
+    expect(updateAccountRateSchema.safeParse({ hourlyRateCents: -1 }).success).toBe(false);
   });
 });
