@@ -1,12 +1,29 @@
 import { and, eq, isNull, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { crmCompany, crmContact, organizations } from "@/db/schema";
+import {
+  crmCompany,
+  crmContact,
+  crmInteraction,
+  crmOpportunity,
+  organizations,
+} from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import { slugify } from "@/modules/tenancy/slug";
-import { companySchema, contactSchema, type CompanyInput, type ContactInput } from "./validation";
+import {
+  changeStageSchema,
+  companySchema,
+  contactSchema,
+  interactionSchema,
+  opportunitySchema,
+  type ChangeStageInput,
+  type CompanyInput,
+  type ContactInput,
+  type InteractionInput,
+  type OpportunityInput,
+} from "./validation";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Slug único (Fase 1 tenancy usa check-then-fail; aqui geramos automático a
@@ -339,6 +356,256 @@ export async function unarchiveContact(
     actorId: ctx.user.id,
     action: "crm.contact.unarchived",
     entityType: "crm_contact",
+    entityId: id,
+  });
+  return ok(null);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Oportunidade
+// ────────────────────────────────────────────────────────────────────────────
+
+async function assertCompanyExists(companyId: string): Promise<string | null> {
+  const c = await db.query.crmCompany.findFirst({
+    where: eq(crmCompany.id, companyId),
+    columns: { id: true },
+  });
+  return c ? null : "Empresa não encontrada.";
+}
+
+async function assertContactBelongsToCompany(
+  contactId: string,
+  companyId: string,
+): Promise<string | null> {
+  const c = await db.query.crmContact.findFirst({
+    where: eq(crmContact.id, contactId),
+    columns: { id: true, companyId: true, archivedAt: true },
+  });
+  if (!c) return "Contato principal não encontrado.";
+  if (c.companyId !== companyId) return "Contato principal não pertence à empresa.";
+  if (c.archivedAt) return "Contato principal está arquivado.";
+  return null;
+}
+
+export async function createOpportunity(
+  ctx: AdminContext,
+  input: OpportunityInput,
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = opportunitySchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const data = parsed.data;
+
+  const companyErr = await assertCompanyExists(data.companyId);
+  if (companyErr) return fail(companyErr, { companyId: [companyErr] });
+  if (data.primaryContactId) {
+    const contactErr = await assertContactBelongsToCompany(data.primaryContactId, data.companyId);
+    if (contactErr) return fail(contactErr, { primaryContactId: [contactErr] });
+  }
+
+  const [row] = await db
+    .insert(crmOpportunity)
+    .values({
+      companyId: data.companyId,
+      primaryContactId: data.primaryContactId,
+      title: data.title,
+      stage: data.stage,
+      valueCents: data.valueCents,
+      currency: data.currency,
+      expectedCloseAt: data.expectedCloseAt,
+      nextStep: data.nextStep,
+      nextStepAt: data.nextStepAt,
+      ownerId: ctx.user.id,
+    })
+    .returning({ id: crmOpportunity.id });
+
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.opportunity.created",
+    entityType: "crm_opportunity",
+    entityId: row.id,
+    metadata: { companyId: data.companyId, stage: data.stage },
+  });
+  return ok({ id: row.id });
+}
+
+export async function updateOpportunity(
+  ctx: AdminContext,
+  id: string,
+  input: OpportunityInput,
+): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Oportunidade não encontrada.");
+  const parsed = opportunitySchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const data = parsed.data;
+
+  const existing = await db.query.crmOpportunity.findFirst({ where: eq(crmOpportunity.id, id) });
+  if (!existing) return fail("Oportunidade não encontrada.");
+  if (existing.companyId !== data.companyId)
+    return fail("Não é possível mover oportunidade entre empresas.");
+  if (data.primaryContactId) {
+    const contactErr = await assertContactBelongsToCompany(data.primaryContactId, data.companyId);
+    if (contactErr) return fail(contactErr, { primaryContactId: [contactErr] });
+  }
+
+  await db
+    .update(crmOpportunity)
+    .set({
+      primaryContactId: data.primaryContactId,
+      title: data.title,
+      valueCents: data.valueCents,
+      currency: data.currency,
+      expectedCloseAt: data.expectedCloseAt,
+      nextStep: data.nextStep,
+      nextStepAt: data.nextStepAt,
+    })
+    .where(eq(crmOpportunity.id, id));
+
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.opportunity.updated",
+    entityType: "crm_opportunity",
+    entityId: id,
+  });
+  return ok(null);
+}
+
+/**
+ * Muda o estágio. Won grava wonAt e zera lostAt/lostReason; lost exige
+ * motivo e zera wonAt; qualquer reabertura (voltar para estágio aberto)
+ * zera ambos. Se o estágio de destino é o mesmo do atual, não grava audit.
+ */
+export async function changeOpportunityStage(
+  ctx: AdminContext,
+  id: string,
+  input: ChangeStageInput,
+): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Oportunidade não encontrada.");
+  const parsed = changeStageSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const { to, lostReason } = parsed.data;
+
+  const existing = await db.query.crmOpportunity.findFirst({ where: eq(crmOpportunity.id, id) });
+  if (!existing) return fail("Oportunidade não encontrada.");
+  if (existing.stage === to) return ok(null);
+
+  const patch: {
+    stage: typeof to;
+    wonAt: Date | null;
+    lostAt: Date | null;
+    lostReason: string | null;
+  } = { stage: to, wonAt: null, lostAt: null, lostReason: null };
+
+  if (to === "won") patch.wonAt = new Date();
+  if (to === "lost") {
+    patch.lostAt = new Date();
+    patch.lostReason = lostReason ?? null;
+  }
+
+  await db.update(crmOpportunity).set(patch).where(eq(crmOpportunity.id, id));
+  await audit({
+    actorId: ctx.user.id,
+    action:
+      to === "won"
+        ? "crm.opportunity.won"
+        : to === "lost"
+          ? "crm.opportunity.lost"
+          : "crm.opportunity.stage_changed",
+    entityType: "crm_opportunity",
+    entityId: id,
+    metadata: to === "lost"
+      ? { from: existing.stage, to, reason: patch.lostReason }
+      : { from: existing.stage, to },
+  });
+  return ok(null);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Interação
+// ────────────────────────────────────────────────────────────────────────────
+
+export async function createInteraction(
+  ctx: AdminContext,
+  input: InteractionInput,
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = interactionSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const data = parsed.data;
+
+  const [row] = await db
+    .insert(crmInteraction)
+    .values({
+      type: data.type,
+      at: data.at,
+      byUserId: ctx.user.id,
+      summary: data.summary,
+      body: data.body,
+      companyId: data.companyId,
+      contactId: data.contactId,
+      opportunityId: data.opportunityId,
+    })
+    .returning({ id: crmInteraction.id });
+
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.interaction.created",
+    entityType: "crm_interaction",
+    entityId: row.id,
+    metadata: {
+      type: data.type,
+      companyId: data.companyId,
+      contactId: data.contactId,
+      opportunityId: data.opportunityId,
+    },
+  });
+  return ok({ id: row.id });
+}
+
+export async function updateInteraction(
+  ctx: AdminContext,
+  id: string,
+  input: InteractionInput,
+): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Interação não encontrada.");
+  const parsed = interactionSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const data = parsed.data;
+
+  const [row] = await db
+    .update(crmInteraction)
+    .set({
+      type: data.type,
+      at: data.at,
+      summary: data.summary,
+      body: data.body,
+      companyId: data.companyId,
+      contactId: data.contactId,
+      opportunityId: data.opportunityId,
+    })
+    .where(and(eq(crmInteraction.id, id), isNull(crmInteraction.deletedAt)))
+    .returning({ id: crmInteraction.id });
+  if (!row) return fail("Interação não encontrada ou já removida.");
+
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.interaction.updated",
+    entityType: "crm_interaction",
+    entityId: id,
+  });
+  return ok(null);
+}
+
+export async function deleteInteraction(ctx: AdminContext, id: string): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Interação não encontrada.");
+  const [row] = await db
+    .update(crmInteraction)
+    .set({ deletedAt: new Date() })
+    .where(and(eq(crmInteraction.id, id), isNull(crmInteraction.deletedAt)))
+    .returning({ id: crmInteraction.id });
+  if (!row) return fail("Interação não encontrada ou já removida.");
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.interaction.deleted",
+    entityType: "crm_interaction",
     entityId: id,
   });
   return ok(null);
