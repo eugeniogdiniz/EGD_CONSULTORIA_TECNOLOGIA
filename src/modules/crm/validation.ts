@@ -49,8 +49,13 @@ const valueCentsRequired = z.coerce
 const valueCentsOptional = z
   .union([z.coerce.number().int(), z.literal("").transform(() => null), z.null()])
   .optional()
-  .transform((v) => (v === undefined || v === "" ? null : v))
+  .transform((v) => v ?? null)
   .refine((v) => v === null || v >= 0, "Valor não pode ser negativo");
+
+const optionalUuid = z
+  .union([z.uuid(), z.literal("").transform(() => null), z.null()])
+  .optional()
+  .transform((v) => v ?? null);
 
 const currency = z.enum(CURRENCY).default("BRL");
 
@@ -78,7 +83,7 @@ export type ContactInput = z.input<typeof contactSchema>;
 
 export const opportunitySchema = z.object({
   companyId: z.uuid(),
-  primaryContactId: z.union([z.uuid(), z.literal("").transform(() => null), z.null()]).optional().transform((v) => (v === undefined || v === "" ? null : v)),
+  primaryContactId: optionalUuid,
   title: z.string().trim().min(2, "Mínimo 2 caracteres").max(200, "Máximo 200 caracteres"),
   stage: z.enum(["new", "qualified", "meeting", "proposal", "won", "lost"]).default("new"),
   valueCents: valueCentsOptional,
@@ -106,9 +111,9 @@ export const interactionSchema = z
     at: isoDateTime,
     summary: z.string().trim().min(2, "Descreva em uma frase").max(200, "Máximo 200 caracteres"),
     body: optionalText(8000),
-    companyId: z.union([z.uuid(), z.literal("").transform(() => null), z.null()]).optional().transform((v) => (v === undefined || v === "" ? null : v)),
-    contactId: z.union([z.uuid(), z.literal("").transform(() => null), z.null()]).optional().transform((v) => (v === undefined || v === "" ? null : v)),
-    opportunityId: z.union([z.uuid(), z.literal("").transform(() => null), z.null()]).optional().transform((v) => (v === undefined || v === "" ? null : v)),
+    companyId: optionalUuid,
+    contactId: optionalUuid,
+    opportunityId: optionalUuid,
   })
   .refine(
     (v) => v.companyId !== null || v.contactId !== null || v.opportunityId !== null,
