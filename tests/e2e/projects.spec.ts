@@ -66,19 +66,54 @@ test.describe.serial("projects", () => {
     await dialog.getByRole("button", { name: /^criar$/i }).click();
     await expect(page.getByText(entregaTitulo)).toBeVisible({ timeout: 10_000 });
 
-    // Muda status via diálogo
+    // Muda status via diálogo. Após "Aplicar" o form do status picker
+    // remonta (useActionState + revalidatePath), então clicar em "Fechar"
+    // corre risco de pegar o botão detached em CI. Manda Escape logo e
+    // valida direto pela mudança no kanban (o card cai na coluna "Feita").
     await page.getByText(entregaTitulo).click();
     dialog = page.getByRole("dialog");
     await dialog.getByLabel(/^status$/i).selectOption("done");
     await dialog.getByRole("button", { name: /^aplicar$/i }).click();
-    await dialog.getByRole("button", { name: /^fechar$/i }).click();
-    // Card agora aparece na coluna "Feita"
-    await expect(page.getByRole("heading", { name: /^feita$/i })).toBeVisible();
+    await page.keyboard.press("Escape");
+    const feitaColumn = page.locator("section", { has: page.getByRole("heading", { name: /^feita$/i }) });
+    await expect(feitaColumn.getByText(entregaTitulo)).toBeVisible({ timeout: 15_000 });
   });
 
   test("/admin/projetos sem sessão redireciona para /entrar", async ({ request }) => {
     const res = await request.get("/admin/projetos", { maxRedirects: 0, failOnStatusCode: false });
     expect([307, 302, 308]).toContain(res.status());
     expect(res.headers()["location"]).toMatch(/\/entrar/);
+  });
+
+  test("Fase 3.5 — abas Gantt, Calendário, Financeiro renderizam sem 404", async ({ page }) => {
+    await loginAs(page, ADMIN.email, ADMIN.password);
+    await page.goto("/admin/projetos");
+    await page.getByRole("link", { name: oppTitulo }).click();
+
+    // Gantt
+    await page.getByRole("link", { name: /^gantt$/i }).click();
+    await expect(page).toHaveURL(/\/gantt$/);
+    await expect(page.getByRole("heading", { level: 1, name: /linha do tempo/i })).toBeVisible();
+
+    // Calendário
+    await page.getByRole("link", { name: /^calend[aá]rio$/i }).click();
+    await expect(page).toHaveURL(/\/calendario$/);
+    await expect(page.getByRole("heading", { level: 1, name: /calend[aá]rio/i })).toBeVisible();
+
+    // Financeiro — cotas visíveis
+    await page.getByRole("link", { name: /^financeiro$/i }).click();
+    await expect(page).toHaveURL(/\/financeiro$/);
+    await expect(page.getByText(/or[çc]amento/i).first()).toBeVisible();
+    await expect(page.getByText(/margem/i).first()).toBeVisible();
+  });
+
+  test("Fase 3.5 — /admin/projetos/templates renderiza e sidebar marca o item certo", async ({ page }) => {
+    await loginAs(page, ADMIN.email, ADMIN.password);
+    await page.goto("/admin/projetos/templates");
+    await expect(page.getByRole("heading", { level: 1, name: /templates de projeto/i })).toBeVisible();
+    // Sidebar: apenas Templates deve ser aria-current="page" nesse pathname.
+    const sidebar = page.getByRole("navigation", { name: /^menu$/i });
+    await expect(sidebar.getByRole("link", { name: /^templates$/i })).toHaveAttribute("aria-current", "page");
+    await expect(sidebar.getByRole("link", { name: /^projetos$/i })).not.toHaveAttribute("aria-current", "page");
   });
 });

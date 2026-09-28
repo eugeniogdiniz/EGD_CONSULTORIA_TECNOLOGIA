@@ -7,7 +7,7 @@ import "dotenv/config";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { files, memberships } from "@/db/schema";
+import { crmCompany, crmOpportunity, files, memberships, project, projectDeliverable } from "@/db/schema";
 import { createOrganization } from "@/modules/tenancy/actions";
 import { putObject } from "@/lib/storage";
 import { buildBucketKey } from "@/modules/files/keys";
@@ -40,6 +40,34 @@ async function createFile(ctx: AdminContext, organizationId: string, name: strin
   return id;
 }
 
+/** Empresa vinculada à organização, projeto ativo e duas entregas (uma visível, uma interna). */
+async function createProject(ctx: AdminContext, organizationId: string, label: string) {
+  const [company] = await db
+    .insert(crmCompany)
+    .values({ name: `Empresa ${label} ${stamp}`, slug: `empresa-${label.toLowerCase()}-${stamp}`, ownerId: ctx.user.id, linkedOrganizationId: organizationId })
+    .returning({ id: crmCompany.id });
+  const [opp] = await db
+    .insert(crmOpportunity)
+    .values({ companyId: company.id, title: `Op ${label} ${stamp}`, stage: "won", ownerId: ctx.user.id, wonAt: new Date() })
+    .returning({ id: crmOpportunity.id });
+  const title = `Projeto ${label} ${stamp}`;
+  const [p] = await db
+    .insert(project)
+    .values({ opportunityId: opp.id, companyId: company.id, title, status: "active", ownerId: ctx.user.id })
+    .returning({ id: project.id });
+  const visibleTitle = `Entrega visível ${label} ${stamp}`;
+  const hiddenTitle = `Entrega interna ${label} ${stamp}`;
+  const [visible] = await db
+    .insert(projectDeliverable)
+    .values({ projectId: p.id, title: visibleTitle, ownerId: ctx.user.id, visibleToClient: true, status: "doing", dueAt: "2030-06-15" })
+    .returning({ id: projectDeliverable.id });
+  const [hidden] = await db
+    .insert(projectDeliverable)
+    .values({ projectId: p.id, title: hiddenTitle, ownerId: ctx.user.id, visibleToClient: false })
+    .returning({ id: projectDeliverable.id });
+  return { id: p.id, title, visible: { id: visible.id, title: visibleTitle }, hiddenId: hidden.id, hiddenTitle };
+}
+
 async function main() {
   const ctx = await adminContext();
   const a = await createOrganization(ctx, { name: `Org A ${stamp}` });
@@ -59,6 +87,8 @@ async function main() {
   }
   const fileA = await createFile(ctx, a.data.id, `a-${stamp}.txt`);
   const fileB = await createFile(ctx, b.data.id, `b-${stamp}.txt`);
+  const projectA = await createProject(ctx, a.data.id, "A");
+  const projectB = await createProject(ctx, b.data.id, "B");
 
   console.log(
     JSON.stringify({
@@ -68,6 +98,8 @@ async function main() {
       clientB: shared ? clientA : clientB,
       fileA: { id: fileA },
       fileB: { id: fileB },
+      projectA,
+      projectB,
     }),
   );
 }

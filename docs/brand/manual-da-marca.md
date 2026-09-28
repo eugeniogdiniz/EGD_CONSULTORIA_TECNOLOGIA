@@ -105,3 +105,7 @@ A página inicial e a página sobre usam os totais calculados em `src/content/ca
 - Análise e validação: `docs/brand/analise-e-entrega.md`.
 
 Este manual substitui as orientações visuais conflitantes do antigo “dark tech” e da proposta de design da Fase 1 para as áreas alteradas. As regras de segurança, autorização e funcionamento do sistema continuam pertencendo à arquitetura existente.
+
+## Documentos e papelaria
+
+Kit comercial em `docs/brand/kit-comercial/`, com índice HTML e pacote `docs/brand/kit-comercial-egd.zip`. Modelos de contrato, proposta, confidencialidade, aditivo, aceite e correspondência em DOCX/PDF. Cartão 90 × 50 mm com sangria de 3 mm, versões SVG/PNG/PDF, assinatura de e-mail e contato vCard. A papelaria mantém a geometria oficial e a paleta azul; dados ainda não confirmados são campos de preenchimento, não informações cadastrais presumidas. Orientações de gráfica, edição e revisão em `LEIA-ME.md` do kit.

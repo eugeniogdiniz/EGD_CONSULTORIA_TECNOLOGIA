@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Projeto · Calendário · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .abas { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .abas a { padding: 10px 14px; font-size: var(--text-small); font-weight: 500; color: var(--fg-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .abas a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent-strong); }
+  .controle { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); margin-bottom: 12px; flex-wrap: wrap; }
+  .controle .mes { font-size: var(--text-body); font-weight: 500; letter-spacing: -0.01em; margin: 0 8px; }
+  .controle .ir { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; font-size: var(--text-small); color: var(--fg-muted); }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); border: 1px solid var(--border); border-radius: 4px; background: var(--surface); overflow: hidden; }
+  .cal .h { padding: 10px 12px; background: var(--bg-subtle); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); font-size: var(--text-micro); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; color: var(--fg-muted); }
+  .cal .h:last-child { border-right: 0; }
+  .cel { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 108px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; background: var(--surface); }
+  .cel:nth-child(7n+8) { border-right-color: var(--border); }
+  .cel:nth-child(7n) { border-right: 0; }
+  .cel .n { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted); }
+  .cel.outside { background: color-mix(in srgb, var(--bg-subtle) 60%, var(--surface)); }
+  .cel.outside .n { color: var(--fg-faint); }
+  .cel.today { background: color-mix(in srgb, var(--link-soft) 70%, var(--surface)); }
+  .cel.today .n { color: var(--link); font-weight: 600; }
+  .cel .n small { font-family: var(--font-sans); font-size: 10px; color: var(--fg-faint); margin-left: 4px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 6px; border-radius: 2px; font-size: 11px; line-height: 1.25; color: var(--fg); border: 1px solid var(--border-strong); background: var(--surface); max-width: 100%; }
+  .chip .pip { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--fg-faint); }
+  .chip.marco { border-style: dashed; }
+  .chip.marco .pip { background: var(--accent); }
+  .chip.done .pip { background: var(--success); }
+  .chip.doing .pip { background: var(--link); }
+  .chip.review .pip { background: var(--accent); }
+  .chip.blocked .pip { background: var(--danger); }
+  .chip .txt { min-width: 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; flex: 1; }
+  .cel .extra { font-size: 10px; color: var(--fg-faint); margin-top: auto; }
+  @media (max-width: 960px) { .cel { min-height: 80px; } .cel .chip { display: none; } .cel .n { font-size: var(--text-small); } .cel .extra { display: none; } }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <a class="item" href="#" style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--fg-muted)">CRM</a>
+    <a class="item" href="#">Organizações</a>
+    <a class="item" href="admin-projetos-lista.html" aria-current="page">Projetos</a>
+    <a class="item" href="admin-projetos-templates.html">Templates</a>
+    <a class="item" href="#">Leads</a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a class="link" href="admin-projetos-lista.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Projetos</a> <span class="faint" style="margin:0 8px">/</span> <a class="link" href="admin-projeto-detalhe.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Laudo de infra TI</a> <span class="faint" style="margin:0 8px">/</span> Calendário</div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <nav class="abas" aria-label="Sub-nav">
+        <a href="admin-projeto-detalhe.html">Visão geral</a>
+        <a href="admin-projeto-kanban.html">Kanban</a>
+        <a href="admin-projeto-gantt.html">Gantt</a>
+        <a href="admin-projeto-calendario.html" aria-current="page">Calendário</a>
+        <a href="admin-projeto-financeiro.html">Financeiro</a>
+      </nav>
+
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Calendário do projeto</h1>
+          <div class="small muted" style="margin-top:6px">Marcos e entregas com data. Clique em um item pra abrir o diálogo. Semana começa segunda.</div>
+        </div>
+      </div>
+
+      <div class="controle">
+        <a class="btn btn-secondary btn-sm" href="?ym=2026-09">←</a>
+        <h2 class="mes">Outubro · 2026</h2>
+        <a class="btn btn-secondary btn-sm" href="?ym=2026-11">→</a>
+        <a class="btn btn-secondary btn-sm" href="?ym=2026-10">Hoje</a>
+        <div class="ir">
+          <label class="small" for="ir-mes" style="color:var(--fg-muted)">Ir para</label>
+          <input id="ir-mes" class="input" type="month" value="2026-10" style="height:32px;width:150px">
+        </div>
+      </div>
+
+      <div class="cal" role="grid" aria-label="Outubro 2026">
+        <div class="h">Seg</div><div class="h">Ter</div><div class="h">Qua</div><div class="h">Qui</div><div class="h">Sex</div><div class="h">Sáb</div><div class="h">Dom</div>
+
+        <!-- Semana 40: 28/09 (Seg) a 04/10 (Dom). Dias 28,29,30 = outside -->
+        <div class="cel outside"><span class="n">28</span></div>
+        <div class="cel outside"><span class="n">29</span></div>
+        <div class="cel outside"><span class="n">30</span></div>
+        <div class="cel"><span class="n">1 <small>Qui</small></span></div>
+        <div class="cel"><span class="n">2</span></div>
+        <div class="cel"><span class="n">3</span>
+          <span class="chip marco"><span class="pip"></span><span class="txt">Kickoff — reunião</span></span>
+          <span class="chip done"><span class="pip"></span><span class="txt">Ata do kickoff</span></span>
+        </div>
+        <div class="cel"><span class="n">4</span></div>
+
+        <!-- Semana 41: 05..11 -->
+        <div class="cel"><span class="n">5</span></div>
+        <div class="cel"><span class="n">6</span></div>
+        <div class="cel"><span class="n">7</span></div>
+        <div class="cel"><span class="n">8</span>
+          <span class="chip marco"><span class="pip"></span><span class="txt">Aceite do escopo</span></span>
+          <span class="chip done"><span class="pip"></span><span class="txt">Escopo assinado</span></span>
+        </div>
+        <div class="cel"><span class="n">9</span></div>
+        <div class="cel"><span class="n">10</span>
+          <span class="chip doing"><span class="pip"></span><span class="txt">Janelas de manut.</span></span>
+        </div>
+        <div class="cel"><span class="n">11</span></div>
+
+        <!-- Semana 42: 12..18. Hoje = 15/10 -->
+        <div class="cel"><span class="n">12</span></div>
+        <div class="cel"><span class="n">13</span></div>
+        <div class="cel"><span class="n">14</span></div>
+        <div class="cel today"><span class="n">15 <small>Hoje</small></span>
+          <span class="chip doing"><span class="pip"></span><span class="txt">Inventário servidores</span></span>
+        </div>
+        <div class="cel"><span class="n">16</span></div>
+        <div class="cel"><span class="n">17</span></div>
+        <div class="cel"><span class="n">18</span>
+          <span class="chip review"><span class="pip"></span><span class="txt">Checklist segurança</span></span>
+        </div>
+
+        <!-- Semana 43: 19..25 -->
+        <div class="cel"><span class="n">19</span></div>
+        <div class="cel"><span class="n">20</span></div>
+        <div class="cel"><span class="n">21</span></div>
+        <div class="cel"><span class="n">22</span>
+          <span class="chip"><span class="pip"></span><span class="txt">Backup gerenciado</span></span>
+        </div>
+        <div class="cel"><span class="n">23</span></div>
+        <div class="cel"><span class="n">24</span></div>
+        <div class="cel"><span class="n">25</span></div>
+
+        <!-- Semana 44: 26..01. 26..30 outubro, 31 outubro (sáb) + 01 nov (dom outside) -->
+        <div class="cel"><span class="n">26</span></div>
+        <div class="cel"><span class="n">27</span>
+          <span class="chip"><span class="pip"></span><span class="txt">Ata reunião técnica</span></span>
+        </div>
+        <div class="cel"><span class="n">28</span></div>
+        <div class="cel"><span class="n">29</span></div>
+        <div class="cel"><span class="n">30</span>
+          <span class="chip blocked"><span class="pip"></span><span class="txt">Migração storage</span></span>
+        </div>
+        <div class="cel"><span class="n">31</span></div>
+        <div class="cel outside"><span class="n">1</span></div>
+
+        <!-- Semana 45 (outside completo) -->
+        <div class="cel outside"><span class="n">2</span></div>
+        <div class="cel outside"><span class="n">3</span></div>
+        <div class="cel outside"><span class="n">4</span></div>
+        <div class="cel outside"><span class="n">5</span></div>
+        <div class="cel outside"><span class="n">6</span></div>
+        <div class="cel outside"><span class="n">7</span></div>
+        <div class="cel outside"><span class="n">8</span></div>
+      </div>
+
+      <section class="bloco" style="margin-top:24px">
+        <div class="bloco-head"><h3>Regras do calendário</h3></div>
+        <div class="bloco-body small muted" style="max-width:60rem;line-height:1.6;display:grid;gap:10px">
+          <p><strong style="color:var(--fg);font-weight:500">Somente com data.</strong> Só marcos e entregas que têm <span class="mono">due_at</span> aparecem. Sem data, ficam invisíveis no calendário (aparecem no kanban ou no detalhe).</p>
+          <p><strong style="color:var(--fg);font-weight:500">Chip pontilhado</strong> = marco. Chip liso = entrega. Cor do pip = status.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Cinza claro</strong> = dia de outro mês, incluído pra manter grid 6×7 estável.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Navegação.</strong> URL guarda <span class="mono">?ym=YYYY-MM</span>. Botão "Hoje" volta pro mês atual do server (UTC).</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

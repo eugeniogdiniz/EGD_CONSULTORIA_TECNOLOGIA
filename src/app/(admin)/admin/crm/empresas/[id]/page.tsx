@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { ContactFormDialog } from "@/modules/crm/components/contact-form";
 import { OpportunityFormDialog } from "@/modules/crm/components/opportunity-form";
 import { InteractionFormDialog } from "@/modules/crm/components/interaction-form";
+import { LinkOrganizationDialog } from "@/modules/crm/components/link-organization-dialog";
+import { listOrganizations } from "@/modules/tenancy/queries";
 import { formatDate, formatBrlCents, formatIsoDate } from "@/lib/format";
 import { cn } from "cn";
 
@@ -45,10 +47,11 @@ export default async function EmpresaDetalhePage({ params }: PageProps<"/admin/c
   const company = await getCompany(ctx, id);
   if (!company) notFound();
 
-  const [contacts, opportunities, interactions] = await Promise.all([
+  const [contacts, opportunities, interactions, organizations] = await Promise.all([
     listContactsByCompany(ctx, id),
     listOpportunities(ctx, { companyId: id, includeClosed: true }),
     listInteractions(ctx, { companyId: id, limit: 20 }),
+    listOrganizations(ctx),
   ]);
 
   const archived = Boolean(company.archivedAt);
@@ -123,6 +126,12 @@ export default async function EmpresaDetalhePage({ params }: PageProps<"/admin/c
               ) : (
                 <span className="text-faint">não vinculada</span>
               )}
+              <LinkOrganizationDialog
+                companyId={company.id}
+                currentOrganizationId={company.linkedOrganizationId}
+                organizations={organizations.map((o) => ({ id: o.id, name: o.name, status: o.status }))}
+                trigger={<button type="button" className="ml-3 text-xs text-link hover:underline">{company.linkedOrganizationId ? "Alterar" : "Vincular"}</button>}
+              />
             </dd>
           </dl>
           {company.notes && (

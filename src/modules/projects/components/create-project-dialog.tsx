@@ -9,15 +9,24 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { createProjectFromOpportunityForm } from "@/modules/projects/form-actions";
 import type { ActionResult } from "@/lib/action-result";
 
+export type TemplateOption = {
+  id: string;
+  name: string;
+  phaseCount: number;
+  deliverableCount: number;
+};
+
 export function CreateProjectDialog({
   opportunityId,
   defaultTitle,
   valueCents,
+  templates = [],
   trigger,
 }: {
   opportunityId: string;
   defaultTitle: string;
   valueCents: number | null;
+  templates?: TemplateOption[];
   trigger: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -42,6 +51,27 @@ export function CreateProjectDialog({
             <Input id="p-title" name="title" defaultValue={defaultTitle} required aria-invalid={fe?.title ? true : undefined} />
             <FieldError errors={fe?.title} />
           </div>
+          {templates.length > 0 && (
+            <div className="grid gap-1.5">
+              <Label htmlFor="p-tpl">Modelo <span className="font-normal text-faint">opcional</span></Label>
+              <select
+                id="p-tpl"
+                name="templateId"
+                defaultValue=""
+                className="h-10 rounded-sm border border-input bg-card px-3 text-sm"
+              >
+                <option value="">Nenhum — projeto vazio</option>
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} · {t.phaseCount} fases · {t.deliverableCount} entregas
+                  </option>
+                ))}
+              </select>
+              <p className="type-micro text-muted-foreground">
+                Fases e entregas do modelo entram como &ldquo;A fazer&rdquo;, com você como responsável.
+              </p>
+            </div>
+          )}
           <label className="inline-flex items-start gap-2 text-sm">
             <input type="checkbox" name="copyValue" defaultChecked className="mt-0.5" />
             <span>

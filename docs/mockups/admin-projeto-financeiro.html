@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Projeto · Financeiro · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .abas { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .abas a { padding: 10px 14px; font-size: var(--text-small); font-weight: 500; color: var(--fg-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .abas a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent-strong); }
+  .quatro { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 960px) { .quatro { grid-template-columns: repeat(2, 1fr); } }
+  .cota-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+  .cota-card .k { font-size: var(--text-small); color: var(--fg-muted); font-weight: 500; }
+  .cota-card .v { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1; font-variation-settings: "wdth" 108; font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .cota-card .v small { font-size: 0.875rem; font-weight: 500; color: var(--fg-muted); margin-left: 4px; font-variation-settings: "wdth" 100; }
+  .cota-card .d { font-size: var(--text-micro); color: var(--fg-faint); margin-top: 2px; }
+  .cota-card.margem.pos .v { color: var(--success); }
+  .cota-card.margem.neg .v { color: var(--danger); }
+  .bar { height: 6px; background: var(--bg-subtle); border-radius: 2px; overflow: hidden; margin-top: 8px; }
+  .bar span { display: block; height: 100%; background: var(--link); }
+  .bar.warn span { background: var(--warning); }
+  .bar.err span { background: var(--danger); }
+  .grid-dois { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 1180px) { .grid-dois { grid-template-columns: 1fr; } }
+  .prop-status { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 2px; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+  .prop-status.aceita { background: var(--success-soft); color: var(--success); }
+  .prop-status.enviada { background: var(--link-soft); color: var(--link); }
+  .prop-status.rascunho { background: var(--bg-subtle); color: var(--fg-muted); }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <a class="item" href="#" style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--fg-muted)">CRM</a>
+    <a class="item" href="#">Organizações</a>
+    <a class="item" href="admin-projetos-lista.html" aria-current="page">Projetos</a>
+    <a class="item" href="admin-projetos-templates.html">Templates</a>
+    <a class="item" href="#">Leads</a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a class="link" href="admin-projetos-lista.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Projetos</a> <span class="faint" style="margin:0 8px">/</span> <a class="link" href="admin-projeto-detalhe.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Laudo de infra TI</a> <span class="faint" style="margin:0 8px">/</span> Financeiro</div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <nav class="abas" aria-label="Sub-nav">
+        <a href="admin-projeto-detalhe.html">Visão geral</a>
+        <a href="admin-projeto-kanban.html">Kanban</a>
+        <a href="admin-projeto-gantt.html">Gantt</a>
+        <a href="admin-projeto-calendario.html">Calendário</a>
+        <a href="admin-projeto-financeiro.html" aria-current="page">Financeiro</a>
+      </nav>
+
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Financeiro do projeto</h1>
+          <div class="small muted" style="margin-top:6px">Orçamento vs. custo real (horas × rate + despesas) vs. receita aceita. Cents em BRL até renderizar.</div>
+        </div>
+        <div class="linha-acoes">
+          <a class="btn btn-secondary btn-sm" href="#">Exportar CSV</a>
+          <a class="btn btn-primary btn-sm" href="#">+ Nova despesa</a>
+        </div>
+      </div>
+
+      <div class="alert warn" style="margin-bottom:16px">
+        <strong>2 entradas sem rate.</strong> Elas contam <span class="mono">0</span> pro custo. Ajuste seu rate em <a class="link" href="#">/admin/conta → Rate por hora</a> pra recalcular retroativamente.
+      </div>
+
+      <div class="quatro">
+        <div class="cota-card">
+          <span class="k">Orçamento</span>
+          <span class="v tnum">R$ 55.000<small>,00</small></span>
+          <span class="d">Snapshot copiado da oportunidade</span>
+        </div>
+        <div class="cota-card">
+          <span class="k">Custo</span>
+          <span class="v tnum">R$ 24.320<small>,00</small></span>
+          <span class="d">Labor R$ 22.500 · despesas R$ 1.820</span>
+          <div class="bar"><span style="width:44%"></span></div>
+        </div>
+        <div class="cota-card">
+          <span class="k">Receita aceita</span>
+          <span class="v tnum">R$ 55.000<small>,00</small></span>
+          <span class="d">1 proposta aceita · 0 enviada</span>
+        </div>
+        <div class="cota-card margem pos">
+          <span class="k">Margem</span>
+          <span class="v tnum">R$ 30.680<small>,00</small></span>
+          <span class="d"><strong>55,8%</strong> sobre receita aceita</span>
+        </div>
+      </div>
+
+      <div class="grid-dois" style="margin-top:24px">
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <section class="bloco">
+            <div class="bloco-head"><h3>Horas por entrega</h3><span class="small faint">Fechadas · total 150h · labor R$ 22.500,00</span></div>
+            <div class="bloco-body" style="padding:0">
+              <div class="table-wrap" style="border:0;border-radius:0">
+                <table>
+                  <thead>
+                    <tr><th>Entrega</th><th>Fase</th><th class="num">Minutos</th><th class="num">Custo</th><th class="num">Sem rate</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><a class="link" href="admin-projeto-entrega.html">Inventário de servidores</a></td>
+                      <td>Execução</td>
+                      <td class="num">507</td>
+                      <td class="num">R$ 1.267,50</td>
+                      <td class="num">0</td>
+                    </tr>
+                    <tr>
+                      <td><a class="link" href="admin-projeto-entrega.html">Checklist de segurança de rede</a></td>
+                      <td>Execução</td>
+                      <td class="num">240</td>
+                      <td class="num">R$ 600,00</td>
+                      <td class="num">0</td>
+                    </tr>
+                    <tr>
+                      <td><a class="link" href="#">Setup de backup gerenciado</a></td>
+                      <td>Execução</td>
+                      <td class="num">180</td>
+                      <td class="num">R$ 450,00</td>
+                      <td class="num">0</td>
+                    </tr>
+                    <tr>
+                      <td><a class="link" href="#">Definição das janelas de manutenção</a></td>
+                      <td>Kickoff</td>
+                      <td class="num">80</td>
+                      <td class="num">R$ 0,00</td>
+                      <td class="num">2</td>
+                    </tr>
+                    <tr>
+                      <td><a class="link" href="#">Ata da reunião de kickoff</a></td>
+                      <td>Kickoff</td>
+                      <td class="num">60</td>
+                      <td class="num">R$ 150,00</td>
+                      <td class="num">0</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr><td>Total</td><td></td><td class="num">1.067</td><td class="num">R$ 22.500,00</td><td class="num">2</td></tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div class="table-note">Rate atual: <span class="mono">R$ 150,00/h</span> · <a class="link" href="#">Alterar</a></div>
+            </div>
+          </section>
+
+          <section class="bloco">
+            <div class="bloco-head"><h3>Despesas</h3><a class="btn btn-secondary btn-sm" href="#">+ Nova despesa</a></div>
+            <div class="bloco-body" style="padding:0">
+              <div class="table-wrap" style="border:0;border-radius:0">
+                <table>
+                  <thead>
+                    <tr><th>Descrição</th><th>Tipo</th><th>Data</th><th>Autor</th><th class="num">Valor</th><th></th></tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Passagem de ida SP → Curitiba</td>
+                      <td><span class="badge badge-info">viagem</span></td>
+                      <td class="mono">08/10/2026</td>
+                      <td>Eugênio</td>
+                      <td class="num">R$ 820,00</td>
+                      <td class="num"><a class="link" href="#">Editar</a></td>
+                    </tr>
+                    <tr>
+                      <td>Licença software de inventário (1 ano)</td>
+                      <td><span class="badge badge-info">serviço</span></td>
+                      <td class="mono">10/10/2026</td>
+                      <td>Eugênio</td>
+                      <td class="num">R$ 1.000,00</td>
+                      <td class="num"><a class="link" href="#">Editar</a></td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr><td colspan="4">Total</td><td class="num">R$ 1.820,00</td><td></td></tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="bloco">
+            <div class="bloco-head"><h3>Propostas</h3><span class="small faint">Da oportunidade origem</span></div>
+            <div class="bloco-body" style="padding:0">
+              <div class="table-wrap" style="border:0;border-radius:0">
+                <table>
+                  <thead>
+                    <tr><th>Número</th><th>Título</th><th>Status</th><th>Enviada</th><th>Decidida</th><th class="num">Valor</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="mono"><a class="link" href="#">PROP-26-003</a></td>
+                      <td>Laudo de infra TI — v2</td>
+                      <td><span class="prop-status aceita">aceita</span></td>
+                      <td class="mono">18/09/2026</td>
+                      <td class="mono">27/09/2026</td>
+                      <td class="num">R$ 55.000,00</td>
+                    </tr>
+                    <tr>
+                      <td class="mono"><a class="link" href="#">PROP-26-002</a></td>
+                      <td>Laudo de infra TI — v1</td>
+                      <td><span class="prop-status enviada">enviada</span></td>
+                      <td class="mono">10/09/2026</td>
+                      <td class="mono">—</td>
+                      <td class="num">R$ 48.000,00</td>
+                    </tr>
+                    <tr>
+                      <td class="mono"><a class="link" href="#">PROP-26-001</a></td>
+                      <td>Laudo de infra TI — draft</td>
+                      <td><span class="prop-status rascunho">rascunho</span></td>
+                      <td class="mono">—</td>
+                      <td class="mono">—</td>
+                      <td class="num">R$ 40.000,00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-note"><span>Receita aceita entra na margem.</span> <span>Enviadas aparecem em <span class="mono">revenueSentCents</span> mas não contam pra margem até virar aceita.</span></div>
+            </div>
+          </section>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <section class="bloco">
+            <div class="bloco-head"><h3>Fórmulas</h3></div>
+            <div class="bloco-body small" style="line-height:1.7">
+              <p><strong style="font-weight:500">labor</strong> = <span class="mono">Σ floor(entrada.minutes × rate.hourly_cents ÷ 60)</span> só das entradas fechadas com rate presente.</p>
+              <p style="margin-top:8px"><strong style="font-weight:500">cost</strong> = <span class="mono">labor + expenses</span>.</p>
+              <p style="margin-top:8px"><strong style="font-weight:500">revenueAccepted</strong> = <span class="mono">Σ crm_proposal.valueCents</span> onde <span class="mono">status = 'accepted'</span>.</p>
+              <p style="margin-top:8px"><strong style="font-weight:500">margin</strong> = <span class="mono">revenueAccepted − cost</span>.</p>
+              <p style="margin-top:8px"><strong style="font-weight:500">marginPct</strong> = arredonda <span class="mono">margin ÷ revenueAccepted × 100</span> (0 se receita = 0, evita div/0).</p>
+            </div>
+          </section>
+
+          <section class="bloco">
+            <div class="bloco-head"><h3>Auditoria</h3></div>
+            <div class="bloco-body small" style="line-height:1.6">
+              <p class="muted">Todo lançamento gera auditoria com metadata em cents.</p>
+              <ul style="margin:8px 0 0;padding-left:16px;color:var(--fg-muted)">
+                <li><span class="mono">project.time.stopped</span> · 22 registros</li>
+                <li><span class="mono">project.time.logged</span> · 5 registros</li>
+                <li><span class="mono">project.expense.created</span> · 2 registros</li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

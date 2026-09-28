@@ -15,7 +15,7 @@ import { OpportunityFormDialog } from "@/modules/crm/components/opportunity-form
 import { InteractionFormDialog } from "@/modules/crm/components/interaction-form";
 import { LostDialog } from "@/modules/crm/components/lost-dialog";
 import { ProposalFormDialog } from "@/modules/crm/components/proposal-form";
-import { getProjectByOpportunity } from "@/modules/projects/queries";
+import { getProjectByOpportunity, listTemplates } from "@/modules/projects/queries";
 import { CreateProjectDialog } from "@/modules/projects/components/create-project-dialog";
 import { formatBrlCents, formatDate, formatIsoDate } from "@/lib/format";
 
@@ -63,10 +63,11 @@ export default async function OportunidadeDetalhePage({
   const opp = row.opportunity;
   const company = row.company;
   const contacts = await listContactsByCompany(ctx, company.id);
-  const [interactions, proposals, linkedProject] = await Promise.all([
+  const [interactions, proposals, linkedProject, templates] = await Promise.all([
     listInteractions(ctx, { opportunityId: opp.id, limit: 30 }),
     listProposals(ctx, { opportunityId: opp.id }),
     getProjectByOpportunity(ctx, opp.id),
+    opp.stage === "won" ? listTemplates(ctx) : Promise.resolve([]),
   ]);
 
   const stageIndex = STAGES.indexOf(opp.stage);
@@ -112,6 +113,12 @@ export default async function OportunidadeDetalhePage({
                 opportunityId={opp.id}
                 defaultTitle={opp.title}
                 valueCents={opp.valueCents}
+                templates={templates.map((t) => ({
+                  id: t.id,
+                  name: t.name,
+                  phaseCount: t.phaseCount,
+                  deliverableCount: t.deliverableCount,
+                }))}
                 trigger={<Button size="sm" type="button">Criar projeto</Button>}
               />
             )}

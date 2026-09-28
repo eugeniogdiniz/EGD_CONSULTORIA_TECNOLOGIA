@@ -7,6 +7,16 @@ export type Fixtures = {
   clientB: { email: string; password: string };
   fileA: { id: string };
   fileB: { id: string };
+  projectA: ProjectFixture;
+  projectB: ProjectFixture;
+};
+
+export type ProjectFixture = {
+  id: string;
+  title: string;
+  visible: { id: string; title: string };
+  hiddenId: string;
+  hiddenTitle: string;
 };
 
 /** Roda o script de fixtures com tsx e devolve os ids/credenciais criados. */

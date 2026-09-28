@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Templates de projeto · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .grid-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 1180px) { .grid-cards { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 720px) { .grid-cards { grid-template-columns: 1fr; } }
+  .tpl { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; display: flex; flex-direction: column; gap: 10px; position: relative; min-height: 200px; }
+  .tpl:hover { border-color: var(--border-strong); }
+  .tpl h3 { font-size: var(--text-body); }
+  .tpl .desc { font-size: var(--text-small); color: var(--fg-muted); line-height: 1.5; }
+  .tpl .stats { display: flex; gap: 16px; font-size: var(--text-small); color: var(--fg-muted); margin-top: auto; }
+  .tpl .stats strong { color: var(--fg); font-weight: 500; margin-right: 4px; }
+  .tpl .rodape { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); margin-top: 4px; font-size: var(--text-micro); color: var(--fg-faint); }
+  .empty-card { border: 1px dashed var(--border-strong); background: var(--bg-subtle); display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; min-height: 200px; }
+  .empty-card p { font-size: var(--text-small); color: var(--fg-muted); max-width: 260px; }
+
+  .detalhe { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-top: 24px; }
+  .detalhe h2 { font-size: var(--text-h3); }
+  .detalhe .desc { font-size: var(--text-small); color: var(--fg-muted); margin-top: 8px; max-width: 60ch; line-height: 1.55; }
+  .fase-tpl { border: 1px solid var(--border); border-radius: 4px; padding: 14px; margin-top: 12px; }
+  .fase-tpl .cab { display: flex; gap: 12px; align-items: center; }
+  .fase-tpl .num { font-family: var(--font-mono); color: var(--fg-faint); font-size: var(--text-micro); }
+  .fase-tpl .nome { font-weight: 500; font-size: var(--text-small); }
+  .fase-tpl ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+  .fase-tpl li { display: grid; grid-template-columns: 20px 1fr; align-items: baseline; gap: 8px; font-size: var(--text-small); }
+  .fase-tpl li::before { content: "☐"; color: var(--fg-faint); font-size: 12px; padding-top: 2px; }
+  .fase-tpl li .secundario { color: var(--fg-muted); font-size: var(--text-micro); }
+
+  .dialog-preview { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-top: 24px; max-width: 520px; box-shadow: var(--shadow-float); }
+  .dialog-preview h3 { font-size: var(--text-body); }
+  .dialog-preview .bar { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .dialog-preview select { width: 100%; }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <a class="item" href="#" style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--fg-muted)">CRM</a>
+    <a class="item" href="#">Organizações</a>
+    <a class="item" href="admin-projetos-lista.html">Projetos</a>
+    <a class="item" href="admin-projetos-templates.html" aria-current="page">Templates</a>
+    <a class="item" href="#">Leads</a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a class="link" href="#" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Projetos</a> <span class="faint" style="margin:0 8px">/</span> Templates</div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Templates de projeto</h1>
+          <div class="small muted" style="margin-top:6px">Snapshot de fases + entregas. Cria a partir de um projeto existente e reutiliza na criação do próximo (sem status, sem prazo, sem anexo).</div>
+        </div>
+      </div>
+
+      <div class="alert" style="margin-bottom:16px">
+        <strong>Novo template?</strong> Vai no detalhe do projeto que quer virar base e clique em <strong>Salvar como template</strong>. Templates são globais, mas cada um guarda o dono e a origem no metadata da auditoria.
+      </div>
+
+      <div class="grid-cards">
+        <article class="tpl">
+          <h3><a class="link" href="#">Laudo de infra TI (padrão)</a></h3>
+          <p class="desc">Kickoff → inventário → aceite. Base para qualquer projeto de auditoria de infra corporativa que a EGD entrega em ~10 semanas.</p>
+          <div class="stats"><span><strong>3</strong>fases</span><span><strong>11</strong>entregas</span></div>
+          <div class="rodape"><span>Eugênio · criado 03/10/2026</span><span><a class="link" style="font-size:var(--text-micro)" href="#">Detalhe</a></span></div>
+        </article>
+
+        <article class="tpl">
+          <h3><a class="link" href="#">Consultoria contábil — onboarding</a></h3>
+          <p class="desc">Fluxo curto de 4 semanas para trazer novo cliente do CoreIN Contábil, com fase de conciliação e fase de fechamento do primeiro mês.</p>
+          <div class="stats"><span><strong>2</strong>fases</span><span><strong>6</strong>entregas</span></div>
+          <div class="rodape"><span>Eugênio · criado 12/09/2026</span><span><a class="link" style="font-size:var(--text-micro)" href="#">Detalhe</a></span></div>
+        </article>
+
+        <article class="tpl">
+          <h3><a class="link" href="#">Migração de sistema legado</a></h3>
+          <p class="desc">Fluxo longo (~4 meses) para saída de sistema tradicional. Inclui fases de mapeamento, POC, migração e paralelo de operação.</p>
+          <div class="stats"><span><strong>5</strong>fases</span><span><strong>18</strong>entregas</span></div>
+          <div class="rodape"><span>Eugênio · criado 20/08/2026</span><span><a class="link" style="font-size:var(--text-micro)" href="#">Detalhe</a></span></div>
+        </article>
+
+        <article class="tpl empty-card">
+          <div>
+            <p><strong style="color:var(--fg);font-weight:500">Sem template ainda?</strong></p>
+            <p style="margin-top:8px">Vá em <a class="link" href="admin-projeto-detalhe.html">um projeto</a> e clique em "Salvar como template".</p>
+          </div>
+        </article>
+      </div>
+
+      <section class="detalhe">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+          <div>
+            <h2>Laudo de infra TI (padrão)</h2>
+            <p class="desc">Kickoff → inventário → aceite. Base para qualquer projeto de auditoria de infra corporativa. Sem prazos, sem responsável definidos — quem cria o projeto preenche.</p>
+          </div>
+          <div class="linha-acoes">
+            <a class="btn btn-secondary btn-sm" href="#">Renomear</a>
+            <a class="btn btn-danger btn-sm" href="#">Deletar</a>
+          </div>
+        </div>
+
+        <div class="fase-tpl">
+          <div class="cab"><span class="num">01</span><span class="nome">Kickoff e escopo</span></div>
+          <ul>
+            <li>Ata da reunião de kickoff <span class="secundario">— Documento final da reunião de abertura, com participantes e decisões.</span></li>
+            <li>Documento de escopo assinado <span class="secundario">— Escopo detalhado + limites com assinatura eletrônica.</span></li>
+            <li>Definição das janelas de manutenção <span class="secundario">— Combinar dias e horários com o cliente.</span></li>
+          </ul>
+        </div>
+        <div class="fase-tpl">
+          <div class="cab"><span class="num">02</span><span class="nome">Execução (inventário + backup)</span></div>
+          <ul>
+            <li>Inventário de servidores</li>
+            <li>Checklist de segurança de rede</li>
+            <li>Setup de backup gerenciado</li>
+            <li>Migração do storage secundário</li>
+          </ul>
+        </div>
+        <div class="fase-tpl">
+          <div class="cab"><span class="num">03</span><span class="nome">Aceite e entrega final</span></div>
+          <ul>
+            <li>Rascunho do laudo</li>
+            <li>Laudo final assinado</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="bloco" style="margin-top:24px">
+        <div class="bloco-head"><h3>Como cria projeto a partir de template</h3></div>
+        <div class="bloco-body">
+          <p class="small muted" style="max-width:60ch;line-height:1.6">Quando você tem uma oportunidade <strong style="color:var(--fg);font-weight:500">Ganha</strong> e abre o botão <strong style="color:var(--fg);font-weight:500">Criar projeto</strong>, o diálogo ganha um dropdown de template. Se selecionado, fases e entregas do template são materializadas na mesma transação da criação.</p>
+
+          <div class="dialog-preview">
+            <h3>Criar projeto — a partir de "Auditoria de infra — Consórcio URBHIS"</h3>
+            <div class="small muted" style="margin-top:4px">Empresa <em>Consórcio URBHIS</em> · Valor R$ 55.000,00</div>
+            <div style="display:grid;gap:12px;margin-top:16px">
+              <div class="field">
+                <label for="p-title">Título do projeto</label>
+                <input id="p-title" class="input" value="Laudo de infra TI — URBHIS">
+              </div>
+              <div class="field">
+                <label for="p-tpl">Modelo (opcional)</label>
+                <select id="p-tpl" class="select">
+                  <option>Nenhum — projeto vazio</option>
+                  <option selected>Laudo de infra TI (padrão) · 3 fases · 11 entregas</option>
+                  <option>Consultoria contábil — onboarding · 2 fases · 6 entregas</option>
+                  <option>Migração de sistema legado · 5 fases · 18 entregas</option>
+                </select>
+                <p class="hint">Fases e entregas do modelo entram como "A fazer", com você como responsável.</p>
+              </div>
+              <label style="display:inline-flex;align-items:center;gap:8px;font-size:var(--text-small)"><input type="checkbox" checked>Copiar valor da oportunidade (R$ 55.000,00) para orçamento</label>
+            </div>
+            <div class="bar">
+              <a class="btn btn-secondary btn-sm" href="#">Cancelar</a>
+              <a class="btn btn-primary btn-sm" href="#">Criar projeto</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloco" style="margin-top:24px">
+        <div class="bloco-head"><h3>Regras dos templates</h3></div>
+        <div class="bloco-body small muted" style="max-width:60rem;line-height:1.6;display:grid;gap:10px">
+          <p><strong style="color:var(--fg);font-weight:500">Snapshot rígido.</strong> Editar o projeto original depois de virar template não muda o template. Sem herança viva.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Sem conteúdo.</strong> Templates carregam só a estrutura: fases (nome, ordem, notas) e entregas (título, descrição, ordem). Sem prazo, sem status, sem anexo, sem responsável.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Nome único.</strong> A tabela tem <span class="mono">unique(name)</span>. Duplicidade cai em fail claro na criação.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Deletar template</strong> não afeta os projetos já criados — o snapshot foi para o projeto no momento da materialização.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>
