@@ -1,4 +1,4 @@
-import { and, eq, isNull, ne } from "drizzle-orm";
+import { and, eq, isNull, ne, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   crmCompany,
@@ -6,6 +6,7 @@ import {
   crmInteraction,
   crmOpportunity,
   crmProposal,
+  leads,
   organizations,
 } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
@@ -730,6 +731,222 @@ export async function attachProposalFile(
     metadata: { fileId: upload.data.id },
   });
   return ok({ fileId: upload.data.id });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Conversão de lead → empresa + contato + oportunidade (transação)
+// ────────────────────────────────────────────────────────────────────────────
+
+export type ConversionPlan =
+  | {
+      mode: "link";
+      companyId: string;
+      contact: ContactInput;
+      opportunity: Omit<OpportunityInput, "companyId">;
+    }
+  | {
+      mode: "create";
+      company: CompanyInput;
+      contact: Omit<ContactInput, "companyId">;
+      opportunity: Omit<OpportunityInput, "companyId">;
+    };
+
+/**
+ * Converte um lead do site em empresa + contato + oportunidade, tudo em
+ * uma transação. Se o lead já foi convertido (segunda tentativa, corrida
+ * entre duas abas), devolve fail citando a empresa existente.
+ */
+export async function convertLead(
+  ctx: AdminContext,
+  leadId: string,
+  plan: ConversionPlan,
+): Promise<ActionResult<{ companyId: string; contactId: string; opportunityId: string }>> {
+  if (!isUuid(leadId)) return fail("Lead não encontrado.");
+
+  // Validações prévias (fora da transação, pra falhar rápido)
+  let companyData: ReturnType<typeof companySchema.parse> | null = null;
+  let contactData: ReturnType<typeof contactSchema.parse>;
+  let opportunityData: ReturnType<typeof opportunitySchema.parse>;
+
+  if (plan.mode === "create") {
+    const parsedCompany = companySchema.safeParse(plan.company);
+    if (!parsedCompany.success) return fromZod(parsedCompany.error);
+    companyData = parsedCompany.data;
+    if (companyData.cnpj) {
+      const dup = await findCompanyByCnpj(companyData.cnpj);
+      if (dup) return fail(`Esse CNPJ já está cadastrado em "${dup.name}".`, { cnpj: ["Em uso"] });
+    }
+  } else if (!isUuid(plan.companyId)) {
+    return fail("Empresa não encontrada.");
+  }
+
+  // Validação de contato e oportunidade usa companyId provisório se create,
+  // então injetamos um placeholder e trocamos depois.
+  const linkedCompanyId = plan.mode === "link" ? plan.companyId : "00000000-0000-4000-8000-000000000000";
+  const parsedContact = contactSchema.safeParse({ ...plan.contact, companyId: linkedCompanyId });
+  if (!parsedContact.success) return fromZod(parsedContact.error);
+  contactData = parsedContact.data;
+
+  const parsedOpportunity = opportunitySchema.safeParse({ ...plan.opportunity, companyId: linkedCompanyId });
+  if (!parsedOpportunity.success) return fromZod(parsedOpportunity.error);
+  opportunityData = parsedOpportunity.data;
+
+  // Auto-downgrade do contato principal quando a empresa já tem um (link mode).
+  if (plan.mode === "link" && contactData.role === "primary") {
+    const other = await primaryExists(plan.companyId);
+    if (other) contactData = { ...contactData, role: "other" };
+  }
+
+  const result = await db.transaction(async (tx) => {
+    // Lock pessimista no lead pra impedir duas conversões simultâneas.
+    const locked = await tx.execute<{
+      id: string;
+      converted_at: Date | null;
+      converted_company_id: string | null;
+    }>(
+      sql`select id, converted_at, converted_company_id from leads where id = ${leadId} for update`,
+    );
+    const lead = locked[0];
+    if (!lead) return { type: "fail" as const, error: "Lead não encontrado." };
+    if (lead.converted_at) {
+      const other = lead.converted_company_id
+        ? await tx.query.crmCompany.findFirst({
+            where: eq(crmCompany.id, lead.converted_company_id),
+            columns: { name: true },
+          })
+        : null;
+      return {
+        type: "fail" as const,
+        error: `Este lead já foi convertido${other ? ` em "${other.name}"` : ""}.`,
+      };
+    }
+
+    // Empresa
+    let companyId: string;
+    if (plan.mode === "create" && companyData) {
+      const slug = await findFreeSlug(slugify(companyData.name));
+      const [row] = await tx
+        .insert(crmCompany)
+        .values({
+          name: companyData.name,
+          slug,
+          cnpj: companyData.cnpj,
+          website: companyData.website,
+          industry: companyData.industry,
+          size: companyData.size,
+          source: "site_contact",
+          notes: companyData.notes,
+          ownerId: ctx.user.id,
+        })
+        .returning({ id: crmCompany.id });
+      companyId = row.id;
+    } else if (plan.mode === "link") {
+      const c = await tx.query.crmCompany.findFirst({
+        where: eq(crmCompany.id, plan.companyId),
+        columns: { id: true },
+      });
+      if (!c) return { type: "fail" as const, error: "Empresa não encontrada." };
+      companyId = c.id;
+    } else {
+      return { type: "fail" as const, error: "Plano de conversão inválido." };
+    }
+
+    // Contato
+    const [contactRow] = await tx
+      .insert(crmContact)
+      .values({
+        companyId,
+        name: contactData.name,
+        email: contactData.email,
+        phone: contactData.phone,
+        role: contactData.role,
+        title: contactData.title,
+        notes: contactData.notes,
+        ownerId: ctx.user.id,
+      })
+      .returning({ id: crmContact.id });
+
+    // Oportunidade
+    const [oppRow] = await tx
+      .insert(crmOpportunity)
+      .values({
+        companyId,
+        primaryContactId: contactRow.id,
+        title: opportunityData.title,
+        stage: opportunityData.stage,
+        valueCents: opportunityData.valueCents,
+        currency: opportunityData.currency,
+        expectedCloseAt: opportunityData.expectedCloseAt,
+        nextStep: opportunityData.nextStep,
+        nextStepAt: opportunityData.nextStepAt,
+        ownerId: ctx.user.id,
+      })
+      .returning({ id: crmOpportunity.id });
+
+    // Lead
+    await tx
+      .update(leads)
+      .set({
+        convertedCompanyId: companyId,
+        convertedContactId: contactRow.id,
+        convertedOpportunityId: oppRow.id,
+        convertedAt: new Date(),
+        convertedBy: ctx.user.id,
+        status: "converted",
+      })
+      .where(eq(leads.id, leadId));
+
+    return {
+      type: "ok" as const,
+      created: plan.mode === "create",
+      companyId,
+      contactId: contactRow.id,
+      opportunityId: oppRow.id,
+    };
+  });
+
+  if (result.type === "fail") return fail(result.error);
+
+  if (result.created) {
+    await audit({
+      actorId: ctx.user.id,
+      action: "crm.company.created",
+      entityType: "crm_company",
+      entityId: result.companyId,
+      metadata: { via: "lead_conversion", leadId },
+    });
+  }
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.contact.created",
+    entityType: "crm_contact",
+    entityId: result.contactId,
+    metadata: { via: "lead_conversion", leadId, companyId: result.companyId },
+  });
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.opportunity.created",
+    entityType: "crm_opportunity",
+    entityId: result.opportunityId,
+    metadata: { via: "lead_conversion", leadId, companyId: result.companyId },
+  });
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.lead.converted",
+    entityType: "lead",
+    entityId: leadId,
+    metadata: {
+      companyId: result.companyId,
+      contactId: result.contactId,
+      opportunityId: result.opportunityId,
+    },
+  });
+
+  return ok({
+    companyId: result.companyId,
+    contactId: result.contactId,
+    opportunityId: result.opportunityId,
+  });
 }
 
 /**
