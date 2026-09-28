@@ -4,7 +4,7 @@
 
 **Goal:** Cliente logado no portal enxerga os projetos da própria organização (visão geral, Gantt, calendário, entregas visíveis), baixa arquivos e comenta.
 
-**Architecture:** Nova coluna `crm_company.organization_id`. Novo módulo `src/modules/portal-projects/` (queries + actions + form-actions) que recebe `PortalContext`. Rotas em `src/app/(portal)/portal/projetos/*`. Reusa funções puras `buildGanttGeometry` e `buildMonthGrid` e o `CommentThread` da 3.5. Sem nova dependência.
+**Architecture:** Nova coluna `crm_company.linked_organization_id`. Novo módulo `src/modules/portal-projects/` (queries + actions + form-actions) que recebe `PortalContext`. Rotas em `src/app/(portal)/portal/projetos/*`. Reusa funções puras `buildGanttGeometry` e `buildMonthGrid` e o `CommentThread` da 3.5. Sem nova dependência.
 
 **Spec:** `docs/superpowers/specs/2026-09-28-fase-4-portal-projetos-design.md`.
 
@@ -33,9 +33,7 @@
 
 | Caminho | Responsabilidade |
 |---------|------------------|
-| `src/modules/crm/schema.ts` | +`organizationId` em `crm_company`. |
-| `src/db/migrations/0004_*.sql` | coluna + índice. |
-| `src/modules/crm/actions.ts` / `form-actions.ts` | `linkCompanyToOrganization`, `unlinkCompany`. |
+| `src/modules/crm/components/link-organization-dialog.tsx` | diálogo de vínculo (a action já existia). |
 | `src/modules/portal-projects/scope.ts` | puro: `isDeliverableVisible`, `portalStatusLabel`, `summarizeProject`. |
 | `src/modules/portal-projects/queries.ts` | queries escopadas por org. |
 | `src/modules/portal-projects/actions.ts` | comentários do cliente. |
@@ -54,16 +52,16 @@
 - [ ] Screenshots.
 - [ ] Aprovação humana.
 
-### Task 2: Migration + vínculo company↔org
+### Task 2: Vínculo company↔org (já existe no schema)
 
-**Files:** `src/modules/crm/schema.ts`, `src/db/migrations/0004_*.sql`.
+`crm_company.linked_organization_id` foi criada na Fase 2, com `linkCompanyToOrganization` e teste de integração. **Sem migration.** Nada a fazer no schema.
 
-- [ ] Adicionar `organizationId` (nullable, `on delete set null`) e índice.
-- [ ] `db:generate`, `db:migrate`, conferir coluna e índice.
+- [x] Confirmar coluna, action e teste existentes.
 
-### Task 3: Actions e UI admin de vínculo
+### Task 3: UI admin de vínculo
 
-`linkCompanyToOrganization` / `unlinkCompany` (audit `crm.company.linked_to_org`). Dialog em `/admin/crm/empresas/[id]`; bloco "Empresas vinculadas" em `/admin/organizacoes/[id]`.
+- [x] `LinkOrganizationDialog` em `/admin/crm/empresas/[id]` (Vincular/Alterar, usa `linkCompanyForm`).
+- [ ] Bloco "Empresas vinculadas" em `/admin/organizacoes/[id]`.
 
 ### Task 4: Puros do escopo do portal (TDD)
 

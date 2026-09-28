@@ -28,7 +28,7 @@ O portal continua read-only para tudo que muda estado do projeto (status, prazo,
 - **Edição de projeto** pelo cliente (aprovar entrega, marcar aceite). Read-only e comentário nesta fase.
 - **Portal vê Kanban** — o kanban admin é operacional. Cliente vê a visão geral e o Gantt, que já mostram estado. Sem tela extra.
 - **Financeiro/horas** — nada disso vaza pra portal. Fase 4 é execução, não custo.
-- **Múltiplas empresas por organização** — usamos FK simples em `crm_company.organization_id`; várias companies podem apontar pra mesma org (holding), mas a UI da 4 não trata o inverso.
+- **Múltiplas empresas por organização** — usamos FK simples em `crm_company.linked_organization_id`; várias companies podem apontar pra mesma org (holding), mas a UI da 4 não trata o inverso.
 - **Templates, dependências, comentários aninhados a mais de 2 níveis** — regras herdadas sem mudança.
 
 ### 1.2 Roadmap atualizado
@@ -49,7 +49,7 @@ O portal continua read-only para tudo que muda estado do projeto (status, prazo,
 
 | Decisão | Escolha | Alternativas descartadas |
 |---------|---------|--------------------------|
-| Ligação org↔company | `crm_company.organization_id uuid null references organizations(id) on delete set null`. FK opcional; várias companies podem apontar pra mesma org (subsidiárias). | `organizations.crm_company_id` (org nasce primeiro pelo convite, esse caminho depois liga); tabela ponte many-to-many (over-engineering pra 1 dono solo). |
+| Ligação org↔company | `crm_company.linked_organization_id uuid null references organizations(id) on delete set null`. FK opcional; várias companies podem apontar pra mesma org (subsidiárias). | `organizations.crm_company_id` (org nasce primeiro pelo convite, esse caminho depois liga); tabela ponte many-to-many (over-engineering pra 1 dono solo). |
 | Visibilidade | Query do portal filtra `project.companyId in (select id from crm_company where organizationId = ctx.organization.id)`. Entregas filtradas por `visibleToClient = true`. Fases/marcos aparecem sempre — sem coluna própria por enquanto. | Coluna `visibleToClient` em phase e milestone (over-engineering; se necessário, Fase futura). Escopo pelo `owner` da oportunidade (não modela agências). |
 | Módulo | Novo namespace `src/modules/portal-projects/` só com `queries.ts` (adaptador `PortalContext` → dados). Actions de comentário reusam `src/modules/projects/actions.ts` com adaptação: expõe `createCommentAsClient(ctx: PortalContext, ...)` que valida a visibilidade antes. | Portal chamar direto `queries.ts` do admin (Compartilha AdminContext; portable-quebra ao evoluir). Duplicar tudo (mant custo alto). |
 | Kanban no portal | Não tem. Visão geral lista entregas por fase; Gantt e calendário cobrem visão temporal. | Kanban read-only (adiciona superfície sem trazer valor pro cliente). |
@@ -83,7 +83,7 @@ src/
     projects/
       queries.ts                 # (Fase 3) adiciona getProjectVisibilityForOrg helper interno
     crm/
-      schema.ts                  # adiciona crm_company.organization_id
+      schema.ts                  # adiciona crm_company.linked_organization_id
       queries.ts                 # amplia getCompany p/ trazer organizationName
       actions.ts                 # linkCompanyToOrganization, unlinkCompany
       form-actions.ts            # linkCompanyToOrganizationForm
@@ -111,7 +111,7 @@ tests/
 
 ### 4.1 Nova coluna
 
-- `crm_company.organization_id uuid null references organizations(id) on delete set null`
+- `crm_company.linked_organization_id uuid null references organizations(id) on delete set null`
 - Índice: `crm_company_organization_idx (organization_id)` para lookup por tenant.
 
 ### 4.2 Tabelas novas
