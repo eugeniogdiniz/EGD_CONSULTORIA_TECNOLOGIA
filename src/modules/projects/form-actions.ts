@@ -30,6 +30,7 @@ import {
   logManualTime,
   movePhase,
   reorderDeliverable,
+  setDeliverableVisibility,
   startTimer,
   stopTimer,
   unarchiveProject,
@@ -260,6 +261,15 @@ export async function attachDeliverableFileForm(_p: NullState, fd: FormData): Pr
   const projectId = String(fd.get("projectId") ?? "");
   revalidatePath(`/admin/projetos/${projectId}/kanban`);
   return r.ok ? { ok: true, data: null } : r;
+}
+
+export async function setDeliverableVisibilityForm(fd: FormData): Promise<void> {
+  const ctx = await requireAdmin();
+  const id = String(fd.get("id") ?? "");
+  const projectId = String(fd.get("projectId") ?? "");
+  await setDeliverableVisibility(ctx, id, fd.get("visible") === "1");
+  revalidatePath(`/admin/projetos/${projectId}/entregas/${id}`);
+  revalidatePath(`/admin/projetos/${projectId}/kanban`);
 }
 
 export async function deleteDeliverableForm(fd: FormData): Promise<void> {

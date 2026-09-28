@@ -67,6 +67,11 @@
 
 `scope.ts`: `isDeliverableVisible`, `portalStatusLabel` (blocked → "Em espera"), `summarizeProject`. Testes unit.
 
+### Task 4b: Visibilidade no admin (lacuna descoberta)
+
+- [x] `setDeliverableVisibility` + form-action + botão "Compartilhar com o cliente" no detalhe da entrega admin. Sem isso o portal ficaria vazio (nada alterava `visibleToClient`).
+- [x] `stripInternalNotes`: o motivo de bloqueio é gravado na descrição (`## Bloqueio`) e não pode chegar ao cliente.
+
 ### Task 5: Queries do portal
 
 `listPortalProjects`, `getPortalProject`, `listPortalPhases`, `listPortalMilestones`, `listPortalDeliverables` (só visíveis), `getPortalDeliverable`, `listPortalComments`. Todas recebem `PortalContext`.

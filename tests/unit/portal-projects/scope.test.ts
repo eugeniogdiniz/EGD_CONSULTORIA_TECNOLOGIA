@@ -4,6 +4,7 @@ import {
   phaseState,
   milestoneState,
   summarizeProject,
+  stripInternalNotes,
 } from "@/modules/portal-projects/scope";
 
 describe("portalStatusLabel", () => {
@@ -78,5 +79,25 @@ describe("summarizeProject", () => {
       { dueAt: "2026-12-12", completedAt: null },
     ];
     expect(summarizeProject([], ms, "2026-10-20").nextMilestoneDueAt).toBe("2026-10-14");
+  });
+});
+
+describe("stripInternalNotes", () => {
+  it("remove a seção de bloqueio anexada pela equipe", () => {
+    expect(stripInternalNotes("Levantamento.\n\n## Bloqueio\nAguardando acesso do rack B")).toBe("Levantamento.");
+  });
+  it("remove várias seções de bloqueio acumuladas", () => {
+    const d = "Texto\n\n## Bloqueio\nmotivo 1\n\n## Bloqueio\nmotivo 2";
+    expect(stripInternalNotes(d)).toBe("Texto");
+  });
+  it("descrição só com bloqueio vira null", () => {
+    expect(stripInternalNotes("## Bloqueio\nsegredo")).toBeNull();
+  });
+  it("mantém descrição sem bloqueio", () => {
+    expect(stripInternalNotes("Só texto")).toBe("Só texto");
+  });
+  it("null e vazio viram null", () => {
+    expect(stripInternalNotes(null)).toBeNull();
+    expect(stripInternalNotes("   ")).toBeNull();
   });
 });

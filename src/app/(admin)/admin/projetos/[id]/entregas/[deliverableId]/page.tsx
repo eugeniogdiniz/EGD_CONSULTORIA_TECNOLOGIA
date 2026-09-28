@@ -14,7 +14,7 @@ import {
   listSuccessors,
   listTimeEntries,
 } from "@/modules/projects/queries";
-import { deleteTimeEntryForm } from "@/modules/projects/form-actions";
+import { deleteTimeEntryForm, setDeliverableVisibilityForm } from "@/modules/projects/form-actions";
 import { PageHeader, Block } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { DeliverableFormDialog } from "@/modules/projects/components/deliverable-form";
@@ -247,6 +247,24 @@ export default async function DeliverableDetailPage({
                 dueAt: p.dueAt,
               }))}
             />
+          </Block>
+
+          <Block title="Portal do cliente">
+            <form action={setDeliverableVisibilityForm} className="grid gap-3">
+              <input type="hidden" name="id" value={d.id} />
+              <input type="hidden" name="projectId" value={id} />
+              <input type="hidden" name="visible" value={d.visibleToClient ? "0" : "1"} />
+              <p className="text-sm text-muted-foreground">
+                {d.visibleToClient
+                  ? "Esta entrega aparece no portal. O cliente vê título, descrição, status, prazo, arquivo e comentários — nunca horas, custos ou o motivo de bloqueio."
+                  : "Esta entrega é interna. O cliente não a vê no portal."}
+              </p>
+              <div>
+                <Button type="submit" size="sm" variant={d.visibleToClient ? "outline" : "default"}>
+                  {d.visibleToClient ? "Ocultar do cliente" : "Compartilhar com o cliente"}
+                </Button>
+              </div>
+            </form>
           </Block>
 
           <Block title="Dados">

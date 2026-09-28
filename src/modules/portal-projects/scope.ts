@@ -72,3 +72,14 @@ export function summarizeProject(
 
   return { total, done, percent, nextDeliverableDueAt, nextMilestoneDueAt };
 }
+
+/**
+ * A equipe registra o motivo de bloqueio dentro da descrição
+ * ("## Bloqueio"). Isso é interno: corta tudo a partir da primeira ocorrência.
+ */
+export function stripInternalNotes(description: string | null): string | null {
+  if (description === null) return null;
+  const idx = description.search(/(^|\n)## Bloqueio\b/);
+  const visible = (idx === -1 ? description : description.slice(0, idx)).trim();
+  return visible === "" ? null : visible;
+}
