@@ -385,3 +385,17 @@ export async function suggestCompanyByEmailDomain(_ctx: AdminContext, email: str
   if (rows.length !== 1) return null;
   return rows[0];
 }
+
+/** Empresas do CRM vinculadas a uma organização do portal, com contagem de projetos. */
+export async function listCompaniesByOrganization(_ctx: AdminContext, organizationId: string) {
+  if (!isUuid(organizationId)) return [];
+  const rows = await db.execute<{ id: string; name: string; project_count: number }>(sql`
+    select c.id, c.name,
+      (select count(*)::int from project p where p.company_id = c.id) as project_count
+    from crm_company c
+    where c.linked_organization_id = ${organizationId}
+      and c.archived_at is null
+    order by c.name asc
+  `);
+  return rows.map((r) => ({ id: r.id, name: r.name, projectCount: r.project_count }));
+}

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Portal · Projeto · Visão geral · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .abas { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .abas a { padding: 10px 14px; font-size: var(--text-small); font-weight: 500; color: var(--fg-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .abas a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent-strong); }
+  .selo { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 2px; font-size: var(--text-micro); font-weight: 500; white-space: nowrap; }
+  .selo.active { background: var(--link-soft); color: var(--link); border: 1px solid var(--link); }
+  .grid-dois { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 1180px) { .grid-dois { grid-template-columns: 1fr; } }
+  .fase { border: 1px solid var(--border); border-radius: 4px; padding: 14px; margin-bottom: 10px; background: var(--surface); }
+  .fase:last-child { margin-bottom: 0; }
+  .fase .cab { display: flex; align-items: center; gap: 10px; }
+  .fase .num { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-faint); }
+  .fase h4 { font-size: var(--text-body); }
+  .fase .cab .estado { margin-left: auto; }
+  .fase .datas { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted); margin-top: 4px; }
+  .barra { height: 6px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+  .barra span { display: block; height: 100%; background: var(--link); }
+  .barra.ok span { background: var(--success); }
+  .fase .cont { font-size: var(--text-micro); color: var(--fg-muted); margin-top: 6px; font-weight: 400; }
+  .marco { display: grid; grid-template-columns: 20px 92px 1fr auto; gap: 12px; align-items: center; padding: 9px 0; border-top: 1px solid var(--border); font-size: var(--text-small); }
+  .marco:first-child { border-top: 0; }
+  .marco .ic { width: 14px; height: 14px; border: 1.5px solid var(--border-strong); border-radius: 2px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; line-height: 1; }
+  .marco.done .ic { background: var(--success); border-color: var(--success); color: #fff; }
+  .marco .data { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted); }
+  .marco.done .nome { color: var(--fg-muted); }
+  .marco.late .data { color: var(--danger); font-weight: 500; }
+  .marco .fase-nome { font-size: var(--text-micro); color: var(--fg-faint); font-weight: 400; }
+  .ent { display: grid; grid-template-columns: 1fr 92px 110px; gap: 10px; padding: 9px 0; border-top: 1px solid var(--border); font-size: var(--text-small); align-items: center; }
+  .ent:first-child { border-top: 0; }
+  .ent .sub { font-size: var(--text-micro); color: var(--fg-muted); font-weight: 400; }
+  .ent .data { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted); text-align: right; }
+  .ent .st { text-align: right; }
+  .kv { display: grid; grid-template-columns: 120px 1fr; gap: 8px 16px; font-size: var(--text-small); }
+  .kv dt { color: var(--fg-muted); font-weight: 500; }
+  .kv dd { margin: 0; }
+  .kv dd.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .nota { max-width: 60rem; line-height: 1.6; display: grid; gap: 10px; }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu do portal">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Início</a>
+    <a class="item" href="portal-projetos-lista.html" aria-current="page">Projetos</a>
+    <a class="item" href="#">Minha conta</a>
+    <div class="rodape">Portal do cliente</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a href="portal-projetos-lista.html" style="color:var(--fg-muted);font-weight:500">Projetos</a> <span class="faint" style="margin:0 8px">/</span> Laudo de infra TI — URBHIS</div>
+      <div class="user">
+        <button class="org-select" aria-label="Organização">Consórcio URBHIS</button>
+        <span>João Silva</span><span class="avatar">JS</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <nav class="abas" aria-label="Sub-nav do projeto">
+        <a href="portal-projeto-detalhe.html" aria-current="page">Visão geral</a>
+        <a href="#">Linha do tempo</a>
+        <a href="#">Calendário</a>
+      </nav>
+
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Laudo de infra TI — URBHIS</h1>
+          <div class="small muted" style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="selo active">Em execução</span>
+            <span class="faint">·</span><span>Consórcio URBHIS</span>
+            <span class="faint">·</span><span>iniciado <span class="mono">03/10/2026</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-dois">
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <section class="bloco">
+            <div class="bloco-head"><h3>Fases</h3><span class="small faint">3 fases</span></div>
+            <div class="bloco-body">
+              <div class="fase">
+                <div class="cab"><span class="num">01</span><h4>Kickoff e escopo</h4><span class="estado selo" style="background:var(--success-soft);color:var(--success);border:1px solid var(--success)">Concluída</span></div>
+                <div class="datas">03/10/2026 → 12/10/2026</div>
+                <div class="barra ok"><span style="width:100%"></span></div>
+                <div class="cont">3 de 3 entregas concluídas</div>
+              </div>
+              <div class="fase">
+                <div class="cab"><span class="num">02</span><h4>Execução (inventário + backup)</h4><span class="estado selo active">Em andamento</span></div>
+                <div class="datas">13/10/2026 → 20/11/2026</div>
+                <div class="barra"><span style="width:25%"></span></div>
+                <div class="cont">1 de 4 entregas concluídas · 1 em espera</div>
+              </div>
+              <div class="fase">
+                <div class="cab"><span class="num">03</span><h4>Aceite e entrega final</h4><span class="estado selo" style="background:var(--bg-subtle);color:var(--fg-muted);border:1px solid var(--border)">A iniciar</span></div>
+                <div class="datas">21/11/2026 → 12/12/2026</div>
+                <div class="barra"><span style="width:0%"></span></div>
+                <div class="cont">0 de 2 entregas concluídas</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="bloco">
+            <div class="bloco-head"><h3>Marcos</h3><span class="small faint">2 de 4 concluídos</span></div>
+            <div class="bloco-body">
+              <div class="marco done"><span class="ic">✓</span><span class="data">03/10/2026</span><span class="nome">Kickoff — reunião</span><span class="fase-nome">Kickoff e escopo</span></div>
+              <div class="marco done"><span class="ic">✓</span><span class="data">08/10/2026</span><span class="nome">Aceite do escopo</span><span class="fase-nome">Kickoff e escopo</span></div>
+              <div class="marco late"><span class="ic"></span><span class="data">14/10/2026</span><span class="nome">Janelas de manutenção acordadas</span><span class="fase-nome">Execução</span></div>
+              <div class="marco"><span class="ic"></span><span class="data">12/12/2026</span><span class="nome">Aceite formal do laudo</span><span class="fase-nome">Aceite</span></div>
+            </div>
+          </section>
+
+          <section class="bloco">
+            <div class="bloco-head"><h3>Próximas entregas</h3><span class="small faint">apenas as que a equipe compartilhou</span></div>
+            <div class="bloco-body">
+              <a class="ent" href="portal-projeto-entrega.html" style="color:inherit">
+                <div><div style="font-weight:500">Inventário de servidores</div><div class="sub">Execução</div></div>
+                <div class="data">15/10/2026</div>
+                <div class="st"><span class="selo active">Em progresso</span></div>
+              </a>
+              <a class="ent" href="#" style="color:inherit">
+                <div><div style="font-weight:500">Checklist de segurança de rede</div><div class="sub">Execução</div></div>
+                <div class="data">18/10/2026</div>
+                <div class="st"><span class="selo" style="background:var(--surface);color:var(--fg);border:1px solid var(--border-strong)">Em revisão</span></div>
+              </a>
+              <a class="ent" href="#" style="color:inherit">
+                <div><div style="font-weight:500">Migração do storage secundário</div><div class="sub">Execução</div></div>
+                <div class="data">30/10/2026</div>
+                <div class="st"><span class="selo on_hold" style="background:var(--warning-soft);color:var(--warning);border:1px solid var(--warning)">Em espera</span></div>
+              </a>
+            </div>
+          </section>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <section class="bloco">
+            <div class="bloco-head"><h3>Resumo</h3></div>
+            <div class="bloco-body">
+              <dl class="kv">
+                <dt>Status</dt><dd><span class="selo active">Em execução</span></dd>
+                <dt>Empresa</dt><dd>Consórcio URBHIS</dd>
+                <dt>Início</dt><dd class="mono">03/10/2026</dd>
+                <dt>Progresso</dt><dd class="mono">5 de 11 · 45%</dd>
+                <dt>Responsável EGD</dt><dd>Eugênio G. Diniz</dd>
+              </dl>
+            </div>
+          </section>
+          <section class="bloco">
+            <div class="bloco-head"><h3>Precisa de algo?</h3></div>
+            <div class="bloco-body small muted">Escreva para <a class="link" href="mailto:contato@egdsystem.com.br">contato@egdsystem.com.br</a>. Você também pode comentar em cada entrega.</div>
+          </section>
+        </div>
+      </div>
+
+      <section class="bloco">
+        <div class="bloco-head"><h3>Regras da visão geral</h3></div>
+        <div class="bloco-body small muted nota">
+          <p><strong style="color:var(--fg);font-weight:500">Fases e marcos aparecem sempre.</strong> Entregas só aparecem quando a equipe marca como visível ao cliente; contadores das fases consideram só essas.</p>
+          <p><strong style="color:var(--fg);font-weight:500">"Bloqueada" vira "Em espera".</strong> O motivo interno do bloqueio nunca é exibido.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Sem valores.</strong> Orçamento, horas, custos, dependências e propostas ficam de fora.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Marco atrasado</strong> = data passada e não concluído (data em vermelho).</p>
+          <p><strong style="color:var(--fg);font-weight:500">Acesso indevido.</strong> Abrir o link de um projeto de outra organização devolve 404, igual a um projeto inexistente.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

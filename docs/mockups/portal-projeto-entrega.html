@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Portal · Projeto · Entrega · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .abas { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .abas a { padding: 10px 14px; font-size: var(--text-small); font-weight: 500; color: var(--fg-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .abas a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent-strong); }
+  .selo { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 2px; font-size: var(--text-micro); font-weight: 500; white-space: nowrap; }
+  .selo.doing { background: var(--link-soft); color: var(--link); border: 1px solid var(--link); }
+  .grid-dois { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 1180px) { .grid-dois { grid-template-columns: 1fr; } }
+  .kv { display: grid; grid-template-columns: 110px 1fr; gap: 8px 16px; font-size: var(--text-small); }
+  .kv dt { color: var(--fg-muted); font-weight: 500; }
+  .kv dd { margin: 0; }
+  .kv dd.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .desc { font-size: var(--text-small); line-height: 1.6; white-space: pre-wrap; }
+  .anexo { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); }
+  .anexo .ext { width: 36px; height: 44px; border: 1px solid var(--border-strong); border-radius: 2px; background: var(--bg-subtle); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 10px; color: var(--fg-muted); flex: none; }
+  .anexo .nome { font-size: var(--text-small); font-weight: 500; }
+  .anexo .meta { font-size: var(--text-micro); color: var(--fg-muted); font-weight: 400; }
+  .anexo .btn { margin-left: auto; }
+  .thread { display: flex; flex-direction: column; gap: 18px; }
+  .comment { display: grid; grid-template-columns: 32px 1fr; gap: 12px; }
+  .comment .av { width: 32px; height: 32px; border-radius: 50%; background: var(--tinta-900); color: var(--surface); display: inline-flex; align-items: center; justify-content: center; font-size: var(--text-micro); font-weight: 600; }
+  .comment .av.eu { background: var(--link); }
+  .comment .cab { display: flex; align-items: baseline; gap: 8px; font-size: var(--text-small); flex-wrap: wrap; }
+  .comment .cab b { font-weight: 500; }
+  .comment .equipe { font-size: 10px; padding: 1px 6px; border-radius: 2px; background: var(--bg-subtle); border: 1px solid var(--border); color: var(--fg-muted); font-weight: 500; }
+  .comment .quando { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-faint); }
+  .comment .corpo { margin-top: 4px; font-size: var(--text-small); line-height: 1.55; white-space: pre-wrap; }
+  .comment .acoes { margin-top: 6px; display: flex; gap: 14px; font-size: var(--text-micro); }
+  .comment .acoes a { color: var(--fg-muted); }
+  .replies { margin-left: 44px; padding-left: 12px; border-left: 2px solid var(--border); display: flex; flex-direction: column; gap: 14px; }
+  .composer { display: grid; gap: 8px; margin-top: 4px; }
+  .composer .textarea { min-height: 84px; }
+  .composer .acoes { display: flex; justify-content: flex-end; gap: 8px; }
+  .nota { max-width: 60rem; line-height: 1.6; display: grid; gap: 10px; }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu do portal">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Início</a>
+    <a class="item" href="portal-projetos-lista.html" aria-current="page">Projetos</a>
+    <a class="item" href="#">Minha conta</a>
+    <div class="rodape">Portal do cliente</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a href="portal-projetos-lista.html" style="color:var(--fg-muted);font-weight:500">Projetos</a> <span class="faint" style="margin:0 8px">/</span> <a href="portal-projeto-detalhe.html" style="color:var(--fg-muted);font-weight:500">Laudo de infra TI</a> <span class="faint" style="margin:0 8px">/</span> Inventário de servidores</div>
+      <div class="user">
+        <button class="org-select" aria-label="Organização">Consórcio URBHIS</button>
+        <span>João Silva</span><span class="avatar">JS</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <nav class="abas" aria-label="Sub-nav do projeto">
+        <a href="portal-projeto-detalhe.html" aria-current="page">Visão geral</a>
+        <a href="#">Linha do tempo</a>
+        <a href="#">Calendário</a>
+      </nav>
+
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Inventário de servidores</h1>
+          <div class="small muted" style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="selo doing">Em progresso</span>
+            <span class="faint">·</span><span>Execução</span>
+            <span class="faint">·</span><span>prazo <span class="mono">15/10/2026</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-dois">
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <section class="bloco">
+            <div class="bloco-head"><h3>Descrição</h3></div>
+            <div class="bloco-body">
+              <p class="desc">Levantamento de todos os servidores físicos e virtuais do datacenter principal: hostname, função, sistema operacional, versão, criticidade e responsável.
+
+Ao final, entregamos uma planilha consolidada e um diagrama de topologia.</p>
+            </div>
+          </section>
+
+          <section class="bloco">
+            <div class="bloco-head"><h3>Arquivo da entrega</h3></div>
+            <div class="bloco-body">
+              <div class="anexo">
+                <span class="ext">XLSX</span>
+                <div><div class="nome">inventario-servidores-v1.xlsx</div><div class="meta">184 KB · enviado em 14/10/2026</div></div>
+                <a class="btn btn-secondary btn-sm" href="#">Baixar</a>
+              </div>
+              <p class="micro faint" style="margin-top:10px;font-weight:400">O download abre um link temporário e fica registrado no histórico da EGD.</p>
+            </div>
+          </section>
+
+          <section class="bloco">
+            <div class="bloco-head"><h3>Comentários (3)</h3></div>
+            <div class="bloco-body">
+              <div class="thread">
+                <div>
+                  <div class="comment">
+                    <span class="av">EG</span>
+                    <div>
+                      <div class="cab"><b>Eugênio G. Diniz</b><span class="equipe">Equipe EGD</span><span class="quando">14/10/2026 09:12</span></div>
+                      <div class="corpo">Primeira versão do inventário anexada. Faltam os 3 servidores do rack B, que dependem do acesso liberado pela TI de vocês.</div>
+                      <div class="acoes"><a href="#">Responder</a></div>
+                    </div>
+                  </div>
+                  <div class="replies" style="margin-top:14px">
+                    <div class="comment">
+                      <span class="av eu">JS</span>
+                      <div>
+                        <div class="cab"><b>João Silva</b><span class="quando">14/10/2026 15:40</span></div>
+                        <div class="corpo">O acesso ao rack B sai amanhã cedo. Pode reagendar a visita para quinta?</div>
+                        <div class="acoes"><a href="#">Editar</a><a href="#">Excluir</a></div>
+                      </div>
+                    </div>
+                    <div class="comment">
+                      <span class="av">EG</span>
+                      <div>
+                        <div class="cab"><b>Eugênio G. Diniz</b><span class="equipe">Equipe EGD</span><span class="quando">14/10/2026 16:05</span></div>
+                        <div class="corpo">Combinado, quinta às 9h.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <form class="composer">
+                  <label class="sr-only" for="c">Escrever comentário</label>
+                  <textarea class="textarea" id="c" placeholder="Escreva um comentário para a equipe da EGD…"></textarea>
+                  <div class="acoes"><button class="btn btn-primary btn-sm" type="submit">Comentar</button></div>
+                </form>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <section class="bloco">
+            <div class="bloco-head"><h3>Dados</h3></div>
+            <div class="bloco-body">
+              <dl class="kv">
+                <dt>Status</dt><dd><span class="selo doing">Em progresso</span></dd>
+                <dt>Prazo</dt><dd class="mono">15/10/2026</dd>
+                <dt>Fase</dt><dd>Execução (inventário + backup)</dd>
+                <dt>Responsável</dt><dd>Eugênio G. Diniz</dd>
+              </dl>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <section class="bloco">
+        <div class="bloco-head"><h3>Estado "Em espera" e regras</h3></div>
+        <div class="bloco-body small muted nota">
+          <div class="alert warn" style="max-width:40rem"><strong>Em espera.</strong> Esta entrega está aguardando um retorno ou liberação. A equipe da EGD entra em contato se precisar de algo de vocês.</div>
+          <p><strong style="color:var(--fg);font-weight:500">Só entregas compartilhadas.</strong> Se a entrega não estiver marcada como visível ao cliente, o link devolve 404.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Comentários.</strong> Dois níveis (comentário e resposta). O cliente edita e exclui só os próprios; comentário excluído aparece como "[comentário apagado]" para manter a conversa.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Sem horas, custos ou dependências.</strong> Nada disso aparece no portal; o motivo interno de bloqueio também não.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Sem notificação nesta fase.</strong> A equipe vê o comentário ao abrir a entrega no admin.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

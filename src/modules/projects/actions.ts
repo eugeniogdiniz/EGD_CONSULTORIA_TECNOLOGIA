@@ -666,6 +666,27 @@ export async function assignDeliverable(
   return ok(null);
 }
 
+export async function setDeliverableVisibility(
+  ctx: AdminContext,
+  id: string,
+  visible: boolean,
+): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Entrega não encontrada.");
+  const [row] = await db
+    .update(projectDeliverable)
+    .set({ visibleToClient: visible })
+    .where(eq(projectDeliverable.id, id))
+    .returning({ id: projectDeliverable.id });
+  if (!row) return fail("Entrega não encontrada.");
+  await audit({
+    actorId: ctx.user.id,
+    action: visible ? "project.deliverable.shared_with_client" : "project.deliverable.hidden_from_client",
+    entityType: "project_deliverable",
+    entityId: id,
+  });
+  return ok(null);
+}
+
 export async function attachDeliverableFile(
   ctx: AdminContext,
   id: string,
