@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/modules/auth/context";
+import { listCompaniesByOrganization } from "@/modules/crm/queries";
 import { getOrganization, listOrganizationMembers, listPendingInvitations } from "@/modules/tenancy/queries";
 import { updateOrganizationForm, toggleOrganizationStatusForm, resendInvitationForm, setUserActiveForm } from "@/modules/tenancy/form-actions";
 import { OrganizationForm } from "@/modules/tenancy/components/organization-form";
@@ -16,7 +17,11 @@ export default async function OrganizacaoPage({ params }: PageProps<"/admin/orga
   const { id } = await params;
   const org = await getOrganization(ctx, id);
   if (!org) notFound();
-  const [members, invites] = await Promise.all([listOrganizationMembers(ctx, id), listPendingInvitations(ctx, id)]);
+  const [members, invites, companies] = await Promise.all([
+    listOrganizationMembers(ctx, id),
+    listPendingInvitations(ctx, id),
+    listCompaniesByOrganization(ctx, id),
+  ]);
   const ativa = org.status === "active";
 
   return (
@@ -130,6 +135,24 @@ export default async function OrganizacaoPage({ params }: PageProps<"/admin/orga
         </div>
 
         <div className="grid gap-6">
+          <Block title="Empresas do CRM vinculadas" aside={String(companies.length)}>
+            {companies.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Nenhuma. Vincule pela página da empresa no CRM para o portal exibir os projetos dela.
+              </p>
+            ) : (
+              <ul className="grid gap-2 text-sm">
+                {companies.map((c) => (
+                  <li key={c.id} className="flex items-center justify-between gap-3">
+                    <Link href={`/admin/crm/empresas/${c.id}`} className="text-link hover:underline">{c.name}</Link>
+                    <span className="type-micro text-muted-foreground">
+                      {c.projectCount} projeto{c.projectCount === 1 ? "" : "s"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Block>
           <Block title="Convidar por e-mail">
             <InviteForm organizationId={org.id} />
           </Block>
