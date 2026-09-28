@@ -10,6 +10,7 @@ import {
 import { toggleCompanyArchivedForm } from "@/modules/crm/form-actions";
 import { PageHeader, Block, EmptyState } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
+import { ContactFormDialog } from "@/modules/crm/components/contact-form";
 import { formatDate, formatBrlCents, formatIsoDate } from "@/lib/format";
 import { cn } from "cn";
 
@@ -130,9 +131,10 @@ export default async function EmpresaDetalhePage({ params }: PageProps<"/admin/c
         <Block
           title="Contatos"
           aside={
-            <span>
-              {contacts.length} {contacts.length === 1 ? "ativo" : "ativos"}
-            </span>
+            <ContactFormDialog
+              companyId={company.id}
+              trigger={<Button variant="secondary" size="sm" type="button">Adicionar contato</Button>}
+            />
           }
         >
           {contacts.length === 0 ? (
@@ -163,11 +165,15 @@ export default async function EmpresaDetalhePage({ params }: PageProps<"/admin/c
                       )}
                     </div>
                   </div>
+                  <ContactFormDialog
+                    companyId={company.id}
+                    contact={c}
+                    trigger={<button type="button" className="text-xs text-link hover:underline">Editar</button>}
+                  />
                 </li>
               ))}
             </ul>
           )}
-          <p className="type-micro mt-4 text-faint">Adicionar contato: em breve na próxima release.</p>
         </Block>
 
         <Block
