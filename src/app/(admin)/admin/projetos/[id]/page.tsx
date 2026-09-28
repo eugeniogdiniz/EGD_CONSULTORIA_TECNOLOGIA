@@ -20,6 +20,7 @@ import { PageHeader, Block, EmptyState } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { PhaseFormDialog } from "@/modules/projects/components/phase-form";
 import { MilestoneFormDialog } from "@/modules/projects/components/milestone-form";
+import { SaveAsTemplateDialog } from "@/modules/projects/components/template-form";
 import { formatBrlCents, formatDate, formatIsoDate } from "@/lib/format";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -99,6 +100,11 @@ export default async function ProjetoDetalhePage({ params }: PageProps<"/admin/p
             <Button variant="secondary" size="sm" render={<Link href={`/admin/projetos/${p.id}/editar`} />}>
               Editar
             </Button>
+            <SaveAsTemplateDialog
+              projectId={p.id}
+              defaultName={p.title}
+              trigger={<Button variant="secondary" size="sm" type="button">Salvar como template</Button>}
+            />
             <form action={toggleProjectArchivedForm}>
               <input type="hidden" name="id" value={p.id} />
               <input type="hidden" name="archived" value={archived ? "1" : "0"} />

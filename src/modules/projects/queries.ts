@@ -397,6 +397,15 @@ export async function listTimeEntries(_ctx: AdminContext, deliverableId: string)
     .orderBy(desc(projectTimeEntry.startedAt));
 }
 
+/** Rate por hora do usuário atual (cents ou null). */
+export async function getCurrentUserRateCents(ctx: AdminContext): Promise<number | null> {
+  const row = await db.query.users.findFirst({
+    where: eq(users.id, ctx.user.id),
+    columns: { hourlyRateCents: true },
+  });
+  return row?.hourlyRateCents ?? null;
+}
+
 /** Timer aberto do usuário atual (endedAt null). Devolve null se não há. */
 export async function getOpenTimer(ctx: AdminContext) {
   const [row] = await db

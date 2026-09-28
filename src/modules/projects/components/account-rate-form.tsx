@@ -65,7 +65,7 @@ export function AccountRateForm({ initialCents }: { initialCents: number | null 
         </div>
         <FieldError errors={fe?.hourlyRateCents} />
         <span className="text-[0.8125rem] text-faint">
-          Ex.: "150,00" para R$ 150 por hora.
+          Ex.: &ldquo;150,00&rdquo; para R$ 150 por hora.
         </span>
       </div>
       {state && !state.ok && !fe && (

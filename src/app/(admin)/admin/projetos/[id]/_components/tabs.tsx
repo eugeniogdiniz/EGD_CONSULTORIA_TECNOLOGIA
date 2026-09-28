@@ -6,9 +6,13 @@ import { cn } from "cn";
 
 export function ProjectTabs({ projectId }: { projectId: string }) {
   const pathname = usePathname();
+  const base = `/admin/projetos/${projectId}`;
   const tabs = [
-    { href: `/admin/projetos/${projectId}`, label: "Visão geral", match: (p: string) => p === `/admin/projetos/${projectId}` || p.startsWith(`/admin/projetos/${projectId}/editar`) },
-    { href: `/admin/projetos/${projectId}/kanban`, label: "Kanban", match: (p: string) => p.startsWith(`/admin/projetos/${projectId}/kanban`) },
+    { href: base, label: "Visão geral", match: (p: string) => p === base || p.startsWith(`${base}/editar`) || p.startsWith(`${base}/entregas`) },
+    { href: `${base}/kanban`, label: "Kanban", match: (p: string) => p.startsWith(`${base}/kanban`) },
+    { href: `${base}/gantt`, label: "Gantt", match: (p: string) => p.startsWith(`${base}/gantt`) },
+    { href: `${base}/calendario`, label: "Calendário", match: (p: string) => p.startsWith(`${base}/calendario`) },
+    { href: `${base}/financeiro`, label: "Financeiro", match: (p: string) => p.startsWith(`${base}/financeiro`) },
   ];
   return (
     <nav aria-label="Sub-nav do projeto" className="flex gap-1 border-b border-border">

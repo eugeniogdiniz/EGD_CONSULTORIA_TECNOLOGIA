@@ -129,6 +129,14 @@ function SidebarGroup({ group }: { group: NavGroup }) {
 export function SidebarNav({ nav, footer }: { nav: NavEntry[]; footer: string }) {
   const pathname = usePathname();
   const firstLinkHref = nav.find((e): e is NavLink => !isGroup(e))?.href;
+
+  // Quando dois itens flat competem pelo mesmo pathname (ex.: /admin/projetos e
+  // /admin/projetos/templates), o mais específico ganha.
+  const flatHrefs = nav.filter((e): e is NavLink => !isGroup(e)).map((e) => e.href);
+  const winningHref = flatHrefs
+    .filter((h) => pathname === h || pathname.startsWith(`${h}/`))
+    .reduce<string | null>((longest, h) => (longest == null || h.length > longest.length ? h : longest), null);
+
   return (
     <>
       <div className="px-3 pt-2 pb-5">
@@ -137,7 +145,11 @@ export function SidebarNav({ nav, footer }: { nav: NavEntry[]; footer: string })
       <nav aria-label="Menu" className="grid gap-1">
         {nav.map((entry, index) => {
           if (isGroup(entry)) return <SidebarGroup key={`g-${entry.storageKey}`} group={entry} />;
-          const active = isLinkActive(pathname, entry.href, entry.href === firstLinkHref && index === 0);
+          const isFirst = entry.href === firstLinkHref && index === 0;
+          const active =
+            winningHref !== null
+              ? entry.href === winningHref
+              : isLinkActive(pathname, entry.href, isFirst);
           return <SidebarLink key={entry.href} item={entry} active={active} />;
         })}
       </nav>

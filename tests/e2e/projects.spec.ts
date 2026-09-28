@@ -84,4 +84,36 @@ test.describe.serial("projects", () => {
     expect([307, 302, 308]).toContain(res.status());
     expect(res.headers()["location"]).toMatch(/\/entrar/);
   });
+
+  test("Fase 3.5 — abas Gantt, Calendário, Financeiro renderizam sem 404", async ({ page }) => {
+    await loginAs(page, ADMIN.email, ADMIN.password);
+    await page.goto("/admin/projetos");
+    await page.getByRole("link", { name: oppTitulo }).click();
+
+    // Gantt
+    await page.getByRole("link", { name: /^gantt$/i }).click();
+    await expect(page).toHaveURL(/\/gantt$/);
+    await expect(page.getByRole("heading", { level: 1, name: /linha do tempo/i })).toBeVisible();
+
+    // Calendário
+    await page.getByRole("link", { name: /^calend[aá]rio$/i }).click();
+    await expect(page).toHaveURL(/\/calendario$/);
+    await expect(page.getByRole("heading", { level: 1, name: /calend[aá]rio/i })).toBeVisible();
+
+    // Financeiro — cotas visíveis
+    await page.getByRole("link", { name: /^financeiro$/i }).click();
+    await expect(page).toHaveURL(/\/financeiro$/);
+    await expect(page.getByText(/or[çc]amento/i).first()).toBeVisible();
+    await expect(page.getByText(/margem/i).first()).toBeVisible();
+  });
+
+  test("Fase 3.5 — /admin/projetos/templates renderiza e sidebar marca o item certo", async ({ page }) => {
+    await loginAs(page, ADMIN.email, ADMIN.password);
+    await page.goto("/admin/projetos/templates");
+    await expect(page.getByRole("heading", { level: 1, name: /templates de projeto/i })).toBeVisible();
+    // Sidebar: apenas Templates deve ser aria-current="page" nesse pathname.
+    const sidebar = page.getByRole("navigation", { name: /^menu$/i });
+    await expect(sidebar.getByRole("link", { name: /^templates$/i })).toHaveAttribute("aria-current", "page");
+    await expect(sidebar.getByRole("link", { name: /^projetos$/i })).not.toHaveAttribute("aria-current", "page");
+  });
 });
