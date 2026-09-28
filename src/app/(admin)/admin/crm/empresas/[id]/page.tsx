@@ -11,6 +11,8 @@ import { toggleCompanyArchivedForm } from "@/modules/crm/form-actions";
 import { PageHeader, Block, EmptyState } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { ContactFormDialog } from "@/modules/crm/components/contact-form";
+import { OpportunityFormDialog } from "@/modules/crm/components/opportunity-form";
+import { InteractionFormDialog } from "@/modules/crm/components/interaction-form";
 import { formatDate, formatBrlCents, formatIsoDate } from "@/lib/format";
 import { cn } from "cn";
 
@@ -179,9 +181,11 @@ export default async function EmpresaDetalhePage({ params }: PageProps<"/admin/c
         <Block
           title="Oportunidades"
           aside={
-            <span>
-              {opportunities.filter((o) => o.stage !== "won" && o.stage !== "lost").length} abertas
-            </span>
+            <OpportunityFormDialog
+              companyId={company.id}
+              contacts={contacts.map((c) => ({ id: c.id, name: c.name }))}
+              trigger={<Button variant="secondary" size="sm" type="button">Nova oportunidade</Button>}
+            />
           }
         >
           {opportunities.length === 0 ? (
@@ -214,7 +218,16 @@ export default async function EmpresaDetalhePage({ params }: PageProps<"/admin/c
         </Block>
       </div>
 
-      <Block title="Interações">
+      <Block
+        title="Interações"
+        aside={
+          <InteractionFormDialog
+            companyId={company.id}
+            back={`/admin/crm/empresas/${company.id}`}
+            trigger={<Button variant="secondary" size="sm" type="button">Registrar interação</Button>}
+          />
+        }
+      >
         {interactions.length === 0 ? (
           <EmptyState title="Nenhuma interação registrada." text="Ligações, e-mails, reuniões e notas aparecem aqui." />
         ) : (
@@ -247,7 +260,6 @@ export default async function EmpresaDetalhePage({ params }: PageProps<"/admin/c
             ))}
           </ol>
         )}
-        <p className="type-micro mt-4 text-faint">Registrar interação: em breve na próxima release.</p>
       </Block>
     </>
   );
