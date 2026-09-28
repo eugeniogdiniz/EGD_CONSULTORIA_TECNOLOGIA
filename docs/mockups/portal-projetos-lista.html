@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Portal · Projetos (lista) · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  @media (max-width: 960px) { .cards { grid-template-columns: 1fr; } }
+  .proj { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; display: grid; gap: 14px; }
+  .proj:hover { border-color: var(--border-strong); }
+  .proj .topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .proj h3 { font-size: var(--text-body); }
+  .proj .empresa { font-size: var(--text-micro); color: var(--fg-muted); margin-top: 2px; font-weight: 400; }
+  .selo { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 2px; font-size: var(--text-micro); font-weight: 500; white-space: nowrap; }
+  .selo.active { background: var(--link-soft); color: var(--link); border: 1px solid var(--link); }
+  .selo.planning { background: var(--bg-subtle); color: var(--fg-muted); border: 1px solid var(--border); }
+  .selo.delivered { background: var(--success-soft); color: var(--success); border: 1px solid var(--success); }
+  .selo.on_hold { background: var(--warning-soft); color: var(--warning); border: 1px solid var(--warning); }
+  .barra { height: 6px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+  .barra span { display: block; height: 100%; background: var(--link); }
+  .prog { display: flex; justify-content: space-between; font-size: var(--text-micro); color: var(--fg-muted); margin-top: 6px; font-weight: 400; }
+  .proj .proximo { border-top: 1px solid var(--border); padding-top: 12px; font-size: var(--text-small); display: grid; grid-template-columns: 96px 1fr; gap: 4px 12px; }
+  .proj .proximo dt { color: var(--fg-muted); font-weight: 500; }
+  .proj .proximo dd { margin: 0; }
+  .proj .rodape { display: flex; justify-content: space-between; align-items: center; font-size: var(--text-micro); color: var(--fg-faint); font-weight: 400; }
+  .nota { max-width: 60rem; line-height: 1.6; display: grid; gap: 10px; }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu do portal">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Início</a>
+    <a class="item" href="portal-projetos-lista.html" aria-current="page">Projetos</a>
+    <a class="item" href="#">Minha conta</a>
+    <div class="rodape">Portal do cliente</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo">Projetos</div>
+      <div class="user">
+        <button class="org-select" aria-label="Organização">Consórcio URBHIS</button>
+        <span>João Silva</span><span class="avatar">JS</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Meus projetos</h1>
+          <p class="small muted" style="margin-top:6px">2 projetos do Consórcio URBHIS. Somente leitura — para mudar algo, fale com a equipe da EGD.</p>
+        </div>
+      </div>
+
+      <div class="cards">
+        <a class="proj" href="portal-projeto-detalhe.html" style="color:inherit">
+          <div class="topo">
+            <div>
+              <h3>Laudo de infra TI — URBHIS</h3>
+              <div class="empresa">Consórcio URBHIS</div>
+            </div>
+            <span class="selo active">Em execução</span>
+          </div>
+          <div>
+            <div class="barra" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso das entregas"><span style="width:45%"></span></div>
+            <div class="prog"><span>5 de 11 entregas concluídas</span><span class="mono">45%</span></div>
+          </div>
+          <dl class="proximo">
+            <dt>Próximo marco</dt><dd>Aceite do escopo · <span class="mono">08/10/2026</span></dd>
+            <dt>Próx. entrega</dt><dd>Inventário de servidores · <span class="mono">15/10/2026</span></dd>
+          </dl>
+          <div class="rodape"><span>Iniciado em 03/10/2026</span><span class="link">Abrir projeto →</span></div>
+        </a>
+
+        <a class="proj" href="#" style="color:inherit">
+          <div class="topo">
+            <div>
+              <h3>Consultoria contábil — onboarding</h3>
+              <div class="empresa">Consórcio URBHIS</div>
+            </div>
+            <span class="selo planning">Planejamento</span>
+          </div>
+          <div>
+            <div class="barra" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso das entregas"><span style="width:0%"></span></div>
+            <div class="prog"><span>0 de 6 entregas concluídas</span><span class="mono">0%</span></div>
+          </div>
+          <dl class="proximo">
+            <dt>Próximo marco</dt><dd>Kickoff · <span class="mono">02/11/2026</span></dd>
+            <dt>Próx. entrega</dt><dd class="faint">Nenhuma com prazo definido</dd>
+          </dl>
+          <div class="rodape"><span>Criado em 27/09/2026</span><span class="link">Abrir projeto →</span></div>
+        </a>
+      </div>
+
+      <section class="bloco">
+        <div class="bloco-head"><h3>Estado vazio</h3></div>
+        <div class="bloco-body">
+          <div class="empty" style="padding:8px 0">
+            <h3>Nenhum projeto por aqui ainda.</h3>
+            <p>Se você espera ver algo aqui, avise a equipe da EGD — talvez o projeto ainda não esteja vinculado à sua organização.</p>
+            <div><a class="btn btn-secondary btn-sm" href="mailto:contato@egdsystem.com.br">Escrever para a EGD</a></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloco">
+        <div class="bloco-head"><h3>Regras da lista</h3></div>
+        <div class="bloco-body small muted nota">
+          <p><strong style="color:var(--fg);font-weight:500">Escopo por organização.</strong> Aparecem só projetos cuja empresa está vinculada à organização ativa (seletor no topo). Trocar de organização troca a lista.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Progresso.</strong> Conta só entregas visíveis ao cliente. Entregas internas não entram no total nem no percentual.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Sem valores.</strong> Orçamento, custos e propostas nunca aparecem no portal.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Arquivados</strong> não aparecem. Projetos cancelados aparecem como "Cancelado" e sem barra de progresso.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>
