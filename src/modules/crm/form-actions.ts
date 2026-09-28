@@ -25,6 +25,67 @@ import {
   updateProposal,
 } from "./actions";
 
+import type { ConversionPlan } from "./actions";
+import { convertLead } from "./actions";
+
+// Conversão de lead ───────────────────────────────────────────────────────
+
+type ConvertState = ActionResult<{ companyId: string; contactId: string; opportunityId: string }> | null;
+
+export async function convertLeadForm(_p: ConvertState, fd: FormData): Promise<ConvertState> {
+  const ctx = await requireAdmin();
+  const leadId = String(fd.get("leadId") ?? "");
+  const mode = String(fd.get("mode") ?? "");
+  const plan: ConversionPlan =
+    mode === "link"
+      ? {
+          mode: "link",
+          companyId: String(fd.get("linkCompanyId") ?? ""),
+          contact: {
+            name: String(fd.get("contactName") ?? ""),
+            email: String(fd.get("contactEmail") ?? ""),
+            phone: String(fd.get("contactPhone") ?? ""),
+            role: (["primary", "technical", "financial", "other"].includes(String(fd.get("contactRole") ?? ""))
+              ? String(fd.get("contactRole"))
+              : "primary") as "primary" | "technical" | "financial" | "other",
+          },
+          opportunity: {
+            title: String(fd.get("opportunityTitle") ?? ""),
+            valueCents: String(fd.get("opportunityValueCents") ?? ""),
+            nextStep: String(fd.get("opportunityNextStep") ?? ""),
+          },
+        }
+      : {
+          mode: "create",
+          company: {
+            name: String(fd.get("companyName") ?? ""),
+            cnpj: String(fd.get("companyCnpj") ?? ""),
+            website: String(fd.get("companyWebsite") ?? ""),
+            source: "site_contact",
+          },
+          contact: {
+            name: String(fd.get("contactName") ?? ""),
+            email: String(fd.get("contactEmail") ?? ""),
+            phone: String(fd.get("contactPhone") ?? ""),
+            role: (["primary", "technical", "financial", "other"].includes(String(fd.get("contactRole") ?? ""))
+              ? String(fd.get("contactRole"))
+              : "primary") as "primary" | "technical" | "financial" | "other",
+          },
+          opportunity: {
+            title: String(fd.get("opportunityTitle") ?? ""),
+            valueCents: String(fd.get("opportunityValueCents") ?? ""),
+            nextStep: String(fd.get("opportunityNextStep") ?? ""),
+          },
+        };
+  const r = await convertLead(ctx, leadId, plan);
+  if (r.ok) {
+    revalidatePath("/admin/leads");
+    revalidatePath(`/admin/crm/empresas/${r.data.companyId}`);
+    redirect(`/admin/crm/empresas/${r.data.companyId}`);
+  }
+  return r;
+}
+
 // Empresas ────────────────────────────────────────────────────────────────
 
 type CompanyState = ActionResult<{ id: string; slug: string }> | null;
