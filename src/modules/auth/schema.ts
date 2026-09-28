@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, text, timestamp, boolean, uuid, index } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, text, timestamp, boolean, bigint, uuid, index } from "drizzle-orm/pg-core";
 
 export const userRole = pgEnum("user_role", ["admin", "client"]);
 
@@ -18,6 +18,8 @@ export const users = pgTable("users", {
   image: text(),
   role: userRole().default("client").notNull(),
   active: boolean().default(true).notNull(),
+  // cents BRL por hora; usado no cálculo de custo do módulo projects
+  hourlyRateCents: bigint({ mode: "number" }),
   ...timestamps,
 });
 

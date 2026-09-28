@@ -1,5 +1,5 @@
 {
-  "validatedAt": "2026-09-28T02:39:37.223Z",
+  "validatedAt": "2026-09-28T03:00:26.909Z",
   "documents": [
     {
       "file": "contrato-prestacao-servicos",
@@ -7,32 +7,32 @@
       "metrics": [
         {
           "page": 1,
-          "gap": 212,
+          "gap": 137,
           "overflow": false
         },
         {
           "page": 2,
-          "gap": 348,
+          "gap": 259,
           "overflow": false
         },
         {
           "page": 3,
-          "gap": 331,
+          "gap": 201,
           "overflow": false
         },
         {
           "page": 4,
-          "gap": 222,
+          "gap": 73,
           "overflow": false
         },
         {
           "page": 5,
-          "gap": 97,
+          "gap": 42,
           "overflow": false
         },
         {
           "page": 6,
-          "gap": 164,
+          "gap": 60,
           "overflow": false
         }
       ],
@@ -44,17 +44,17 @@
       "metrics": [
         {
           "page": 1,
-          "gap": 182,
+          "gap": 134,
           "overflow": false
         },
         {
           "page": 2,
-          "gap": 315,
+          "gap": 263,
           "overflow": false
         },
         {
           "page": 3,
-          "gap": 233,
+          "gap": 185,
           "overflow": false
         }
       ],
@@ -66,12 +66,12 @@
       "metrics": [
         {
           "page": 1,
-          "gap": 268,
+          "gap": 186,
           "overflow": false
         },
         {
           "page": 2,
-          "gap": 243,
+          "gap": 180,
           "overflow": false
         }
       ],
@@ -83,7 +83,7 @@
       "metrics": [
         {
           "page": 1,
-          "gap": 119,
+          "gap": 69,
           "overflow": false
         }
       ],
@@ -95,7 +95,7 @@
       "metrics": [
         {
           "page": 1,
-          "gap": 158,
+          "gap": 109,
           "overflow": false
         }
       ],
@@ -107,7 +107,7 @@
       "metrics": [
         {
           "page": 1,
-          "gap": 530,
+          "gap": 507,
           "overflow": false
         }
       ],
@@ -164,5 +164,43 @@
       "height": 1024
     }
   ],
-  "docx": "native OOXML; structure and text checked separately; Word pagination not rendered"
+  "docx": "ZIP/XML e conteúdo integral verificados; paginação não renderizada no Word.",
+  "documentIntegrity": [
+    {
+      "file": "contrato-prestacao-servicos.pdf",
+      "pages": 6,
+      "pdfText": "ok",
+      "docxXmlAndText": "ok"
+    },
+    {
+      "file": "proposta-comercial.pdf",
+      "pages": 3,
+      "pdfText": "ok",
+      "docxXmlAndText": "ok"
+    },
+    {
+      "file": "acordo-confidencialidade.pdf",
+      "pages": 2,
+      "pdfText": "ok",
+      "docxXmlAndText": "ok"
+    },
+    {
+      "file": "termo-aceite.pdf",
+      "pages": 1,
+      "pdfText": "ok",
+      "docxXmlAndText": "ok"
+    },
+    {
+      "file": "termo-aditivo.pdf",
+      "pages": 1,
+      "pdfText": "ok",
+      "docxXmlAndText": "ok"
+    },
+    {
+      "file": "papel-timbrado.pdf",
+      "pages": 1,
+      "pdfText": "ok",
+      "docxXmlAndText": "ok"
+    }
+  ]
 }
