@@ -271,6 +271,12 @@ export function KanbanBoard({
 }) {
   const router = useRouter();
   const [columns, setColumns] = useState<Column[]>(initialColumns);
+  // Ressincroniza quando o servidor manda dados novos (criar/editar entrega, router.refresh).
+  const [syncedFrom, setSyncedFrom] = useState(initialColumns);
+  if (syncedFrom !== initialColumns) {
+    setSyncedFrom(initialColumns);
+    setColumns(initialColumns);
+  }
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overColumn, setOverColumn] = useState<Status | null>(null);
   const [pending, startTransition] = useTransition();
