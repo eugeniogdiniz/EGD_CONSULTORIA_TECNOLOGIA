@@ -1,0 +1,181 @@
+/* EGD / Conexões que constroem. Especificação: docs/brand/manual-da-marca.md */
+.site-root {
+  --brand-signal: #0875e1;
+  --radius: 4px;
+  --radius-lg: 8px;
+  --shadow-1: none;
+  --shadow-2: none;
+}
+.site-root::before { display: none; }
+.site-root .container { max-width: 1280px; padding-inline: 48px; }
+.site-root :is(a, button, summary, video, [tabindex]):focus-visible { outline: 3px solid #075eb5; outline-offset: 5px; }
+.site-root ::selection { color: #071d3b; background: #c4e1ff; }
+.site-root .skip-link { position: fixed; top: -80px; left: 16px; z-index: 100; padding: 14px 20px; background: #071d3b; color: white; }
+.site-root .skip-link:focus { top: 12px; }
+.site-root .nav-wrap { background: #f3f6fb; border-bottom: 1px solid var(--line); }
+.site-root .nav { height: 88px; }
+.site-root .nav-links { background: none; border: 0; gap: 0; padding: 0; }
+.site-root .nav-links a { border-radius: 0; padding: 10px 13px; }
+.site-root .nav-links a.active { background: none; box-shadow: inset 0 -2px #0875e1; }
+.site-root .logo-mark { width: 40px; height: 40px; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.site-root .logo-mark svg { width: 40px; height: 40px; }
+.site-root .logo-text { font-size: 28px; font-weight: 650; letter-spacing: -.06em; }
+.site-root .btn { border-radius: 4px; min-height: 48px; padding: 12px 20px; box-shadow: none; transition: background .18s, color .18s, border-color .18s; }
+.site-root .btn:hover { transform: none; }
+.site-root .btn-primary { background: #071d3b; color: #fff; border-color: #071d3b; box-shadow: none; }
+.site-root .btn-primary:hover { background: #12385e; color: #fff; box-shadow: none; }
+.site-root .btn-sm { min-height: 42px; padding: 9px 14px; font-size: 13px; }
+.site-root .btn-ghost { background: transparent; }
+.site-root .btn-ghost:hover { background: #e7eef8; }
+.site-root .eyebrow { text-transform: none; font-family: var(--font-sans); letter-spacing: .01em; color: var(--fg-dim); font-size: 13px; }
+.site-root .eyebrow::before { border-radius: 0; box-shadow: none; background: #0875e1; }
+.site-root .italic-grad { background: none; color: inherit; font-style: normal; font-weight: inherit; }
+.site-root h1 { font-size: clamp(38px, 5.3vw, 72px); line-height: 1.06; font-weight: 550; letter-spacing: -.05em; }
+.site-root h2 { font-size: clamp(30px, 3.5vw, 46px); line-height: 1.14; font-weight: 500; letter-spacing: -.04em; }
+.site-root h3 { letter-spacing: -.025em; }
+.site-root :is(.grid-bg, .hero-bg, .hero-grid, .page-head .grid-bg, .cta-card::before) { display: none; }
+.site-root :is(.reveal, .reveal.in) { opacity: 1; transform: none; transition: none; }
+.site-root .status .dot::after { animation: none; }
+.site-root :is(.card, .svc, .cta-card, .feat-card, .client-card, .mock-window) { box-shadow: none; border-radius: 6px; }
+.site-root :is(.fc-mark, .cc-mark, .lo-mark) { background: #e0eaf6; box-shadow: none; color: #071d3b; }
+.site-root :is(.term, .term-head, .diag-mini) { background: #e7eef8; box-shadow: none; }
+.site-root .page-head { padding-top: 150px; background: var(--bg); }
+.site-root .page-head .lead { max-width: 760px; line-height: 1.65; }
+.site-root .section { padding-block: 80px; }
+.site-root .cta-card { background: #e7eef8; border: 0; padding: 56px; }
+.site-root footer { background: #eaf1fa; border-top: 1px solid var(--line); padding-top: 64px; }
+.site-root footer h4 { text-transform: none; letter-spacing: 0; font-family: var(--font-sans); font-size: 15px; }
+.site-root .footer-bottom { font-family: var(--font-sans); letter-spacing: 0; }
+.site-root .mobile-menu { top: 88px; }
+.site-root .burger { width: 44px; height: 44px; }
+/* Página inicial: composição editorial, fotografia e linhas de conexão. */
+.site-root .brand-hero { padding-top: 130px; }
+.site-root .brand-kicker { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--fg-dim); }
+.site-root .brand-kicker > span:last-child { margin-left: auto; }
+.site-root .brand-dot { height: 7px; width: 7px; background: #0875e1; }
+.site-root .brand-hero-heading { display: grid; grid-template-columns: 1.35fr 1fr; gap: 64px; align-items: end; padding-block: 38px 44px; }
+.site-root .brand-hero-heading h1 { font-size: clamp(44px, 5.7vw, 77px); }
+.site-root .brand-hero-heading em, .site-root .brand-method em { color: #075eb5; font-style: normal; }
+.site-root .brand-hero-intro { max-width: 350px; padding-bottom: 5px; justify-self: end; }
+.site-root .brand-hero-intro p { font-size: 17px; line-height: 1.65; margin-bottom: 24px; }
+.site-root .brand-landscape { position: relative; margin: 0; overflow: hidden; background: #e8eff7; }
+.site-root .brand-landscape img { width: 100%; height: 430px; object-fit: cover; object-position: 50% 56%; }
+.site-root .brand-landscape figcaption { display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; font-size: 13px; border: 1px solid var(--line); background: #ffffff; }
+.site-root .brand-landscape figcaption span:first-child { font-weight: 600; }
+.site-root .brand-proof { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr; gap: 28px; align-items: center; padding-block: 35px; border-bottom: 1px solid var(--line); }
+.site-root .brand-proof p { font-size: 13px; }
+.site-root .brand-proof p strong { font-weight: 500; color: var(--fg); }
+.site-root .brand-proof div { display: grid; gap: 2px; }
+.site-root .brand-proof div strong { font-size: 36px; font-weight: 500; letter-spacing: -.045em; }
+.site-root .brand-proof div span { font-size: 12px; color: var(--fg-dim); }
+.site-root .brand-proof a { font-size: 13px; display: flex; gap: 8px; align-items: center; justify-self: end; }
+.site-root .brand-section { padding-block: 88px; }
+.site-root .brand-section-heading { display: grid; grid-template-columns: 1fr 2.1fr; gap: 48px; margin-bottom: 44px; }
+.site-root .brand-label { display: inline-block; font-size: 13px; font-weight: 500; }
+.site-root .brand-label::before { content: ''; display: inline-block; height: 7px; width: 7px; margin-right: 10px; background: #0875e1; vertical-align: 1px; }
+.site-root .brand-section-heading p { max-width: 540px; margin-top: 20px; line-height: 1.65; }
+.site-root .brand-services { border-top: 1px solid var(--line); }
+.site-root .brand-service { display: grid; grid-template-columns: 1fr 1.2fr 24px; align-items: center; gap: 50px; padding: 25px 0; border-bottom: 1px solid var(--line); transition: background .2s; }
+.site-root .brand-service:hover { background: #eaf1fa; }
+.site-root .brand-service h3 { font-size: 22px; }
+.site-root .brand-service p { font-size: 14px; max-width: 440px; }
+.site-root .brand-service svg { color: #075eb5; }
+.site-root .brand-method { padding-block: 80px; background: #e7eef8; }
+.site-root .brand-method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 90px; align-items: center; }
+.site-root .brand-method h2 { margin-top: 30px; font-size: clamp(28px, 3vw, 40px); }
+.site-root .brand-method p { margin-block: 24px; max-width: 440px; }
+.site-root .operation-flow { border: 1px solid #9db5d2; padding: 28px; background: #f3f6fb; }
+.site-root .operation-route svg { width: 100%; height: auto; overflow: visible; }
+.site-root .operation-route path { fill: none; stroke-width: 3; }
+.site-root .route-base { stroke: #c2d4e9; }
+.site-root .route-progress { stroke: #075eb5; stroke-dasharray: 1; stroke-dashoffset: var(--route-end, 0); animation: route-draw .75s ease-out both; }
+.site-root .route-0 { --route-end: .75; }
+.site-root .route-1 { --route-end: .35; }
+.site-root .route-2 { --route-end: 0; }
+.site-root .operation-route circle { fill: #071d3b; }
+.site-root .operation-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 24px; }
+.site-root .operation-tabs button { text-align: left; padding: 12px 0; background: none; border: 0; border-top: 2px solid #ccd9e8; min-height: 65px; font-size: 14px; }
+.site-root .operation-tabs button span { display: block; font-family: var(--font-mono); font-size: 11px; margin-bottom: 6px; color: #576c84; }
+.site-root .operation-tabs button[aria-selected="true"] { border-color: #075eb5; color: #075eb5; }
+.site-root #operation-panel { min-height: 164px; margin-top: 28px; }
+.site-root #operation-panel h3 { font-size: 20px; }
+.site-root #operation-panel p { font-size: 14px; margin-block: 14px 0; }
+.site-root .brand-products { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); }
+.site-root .brand-product { padding: 28px 24px; border-right: 1px solid var(--line); display: flex; flex-direction: column; align-items: start; }
+.site-root .brand-product:last-child { border: 0; }
+.site-root .brand-product:hover { background: #eaf1fa; }
+.site-root .brand-product-symbol { font-size: 42px; line-height: 1; color: #075eb5; margin-bottom: 36px; }
+.site-root .brand-product h3 { font-size: 22px; }
+.site-root .brand-product p { margin-block: 16px 32px; font-size: 14px; }
+.site-root .brand-product-link { display: flex; gap: 12px; font-size: 13px; margin-top: auto; align-items: center; }
+.site-root .brand-film-section { display: grid; grid-template-columns: .9fr 1.1fr; gap: 64px; padding-top: 0; align-items: center; }
+.site-root .brand-film-section h2 { margin-block: 25px; font-size: 36px; }
+.site-root .brand-film { min-width: 0; margin: 0; }
+.site-root .brand-film video { width: 100%; aspect-ratio: 16 / 9; background: #071d3b; display: block; }
+.site-root .brand-film figcaption { font-size: 12px; color: var(--fg-dim); padding-top: 12px; }
+.site-root .brand-film details { font-size: 12px; margin-top: 10px; }
+.site-root .brand-film summary { cursor: pointer; padding-block: 8px; }
+.site-root .brand-film details p { margin-top: 12px; }
+.site-root .brand-cta { border-top: 1px solid var(--line); padding-block: 72px 88px; }
+.site-root .brand-cta h2 { margin-block: 26px 32px; font-size: clamp(36px, 4.8vw, 62px); }
+.site-root .brand-cta-note { margin-left: 28px; font-size: 13px; color: var(--fg-dim); }
+.site-root .brand-editorial-image { width: 100%; height: auto; max-height: 460px; object-fit: cover; margin-top: 40px; }
+.site-root .brand-sectors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+@keyframes route-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: var(--route-end, 0); } }
+@media (max-width: 1100px) {
+  .site-root .nav-links a { padding-inline: 9px; }
+  .site-root .container { padding-inline: 32px; }
+  .site-root .brand-hero-heading { gap: 32px; }
+  .site-root .brand-method-grid { gap: 40px; }
+  .site-root .brand-products { grid-template-columns: repeat(2, 1fr); }
+  .site-root .brand-product:nth-child(2) { border-right: 0; }
+  .site-root .brand-product:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 800px) {
+  .site-root .container { padding-inline: 24px; }
+  .site-root .nav { height: 76px; }
+  .site-root .nav-links, .site-root .nav-entrar { display: none; }
+  .site-root .burger { display: flex; }
+  .site-root .mobile-menu { top: 76px; overflow-y: auto; }
+  .site-root .brand-hero { padding-top: 110px; }
+  .site-root .brand-kicker > span:last-child { display: none; }
+  .site-root .brand-hero-heading, .site-root .brand-method-grid, .site-root .brand-film-section { grid-template-columns: 1fr; gap: 30px; }
+  .site-root .brand-hero-intro { justify-self: start; max-width: 520px; }
+  .site-root .brand-hero-heading h1 { font-size: clamp(42px, 8.5vw, 65px); }
+  .site-root .brand-landscape img { height: 330px; }
+  .site-root .brand-proof { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .site-root .brand-proof > p { grid-column: 1 / -1; }
+  .site-root .brand-proof > a { grid-column: 1 / -1; justify-self: start; }
+  .site-root .brand-section { padding-block: 60px; }
+  .site-root .brand-section-heading { grid-template-columns: 1fr; gap: 24px; }
+  .site-root .brand-service { grid-template-columns: 1fr 24px; gap: 14px; }
+  .site-root .brand-service p { grid-row: 2; }
+  .site-root .brand-service svg { grid-column: 2; grid-row: 1; }
+  .site-root .brand-service h3 { font-size: 20px; }
+  .site-root .brand-method { padding-block: 60px; }
+  .site-root .brand-film-section { padding-top: 0; }
+  .site-root .brand-cta-note { display: block; margin: 20px 0 0; }
+  .site-root .brand-sectors { grid-template-columns: 1fr; }
+  .site-root .cta-card { padding: 30px 24px; }
+}
+@media (max-width: 480px) {
+  .site-root .container { padding-inline: 20px; }
+  .site-root .logo { gap: 5px; }
+  .site-root .logo-text { font-size: 25px; }
+  .site-root .nav .btn-sm { padding-inline: 10px; }
+  .site-root .brand-landscape img { height: 270px; }
+  .site-root .brand-landscape figcaption { padding-inline: 12px; font-size: 11px; gap: 14px; }
+  .site-root .brand-products { grid-template-columns: 1fr; }
+  .site-root .brand-product { border-right: 0; border-bottom: 1px solid var(--line); }
+  .site-root .brand-product-symbol { margin-bottom: 20px; }
+  .site-root .operation-flow { padding: 20px; }
+  .site-root .operation-tabs button { font-size: 13px; }
+  .site-root .brand-proof div span { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-root *, .site-root *::before, .site-root *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .site-root .route-progress { stroke-dashoffset: var(--route-end, 0); }
+}
+.site-root .brand-wordmark { height: 24px; width: 83px; display: block; }
+.site-root .status::before { display: none; }
+@media (max-width: 480px) { .site-root .brand-wordmark { height: 20px; width: 69px; } }

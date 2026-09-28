@@ -72,21 +72,22 @@
 }
 
 :root {
+  --brand-signal: #0875e1;
   /* primitivas */
-  --papel-100: #eef1f2;
-  --papel-50: #f7f8f9;
+  --papel-100: #f3f6fb;
+  --papel-50: #ffffff;
   --folha: #ffffff;
-  --tinta-900: #10202c;
-  --tinta-800: #1b3040;
-  --tinta-600: #4b5b67;
-  --tinta-400: #7d8b95;
-  --regua-300: #c8d1d6;
-  --regua-500: #9fadb6;
-  --sinal-500: #e4571b;
-  --sinal-700: #b9440f;
-  --sinal-100: #fcebe2;
-  --projeto-600: #1c4f8a;
-  --projeto-100: #e3ecf6;
+  --tinta-900: #071d3b;
+  --tinta-800: #12385e;
+  --tinta-600: #4b6079;
+  --tinta-400: #576c84;
+  --regua-300: #ccd9e8;
+  --regua-500: #879eb9;
+  --sinal-500: #0875e1;
+  --sinal-700: #075eb5;
+  --sinal-100: #e3efff;
+  --projeto-600: #075eb5;
+  --projeto-100: #e3efff;
   --aprovado-600: #1e7a4b;
   --aprovado-100: #e1f2e8;
   --atencao-600: #b07600;

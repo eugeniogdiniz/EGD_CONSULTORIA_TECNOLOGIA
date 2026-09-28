@@ -1,0 +1,168 @@
+{
+  "validatedAt": "2026-09-28T02:39:37.223Z",
+  "documents": [
+    {
+      "file": "contrato-prestacao-servicos",
+      "pages": 6,
+      "metrics": [
+        {
+          "page": 1,
+          "gap": 212,
+          "overflow": false
+        },
+        {
+          "page": 2,
+          "gap": 348,
+          "overflow": false
+        },
+        {
+          "page": 3,
+          "gap": 331,
+          "overflow": false
+        },
+        {
+          "page": 4,
+          "gap": 222,
+          "overflow": false
+        },
+        {
+          "page": 5,
+          "gap": 97,
+          "overflow": false
+        },
+        {
+          "page": 6,
+          "gap": 164,
+          "overflow": false
+        }
+      ],
+      "mobile": "ok"
+    },
+    {
+      "file": "proposta-comercial",
+      "pages": 3,
+      "metrics": [
+        {
+          "page": 1,
+          "gap": 182,
+          "overflow": false
+        },
+        {
+          "page": 2,
+          "gap": 315,
+          "overflow": false
+        },
+        {
+          "page": 3,
+          "gap": 233,
+          "overflow": false
+        }
+      ],
+      "mobile": "ok"
+    },
+    {
+      "file": "acordo-confidencialidade",
+      "pages": 2,
+      "metrics": [
+        {
+          "page": 1,
+          "gap": 268,
+          "overflow": false
+        },
+        {
+          "page": 2,
+          "gap": 243,
+          "overflow": false
+        }
+      ],
+      "mobile": "ok"
+    },
+    {
+      "file": "termo-aceite",
+      "pages": 1,
+      "metrics": [
+        {
+          "page": 1,
+          "gap": 119,
+          "overflow": false
+        }
+      ],
+      "mobile": "ok"
+    },
+    {
+      "file": "termo-aditivo",
+      "pages": 1,
+      "metrics": [
+        {
+          "page": 1,
+          "gap": 158,
+          "overflow": false
+        }
+      ],
+      "mobile": "ok"
+    },
+    {
+      "file": "papel-timbrado",
+      "pages": 1,
+      "metrics": [
+        {
+          "page": 1,
+          "gap": 530,
+          "overflow": false
+        }
+      ],
+      "mobile": "ok"
+    }
+  ],
+  "card": {
+    "trimMm": [
+      90,
+      50
+    ],
+    "bleedMm": 3,
+    "pngPixels": [
+      1080,
+      600
+    ],
+    "equivalentPPI": 304.8,
+    "qrDestination": "https://egdsystem.com.br"
+  },
+  "logos": [
+    {
+      "file": "logo-institucional",
+      "width": 2880,
+      "height": 448
+    },
+    {
+      "file": "logo-horizontal",
+      "width": 1504,
+      "height": 448
+    },
+    {
+      "file": "logo-negativo",
+      "width": 1504,
+      "height": 448
+    },
+    {
+      "file": "logo-monocromatico",
+      "width": 1504,
+      "height": 448
+    },
+    {
+      "file": "logo-branco",
+      "width": 1504,
+      "height": 448
+    },
+    {
+      "file": "simbolo",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "simbolo-negativo",
+      "width": 1024,
+      "height": 1024
+    }
+  ],
+  "docx": "native OOXML; structure and text checked separately; Word pagination not rendered"
+}

@@ -13,36 +13,36 @@
    ============================================================ */
 
 & {
-  --bg:        #06080d;
-  --bg-2:      #0a0d14;
-  --bg-3:      #0d111a;
-  --surface:   #11151f;
-  --surface-2: #161b27;
-  --line:      rgba(255,255,255,0.07);
-  --line-2:    rgba(255,255,255,0.12);
-  --line-3:    rgba(255,255,255,0.18);
-  --fg:        #e8ecf2;
-  --fg-dim:    #aab2c2;
-  --fg-mute:   #6f7689;
-  --fg-faint:  #4a5168;
+  --bg:        #f3f6fb;
+  --bg-2:      #eaf1fa;
+  --bg-3:      #e7eef8;
+  --surface:   #ffffff;
+  --surface-2: #e7eef8;
+  --line:      #ccd9e8;
+  --line-2:    #b5c8df;
+  --line-3:    #879eb9;
+  --fg:        #071d3b;
+  --fg-dim:    #4b6079;
+  --fg-mute:   #4b6079;
+  --fg-faint:  #576c84;
 
-  --accent:    oklch(0.72 0.19 252);
-  --accent-2:  oklch(0.80 0.15 220);
+  --accent:    #075eb5;
+  --accent-2:  #075eb5;
   --accent-soft: color-mix(in oklab, var(--accent) 16%, transparent);
   --accent-glow: color-mix(in oklab, var(--accent) 35%, transparent);
 
-  --ok:    oklch(0.78 0.16 152);
-  --warn:  oklch(0.80 0.15 80);
-  --err:   oklch(0.72 0.18 28);
+  --ok:    #1e7a4b;
+  --warn:  #855700;
+  --err:   #b4271f;
 
   --radius:    14px;
   --radius-lg: 22px;
   --shadow-1:  0 1px 0 rgba(255,255,255,0.04) inset, 0 1px 2px rgba(0,0,0,0.4);
   --shadow-2:  0 30px 60px -20px rgba(0,0,0,0.6), 0 0 0 1px var(--line);
 
-  --display:   var(--font-space), ui-sans-serif, system-ui, sans-serif;
-  --sans:      ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", sans-serif;
-  --mono:      var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --display:   var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --sans:      var(--font-sans), sans-serif;
+  --mono:      var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 
@@ -1113,7 +1113,7 @@ footer { border-top: 1px solid var(--line); padding: 56px 0 60px; background: va
   border-radius: 12px;
   background:
     radial-gradient(120% 100% at 0% 0%, color-mix(in oklab, var(--accent) 40%, transparent), transparent 60%),
-    linear-gradient(140deg, #161b27, #0c1018);
+    linear-gradient(140deg, #e7eef8, #0c1018);
   border: 1px solid var(--line-2);
   display: grid; place-items: center;
   font-family: var(--display);
@@ -1192,7 +1192,7 @@ footer { border-top: 1px solid var(--line); padding: 56px 0 60px; background: va
 .lo-mark {
   width: 28px; height: 28px;
   border-radius: 7px;
-  background: linear-gradient(140deg, #161b27, #0c1018);
+  background: linear-gradient(140deg, #e7eef8, #0c1018);
   border: 1px solid var(--line-2);
   display: grid; place-items: center;
   font-family: var(--display); font-weight: 600;

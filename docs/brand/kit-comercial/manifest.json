@@ -1,0 +1,55 @@
+{
+  "documents": [
+    {
+      "slug": "contrato-prestacao-servicos",
+      "title": "Contrato de prestação de serviços",
+      "subtitle": "Consultoria, desenvolvimento e automação",
+      "kind": "MINUTA CONTRATUAL",
+      "pages": 6
+    },
+    {
+      "slug": "proposta-comercial",
+      "title": "Proposta comercial",
+      "subtitle": "Do desafio à próxima entrega",
+      "kind": "MODELO COMERCIAL",
+      "pages": 3
+    },
+    {
+      "slug": "acordo-confidencialidade",
+      "title": "Acordo de confidencialidade",
+      "subtitle": "Proteção mútua das informações do projeto",
+      "kind": "MINUTA · ACORDO MUTUO",
+      "pages": 2
+    },
+    {
+      "slug": "termo-aceite",
+      "title": "Termo de entrega e aceite",
+      "subtitle": "Registro de validação dos entregáveis",
+      "kind": "MODELO OPERACIONAL",
+      "pages": 1
+    },
+    {
+      "slug": "termo-aditivo",
+      "title": "Termo aditivo",
+      "subtitle": "Alteração controlada do contrato",
+      "kind": "MINUTA CONTRATUAL",
+      "pages": 1
+    },
+    {
+      "slug": "papel-timbrado",
+      "title": "Comunicação institucional",
+      "subtitle": "Tecnologia que transforma. Soluções que geram valor.",
+      "kind": "PAPEL TIMBRADO",
+      "pages": 1
+    }
+  ],
+  "card": {
+    "trim_mm": [
+      90,
+      50
+    ],
+    "bleed_mm": 3,
+    "qr_url": "https://egdsystem.com.br"
+  },
+  "data_origin": "Nome, cargo, telefone, LinkedIn e GitHub: referência horizontal fornecida pelo cliente. Marca, site, e-mail e cidade: conteúdo institucional do projeto. Dados legais e condições comerciais: não informados."
+}

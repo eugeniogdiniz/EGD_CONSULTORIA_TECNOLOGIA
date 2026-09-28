@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
+import { TOTAIS } from "@/content/cases";
 import { Arrow } from "@/components/legacy/ui";
 import { PRINCIPLES, TIMELINE, SECTORS } from "@/content/legacy-pages";
+import { BrandFilm } from "@/components/site/brand-film";
 
 export const metadata: Metadata = { title: "Sobre", description: "A EGD Consultoria: consultoria de tecnologia que entrega código em produção." };
 
@@ -19,11 +22,12 @@ export default function SobrePage() {
             </h1>
             <p className="lead">A EGD Consultoria nasceu para preencher um espaço pouco ocupado: consultoria de tecnologia que entrega código em produção, não apenas diagnóstico. Somos engenheiros que viram consultores — não o contrário.</p>
           </div>
-          <div className="hero-meta reveal" style={{ marginTop: 56 }}>
-            <div className="meta-item"><div className="num">8<small>+</small></div><div className="lbl">ANOS DE OPERAÇÃO</div></div>
-            <div className="meta-item"><div className="num">40<small>+</small></div><div className="lbl">PROJETOS ENTREGUES</div></div>
-            <div className="meta-item"><div className="num">22</div><div className="lbl">PESSOAS NO TIME</div></div>
-            <div className="meta-item"><div className="num">6</div><div className="lbl">SETORES ATENDIDOS</div></div>
+          <Image className="brand-editorial-image" src="/brand/images/fluxo-azul.webp" alt="Maquete conceitual de três etapas conectadas por um percurso azul, representando o método EGD." width={1536} height={1024} sizes="(max-width: 800px) 100vw, 1180px" />
+          <div className="hero-meta" style={{ marginTop: 40 }}>
+            <div className="meta-item"><div className="num">{TOTAIS.clientes}</div><div className="lbl">Clientes no portfólio</div></div>
+            <div className="meta-item"><div className="num">{TOTAIS.sistemas}</div><div className="lbl">Sistemas entregues</div></div>
+            <div className="meta-item"><div className="num">{TOTAIS.automacoes}</div><div className="lbl">Automações entregues</div></div>
+            <div className="meta-item"><Link href="/cases" className="btn btn-ghost">Conheça os cases</Link></div>
           </div>
         </div>
       </section>
@@ -81,7 +85,7 @@ export default function SobrePage() {
             <span className="eyebrow">SETORES ATENDIDOS</span>
             <h2>Verticais onde já entregamos.</h2>
           </div>
-          <div className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "var(--line)", border: "1px solid var(--line)", borderRadius: 14, overflow: "hidden" }}>
+          <div className="brand-sectors">
             {SECTORS.map((s, i) => (
               <div key={i} style={{ background: "var(--bg)", padding: "32px 28px" }}>
                 <div style={{ fontFamily: "var(--display)", fontSize: 22, fontWeight: 500, marginBottom: 6 }}>{s.n}</div>
@@ -90,6 +94,11 @@ export default function SobrePage() {
             ))}
           </div>
         </div>
+      </section>
+
+      <section className="brand-section container brand-film-section">
+        <div><span className="brand-label">A marca em movimento</span><h2>Do projeto<br />à operação.</h2><p>Dados, sistemas e pessoas conectados por uma mesma direção.</p></div>
+        <BrandFilm variant="signature" />
       </section>
 
       <section className="cta-final">
