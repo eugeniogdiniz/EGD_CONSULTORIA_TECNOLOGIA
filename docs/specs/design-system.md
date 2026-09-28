@@ -1,5 +1,7 @@
 # Design system EGD — Fase 1
 
+> Referência histórica. O rebranding de 27/09/2026 está documentado em [Manual da marca](../brand/manual-da-marca.md), que substitui as orientações visuais conflitantes desta proposta.
+
 **Status:** proposta para aprovação (Task 10). Materializado em `docs/mockups/tokens.css` e `docs/mockups/mockup.css`; após aprovação vira `src/app/globals.css` + shadcn/ui (Task 11).
 
 ## 1. Conceito

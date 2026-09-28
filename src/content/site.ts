@@ -1,5 +1,5 @@
 export const SITE = {
-  name: "EGD Consultoria & Tecnologia",
+  name: "EGD Consultoria em Tecnologia",
   shortName: "EGD",
   url: "https://egdsystem.com.br",
   description:

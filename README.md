@@ -48,3 +48,13 @@ Ver `docs/runbooks/coolify.md`. A imagem é construída pelo `Dockerfile`; o `do
 ## Site antigo
 
 O site estático anterior (HTML + React via CDN, publicado no GitHub Pages) foi removido do repositório ao fim da Fase 1; ele continua no histórico do git até o commit `90cfda2`. Desative o GitHub Pages em Settings → Pages quando o domínio apontar para o VPS.
+
+## Identidade visual e materiais da marca
+
+Rebranding: [manual da marca](docs/brand/manual-da-marca.md), [análise e entrega](docs/brand/analise-e-entrega.md) e [prompts das imagens](docs/brand/prompts-imagens.md). Kit em `public/brand/`; manual visual disponível em `/brand/manual-da-marca.html` e `/brand/manual-da-marca.pdf`.
+
+- Gerar formatos web e filmes: `node scripts/build-brand-media.mjs`.
+- Validar layout, navegação, movimento, vídeo e exportar PDF: `node scripts/check-brand.mjs` (servidor local ativo).
+- Exportar somente o manual e a prancha, sem servidor: `node scripts/check-brand.mjs --manual-only`.
+- Os scripts de mídia e validação usam Chrome local; configure `CHROME_PATH` se necessário.
+- Animação interativa na página inicial; filme de apresentação de 15 s na página inicial e assinatura de 8 s na página Sobre. Ambos com controles, legendas, poster e transcrição.

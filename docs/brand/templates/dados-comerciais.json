@@ -1,0 +1,18 @@
+{
+  "marca": "EGD Consultoria em Tecnologia",
+  "nome_contato": "Eugênio G. Diniz",
+  "cargo": "Consultor em Tecnologia",
+  "telefone": "+55 (11) 94050-2208",
+  "telefone_uri": "+5511940502208",
+  "email": "contato@egdsystem.com.br",
+  "site": "https://egdsystem.com.br",
+  "site_curto": "egdsystem.com.br",
+  "linkedin": "https://www.linkedin.com/in/eugeniodiniz/",
+  "github": "https://github.com/eugeniogdiniz",
+  "localidade": "São Paulo · Brasil",
+  "razao_social": "[RAZAO_SOCIAL_EGD]",
+  "cnpj": "[CNPJ_EGD]",
+  "endereco": "[ENDERECO_COMPLETO_EGD]",
+  "representante_legal": "[NOME_E_CARGO_REPRESENTANTE_EGD]",
+  "origem": "Nome, cargo, telefone, LinkedIn e GitHub: referência horizontal fornecida pelo cliente. Marca, site, e-mail e cidade: conteúdo institucional do projeto. Dados legais e condições comerciais: não informados."
+}

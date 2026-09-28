@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Arrow, Icon } from "@/components/legacy/ui";
 import { SERVICES } from "@/content/legacy-pages";
 
@@ -29,6 +30,7 @@ export default function ServicosPage() {
         </div>
       </section>
 
+      <div className="container"><Image className="brand-editorial-image" src="/brand/images/fluxo-azul.webp" alt="Representação conceitual de dados e sistemas conectados em um fluxo contínuo." width={1536} height={1024} sizes="(max-width: 800px) 100vw, 1180px" /></div>
       <section className="section">
         <div className="container">
           {SERVICES.map((s) => (

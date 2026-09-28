@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Arrow, LogoMark } from "./ui";
+import { BrandWordmark } from "@/components/site/brand-mark";
 
 export const NAV_LINKS = [
   { href: "/", label: "Início" },
@@ -38,18 +39,18 @@ export function Navbar() {
     <>
       <div className={`nav-wrap ${scrolled ? "scrolled" : ""}`}>
         <div className="container">
-          <nav className="nav">
-            <Link href="/" className="logo">
+          <nav className="nav" aria-label="Navegação principal">
+            <Link href="/" className="logo" aria-label="EGD — início">
               <span className="logo-mark">
                 <LogoMark />
               </span>
               <span className="logo-text">
-                EGD<span>.</span>
+                <BrandWordmark className="brand-wordmark" />
               </span>
             </Link>
             <div className="nav-links">
               {NAV_LINKS.map((l) => (
-                <Link key={l.href} href={l.href} className={isActive(l.href) ? "active" : ""}>
+                <Link key={l.href} href={l.href} className={isActive(l.href) ? "active" : ""} aria-current={isActive(l.href) ? "page" : undefined}>
                   {l.label}
                 </Link>
               ))}
@@ -61,16 +62,16 @@ export function Navbar() {
               <Link href="/contato" className="btn btn-primary btn-sm">
                 Fale conosco <Arrow size={13} />
               </Link>
-              <button className="burger" aria-label="Menu" onClick={() => setMenuOpen((o) => !o)}>
+              <button className="burger" aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={menuOpen} aria-controls="menu-mobile" onClick={() => setMenuOpen((o) => !o)}>
                 <span></span>
               </button>
             </div>
           </nav>
         </div>
       </div>
-      <div className={`mobile-menu ${menuOpen ? "open" : ""}`}>
+      <div id="menu-mobile" onKeyDown={(event) => { if (event.key === "Escape") setMenuOpen(false); }} className={`mobile-menu ${menuOpen ? "open" : ""}`}>
         {[...NAV_LINKS, { href: "/entrar", label: "Entrar" }].map((l) => (
-          <Link key={l.href} href={l.href}>
+          <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)}>
             {l.label}
           </Link>
         ))}

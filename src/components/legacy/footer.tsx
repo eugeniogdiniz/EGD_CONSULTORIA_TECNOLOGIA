@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LogoMark } from "./ui";
 import { SITE } from "@/content/site";
+import { BrandWordmark } from "@/components/site/brand-mark";
 
 export function Footer() {
   return (
@@ -8,20 +9,16 @@ export function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div>
-            <div className="logo">
+            <div className="logo" role="img" aria-label="EGD Consultoria em Tecnologia">
               <span className="logo-mark">
                 <LogoMark />
               </span>
               <span className="logo-text">
-                EGD<span>.</span> CONSULTORIA
+                <BrandWordmark className="brand-wordmark" />
               </span>
             </div>
-            <p className="footer-tagline">Engenharia de dados, sistemas e automação para empresas que decidem evoluir com método.</p>
-            <div className="footer-status" style={{ marginTop: 18 }}>
-              <span className="status">
-                <span className="dot"></span>Sistemas operando
-              </span>
-            </div>
+            <p className="footer-tagline">Tecnologia que transforma. Soluções que geram valor. Dados, sistemas e inteligência trabalhando na mesma direção.</p>
+
           </div>
           <div>
             <h4>Serviços</h4>
@@ -49,13 +46,13 @@ export function Footer() {
             <ul>
               <li><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
               <li><span style={{ color: "var(--fg-dim)", fontSize: 14 }}>São Paulo · BR</span></li>
-              <li><a href="#">LinkedIn ↗</a></li>
+              <li><a href="/brand/manual-da-marca.pdf">Manual da marca</a></li>
             </ul>
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} EGD CONSULTORIA · v5.0.0</span>
-          <span>FEITO COM RIGOR — REMOTO / SP / BR</span>
+          <span>© {new Date().getFullYear()} EGD Consultoria em Tecnologia</span>
+          <span>Do projeto à operação.</span>
         </div>
       </div>
     </footer>

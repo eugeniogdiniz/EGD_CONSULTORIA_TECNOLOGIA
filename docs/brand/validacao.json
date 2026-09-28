@@ -1,0 +1,166 @@
+[
+  {
+    "route": "/",
+    "width": 1440,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/servicos",
+    "width": 1440,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/produtos",
+    "width": 1440,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/cases",
+    "width": 1440,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/sobre",
+    "width": 1440,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/contato",
+    "width": 1440,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/entrar",
+    "width": 1440,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "menu": "ok",
+    "tabs": "ok",
+    "reducedMotion": "ok",
+    "video": "ok",
+    "signatureVideo": "ok",
+    "captions": "ok",
+    "transcripts": "ok",
+    "validatedAt": "2026-09-28T02:18:40.723Z"
+  },
+  {
+    "route": "/",
+    "width": 390,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/servicos",
+    "width": 390,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/produtos",
+    "width": 390,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/cases",
+    "width": 390,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/sobre",
+    "width": 390,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/contato",
+    "width": 390,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "route": "/entrar",
+    "width": 390,
+    "status": 200,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "width": 390,
+    "menu": "ok",
+    "tabs": "ok",
+    "reducedMotion": "ok",
+    "video": "ok",
+    "signatureVideo": "ok",
+    "captions": "ok",
+    "transcripts": "ok",
+    "validatedAt": "2026-09-28T02:18:50.704Z"
+  },
+  {
+    "manual": "8 páginas, PDF exportado",
+    "validatedAt": "2026-09-28T02:18:53.466Z",
+    "assets": "ok",
+    "footGaps": [
+      {
+        "page": 1,
+        "footGap": 166
+      },
+      {
+        "page": 2,
+        "footGap": 43
+      },
+      {
+        "page": 3,
+        "footGap": 106
+      },
+      {
+        "page": 4,
+        "footGap": 58
+      },
+      {
+        "page": 5,
+        "footGap": 75
+      },
+      {
+        "page": 6,
+        "footGap": 118
+      },
+      {
+        "page": 7,
+        "footGap": 69
+      },
+      {
+        "page": 8,
+        "footGap": 32
+      }
+    ],
+    "responsiveWidths": [
+      390,
+      768,
+      1440
+    ]
+  }
+]
