@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Projeto · Visão geral · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .abas { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .abas a { padding: 10px 14px; font-size: var(--text-small); font-weight: 500; color: var(--fg-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .abas a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent-strong); }
+  .selo { display: inline-flex; align-items: center; padding: 2px 8px; height: 22px; border-radius: 2px; font-size: var(--text-micro); font-weight: 500; }
+  .selo.active { background: var(--link-soft); color: var(--link); border: 1px solid var(--link); }
+  .grid-dois { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 1180px) { .grid-dois { grid-template-columns: 1fr; } }
+  .fase { border: 1px solid var(--border); border-radius: 4px; padding: 14px; margin-bottom: 8px; background: var(--surface); }
+  .fase .cabecalho { display: flex; align-items: center; gap: 10px; }
+  .fase .cabecalho .num { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-faint); }
+  .fase .cabecalho h4 { margin: 0; font-size: var(--text-body); }
+  .fase .cabecalho .ordena { margin-left: auto; display: inline-flex; gap: 4px; }
+  .fase .cabecalho .ordena button { width: 24px; height: 24px; padding: 0; border: 1px solid var(--border-strong); background: var(--surface); border-radius: 2px; cursor: pointer; font-size: 10px; color: var(--fg-muted); }
+  .fase .datas { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted); margin-top: 4px; }
+  .fase .contadores { font-size: var(--text-micro); color: var(--fg-muted); margin-top: 6px; }
+  .marco { display: grid; grid-template-columns: 20px 90px 1fr auto; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); font-size: var(--text-small); }
+  .marco:first-child { border-top: 0; }
+  .marco input[type=checkbox] { margin: 0; }
+  .marco .data { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted); }
+  .marco.done .nome { color: var(--fg-muted); text-decoration: line-through; }
+  .marco.late .data { color: var(--danger); font-weight: 500; }
+  .entrega-mini { display: grid; grid-template-columns: 1fr 90px 60px; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); font-size: var(--text-small); align-items: center; }
+  .entrega-mini:first-child { border-top: 0; }
+  .entrega-mini .data { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted); }
+  .entrega-mini .stat { font-size: var(--text-micro); color: var(--fg-muted); text-transform: none; }
+  .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 16px; font-size: var(--text-small); }
+  .kv dt { color: var(--fg-muted); font-weight: 500; }
+  .kv dd { margin: 0; color: var(--fg); }
+  .kv dd.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <div class="group" data-open="false">
+      <button class="group-head" type="button" aria-expanded="false" style="display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:2px;font-family:var(--font-mono);font-size:var(--text-micro);color:var(--fg-muted);background:transparent;border:0;width:100%;text-align:left">
+        <span style="flex:1">CRM</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" style="color:var(--fg-faint)" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div style="display:none"></div>
+    </div>
+    <a class="item" href="#">Organizações</a>
+    <a class="item" href="admin-projetos-lista.html" aria-current="page">Projetos</a>
+    <a class="item" href="#">Leads</a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a class="link" href="admin-projetos-lista.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Projetos</a> <span class="faint" style="margin:0 8px">/</span> Laudo de infra TI</div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <nav class="abas" aria-label="Sub-nav do projeto">
+        <a href="admin-projeto-detalhe.html" aria-current="page">Visão geral</a>
+        <a href="admin-projeto-kanban.html">Kanban</a>
+      </nav>
+
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Laudo de infra TI — URBHIS</h1>
+          <div class="small muted" style="margin-top:6px">
+            <span class="selo active">Em execução</span>
+            <span class="faint" style="margin:0 10px">·</span>
+            <a class="link" href="#">Consórcio URBHIS</a>
+            <span class="faint" style="margin:0 10px">·</span>
+            iniciado 03/10/2026 · previsto 12/12/2026
+          </div>
+        </div>
+        <div class="linha-acoes">
+          <a class="btn btn-secondary btn-sm" href="#">Editar</a>
+          <a class="btn btn-secondary btn-sm" href="#">Mudar status</a>
+          <a class="btn btn-danger btn-sm" href="#">Arquivar</a>
+        </div>
+      </div>
+
+      <div class="grid-dois">
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <section class="bloco">
+            <div class="bloco-head"><h3>Fases</h3><a class="btn btn-secondary btn-sm" href="#">Nova fase</a></div>
+            <div class="bloco-body">
+              <div class="fase">
+                <div class="cabecalho">
+                  <span class="num">01</span><h4>Kickoff e escopo</h4>
+                  <div class="ordena"><button disabled>↑</button><button>↓</button></div>
+                </div>
+                <div class="datas">03/10 → 12/10</div>
+                <div class="contadores">3 entregas · 2 marcos · <a class="link small" href="#">Editar</a></div>
+              </div>
+              <div class="fase">
+                <div class="cabecalho">
+                  <span class="num">02</span><h4>Execução (inventário + backup)</h4>
+                  <div class="ordena"><button>↑</button><button>↓</button></div>
+                </div>
+                <div class="datas">13/10 → 20/11</div>
+                <div class="contadores">6 entregas · 1 marco · <a class="link small" href="#">Editar</a></div>
+              </div>
+              <div class="fase">
+                <div class="cabecalho">
+                  <span class="num">03</span><h4>Aceite e entrega final</h4>
+                  <div class="ordena"><button>↑</button><button disabled>↓</button></div>
+                </div>
+                <div class="datas">21/11 → 12/12</div>
+                <div class="contadores">2 entregas · 1 marco · <a class="link small" href="#">Editar</a></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="bloco">
+            <div class="bloco-head"><h3>Marcos</h3><a class="btn btn-secondary btn-sm" href="#">Novo marco</a></div>
+            <div class="bloco-body">
+              <div class="marco done"><input type="checkbox" checked><span class="data">03/10/2026</span><span class="nome">Kickoff — reunião de escopo</span><span class="stat">Kickoff</span></div>
+              <div class="marco done"><input type="checkbox" checked><span class="data">08/10/2026</span><span class="nome">Aceite do escopo por escrito</span><span class="stat">Kickoff</span></div>
+              <div class="marco late"><input type="checkbox"><span class="data">27/09/2026</span><span class="nome">Ata da reunião técnica</span><span class="stat">Kickoff</span></div>
+              <div class="marco"><input type="checkbox"><span class="data">20/11/2026</span><span class="nome">Fechamento do inventário</span><span class="stat">Execução</span></div>
+              <div class="marco"><input type="checkbox"><span class="data">12/12/2026</span><span class="nome">Aceite formal do laudo</span><span class="stat">Aceite</span></div>
+            </div>
+          </section>
+
+          <section class="bloco">
+            <div class="bloco-head"><h3>Próximas entregas</h3><a class="link small" href="admin-projeto-kanban.html">Ver kanban</a></div>
+            <div class="bloco-body">
+              <div class="entrega-mini"><div><strong>Ata da reunião técnica</strong><div class="stat">Kickoff · Eugênio</div></div><div class="data" style="color:var(--danger);font-weight:500">27/09</div><div><span class="stat">A fazer</span></div></div>
+              <div class="entrega-mini"><div><strong>Inventário de servidores</strong><div class="stat">Execução · Eugênio</div></div><div class="data">15/10</div><div><span class="stat">Em progresso</span></div></div>
+              <div class="entrega-mini"><div><strong>Setup de backup gerenciado</strong><div class="stat">Execução · Eugênio</div></div><div class="data">22/10</div><div><span class="stat">A fazer</span></div></div>
+              <div class="entrega-mini"><div><strong>Rascunho do laudo</strong><div class="stat">Aceite · Eugênio</div></div><div class="data">05/12</div><div><span class="stat">A fazer</span></div></div>
+              <div class="entrega-mini"><div><strong>Laudo final assinado</strong><div class="stat">Aceite · Eugênio</div></div><div class="data">12/12</div><div><span class="stat">A fazer</span></div></div>
+            </div>
+          </section>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <section class="bloco">
+            <div class="bloco-head"><h3>Dados</h3></div>
+            <div class="bloco-body">
+              <dl class="kv">
+                <dt>Valor snapshot</dt><dd class="mono">R$ 55.000,00</dd>
+                <dt>Moeda</dt><dd class="mono">BRL</dd>
+                <dt>Owner</dt><dd>Eugênio</dd>
+                <dt>Iniciado em</dt><dd class="mono">03/10/2026</dd>
+                <dt>Criado em</dt><dd class="mono">28/09/2026</dd>
+                <dt>Empresa</dt><dd><a class="link" href="#">Consórcio URBHIS</a></dd>
+                <dt>Oportunidade</dt><dd><a class="link" href="#">Laudo de infra TI</a></dd>
+              </dl>
+            </div>
+          </section>
+
+          <section class="bloco">
+            <div class="bloco-head"><h3>Notas</h3></div>
+            <div class="bloco-body small muted" style="line-height:1.55">
+              Time da URBHIS reduzido, sem SRE. Janela de manutenção só aos sábados. Marcos e Ana são os pontos de contato — Ana precisa aprovar o pagamento antes da fase 3.
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>
