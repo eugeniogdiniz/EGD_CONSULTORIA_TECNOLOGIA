@@ -3,7 +3,6 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { auditLog, crmProposal, files } from "@/db/schema";
 import {
-  attachProposalFile,
   changeProposalStatus,
   createCompany,
   createOpportunity,

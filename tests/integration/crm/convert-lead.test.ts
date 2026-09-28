@@ -38,7 +38,7 @@ describe("convertLead — modo create", () => {
       mode: "create",
       company: { name: "Construtora Sul" },
       contact: { name: "Ana Ribeiro", email: "ana@construtorasul.com.br", role: "primary" },
-      opportunity: { companyId: "" as never, title: "Contato pelo site — Ana" },
+      opportunity: { title: "Contato pelo site — Ana" },
     });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -67,14 +67,14 @@ describe("convertLead — modo create", () => {
       mode: "create",
       company: { name: "Primeira Empresa" },
       contact: { name: "Primeiro" },
-      opportunity: { companyId: "" as never, title: "Piloto" },
+      opportunity: { title: "Piloto" },
     });
     expect(r1.ok).toBe(true);
     const r2 = await convertLead(ctx, leadId, {
       mode: "create",
       company: { name: "Segunda" },
       contact: { name: "Segundo" },
-      opportunity: { companyId: "" as never, title: "Bis" },
+      opportunity: { title: "Bis" },
     });
     expect(r2.ok).toBe(false);
     if (r2.ok) return;
@@ -89,7 +89,7 @@ describe("convertLead — modo create", () => {
       mode: "create",
       company: { name: "Nova", cnpj: "77888999000111" },
       contact: { name: "Lead" },
-      opportunity: { companyId: "" as never, title: "Piloto" },
+      opportunity: { title: "Piloto" },
     });
     expect(r.ok).toBe(false);
     const after = await db.select({ id: crmCompany.id }).from(crmCompany);
@@ -108,8 +108,8 @@ describe("convertLead — modo link", () => {
     const r = await convertLead(ctx, leadId, {
       mode: "link",
       companyId: co.data.id,
-      contact: { companyId: co.data.id, name: "Novo Contato", role: "primary" },
-      opportunity: { companyId: "" as never, title: "Segundo negócio" },
+      contact: { name: "Novo Contato", role: "primary" },
+      opportunity: { title: "Segundo negócio" },
     });
     expect(r.ok).toBe(true);
     const after = await db.select({ id: crmCompany.id }).from(crmCompany);
@@ -124,15 +124,15 @@ describe("convertLead — modo link", () => {
     await convertLead(ctx, leadId1, {
       mode: "link",
       companyId: co.data.id,
-      contact: { companyId: co.data.id, name: "Principal Atual", role: "primary" },
-      opportunity: { companyId: "" as never, title: "Piloto A" },
+      contact: { name: "Principal Atual", role: "primary" },
+      opportunity: { title: "Piloto A" },
     });
     const leadId2 = await seedLead({ email: "segundo@principal.com.br" });
     const r = await convertLead(ctx, leadId2, {
       mode: "link",
       companyId: co.data.id,
-      contact: { companyId: co.data.id, name: "Segundo Chega", role: "primary" },
-      opportunity: { companyId: "" as never, title: "Piloto B" },
+      contact: { name: "Segundo Chega", role: "primary" },
+      opportunity: { title: "Piloto B" },
     });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -145,8 +145,8 @@ describe("convertLead — modo link", () => {
     const r = await convertLead(ctx, leadId, {
       mode: "link",
       companyId: "99999999-9999-4999-8999-999999999999",
-      contact: { companyId: "" as never, name: "Fantasma" },
-      opportunity: { companyId: "" as never, title: "Nada" },
+      contact: { name: "Fantasma" },
+      opportunity: { title: "Nada" },
     });
     expect(r.ok).toBe(false);
   });

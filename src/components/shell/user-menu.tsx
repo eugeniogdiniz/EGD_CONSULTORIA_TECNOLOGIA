@@ -13,7 +13,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { signOutAction } from "@/modules/auth/actions";
-import { SidebarNav, type NavItem } from "./sidebar";
+import { SidebarNav, type NavEntry } from "./sidebar";
 
 export function UserMenu({ name, email, accountHref }: { name: string; email: string; accountHref: string }) {
   const initials = name
@@ -43,7 +43,7 @@ export function UserMenu({ name, email, accountHref }: { name: string; email: st
 }
 
 /** Menu lateral em Sheet para telas estreitas. */
-export function MobileNav({ nav, footer }: { nav: NavItem[]; footer: string }) {
+export function MobileNav({ nav, footer }: { nav: NavEntry[]; footer: string }) {
   return (
     <Sheet>
       <SheetTrigger render={<Button variant="outline" size="icon-sm" className="md:hidden" aria-label="Abrir menu" />}>

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { auditLog, crmCompany, crmContact, organizations } from "@/db/schema";
+import { auditLog, crmCompany, organizations } from "@/db/schema";
 import {
   archiveCompany,
   archiveContact,

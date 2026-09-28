@@ -741,7 +741,7 @@ export type ConversionPlan =
   | {
       mode: "link";
       companyId: string;
-      contact: ContactInput;
+      contact: Omit<ContactInput, "companyId">;
       opportunity: Omit<OpportunityInput, "companyId">;
     }
   | {
@@ -765,8 +765,6 @@ export async function convertLead(
 
   // Validações prévias (fora da transação, pra falhar rápido)
   let companyData: ReturnType<typeof companySchema.parse> | null = null;
-  let contactData: ReturnType<typeof contactSchema.parse>;
-  let opportunityData: ReturnType<typeof opportunitySchema.parse>;
 
   if (plan.mode === "create") {
     const parsedCompany = companySchema.safeParse(plan.company);
@@ -785,11 +783,11 @@ export async function convertLead(
   const linkedCompanyId = plan.mode === "link" ? plan.companyId : "00000000-0000-4000-8000-000000000000";
   const parsedContact = contactSchema.safeParse({ ...plan.contact, companyId: linkedCompanyId });
   if (!parsedContact.success) return fromZod(parsedContact.error);
-  contactData = parsedContact.data;
+  let contactData = parsedContact.data;
 
   const parsedOpportunity = opportunitySchema.safeParse({ ...plan.opportunity, companyId: linkedCompanyId });
   if (!parsedOpportunity.success) return fromZod(parsedOpportunity.error);
-  opportunityData = parsedOpportunity.data;
+  const opportunityData = parsedOpportunity.data;
 
   // Auto-downgrade do contato principal quando a empresa já tem um (link mode).
   if (plan.mode === "link" && contactData.role === "primary") {
