@@ -15,6 +15,13 @@
       "when": 1790559045956,
       "tag": "0001_closed_black_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790564859918,
+      "tag": "0002_graceful_red_shift",
+      "breakpoints": true
     }
   ]
 }
