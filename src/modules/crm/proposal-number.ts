@@ -13,18 +13,25 @@ export function formatProposalNumber(year: number, seq: number): string {
 }
 
 /**
+ * Aceita `db` ou uma `tx` (ambas têm `.execute`). Sequências Postgres não
+ * são transacionais — um rollback não devolve o número — então basta ter
+ * uma interface que rode SQL.
+ */
+type SqlRunner = Pick<Db, "execute">;
+
+/**
  * Gera o próximo número usando a função Postgres `crm_next_proposal_number(y)`
  * (criada na migration 0001). A função cuida da sequência anual sob demanda.
  * O ano usado é o do timestamp de gravação, no relógio do banco.
  */
 export async function nextProposalNumber(
-  tx: Db,
+  runner: SqlRunner,
   year: number = new Date().getUTCFullYear(),
 ): Promise<string> {
-  const [row] = await tx.execute<{ crm_next_proposal_number: string }>(
+  const rows = await runner.execute<{ crm_next_proposal_number: string }>(
     sql`select crm_next_proposal_number(${year}) as crm_next_proposal_number`,
   );
-  const value = row?.crm_next_proposal_number;
+  const value = rows[0]?.crm_next_proposal_number;
   if (!value) throw new Error("crm_next_proposal_number não retornou valor");
   return value;
 }

@@ -5,6 +5,7 @@ import {
   crmContact,
   crmInteraction,
   crmOpportunity,
+  crmProposal,
   organizations,
 } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
@@ -12,17 +13,23 @@ import { audit } from "@/modules/audit/log";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import { slugify } from "@/modules/tenancy/slug";
+import { uploadFile } from "@/modules/files/actions";
+import { nextProposalNumber } from "./proposal-number";
 import {
+  changeProposalStatusSchema,
   changeStageSchema,
   companySchema,
   contactSchema,
   interactionSchema,
   opportunitySchema,
+  proposalSchema,
+  type ChangeProposalStatusInput,
   type ChangeStageInput,
   type CompanyInput,
   type ContactInput,
   type InteractionInput,
   type OpportunityInput,
+  type ProposalInput,
 } from "./validation";
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -607,6 +614,192 @@ export async function deleteInteraction(ctx: AdminContext, id: string): Promise<
     action: "crm.interaction.deleted",
     entityType: "crm_interaction",
     entityId: id,
+  });
+  return ok(null);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Proposta
+// ────────────────────────────────────────────────────────────────────────────
+
+export async function createProposal(
+  ctx: AdminContext,
+  input: ProposalInput,
+): Promise<ActionResult<{ id: string; number: string }>> {
+  const parsed = proposalSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const data = parsed.data;
+
+  const opportunity = await db.query.crmOpportunity.findFirst({
+    where: eq(crmOpportunity.id, data.opportunityId),
+    columns: { id: true },
+  });
+  if (!opportunity) return fail("Oportunidade não encontrada.");
+
+  const result = await db.transaction(async (tx) => {
+    const number = await nextProposalNumber(tx);
+    const [row] = await tx
+      .insert(crmProposal)
+      .values({
+        number,
+        opportunityId: data.opportunityId,
+        title: data.title,
+        valueCents: data.valueCents,
+        currency: data.currency,
+        status: "draft",
+        validUntil: data.validUntil,
+        ownerId: ctx.user.id,
+      })
+      .returning({ id: crmProposal.id });
+    return { id: row.id, number };
+  });
+
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.proposal.created",
+    entityType: "crm_proposal",
+    entityId: result.id,
+    metadata: { number: result.number, opportunityId: data.opportunityId },
+  });
+  return ok(result);
+}
+
+export async function updateProposal(
+  ctx: AdminContext,
+  id: string,
+  input: ProposalInput,
+): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Proposta não encontrada.");
+  const parsed = proposalSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const data = parsed.data;
+
+  const existing = await db.query.crmProposal.findFirst({ where: eq(crmProposal.id, id) });
+  if (!existing) return fail("Proposta não encontrada.");
+  if (existing.opportunityId !== data.opportunityId)
+    return fail("Não é possível mover proposta entre oportunidades.");
+  if (existing.status !== "draft")
+    return fail("Uma proposta enviada só muda por transição de status.", { status: ["Só em rascunho"] });
+
+  await db
+    .update(crmProposal)
+    .set({
+      title: data.title,
+      valueCents: data.valueCents,
+      currency: data.currency,
+      validUntil: data.validUntil,
+    })
+    .where(eq(crmProposal.id, id));
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.proposal.updated",
+    entityType: "crm_proposal",
+    entityId: id,
+  });
+  return ok(null);
+}
+
+/**
+ * Anexa (ou substitui) o arquivo da proposta. Reusa o módulo files da
+ * Fase 1 para o upload; o proprietário do arquivo é o admin, sem organização.
+ */
+export async function attachProposalFile(
+  ctx: AdminContext,
+  proposalId: string,
+  formData: FormData,
+): Promise<ActionResult<{ fileId: string }>> {
+  if (!isUuid(proposalId)) return fail("Proposta não encontrada.");
+  const proposal = await db.query.crmProposal.findFirst({
+    where: eq(crmProposal.id, proposalId),
+    columns: { id: true },
+  });
+  if (!proposal) return fail("Proposta não encontrada.");
+
+  // Garante que uploadFile leia organizationId = null (arquivo interno do admin).
+  if (!formData.has("organizationId")) formData.append("organizationId", "");
+
+  const upload = await uploadFile(ctx, formData);
+  if (!upload.ok) return upload;
+
+  await db.update(crmProposal).set({ fileId: upload.data.id }).where(eq(crmProposal.id, proposalId));
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.proposal.file_attached",
+    entityType: "crm_proposal",
+    entityId: proposalId,
+    metadata: { fileId: upload.data.id },
+  });
+  return ok({ fileId: upload.data.id });
+}
+
+/**
+ * Regras da transição de status:
+ *  - draft → sent: exige file_id (fieldError em status).
+ *  - sent → accepted/rejected/expired: grava decidedAt.
+ *  - qualquer → draft: reabre (limpa sentAt e decidedAt).
+ *  - Mesmo status devolve ok(null) sem gravar audit.
+ */
+export async function changeProposalStatus(
+  ctx: AdminContext,
+  id: string,
+  input: ChangeProposalStatusInput,
+): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Proposta não encontrada.");
+  const parsed = changeProposalStatusSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const { to, decisionNotes, sentAt, validUntil } = parsed.data;
+
+  const existing = await db.query.crmProposal.findFirst({ where: eq(crmProposal.id, id) });
+  if (!existing) return fail("Proposta não encontrada.");
+  if (existing.status === to) return ok(null);
+
+  if (to === "sent" && !existing.fileId)
+    return fail("Uma proposta enviada precisa ter arquivo anexado.", { status: ["Anexo obrigatório"] });
+
+  const patch: {
+    status: typeof to;
+    sentAt: Date | null;
+    decidedAt: Date | null;
+    decisionNotes: string | null;
+    validUntil: string | null;
+  } = {
+    status: to,
+    sentAt: existing.sentAt,
+    decidedAt: existing.decidedAt,
+    decisionNotes: existing.decisionNotes,
+    validUntil: existing.validUntil,
+  };
+
+  if (to === "sent") {
+    patch.sentAt = sentAt ? new Date(`${sentAt}T00:00:00Z`) : new Date();
+    patch.validUntil = validUntil ?? existing.validUntil;
+    patch.decidedAt = null;
+    patch.decisionNotes = null;
+  } else if (to === "accepted" || to === "rejected" || to === "expired") {
+    patch.decidedAt = new Date();
+    if (decisionNotes) patch.decisionNotes = decisionNotes;
+  } else if (to === "draft") {
+    patch.sentAt = null;
+    patch.decidedAt = null;
+    patch.decisionNotes = null;
+  }
+
+  await db.update(crmProposal).set(patch).where(eq(crmProposal.id, id));
+  await audit({
+    actorId: ctx.user.id,
+    action:
+      to === "sent"
+        ? "crm.proposal.sent"
+        : to === "accepted"
+          ? "crm.proposal.accepted"
+          : to === "rejected"
+            ? "crm.proposal.rejected"
+            : to === "expired"
+              ? "crm.proposal.expired"
+              : "crm.proposal.reopened",
+    entityType: "crm_proposal",
+    entityId: id,
+    metadata: { from: existing.status, to },
   });
   return ok(null);
 }
