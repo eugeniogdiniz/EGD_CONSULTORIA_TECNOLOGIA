@@ -1,26 +1,50 @@
-﻿# EGD Consultoria
+# EGD Consultoria & Tecnologia
 
-Site estatico institucional preparado para deploy no GitHub Pages.
+Site público e sistema (portal do cliente e portal administrativo) da EGD, em Next.js 16 com Postgres. Domínio: egdsystem.com.br.
 
-## Publicacao
+## Arquitetura em cinco linhas
 
-O repositorio inclui a workflow `.github/workflows/pages.yml`, que publica automaticamente as paginas HTML do root e a pasta `assets/`.
+- Um único app Next.js (App Router) com quatro grupos de rotas: site público, autenticação, portal do cliente e admin.
+- Módulos por domínio em `src/modules/*` (auth, tenancy, leads, files, audit, mail), cada um com `schema.ts` (Drizzle), `queries.ts` e `actions.ts`. Páginas nunca acessam o banco direto.
+- Better Auth para login por e-mail e senha; cadastro só por convite; autorização por `requireAdmin()` / `requirePortal()`.
+- Postgres 16 (Drizzle ORM), armazenamento S3-compatível (RustFS), SMTP para e-mail transacional.
+- Um container Docker que aplica migrations e sobe o servidor; deploy pelo Coolify a cada push na `main`.
 
-Para ativar no GitHub:
+Documentos: spec em `docs/superpowers/specs/2026-09-27-fase-1-fundacao-design.md`, plano em `docs/superpowers/plans/2026-09-27-fase-1-fundacao.md`, design system em `docs/specs/design-system.md`, deploy em `docs/runbooks/coolify.md`.
 
-1. Suba o repositorio para o GitHub.
-2. Em `Settings > Pages`, selecione `GitHub Actions` como source.
-3. Faca push para a branch `main` ou `master`.
+## Requisitos
 
-## Escopo do deploy
+- Node 24 e npm 11
+- Docker (Postgres, RustFS e Mailpit locais)
 
-A publicacao envia:
+## Rodar local
 
-- `index.html`
-- `contato.html`
-- `produtos.html`
-- `servicos.html`
-- `sobre.html`
-- `assets/`
+```bash
+docker compose -f docker-compose.dev.yml up -d
+cp .env.example .env
+npm install
+npm run db:migrate
+npm run db:seed        # cria o admin de SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD do .env
+npm run dev
+```
 
-As pastas `export/` e `uploads/` nao entram no artifact do GitHub Pages.
+- App: http://localhost:3000 (admin em `/admin`, portal em `/portal`)
+- E-mails capturados: http://localhost:8025 (Mailpit)
+- Console do storage: http://localhost:9001
+
+## Testes
+
+```bash
+npm run lint && npm run typecheck
+npm test                 # unitários (Vitest)
+npm run test:integration # contra o Postgres do compose
+npm run test:e2e         # Playwright (sobe o dev server se preciso)
+```
+
+## Deploy
+
+Ver `docs/runbooks/coolify.md`. A imagem é construída pelo `Dockerfile`; o `docker-entrypoint.sh` aplica as migrations antes de iniciar o servidor.
+
+## Site antigo
+
+O site estático anterior (HTML + React via CDN, publicado no GitHub Pages) foi removido do repositório ao fim da Fase 1; ele continua no histórico do git até o commit `90cfda2`. Desative o GitHub Pages em Settings → Pages quando o domínio apontar para o VPS.

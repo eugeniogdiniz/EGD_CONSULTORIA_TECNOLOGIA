@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Sobre · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .page-title { padding-block: 64px 48px; }
+  .page-title .lead { margin-top: 20px; max-width: 44rem; }
+  .page-title .cotas { margin-top: 48px; border-top: 1px solid var(--border); padding-top: 32px; }
+  .principios { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--border); }
+  .principios .item { padding: 24px 24px 24px 0; border-bottom: 1px solid var(--border); }
+  .principios .item:nth-child(odd) { border-right: 1px solid var(--border); padding-right: 32px; }
+  .principios .item:nth-child(even) { padding-left: 32px; }
+  .principios .item p { margin-top: 8px; color: var(--fg-muted); max-width: 30rem; }
+  .timeline { display: grid; gap: 0; border-left: 1px solid var(--border-strong); margin-left: 6px; }
+  .timeline .ev { display: grid; grid-template-columns: 80px 1fr; gap: 16px; padding: 0 0 28px 24px; position: relative; }
+  .timeline .ev::before { content: ""; position: absolute; left: -5px; top: 8px; width: 9px; height: 9px; background: var(--surface); border: 1px solid var(--fg); border-radius: 50%; }
+  .timeline .ev:last-child::before { background: var(--accent); border-color: var(--accent); }
+  .timeline .ano { font-family: var(--font-mono); font-size: var(--text-small); color: var(--fg-muted); padding-top: 3px; }
+  .timeline h3 { font-size: var(--text-body); }
+  .timeline p { color: var(--fg-muted); margin-top: 4px; font-size: var(--text-small); max-width: 34rem; }
+  .setores { display: flex; flex-wrap: wrap; gap: 8px; }
+  .setores span { border: 1px solid var(--border-strong); border-radius: 2px; padding: 8px 12px; font-size: var(--text-small); background: var(--surface); }
+  @media (max-width: 960px) { .principios { grid-template-columns: 1fr; } .principios .item:nth-child(odd) { border-right: 0; padding-right: 0; } .principios .item:nth-child(even) { padding-left: 0; } }
+</style>
+</head>
+<body class="theme-site">
+<header class="container"><nav class="nav" aria-label="Principal">
+  <a class="logo" href="#"><span class="mark"></span>EGD <small>Consultoria &amp; Tecnologia</small></a>
+  <div class="nav-links"><a href="#">Início</a><a href="#">Serviços</a><a href="#">Produtos</a><a href="#">Cases</a><a href="#" aria-current="page">Sobre</a><a href="#">Contato</a></div>
+  <div class="nav-actions"><a class="entrar" href="#">Entrar</a><a class="btn btn-primary btn-sm" href="#">Falar com a EGD</a><button class="burger" aria-label="Abrir menu"><span></span></button></div>
+</nav></header>
+
+<main class="container">
+  <section class="page-title">
+    <h1>Engenharia que entrega código em produção.</h1>
+    <p class="lead">A EGD nasceu dentro de consórcios de engenharia e habitação, resolvendo controle de documentos, vistorias e relatórios que consumiam a equipe. Continuamos fazendo isso, agora também com dados, painéis e IA.</p>
+    <div class="cotas">
+      <div class="cota"><div class="valor">13</div><div class="linha"></div><div class="rotulo">clientes</div></div>
+      <div class="cota"><div class="valor">27</div><div class="linha"></div><div class="rotulo">sistemas em produção</div></div>
+      <div class="cota"><div class="valor">62</div><div class="linha"></div><div class="rotulo">automações</div></div>
+      <div class="cota"><div class="valor">7</div><div class="linha"></div><div class="rotulo">setores atendidos</div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sheet-head"><div><h2>Como trabalhamos</h2></div><p class="lead" style="margin-top:0">Princípios que mantemos mesmo quando dão trabalho, porque é aí que importam.</p></div>
+    <div class="sheet-body"><div class="aside"></div>
+      <div class="principios">
+        <div class="item"><h3>Tudo vai para produção</h3><p>Cada entrega chega ao uso diário com testes, monitoramento e manual de operação.</p></div>
+        <div class="item"><h3>Ferramenta pelo contexto</h3><p>Power Platform, Azure, AWS ou código aberto: escolhemos pelo que sua equipe consegue manter.</p></div>
+        <div class="item"><h3>Propriedade do cliente</h3><p>Código, dados e acessos ficam com você. Sem dependência escondida.</p></div>
+        <div class="item"><h3>Equipe pequena e sênior</h3><p>Quem levanta o problema é quem constrói e sustenta.</p></div>
+        <div class="item"><h3>Ciclo curto</h3><p>Entregas em semanas, com algo em uso a cada etapa.</p></div>
+        <div class="item"><h3>Decisão por indicador</h3><p>Escolhemos o que fazer pelo uso medido, pela economia registrada e pelo prazo cumprido.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sheet-head"><div><h2>Linha do tempo</h2></div><p class="lead" style="margin-top:0">Cada frente surgiu para resolver um problema de um cliente que já existia.</p></div>
+    <div class="sheet-body"><div class="aside"></div>
+      <div class="timeline">
+        <div class="ev"><div class="ano">2018</div><div><h3>Início</h3><p>Automação Microsoft e painéis para engenharia.</p></div></div>
+        <div class="ev"><div class="ano">2020</div><div><h3>Primeiro SIGD</h3><p>Sistema de gestão documental em consórcio de habitação.</p></div></div>
+        <div class="ev"><div class="ano">2022</div><div><h3>Sistemas de campo</h3><p>Vistorias com uso sem sinal e sincronização.</p></div></div>
+        <div class="ev"><div class="ano">2024</div><div><h3>Assistentes de IA</h3><p>Primeiros agentes sobre documentos de contrato.</p></div></div>
+        <div class="ev"><div class="ano">2026</div><div><h3>13 clientes, 27 sistemas</h3><p>Em produção em habitação, engenharia, energia e regularização fundiária.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sheet-head"><div><h2>Setores</h2></div><p class="lead" style="margin-top:0">Onde os sistemas já estão em uso.</p></div>
+    <div class="sheet-body"><div class="aside"></div>
+      <div class="setores"><span>Habitação e engenharia</span><span>Urbanismo</span><span>Petróleo e gás</span><span>Energia</span><span>Regularização fundiária</span><span>Habitação pública</span><span>Notificações e compliance</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="cta">
+      <div><h2>Em 30 minutos de conversa dá para saber se faz sentido trabalharmos juntos.</h2></div>
+      <div class="acoes"><a class="btn btn-primary btn-lg" href="#">Falar com a EGD</a></div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="container"><div class="foot">
+  <div><a class="logo" href="#"><span class="mark"></span>EGD</a><p>Sistemas de gestão, apps de campo e automação de relatórios para consórcios de engenharia, habitação e energia.</p></div>
+  <div><h4>Serviços</h4><ul><li><a href="#">Desenvolvimento de sistemas</a></li><li><a href="#">Automação de processos</a></li><li><a href="#">Dados e painéis</a></li><li><a href="#">Agentes de IA</a></li><li><a href="#">Governança de dados</a></li><li><a href="#">Gestão de projetos</a></li></ul></div>
+  <div><h4>Empresa</h4><ul><li><a href="#">Produtos</a></li><li><a href="#">Cases</a></li><li><a href="#">Sobre</a></li><li><a href="#">Contato</a></li><li><a href="#">Entrar no portal</a></li></ul></div>
+  <div><h4>Contato</h4><ul><li><a href="#">contato@egdsystem.com.br</a></li><li><span class="muted">São Paulo, Brasil</span></li><li><a href="#">LinkedIn</a></li></ul></div>
+</div><div class="foot-bottom"><span>© 2026 EGD Consultoria &amp; Tecnologia. CNPJ 00.000.000/0001-00</span><a href="#">Política de privacidade</a></div></div></footer>
+</body>
+</html>

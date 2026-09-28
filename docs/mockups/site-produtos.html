@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Produtos · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .page-title { padding-block: 64px 48px; }
+  .page-title .lead { margin-top: 20px; }
+  .prod { display: grid; grid-template-columns: 5fr 7fr; gap: 48px; border-top: 1px solid var(--border); padding-block: 48px; align-items: start; }
+  .prod .lead { margin-top: 12px; }
+  .prod ul { margin: 20px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .prod ul li { padding-left: 16px; position: relative; color: var(--fg-muted); }
+  .prod ul li::before { content: ""; position: absolute; left: 0; top: 0.65em; width: 8px; height: 1px; background: var(--fg); }
+  .prod .acoes { display: flex; gap: 12px; margin-top: 24px; }
+  .prod .folha .conteudo { padding: 20px; }
+  .prod .carimbo { grid-template-columns: 1.2fr 1.6fr 2.2fr; }
+  .mini-table { border: 1px solid var(--border); border-radius: 2px; overflow: hidden; background: var(--surface); }
+  .mini-table table td, .mini-table table th { height: 36px; padding: 0 12px; font-size: var(--text-micro); }
+  @media (max-width: 960px) { .prod { grid-template-columns: 1fr; gap: 24px; } }
+</style>
+</head>
+<body class="theme-site">
+<header class="container"><nav class="nav" aria-label="Principal">
+  <a class="logo" href="#"><span class="mark"></span>EGD <small>Consultoria &amp; Tecnologia</small></a>
+  <div class="nav-links"><a href="#">Início</a><a href="#">Serviços</a><a href="#" aria-current="page">Produtos</a><a href="#">Cases</a><a href="#">Sobre</a><a href="#">Contato</a></div>
+  <div class="nav-actions"><a class="entrar" href="#">Entrar</a><a class="btn btn-primary btn-sm" href="#">Falar com a EGD</a><button class="burger" aria-label="Abrir menu"><span></span></button></div>
+</nav></header>
+
+<main class="container">
+  <section class="page-title">
+    <h1>Sistemas que já rodam em clientes.</h1>
+    <p class="lead">Quatro produtos adaptáveis ao seu contrato. Implantação em semanas, dados e código com você.</p>
+  </section>
+
+  <article class="prod" id="sigd">
+    <div>
+      <span class="status ok">Em produção em cinco consórcios</span>
+      <h2 style="margin-top:12px">SIGD: gestão documental e de processos</h2>
+      <p class="lead">Documentos, revisões, fluxos de aprovação e trilha de auditoria de tudo que entra e sai de um contrato.</p>
+      <ul><li>Controle de revisões e versões com histórico</li><li>Fluxos de aprovação com prazos e alçadas</li><li>Busca por metadados e conteúdo</li><li>Trilha de auditoria de acesso e alteração</li><li>Integração com SharePoint e e-mail</li></ul>
+      <div class="acoes"><a class="btn btn-primary" href="#">Pedir uma demonstração</a><a class="btn btn-secondary" href="#">Ver case do URBHIS</a></div>
+    </div>
+    <figure class="folha"><div class="grade"></div>
+      <div class="conteudo">
+        <div class="titulo"><span>Documentos do contrato, revisões em aberto</span><span class="mono faint">SIGD</span></div>
+        <div class="mini-table" style="margin-top:16px"><table>
+          <thead><tr><th>Documento</th><th>Rev.</th><th>Etapa</th><th>Prazo</th></tr></thead>
+          <tbody>
+            <tr><td>Memorial descritivo do lote 04</td><td class="num">R2</td><td><span class="status warn">Em aprovação</span></td><td class="num">28/09</td></tr>
+            <tr><td>Planta de implantação</td><td class="num">R5</td><td><span class="status ok">Aprovado</span></td><td class="num">—</td></tr>
+            <tr><td>Relatório de vistoria 0921</td><td class="num">R1</td><td><span class="status info">Em análise</span></td><td class="num">30/09</td></tr>
+            <tr><td>Ata de reunião 14</td><td class="num">R0</td><td><span class="status">Rascunho</span></td><td class="num">—</td></tr>
+          </tbody></table></div>
+      </div>
+      <figcaption class="carimbo"><div><div class="k">Implantação</div><div class="v">3 a 6 semanas</div></div><div><div class="k">Áreas</div><div class="v">Engenharia, gerenciamento, jurídico</div></div><div><div class="k">Stack</div><div class="v">Power Apps, SharePoint, Power Automate, Power BI</div></div></figcaption>
+    </figure>
+  </article>
+
+  <article class="prod" id="campo">
+    <div>
+      <span class="status ok">Em produção</span>
+      <h2 style="margin-top:12px">Sistema de campo: vistorias e fiscalização</h2>
+      <p class="lead">Aplicativo para inspeções em campo com checklists, fotos com localização, assinatura e relatório automático.</p>
+      <ul><li>Checklists por tipo de obra ou ativo</li><li>Fotos com localização e horário</li><li>Uso sem sinal com sincronização automática</li><li>Relatório em PDF gerado e enviado ao fim da vistoria</li><li>Painel com mapa de não conformidades</li></ul>
+      <div class="acoes"><a class="btn btn-primary" href="#">Pedir uma demonstração</a></div>
+    </div>
+    <figure class="folha"><div class="grade"></div>
+      <div class="conteudo">
+        <div class="titulo"><span>Vistoria 4821, checklist estrutural</span><span class="mono faint">CAMPO</span></div>
+        <div class="mini-table" style="margin-top:16px"><table>
+          <thead><tr><th>Item</th><th>Verificação</th><th>Resultado</th></tr></thead>
+          <tbody>
+            <tr><td class="num">001</td><td>Armadura conforme projeto</td><td><span class="status ok">Conforme</span></td></tr>
+            <tr><td class="num">014</td><td>Concreto dos pilares</td><td><span class="status warn">Observação</span></td></tr>
+            <tr><td class="num">022</td><td>EPI da equipe</td><td><span class="status err">Não conforme</span></td></tr>
+            <tr><td class="num">031</td><td>Sinalização de acesso</td><td><span class="status ok">Conforme</span></td></tr>
+          </tbody></table></div>
+        <p class="micro faint" style="margin-top:12px">3 fotos anexadas, sincronizado às 16:42, assinado por J. Almeida</p>
+      </div>
+      <figcaption class="carimbo"><div><div class="k">Implantação</div><div class="v">4 a 6 semanas</div></div><div><div class="k">Áreas</div><div class="v">Engenharia, fiscalização, manutenção</div></div><div><div class="k">Stack</div><div class="v">Power Apps, Supabase, React Native, Power BI</div></div></figcaption>
+    </figure>
+  </article>
+
+  <article class="prod" id="contratos">
+    <div>
+      <span class="status info">Pronto para implantar</span>
+      <h2 style="margin-top:12px">Gestão de contratos</h2>
+      <p class="lead">Vigência, aditivos, alertas de vencimento e indicadores de cada contrato em um lugar só.</p>
+      <ul><li>Aprovação em níveis com alçadas</li><li>Alertas de vencimento e reajuste em 90, 60 e 30 dias</li><li>Repositório central com versões</li><li>Painel de obrigações e prazos</li><li>Integração com ERP e diretório corporativo</li></ul>
+      <div class="acoes"><a class="btn btn-primary" href="#">Pedir uma demonstração</a></div>
+    </div>
+    <figure class="folha"><div class="grade"></div>
+      <div class="conteudo">
+        <div class="titulo"><span>Contratos com vencimento nos próximos 90 dias</span><span class="mono faint">CONTRATOS</span></div>
+        <div class="mini-table" style="margin-top:16px"><table>
+          <thead><tr><th>Contrato</th><th>Fornecedor</th><th>Vence em</th><th>Alerta</th></tr></thead>
+          <tbody>
+            <tr><td class="num">CT-2024-018</td><td>Terraplenagem Norte</td><td class="num">12 dias</td><td><span class="status err">30 dias</span></td></tr>
+            <tr><td class="num">CT-2023-092</td><td>Locação de equipamentos</td><td class="num">41 dias</td><td><span class="status warn">60 dias</span></td></tr>
+            <tr><td class="num">CT-2025-007</td><td>Topografia e cadastro</td><td class="num">77 dias</td><td><span class="status info">90 dias</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <figcaption class="carimbo"><div><div class="k">Implantação</div><div class="v">2 a 4 semanas</div></div><div><div class="k">Áreas</div><div class="v">Jurídico, suprimentos, financeiro</div></div><div><div class="k">Stack</div><div class="v">SharePoint, Power Apps, Power Automate, Power BI</div></div></figcaption>
+    </figure>
+  </article>
+
+  <article class="prod" id="chamados">
+    <div>
+      <span class="status info">Pronto para implantar</span>
+      <h2 style="margin-top:12px">Central de chamados</h2>
+      <p class="lead">Abertura, prazo e histórico de atendimentos, com base de conhecimento e indicadores.</p>
+      <ul><li>Abertura por e-mail, web e Teams</li><li>Prazo por categoria e prioridade</li><li>Base de conhecimento com busca</li><li>Painel de atendimentos em aberto e prazos</li><li>Classificação automática por assistente de IA</li></ul>
+      <div class="acoes"><a class="btn btn-primary" href="#">Pedir uma demonstração</a></div>
+    </div>
+    <figure class="folha"><div class="grade"></div>
+      <div class="conteudo">
+        <div class="titulo"><span>Atendimentos em aberto hoje</span><span class="mono faint">CHAMADOS</span></div>
+        <div class="mini-table" style="margin-top:16px"><table>
+          <thead><tr><th>Nº</th><th>Assunto</th><th>Prioridade</th><th>Prazo</th></tr></thead>
+          <tbody>
+            <tr><td class="num">9847</td><td>VPN não conecta</td><td>Alta</td><td><span class="status ok">2 h restantes</span></td></tr>
+            <tr><td class="num">9846</td><td>Acesso ao SharePoint</td><td>Média</td><td><span class="status info">Resolvido pelo assistente</span></td></tr>
+            <tr><td class="num">9844</td><td>Erro no painel Power BI</td><td>Alta</td><td><span class="status warn">30 min</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <figcaption class="carimbo"><div><div class="k">Implantação</div><div class="v">2 a 3 semanas</div></div><div><div class="k">Áreas</div><div class="v">TI, facilities, atendimento</div></div><div><div class="k">Stack</div><div class="v">SharePoint, Power Automate, n8n, Azure OpenAI</div></div></figcaption>
+    </figure>
+  </article>
+
+  <section class="section">
+    <div class="cta">
+      <div><h2>Precisa de algo que não está aqui?</h2><p>Construímos sob medida a partir do que já existe. Conte o caso e respondemos em até um dia útil.</p></div>
+      <div class="acoes"><a class="btn btn-primary btn-lg" href="#">Conversar sobre o seu caso</a></div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="container"><div class="foot">
+  <div><a class="logo" href="#"><span class="mark"></span>EGD</a><p>Sistemas de gestão, apps de campo e automação de relatórios para consórcios de engenharia, habitação e energia.</p></div>
+  <div><h4>Serviços</h4><ul><li><a href="#">Desenvolvimento de sistemas</a></li><li><a href="#">Automação de processos</a></li><li><a href="#">Dados e painéis</a></li><li><a href="#">Agentes de IA</a></li><li><a href="#">Governança de dados</a></li><li><a href="#">Gestão de projetos</a></li></ul></div>
+  <div><h4>Empresa</h4><ul><li><a href="#">Produtos</a></li><li><a href="#">Cases</a></li><li><a href="#">Sobre</a></li><li><a href="#">Contato</a></li><li><a href="#">Entrar no portal</a></li></ul></div>
+  <div><h4>Contato</h4><ul><li><a href="#">contato@egdsystem.com.br</a></li><li><span class="muted">São Paulo, Brasil</span></li><li><a href="#">LinkedIn</a></li></ul></div>
+</div><div class="foot-bottom"><span>© 2026 EGD Consultoria &amp; Tecnologia. CNPJ 00.000.000/0001-00</span><a href="#">Política de privacidade</a></div></div></footer>
+</body>
+</html>

@@ -1,0 +1,215 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Tokens EGD (docs/specs/design-system.md). Três camadas:
+ * primitivas (--papel-*, --tinta-*...) → semânticas (--bg, --fg, --accent...)
+ * → variáveis que o shadcn/ui espera (--background, --primary...).
+ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-2xl: 6px;
+  --radius-3xl: 8px;
+  --radius-4xl: 8px;
+
+  /* semânticas próprias, expostas como utilitários (bg-signal, text-link, border-strong...) */
+  --color-signal: var(--sinal-500);
+  --color-signal-strong: var(--sinal-700);
+  --color-signal-soft: var(--sinal-100);
+  --color-link: var(--projeto-600);
+  --color-link-soft: var(--projeto-100);
+  --color-success: var(--aprovado-600);
+  --color-success-soft: var(--aprovado-100);
+  --color-warning: var(--atencao-600);
+  --color-warning-soft: var(--atencao-100);
+  --color-danger: var(--erro-600);
+  --color-danger-soft: var(--erro-100);
+  --color-strong: var(--regua-500);
+  --color-faint: var(--tinta-400);
+  --color-subtle: var(--papel-50);
+  --color-paper: var(--papel-100);
+}
+
+:root {
+  /* primitivas */
+  --papel-100: #eef1f2;
+  --papel-50: #f7f8f9;
+  --folha: #ffffff;
+  --tinta-900: #10202c;
+  --tinta-800: #1b3040;
+  --tinta-600: #4b5b67;
+  --tinta-400: #7d8b95;
+  --regua-300: #c8d1d6;
+  --regua-500: #9fadb6;
+  --sinal-500: #e4571b;
+  --sinal-700: #b9440f;
+  --sinal-100: #fcebe2;
+  --projeto-600: #1c4f8a;
+  --projeto-100: #e3ecf6;
+  --aprovado-600: #1e7a4b;
+  --aprovado-100: #e1f2e8;
+  --atencao-600: #b07600;
+  --atencao-100: #fbf1d9;
+  --erro-600: #b4271f;
+  --erro-100: #fbe5e3;
+
+  /* shadcn — tema público (site) */
+  --background: var(--papel-100);
+  --foreground: var(--tinta-900);
+  --card: var(--folha);
+  --card-foreground: var(--tinta-900);
+  --popover: var(--folha);
+  --popover-foreground: var(--tinta-900);
+  --primary: var(--tinta-900);
+  --primary-foreground: var(--folha);
+  --secondary: var(--papel-50);
+  --secondary-foreground: var(--tinta-900);
+  --muted: var(--papel-50);
+  --muted-foreground: var(--tinta-600);
+  --accent: var(--projeto-100);
+  --accent-foreground: var(--projeto-600);
+  --destructive: var(--erro-600);
+  --border: var(--regua-300);
+  --input: var(--regua-500);
+  --ring: var(--projeto-600);
+  --chart-1: var(--projeto-600);
+  --chart-2: var(--sinal-500);
+  --chart-3: var(--aprovado-600);
+  --chart-4: var(--atencao-600);
+  --chart-5: var(--tinta-400);
+  --radius: 4px;
+  --sidebar: var(--papel-100);
+  --sidebar-foreground: var(--tinta-900);
+  --sidebar-primary: var(--projeto-600);
+  --sidebar-primary-foreground: var(--folha);
+  --sidebar-accent: var(--projeto-100);
+  --sidebar-accent-foreground: var(--projeto-600);
+  --sidebar-border: var(--regua-300);
+  --sidebar-ring: var(--projeto-600);
+
+  --shadow-float: 0 24px 48px -24px rgb(16 32 44 / 0.35);
+  --ease-egd: cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+/* Tema dos portais: conteúdo em branco, sidebar em papel, escala menor. */
+.theme-app {
+  --background: var(--folha);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    font-variation-settings: "wdth" 100;
+  }
+  .theme-app body,
+  .theme-app {
+    font-size: 0.9375rem;
+  }
+  h1, h2, h3, h4 {
+    @apply font-semibold;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+  ::selection {
+    background: var(--sinal-100);
+  }
+}
+
+@layer components {
+  /* Escala tipográfica (docs/specs/design-system.md §3) */
+  .type-display { font-size: clamp(2.25rem, 1.5rem + 3vw, 3.5rem); line-height: 1.02; letter-spacing: -0.02em; font-variation-settings: "wdth" 112; }
+  .type-h1 { font-size: clamp(1.875rem, 1.4rem + 1.8vw, 2.5rem); line-height: 1.08; font-variation-settings: "wdth" 108; }
+  .type-h2 { font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.75rem); line-height: 1.15; font-variation-settings: "wdth" 104; }
+  .type-h3 { font-size: 1.25rem; line-height: 1.25; }
+  .type-lead { font-size: 1.1875rem; line-height: 1.5; }
+  .type-small { font-size: 0.875rem; line-height: 1.45; }
+  .type-micro { font-size: 0.8125rem; line-height: 1.4; font-weight: 500; }
+  .type-data { font-family: var(--font-mono); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+
+  /* Registro de folha: título na coluna esquerda, conteúdo à direita */
+  .sheet-head { @apply grid gap-6 border-t border-border pt-6 md:grid-cols-[3fr_9fr]; }
+  .sheet-body { @apply mt-6 grid gap-6 md:mt-10 md:grid-cols-[3fr_9fr]; }
+
+  /* Cota: linha de dimensão medindo um número real */
+  .cota { @apply flex flex-col gap-2.5; }
+  .cota-valor { font-size: 2.25rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1; font-variation-settings: "wdth" 108; font-variant-numeric: tabular-nums; }
+  .cota-linha { @apply relative h-3; }
+  .cota-linha::before { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 1px; background: var(--regua-500); }
+  .cota-linha::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 12px; border-left: 1px solid var(--regua-500); border-right: 1px solid var(--regua-500); }
+
+  /* Folha de projeto e carimbo */
+  .folha { @apply relative overflow-hidden rounded-lg border border-strong bg-card; }
+  .folha-grade { position: absolute; inset: 0; pointer-events: none; background-size: 32px 32px; background-image: linear-gradient(to right, color-mix(in srgb, var(--regua-300) 45%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--regua-300) 45%, transparent) 1px, transparent 1px); }
+  .carimbo { @apply relative grid border-t border-strong bg-card; }
+  .carimbo > div { @apply min-w-0 border-r border-border px-3 py-2.5 last:border-r-0; }
+  .carimbo-k { font-size: 0.8125rem; line-height: 1.4; font-weight: 500; color: var(--tinta-400); }
+  .carimbo-v { margin-top: 2px; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.35; }
+
+  /* Status: ponto + texto */
+  .status { @apply inline-flex items-center gap-2 text-sm font-medium text-muted-foreground; }
+  .status::before { content: ""; width: 8px; height: 8px; border-radius: 9999px; background: var(--tinta-400); flex: none; }
+  .status-ok::before { background: var(--aprovado-600); }
+  .status-warn::before { background: var(--atencao-600); }
+  .status-err::before { background: var(--erro-600); }
+  .status-info::before { background: var(--projeto-600); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .draw line, .draw path { stroke-dasharray: 600; stroke-dashoffset: 600; animation: egd-draw 700ms var(--ease-egd) forwards; }
+  .draw text { opacity: 0; animation: egd-fade 300ms 600ms var(--ease-egd) forwards; }
+}
+@keyframes egd-draw { to { stroke-dashoffset: 0; } }
+@keyframes egd-fade { to { opacity: 1; } }

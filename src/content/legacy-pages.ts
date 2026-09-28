@@ -1,0 +1,129 @@
+/* Conteúdo das páginas internas originais (portado de legacy/assets/*.jsx). */
+
+export const SERVICES = [
+  {
+    id: "dev", num: "01", title: "Desenvolvimento de Sistemas",
+    lead: "Aplicações web, mobile e plataformas internas sob medida — do MVP à arquitetura distribuída em cloud.",
+    icon: "M4 6h16v12H4z M4 10h16 M8 6v-2 M16 6v-2",
+    capabilities: [
+      { t: "Web apps & SPAs", d: "React, Next.js, Vue — TypeScript first, com testes e CI/CD." },
+      { t: "Apps mobile multiplataforma", d: "React Native e PWAs com sincronização offline e push." },
+      { t: "APIs & microsserviços", d: "REST, GraphQL e gRPC sobre Node, Python ou .NET." },
+      { t: "Containers & Kubernetes", d: "Deploy em EKS, AKS ou GKE — com observabilidade e auto-scale." },
+      { t: "Modernização de legado", d: "Refatoração progressiva, strangler pattern e migração para cloud." },
+      { t: "DevOps & SRE", d: "Pipelines, IaC (Terraform, Bicep) e SLOs ativos." },
+    ],
+    stack: { aws: ["Lambda", "ECS", "EKS", "API Gateway", "RDS"], azure: ["Functions", "AKS", "App Service", "Cosmos DB"], apache: ["Tomcat", "Maven"], outros: ["TypeScript", "Python", ".NET", "React", "Node"] },
+    delivery: "MVP em 4–8 semanas", squad: "PO, tech lead, 2–4 devs, QA",
+  },
+  {
+    id: "auto", num: "02", title: "Automação de Processos",
+    lead: "RPA, fluxos low-code e orquestração serverless que eliminam trabalho manual e reduzem erro humano em escala.",
+    icon: "M12 3v3 M12 18v3 M3 12h3 M18 12h3 M5.6 5.6l2.1 2.1 M16.3 16.3l2.1 2.1 M5.6 18.4l2.1-2.1 M16.3 7.7l2.1-2.1 M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z",
+    capabilities: [
+      { t: "Mapeamento de processos", d: "Discovery com BPMN, identificação de gargalos e ROI esperado." },
+      { t: "Automação serverless", d: "AWS Lambda, Azure Functions e Step Functions para workflows event-driven." },
+      { t: "Power Automate & SharePoint", d: "Aprovações, alçadas e integrações sobre Microsoft 365." },
+      { t: "n8n self-hosted", d: "Orquestração open-source com 400+ conectores e versionamento." },
+      { t: "RPA tradicional", d: "Quando o processo depende de telas legadas sem API." },
+      { t: "Integrações & webhooks", d: "Barramento de eventos com Kafka, EventBridge ou Service Bus." },
+    ],
+    stack: { aws: ["Lambda", "Step Functions", "EventBridge", "SQS", "SNS"], azure: ["Functions", "Logic Apps", "Service Bus"], apache: ["Kafka", "Camel", "NiFi"], outros: ["Power Automate", "n8n", "Zapier"] },
+    delivery: "Primeiros fluxos em 2–3 semanas", squad: "Analista, automation eng, dev",
+  },
+  {
+    id: "data", num: "03", title: "Data Analytics & BI",
+    lead: "Plataformas de dados modernas, modelagem semântica e dashboards executivos sobre lakehouse e warehouse.",
+    icon: "M4 20V8 M10 20V4 M16 20v-9 M22 20H2",
+    capabilities: [
+      { t: "Lakehouse moderno", d: "Apache Iceberg sobre S3/ADLS, com camadas raw/silver/gold." },
+      { t: "ETL/ELT em escala", d: "Apache Spark, Glue, Synapse Pipelines e dbt para modelagem." },
+      { t: "Warehouses analíticos", d: "Redshift, Synapse, Snowflake — projetados para custo e performance." },
+      { t: "Dashboards executivos", d: "Power BI Premium, Fabric e Tableau — com modelagem semântica robusta." },
+      { t: "Streaming analytics", d: "Apache Kafka + Flink/Spark Streaming para dados em tempo real." },
+      { t: "Métricas & KPIs", d: "Camada semântica única, métricas certificadas e self-service." },
+    ],
+    stack: { aws: ["S3", "Glue", "Redshift", "Athena", "EMR", "QuickSight"], azure: ["ADLS", "Synapse", "Data Factory", "Fabric"], apache: ["Spark", "Iceberg", "Kafka", "Flink", "Superset"], outros: ["dbt", "Power BI", "Tableau"] },
+    delivery: "Dashboard inicial em 3–5 semanas", squad: "Eng. de dados, analytics eng, analista",
+  },
+  {
+    id: "ia", num: "04", title: "Agentes de IA",
+    lead: "Copilotos sob medida e agentes autônomos integrados aos seus sistemas — do RAG simples ao multi-agente orquestrado.",
+    icon: "M9 12a3 3 0 1 1 6 0 3 3 0 1 1-6 0z M5 8V6a2 2 0 0 1 2-2h2 M19 8V6a2 2 0 0 0-2-2h-2 M5 16v2a2 2 0 0 0 2 2h2 M19 16v2a2 2 0 0 1-2 2h-2 M2 12h2 M20 12h2 M12 2v2 M12 20v2",
+    capabilities: [
+      { t: "RAG sobre dados próprios", d: "Indexação semântica, re-ranking e citação de fontes." },
+      { t: "Agentes com ferramentas", d: "LangChain, LlamaIndex e MCP para integrar APIs e bancos." },
+      { t: "Copilotos de produto", d: "Assistentes contextuais embutidos em apps internos e externos." },
+      { t: "Avaliação & guardrails", d: "Eval pipelines, prompt firewall e telemetria de qualidade." },
+      { t: "Modelos open-source", d: "Llama, Mistral, Qwen — em VPC quando o dado é sensível." },
+      { t: "Hub de conhecimento", d: "Pipeline de ingestão contínua de docs, tickets e wikis." },
+    ],
+    stack: { aws: ["Bedrock", "SageMaker", "OpenSearch", "Lambda"], azure: ["OpenAI", "AI Search", "ML Studio"], apache: ["Kafka", "Airflow"], outros: ["LangChain", "LlamaIndex", "Pinecone", "pgvector", "Ollama"] },
+    delivery: "PoC em 2–4 semanas", squad: "ML eng, data eng, dev full-stack",
+  },
+  {
+    id: "gov", num: "05", title: "Governança de Dados",
+    lead: "Catálogo, qualidade, linhagem e políticas de acesso. Dados confiáveis, auditáveis e prontos para escalar.",
+    icon: "M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z M9 12l2 2 4-4",
+    capabilities: [
+      { t: "Catálogo & discovery", d: "Glossário de negócio, ownership claro, busca semântica." },
+      { t: "Qualidade automatizada", d: "Testes em cada DAG com Great Expectations / Soda / dbt-tests." },
+      { t: "Linhagem ponta-a-ponta", d: "OpenLineage + Marquez para impacto e auditoria." },
+      { t: "LGPD & privacidade", d: "Mascaramento, minimização, data subject requests automatizados." },
+      { t: "Acesso & RBAC", d: "Lake Formation, Purview e políticas por tag." },
+      { t: "FinOps de dados", d: "Custo por workload, alertas e otimização contínua." },
+    ],
+    stack: { aws: ["Lake Formation", "Glue Catalog", "DataZone"], azure: ["Purview", "Defender for Cloud"], apache: ["Atlas", "Ranger", "OpenLineage"], outros: ["dbt", "Great Expectations", "Soda", "Collibra"] },
+    delivery: "Diagnóstico em 2 semanas", squad: "Data architect, gov lead, eng. dados",
+  },
+  {
+    id: "agile", num: "06", title: "Consultoria em Projetos Ágeis",
+    lead: "Discovery, descoberta de produto e gestão de squads. Aceleramos sua entrega com cadência, foco em valor e métricas claras.",
+    icon: "M3 12h4l2-6 4 12 2-6h4",
+    capabilities: [
+      { t: "Discovery dual-track", d: "Pesquisa, prototipagem e validação contínuas em paralelo ao delivery." },
+      { t: "Métricas DORA", d: "Lead time, deploy frequency, MTTR e change failure rate." },
+      { t: "Coaching de squads", d: "Cerimônias, papéis e práticas técnicas (TDD, pair, trunk-based)." },
+      { t: "OKRs & alinhamento", d: "Cascata de OKRs com check-ins quinzenais e métricas de saúde." },
+      { t: "Gestão de portfólio", d: "WSJF, RICE e visibilidade contínua de capacidade vs. demanda." },
+      { t: "Ritos executivos", d: "Steering committees objetivos, decisão por dado, não por opinião." },
+    ],
+    stack: { aws: [], azure: ["DevOps", "Boards"], apache: [], outros: ["Jira", "Linear", "Miro", "Notion", "ProductBoard"] },
+    delivery: "Onboarding em 2 semanas", squad: "Agile coach, PM, tech lead",
+  },
+];
+
+export type ProductVisual = "contratos" | "rh" | "vistorias" | "helpdesk";
+
+export const PRODUCTS_FULL: { id: string; num: string; title: string; tag: string; lead: string; features: string[]; deploy: string; scope: string; stack: string[]; visual: ProductVisual }[] = [
+  { id: "contratos", num: "01", title: "Gestão de Contratos", tag: "ENTERPRISE", lead: "Ciclo completo do contrato: criação, aprovação, vigência, aditivos e renovação — com alertas, dashboards e trilha de auditoria.", features: ["Workflow de aprovação multi-nível com alçadas", "Alertas automáticos de vencimento e reajuste (90/60/30 dias)", "Repositório central com versionamento e assinatura digital", "Dashboard de obrigações, SLAs e indicadores financeiros", "Integração com ERP (TOTVS, SAP) e Active Directory"], deploy: "2 a 4 semanas", scope: "Jurídico, Suprimentos, Financeiro", stack: ["SharePoint", "Power Apps", "Power Automate", "Power BI", "Azure AD"], visual: "contratos" },
+  { id: "rh", num: "02", title: "Gestão de RH", tag: "PEOPLE OPS", lead: "Controle de jornada, folha, férias, treinamentos e onboarding em uma plataforma unificada — integrada ao ecossistema corporativo.", features: ["Banco de horas e ponto eletrônico com geolocalização", "Gestão de férias, abonos e benefícios em fluxo único", "Trilhas de onboarding e capacitação com certificados", "Indicadores de turnover, clima e headcount em tempo real", "Integração com folha (ADP, Senior, TOTVS RM)"], deploy: "3 a 5 semanas", scope: "RH, DP, Liderança", stack: ["Power Apps", "Power Automate", "MySQL", "Azure Functions", "Power BI"], visual: "rh" },
+  { id: "vistorias", num: "03", title: "App de Vistorias e Fiscalização de Obras", tag: "FIELD", lead: "Aplicativo mobile para inspeções em campo com checklists, fotos georreferenciadas, assinatura digital e relatórios automáticos.", features: ["Checklists configuráveis por tipo de obra ou ativo", "Captura de mídia com geolocalização e timestamp", "Operação 100% offline com sincronização automática", "Relatórios PDF gerados e enviados automaticamente", "Painel web para gestores com mapa de não-conformidades"], deploy: "4 a 6 semanas", scope: "Engenharia, Manutenção, Segurança", stack: ["Power Apps", "Supabase", "Azure Storage", "Power BI", "React Native"], visual: "vistorias" },
+  { id: "helpdesk", num: "04", title: "Central de Chamados (Helpdesk)", tag: "OPERATIONS", lead: "Sistema de tickets com SLA, fluxos de escalonamento, base de conhecimento com IA e indicadores em tempo real para times de suporte.", features: ["Multi-canal: e-mail, web, Teams, WhatsApp e Slack", "SLA por categoria, prioridade e horário comercial", "Base de conhecimento com busca semântica (RAG + LLM)", "Painel de operação ao vivo com alertas de SLA", "Auto-classificação e roteamento por agente de IA"], deploy: "2 a 3 semanas", scope: "TI, Facilities, Suporte interno e externo", stack: ["SharePoint", "Power Automate", "n8n", "Azure OpenAI", "Power BI"], visual: "helpdesk" },
+];
+
+export const PRINCIPLES = [
+  { t: "Engenharia, não promessa", d: "Toda solução vai a produção com testes, observabilidade e runbook — não slides." },
+  { t: "Stack agnóstico", d: "AWS, Azure, Apache, Power Platform — escolhemos pela aderência ao seu contexto." },
+  { t: "Propriedade do cliente", d: "Código, modelos e dados ficam com você. Sem lock-in proprietário escondido." },
+  { t: "Time pequeno, sênior", d: "Squads enxutos com tech leads experientes. Nenhum elo fraco no delivery." },
+  { t: "Ciclo curto", d: "Entregas em semanas, não trimestres. Valor demonstrável a cada sprint." },
+  { t: "Métrica acima de opinião", d: "Decisões guiadas por DORA, SLOs e indicadores de produto — não preferências." },
+];
+
+export const TIMELINE = [
+  { y: "2018", t: "Fundação", d: "Nasce em São Paulo com foco em automação Microsoft e BI." },
+  { y: "2020", t: "Primeira plataforma de dados", d: "Entregamos lakehouse em produção para cliente do setor industrial." },
+  { y: "2022", t: "Cloud-native e DevOps", d: "Squad dedicado a AWS, Azure, Kubernetes e SRE para clientes enterprise." },
+  { y: "2024", t: "Vertical de IA", d: "Primeiros agentes em produção sobre Bedrock e Azure OpenAI." },
+  { y: "2026", t: "40+ projetos", d: "Plataformas em prod em 6 setores: indústria, varejo, saúde, jurídico, infra, financeiro." },
+];
+
+export const SECTORS = [
+  { n: "Indústria", d: "Manufatura, energia, infraestrutura" },
+  { n: "Varejo", d: "E-commerce, supply chain, omnichannel" },
+  { n: "Saúde", d: "Hospitais, operadoras, healthtech" },
+  { n: "Jurídico", d: "Escritórios, departamentos jurídicos" },
+  { n: "Construção", d: "Incorporadoras, gerenciadoras, obras" },
+  { n: "Financeiro", d: "Bancos médios, fintechs, asset" },
+];

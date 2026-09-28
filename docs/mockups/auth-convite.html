@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Convite · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  body { background: var(--papel-100); }
+  .auth-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; align-items: start; width: 100%; max-width: 1320px; }
+  .auth .card h2 { font-size: 1.5rem; margin-top: 20px; line-height: 1.15; }
+  .rotulo-mock { font-size: var(--text-micro); color: var(--fg-faint); font-weight: 500; margin-bottom: 8px; }
+  @media (max-width: 960px) { .auth-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="theme-app">
+<main class="auth">
+  <div class="auth-grid">
+    <div>
+      <div class="rotulo-mock">/convite/[token] · usuário novo</div>
+      <div class="card">
+        <a class="logo" href="#"><span class="mark"></span>EGD</a>
+        <h2>Crie sua senha para acessar o portal do Consórcio URBHIS</h2>
+        <p class="lead">Você foi convidado por eugenio@egdsystem.com.br. Defina um nome de exibição e uma senha.</p>
+        <form>
+          <div class="field"><label for="nome">Seu nome</label><input class="input" id="nome" autocomplete="name"></div>
+          <div class="field"><label for="senha">Senha</label><input class="input" id="senha" type="password" autocomplete="new-password"><span class="hint">Mínimo 10 caracteres. Evite senhas usadas em outros serviços.</span></div>
+          <button class="btn btn-primary" type="submit" style="width:100%">Criar minha conta</button>
+        </form>
+        <p class="rodape">Conta para <span class="mono">joao.silva@urbhis.com.br</span>. O convite vale por 7 dias.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="rotulo-mock">/convite/[token] · usuário já existente</div>
+      <div class="card">
+        <a class="logo" href="#"><span class="mark"></span>EGD</a>
+        <h2>Vincular sua conta ao Consórcio HABITA GERENCIAL</h2>
+        <p class="lead">Você já tem conta com o e-mail <span class="mono">joao.silva@urbhis.com.br</span>. Confirme para acessar também esta organização.</p>
+        <form>
+          <button class="btn btn-primary" type="submit" style="width:100%">Vincular à HABITA GERENCIAL</button>
+        </form>
+        <p class="rodape">Depois de vincular, entre com a sua senha atual.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="rotulo-mock">/convite/[token] · inválido ou expirado</div>
+      <div class="card">
+        <a class="logo" href="#"><span class="mark"></span>EGD</a>
+        <h2>Este convite não é válido ou já expirou.</h2>
+        <p class="lead">Peça um novo convite para a EGD. Convites valem por 7 dias e só podem ser usados uma vez.</p>
+        <div style="display:flex;gap:12px;margin-top:24px"><a class="btn btn-secondary" href="#">Ir para a página inicial</a><a class="btn btn-primary" href="mailto:contato@egdsystem.com.br">Falar com a EGD</a></div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

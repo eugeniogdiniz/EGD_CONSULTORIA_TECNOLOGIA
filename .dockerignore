@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.github
+.claude
+.superpowers
+.playwright-mcp
+legacy
+docs
+tests
+test-results
+playwright-report
+.env
+.env.*
+!.env.example
+*.md

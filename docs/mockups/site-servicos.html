@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Serviços · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .page-title { padding-block: 64px 48px; }
+  .page-title .lead { margin-top: 20px; }
+  .indice { display: flex; gap: 8px 20px; flex-wrap: wrap; margin-top: 32px; font-size: var(--text-small); }
+  .servico { display: grid; grid-template-columns: 3fr 6fr 3fr; gap: var(--gutter); border-top: 1px solid var(--border); padding-block: 40px 48px; }
+  .servico .lead { margin-top: 12px; }
+  .servico ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; align-content: start; }
+  .servico ul li { padding-left: 16px; position: relative; color: var(--fg-muted); }
+  .servico ul li::before { content: ""; position: absolute; left: 0; top: 0.65em; width: 8px; height: 1px; background: var(--fg); }
+  .ficha { border: 1px solid var(--border); border-radius: var(--radius-surface); background: var(--surface); font-size: var(--text-small); }
+  .ficha div { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .ficha div:last-child { border-bottom: 0; }
+  .ficha .k { color: var(--fg-faint); font-weight: 500; font-size: var(--text-micro); }
+  .ficha .v { margin-top: 2px; }
+  @media (max-width: 960px) { .servico { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="theme-site">
+<header class="container"><nav class="nav" aria-label="Principal">
+  <a class="logo" href="#"><span class="mark"></span>EGD <small>Consultoria &amp; Tecnologia</small></a>
+  <div class="nav-links"><a href="#">Início</a><a href="#" aria-current="page">Serviços</a><a href="#">Produtos</a><a href="#">Cases</a><a href="#">Sobre</a><a href="#">Contato</a></div>
+  <div class="nav-actions"><a class="entrar" href="#">Entrar</a><a class="btn btn-primary btn-sm" href="#">Falar com a EGD</a><button class="burger" aria-label="Abrir menu"><span></span></button></div>
+</nav></header>
+
+<main class="container">
+  <section class="page-title">
+    <h1>Do sistema ao painel, com a mesma equipe.</h1>
+    <p class="lead">Seis frentes de trabalho. Cada uma tem escopo, prazo típico e a stack que usamos de fato.</p>
+    <nav class="indice" aria-label="Serviços nesta página">
+      <a class="link" href="#dev">Desenvolvimento de sistemas</a><a class="link" href="#auto">Automação de processos</a><a class="link" href="#dados">Dados e painéis</a><a class="link" href="#ia">Agentes de IA</a><a class="link" href="#gov">Governança de dados</a><a class="link" href="#gestao">Gestão de projetos</a>
+    </nav>
+  </section>
+
+  <article class="servico" id="dev">
+    <div><h2>Desenvolvimento de sistemas</h2><p class="lead">Sistemas web e aplicativos que substituem planilhas compartilhadas e formulários em papel.</p></div>
+    <ul><li>Sistemas de gestão documental e de processos (SIGD, GED)</li><li>Aplicativos de campo com uso sem sinal e sincronização</li><li>Cadastros e fluxos de aprovação com alçadas</li><li>Integração com ERP, SharePoint e e-mail</li><li>Modernização de sistemas antigos por etapas</li></ul>
+    <div class="ficha"><div><div class="k">Stack</div><div class="v">Power Apps, SharePoint, Supabase e Postgres, Next.js, Python, React Native</div></div><div><div class="k">Prazo típico</div><div class="v">Primeira versão em uso em 4 a 8 semanas</div></div></div>
+  </article>
+
+  <article class="servico" id="auto">
+    <div><h2>Automação de processos</h2><p class="lead">Relatórios e rotinas que hoje alguém monta à mão passam a rodar sozinhos, com registro do que foi feito.</p></div>
+    <ul><li>Mapeamento do processo e cálculo da economia esperada</li><li>Relatórios periódicos gerados e enviados automaticamente</li><li>Aprovações e notificações sobre Microsoft 365</li><li>Integrações entre sistemas por API e webhooks</li><li>Automação de telas quando não existe API</li></ul>
+    <div class="ficha"><div><div class="k">Stack</div><div class="v">Power Automate, n8n, Python, Azure Functions, AWS Lambda</div></div><div><div class="k">Prazo típico</div><div class="v">Primeiros fluxos em 2 a 3 semanas</div></div></div>
+  </article>
+
+  <article class="servico" id="dados">
+    <div><h2>Dados e painéis</h2><p class="lead">Uma base só para os números e painéis que a gestão consulta toda semana.</p></div>
+    <ul><li>Modelagem de dados e camada semântica</li><li>Cargas automáticas a partir de sistemas, planilhas e APIs</li><li>Painéis em Power BI por contrato, obra ou região</li><li>Indicadores com definição escrita e dono</li><li>Mapas e séries históricas</li></ul>
+    <div class="ficha"><div><div class="k">Stack</div><div class="v">Power BI, Postgres, Python, Azure Data Factory, SQL</div></div><div><div class="k">Prazo típico</div><div class="v">Primeiro painel em 3 a 5 semanas</div></div></div>
+  </article>
+
+  <article class="servico" id="ia">
+    <div><h2>Agentes de IA</h2><p class="lead">Assistentes que consultam seus documentos e sistemas e respondem citando a fonte.</p></div>
+    <ul><li>Busca e resposta sobre documentos internos (RAG)</li><li>Assistentes dentro dos seus sistemas e do Teams</li><li>Classificação e roteamento automático de solicitações</li><li>Avaliação de qualidade e registro de cada interação</li><li>Modelos hospedados no seu ambiente quando o dado exige</li></ul>
+    <div class="ficha"><div><div class="k">Stack</div><div class="v">Azure OpenAI, AWS Bedrock, pgvector, Python</div></div><div><div class="k">Prazo típico</div><div class="v">Prova de conceito em 2 a 4 semanas</div></div></div>
+  </article>
+
+  <article class="servico" id="gov">
+    <div><h2>Governança de dados</h2><p class="lead">Regras claras sobre acesso, origem e qualidade de cada informação.</p></div>
+    <ul><li>Catálogo de dados com dono e definição</li><li>Testes de qualidade nas cargas</li><li>Linhagem: de onde vem cada número do painel</li><li>Adequação à LGPD: acesso, retenção e anonimização</li><li>Controle de acesso por papel e por contrato</li></ul>
+    <div class="ficha"><div><div class="k">Stack</div><div class="v">Microsoft Purview, dbt, Great Expectations, Postgres</div></div><div><div class="k">Prazo típico</div><div class="v">Diagnóstico em 2 semanas</div></div></div>
+  </article>
+
+  <article class="servico" id="gestao">
+    <div><h2>Gestão de projetos de tecnologia</h2><p class="lead">Levantamento, priorização e acompanhamento das entregas, com o cliente decidindo o que vem primeiro.</p></div>
+    <ul><li>Levantamento de processos e dores com quem opera</li><li>Backlog priorizado por economia e urgência</li><li>Reuniões quinzenais de acompanhamento com registro</li><li>Escopo e critérios de aceite por escrito</li><li>Indicadores de entrega e de uso</li></ul>
+    <div class="ficha"><div><div class="k">Stack</div><div class="v">Planner, Jira, Notion, planilha de CAPEX</div></div><div><div class="k">Prazo típico</div><div class="v">Início em 2 semanas</div></div></div>
+  </article>
+
+  <section class="section">
+    <div class="cta">
+      <div><h2>Qual dessas frentes resolve o problema de hoje?</h2><p>Respondemos em até um dia útil com uma leitura inicial e os próximos passos.</p></div>
+      <div class="acoes"><a class="link" href="#" style="color:var(--surface)">Ver produtos prontos</a><a class="btn btn-primary btn-lg" href="#">Falar com a EGD</a></div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="container"><div class="foot">
+  <div><a class="logo" href="#"><span class="mark"></span>EGD</a><p>Sistemas de gestão, apps de campo e automação de relatórios para consórcios de engenharia, habitação e energia.</p></div>
+  <div><h4>Serviços</h4><ul><li><a href="#">Desenvolvimento de sistemas</a></li><li><a href="#">Automação de processos</a></li><li><a href="#">Dados e painéis</a></li><li><a href="#">Agentes de IA</a></li><li><a href="#">Governança de dados</a></li><li><a href="#">Gestão de projetos</a></li></ul></div>
+  <div><h4>Empresa</h4><ul><li><a href="#">Produtos</a></li><li><a href="#">Cases</a></li><li><a href="#">Sobre</a></li><li><a href="#">Contato</a></li><li><a href="#">Entrar no portal</a></li></ul></div>
+  <div><h4>Contato</h4><ul><li><a href="#">contato@egdsystem.com.br</a></li><li><span class="muted">São Paulo, Brasil</span></li><li><a href="#">LinkedIn</a></li></ul></div>
+</div><div class="foot-bottom"><span>© 2026 EGD Consultoria &amp; Tecnologia. CNPJ 00.000.000/0001-00</span><a href="#">Política de privacidade</a></div></div></footer>
+</body>
+</html>

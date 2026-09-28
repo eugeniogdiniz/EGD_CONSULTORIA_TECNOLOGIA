@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Organização · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .dois { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 1100px) { .dois { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu do administrador">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <a class="item" href="#" aria-current="page">Organizações</a>
+    <a class="item" href="#">Leads <span class="badge badge-novo" style="margin-left:auto">3</span></a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a class="link" href="#" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Organizações</a> <span class="faint" style="margin:0 8px">/</span> Consórcio URBHIS</div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div><h1 class="h1">Consórcio URBHIS</h1><div class="small muted" style="margin-top:6px"><span class="status ok">Ativa</span> <span class="faint" style="margin:0 10px">/</span> <span class="mono">consorcio-urbhis</span> <span class="faint" style="margin:0 10px">/</span> criada em 27/09/2026</div></div>
+        <div class="linha-acoes"><a class="btn btn-secondary btn-sm" href="#">Editar dados</a><a class="btn btn-danger btn-sm" href="#">Inativar</a></div>
+      </div>
+
+      <div class="dois">
+        <div class="stack" style="display:grid;gap:24px">
+          <section class="bloco">
+            <div class="bloco-head"><h3>Usuários</h3><span class="small muted">2 ativos</span></div>
+            <div class="table-wrap" style="border:0;border-radius:0"><table>
+              <thead><tr><th>Nome</th><th>E-mail</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>João Silva</td><td class="mono">joao.silva@urbhis.com.br</td><td><span class="status ok">Ativo</span></td><td style="text-align:right"><a class="link small" href="#">Desativar</a></td></tr>
+                <tr><td>Marina Costa</td><td class="mono">marina.costa@urbhis.com.br</td><td><span class="status ok">Ativo</span></td><td style="text-align:right"><a class="link small" href="#">Desativar</a></td></tr>
+                <tr><td>Paulo Reis</td><td class="mono">paulo.reis@urbhis.com.br</td><td><span class="status err">Desativado</span></td><td style="text-align:right"><a class="link small" href="#">Ativar</a></td></tr>
+              </tbody></table></div>
+          </section>
+
+          <section class="bloco">
+            <div class="bloco-head"><h3>Convites pendentes</h3><span class="small muted">1</span></div>
+            <div class="table-wrap" style="border:0;border-radius:0"><table>
+              <thead><tr><th>E-mail</th><th>Enviado em</th><th>Expira em</th><th></th></tr></thead>
+              <tbody><tr><td class="mono">carla.mendes@urbhis.com.br</td><td>27/09/2026</td><td><span class="status warn">6 dias</span></td><td style="text-align:right"><a class="link small" href="#">Reenviar</a></td></tr></tbody></table></div>
+          </section>
+        </div>
+
+        <div style="display:grid;gap:24px">
+          <section class="bloco">
+            <div class="bloco-head"><h3>Convidar por e-mail</h3></div>
+            <div class="bloco-body"><form style="display:grid;gap:12px">
+              <div class="field"><label for="conv">E-mail</label><input class="input" id="conv" type="email" placeholder="nome@empresa.com.br"></div>
+              <button class="btn btn-primary" type="submit">Convidar</button>
+              <p class="micro faint" style="font-weight:400">A pessoa recebe um link para criar a senha. O convite vale por 7 dias.</p>
+            </form></div>
+          </section>
+          <section class="bloco">
+            <div class="bloco-head"><h3>Dados</h3></div>
+            <div class="bloco-body small" style="display:grid;gap:12px">
+              <div><div class="micro faint">CNPJ</div><div class="mono">12.345.678/0001-95</div></div>
+              <div><div class="micro faint">Identificador</div><div class="mono">consorcio-urbhis</div></div>
+              <div><div class="micro faint">Arquivos</div><div>4 arquivos, 18,2 MB</div></div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <section class="bloco">
+        <div class="bloco-head"><h3>Referência: outras telas do admin</h3><span class="small muted">lista, vazio, leads e diálogo</span></div>
+        <div class="bloco-body" style="display:grid;gap:24px">
+          <div>
+            <div class="page-head" style="margin-bottom:12px"><h2 class="h3">Organizações</h2><a class="btn btn-primary btn-sm" href="#">Nova organização</a></div>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Nome</th><th>Identificador</th><th>Usuários</th><th>Status</th><th>Criada em</th></tr></thead>
+              <tbody>
+                <tr><td><a class="link" href="#">Consórcio BJMM</a></td><td class="mono">consorcio-bjmm</td><td class="num">3</td><td><span class="status ok">Ativa</span></td><td>27/09/2026</td></tr>
+                <tr><td><a class="link" href="#">Consórcio URBHIS</a></td><td class="mono">consorcio-urbhis</td><td class="num">2</td><td><span class="status ok">Ativa</span></td><td>27/09/2026</td></tr>
+                <tr><td><a class="link" href="#">COHAB Santos</a></td><td class="mono">cohab-santos</td><td class="num">0</td><td><span class="status err">Inativa</span></td><td>27/09/2026</td></tr>
+              </tbody></table></div>
+          </div>
+          <div>
+            <div class="tabs" style="margin-bottom:12px"><a href="#" aria-current="page">Novos</a><a href="#">Vistos</a><a href="#">Todos</a></div>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Nome</th><th>E-mail</th><th>Empresa</th><th>Mensagem</th><th>Recebido em</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Ana Ribeiro <span class="badge badge-novo" style="margin-left:6px">Novo</span></td><td class="mono">ana@construtorasul.com.br</td><td>Construtora Sul</td><td class="muted" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Temos 40 vistorias por semana em papel e o relatório sai com…</td><td>hoje, 14:02</td><td style="text-align:right"><a class="link small" href="#">Marcar como visto</a></td></tr>
+                <tr><td>Carlos Lima <span class="badge badge-novo" style="margin-left:6px">Novo</span></td><td class="mono">carlos.lima@habitasp.gov.br</td><td>Habita SP</td><td class="muted" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Precisamos de um GED para 3 contratos com aprovação em…</td><td>ontem, 09:40</td><td style="text-align:right"><a class="link small" href="#">Marcar como visto</a></td></tr>
+              </tbody></table></div>
+          </div>
+          <div class="table-wrap"><div class="empty"><h3>Nenhuma organização ainda.</h3><p>Crie a primeira para convidar clientes.</p><div><a class="btn btn-primary btn-sm" href="#">Nova organização</a></div></div></div>
+          <div style="position:relative;height:220px;border:1px dashed var(--border-strong);border-radius:4px;overflow:hidden">
+            <div class="dialog-backdrop" style="position:absolute"><div class="dialog" role="dialog" aria-labelledby="dlg"><h3 id="dlg">Inativar Consórcio URBHIS?</h3><p class="small muted">Os usuários dela perdem acesso ao portal até ser reativada. Os dados continuam guardados.</p><div class="acoes"><button class="btn btn-secondary btn-sm">Cancelar</button><button class="btn btn-danger btn-sm">Inativar</button></div></div></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main, fase-1-fundacao]
+  pull_request:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/egd-app
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
+      - name: Sobe Postgres, RustFS e Mailpit
+        run: docker compose -f docker-compose.dev.yml up -d --wait
+      - run: cp .env.example .env
+      - run: npm run db:migrate
+      - run: npm run db:seed
+      - run: npm run test:integration
+
+      - name: Build de produção
+        run: npm run build
+      - name: Servidor para os e2e
+        run: |
+          npm run start &
+          npx wait-on --timeout 120000 http://localhost:3000/api/health
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+
+  # A imagem é construída aqui (não no VPS, que tem 1 vCPU) e publicada no GHCR.
+  # O Coolify faz o deploy a partir da imagem pronta.
+  image:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tags da imagem
+        id: meta
+        run: |
+          IMAGE_LC=$(echo "${IMAGE}" | tr '[:upper:]' '[:lower:]')
+          BRANCH=$(echo "${GITHUB_REF_NAME}" | tr '/' '-')
+          echo "image=${IMAGE_LC}" >> "$GITHUB_OUTPUT"
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.branch }}
+            ${{ steps.meta.outputs.image }}:sha-${{ github.sha }}
+            ${{ github.ref_name == 'main' && format('{0}:latest', steps.meta.outputs.image) || '' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
