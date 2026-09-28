@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { OpportunityFormDialog } from "@/modules/crm/components/opportunity-form";
 import { InteractionFormDialog } from "@/modules/crm/components/interaction-form";
 import { LostDialog } from "@/modules/crm/components/lost-dialog";
+import { ProposalFormDialog } from "@/modules/crm/components/proposal-form";
 import { formatBrlCents, formatDate, formatIsoDate } from "@/lib/format";
 
 const STAGES: Array<"new" | "qualified" | "meeting" | "proposal" | "won" | "lost"> = [
@@ -186,7 +187,12 @@ export default async function OportunidadeDetalhePage({
 
         <Block
           title="Propostas"
-          aside={<span>{proposals.length}</span>}
+          aside={
+            <ProposalFormDialog
+              opportunityId={opp.id}
+              trigger={<Button variant="secondary" size="sm" type="button">Nova proposta</Button>}
+            />
+          }
         >
           {proposals.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhuma proposta ainda.</p>

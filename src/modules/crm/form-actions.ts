@@ -266,6 +266,15 @@ export async function updateProposalForm(_p: NullState, fd: FormData): Promise<N
   return r;
 }
 
+export async function attachProposalFileForm(_p: NullState, fd: FormData): Promise<NullState> {
+  const ctx = await requireAdmin();
+  const id = String(fd.get("id") ?? "");
+  const { attachProposalFile } = await import("./actions");
+  const r = await attachProposalFile(ctx, id, fd);
+  revalidatePath(`/admin/crm/propostas/${id}`);
+  return r.ok ? { ok: true, data: null } : r;
+}
+
 export async function changeProposalStatusForm(fd: FormData): Promise<void> {
   const ctx = await requireAdmin();
   const id = String(fd.get("id") ?? "");
