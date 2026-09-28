@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { TOTAIS } from "@/content/cases";
+import { getPublishedTotals } from "@/modules/cases/queries";
 import { Arrow } from "@/components/legacy/ui";
 import { PRINCIPLES, TIMELINE, SECTORS } from "@/content/legacy-pages";
 import { BrandFilm } from "@/components/site/brand-film";
 
 export const metadata: Metadata = { title: "Sobre", description: "A EGD Consultoria: consultoria de tecnologia que entrega código em produção." };
 
-export default function SobrePage() {
+export const dynamic = "force-dynamic";
+
+export default async function SobrePage() {
+  const TOTAIS = await getPublishedTotals();
   return (
     <>
       <section className="page-head">
