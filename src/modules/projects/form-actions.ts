@@ -127,13 +127,12 @@ export async function movePhaseForm(fd: FormData): Promise<void> {
   revalidatePath(`/admin/projetos/${projectId}`);
 }
 
-export async function deletePhaseForm(fd: FormData): Promise<NullState> {
+export async function deletePhaseForm(fd: FormData): Promise<void> {
   const ctx = await requireAdmin();
   const id = String(fd.get("id") ?? "");
   const projectId = String(fd.get("projectId") ?? "");
-  const r = await deletePhase(ctx, id);
+  await deletePhase(ctx, id);
   revalidatePath(`/admin/projetos/${projectId}`);
-  return r;
 }
 
 // Marco ───────────────────────────────────────────────────────────────────
