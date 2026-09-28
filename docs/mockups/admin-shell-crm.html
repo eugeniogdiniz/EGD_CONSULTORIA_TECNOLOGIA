@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Sidebar com grupo colapsável · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  /* Emenda do design system §11 — grupo colapsável na sidebar admin.
+     Estas regras entram em mockup.css depois de aprovadas. */
+  .sidebar .group-head {
+    display: flex; align-items: center; gap: 8px;
+    height: 36px; padding: 0 12px; border-radius: 2px;
+    font-family: var(--font-mono); font-size: var(--text-micro);
+    color: var(--fg-muted); background: transparent; border: 0;
+    cursor: pointer; width: 100%; text-align: left;
+  }
+  .sidebar .group-head:hover { color: var(--fg); }
+  .sidebar .group-head:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .sidebar .group-head .label { flex: 1; }
+  .sidebar .group-head .chevron {
+    width: 12px; height: 12px; color: var(--fg-faint);
+    transition: transform 160ms cubic-bezier(.2,.6,.2,1);
+  }
+  .sidebar .group[data-open="true"] .group-head .chevron { transform: rotate(90deg); }
+  .sidebar .group[data-open="false"] .group-items { display: none; }
+  .sidebar .group-items { display: flex; flex-direction: column; gap: 4px; }
+  .sidebar .group-items .item { padding-left: 24px; }
+
+  /* Layout do comparativo: duas sidebars lado a lado (aberto e fechado). */
+  .comparativo {
+    display: grid; grid-template-columns: 260px 260px 1fr; gap: 24px; align-items: start;
+    padding: 24px; background: var(--bg-subtle); border-radius: 4px; border: 1px solid var(--border);
+  }
+  .comparativo .frame {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+  }
+  .comparativo .frame-legend {
+    padding: 8px 12px; background: var(--surface); border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: var(--text-micro); color: var(--fg-muted);
+  }
+  .comparativo .frame .sidebar { border-right: 0; height: 420px; }
+  .comparativo .notas { padding: 8px 0; }
+  .comparativo .notas ul { margin: 8px 0 0; padding-left: 18px; }
+  .comparativo .notas li { color: var(--fg-muted); font-size: var(--text-small); margin-bottom: 6px; }
+  .comparativo .notas li strong { color: var(--fg); font-weight: 500; }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu do administrador">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+
+    <div class="group" data-open="true" id="grupo-crm">
+      <button class="group-head" type="button" aria-expanded="true" aria-controls="grupo-crm-itens" onclick="toggleGroup('grupo-crm', this)">
+        <span class="label">CRM</span>
+        <svg class="chevron" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="group-items" id="grupo-crm-itens">
+        <a class="item" href="#">Empresas</a>
+        <a class="item" href="#">Contatos</a>
+        <a class="item" href="#" aria-current="page">Funil</a>
+        <a class="item" href="#">Propostas</a>
+      </div>
+    </div>
+
+    <a class="item" href="#">Organizações</a>
+    <a class="item" href="#">Leads <span class="badge badge-novo" style="margin-left:auto">3</span></a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a class="link" href="#" style="text-decoration:none;color:var(--fg-muted);font-weight:500">CRM</a> <span class="faint" style="margin:0 8px">/</span> Funil</div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Sidebar do admin com grupo colapsável</h1>
+          <div class="small muted" style="margin-top:6px">Emenda ao design system §11 · aprovada em conjunto com este mockup · aplica só à sidebar do admin.</div>
+        </div>
+      </div>
+
+      <section class="bloco">
+        <div class="bloco-head"><h3>Estados do grupo</h3><span class="small muted">aberto (à esquerda) e fechado (ao centro)</span></div>
+        <div class="bloco-body">
+          <div class="comparativo">
+            <div class="frame">
+              <div class="frame-legend">Grupo aberto (default quando um sub-item está ativo)</div>
+              <aside class="sidebar" aria-label="Exemplo aberto">
+                <a class="logo" href="#"><span class="mark"></span>EGD</a>
+                <a class="item" href="#">Painel</a>
+                <div class="group" data-open="true">
+                  <button class="group-head" type="button" aria-expanded="true" tabindex="-1">
+                    <span class="label">CRM</span>
+                    <svg class="chevron" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <div class="group-items">
+                    <a class="item" href="#">Empresas</a>
+                    <a class="item" href="#">Contatos</a>
+                    <a class="item" href="#" aria-current="page">Funil</a>
+                    <a class="item" href="#">Propostas</a>
+                  </div>
+                </div>
+                <a class="item" href="#">Organizações</a>
+                <a class="item" href="#">Leads <span class="badge badge-novo" style="margin-left:auto">3</span></a>
+                <a class="item" href="#">Arquivos</a>
+                <a class="item" href="#">Auditoria</a>
+                <div class="rodape">Portal administrativo</div>
+              </aside>
+            </div>
+
+            <div class="frame">
+              <div class="frame-legend">Grupo fechado (default se o admin nunca abriu)</div>
+              <aside class="sidebar" aria-label="Exemplo fechado">
+                <a class="logo" href="#"><span class="mark"></span>EGD</a>
+                <a class="item" href="#" aria-current="page">Painel</a>
+                <div class="group" data-open="false">
+                  <button class="group-head" type="button" aria-expanded="false" tabindex="-1">
+                    <span class="label">CRM</span>
+                    <svg class="chevron" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <div class="group-items">
+                    <a class="item" href="#">Empresas</a>
+                    <a class="item" href="#">Contatos</a>
+                    <a class="item" href="#">Funil</a>
+                    <a class="item" href="#">Propostas</a>
+                  </div>
+                </div>
+                <a class="item" href="#">Organizações</a>
+                <a class="item" href="#">Leads <span class="badge badge-novo" style="margin-left:auto">3</span></a>
+                <a class="item" href="#">Arquivos</a>
+                <a class="item" href="#">Auditoria</a>
+                <div class="rodape">Portal administrativo</div>
+              </aside>
+            </div>
+
+            <div class="notas">
+              <h3 class="h3">Regras</h3>
+              <ul>
+                <li><strong>Cabeçalho não é link.</strong> Fragment Mono 13 px, `--fg-muted`, chevron 12 px à direita. `role="button"`, `aria-expanded`, `aria-controls`.</li>
+                <li><strong>Sub-item ativo força aberto.</strong> Se a URL bate com prefixo de qualquer sub-item, o grupo abre e ignora o estado persistido enquanto a navegação estiver ali.</li>
+                <li><strong>Persistência</strong> em `localStorage`, chave `egd_admin_nav`, JSON `{ groups: { crm: "open" | "closed" } }`.</li>
+                <li><strong>Sem animação de altura.</strong> Toggle instantâneo. O chevron gira em 160 ms (só rotação, não altera layout).</li>
+                <li><strong>Aninhar é proibido.</strong> Um nível só. Sub-item de sub-item não existe.</li>
+                <li><strong>Selo `.badge` continua permitido</strong> à direita de qualquer sub-item (mesmo padrão de `Leads`).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloco">
+        <div class="bloco-head"><h3>Interativo</h3><span class="small muted">clique no cabeçalho "CRM" da sidebar principal (topo) para ver o toggle real</span></div>
+        <div class="bloco-body small muted">
+          <p style="max-width:44rem">A sidebar principal desta página (à esquerda) exercita o padrão: cabeçalho "CRM" clicável, chevron gira, sub-itens somem sem animar altura. O sub-item ativo (Funil) reabre o grupo se você tentar fechar enquanto está nele — para simular, mude o `aria-current` no HTML ou navegue.</p>
+        </div>
+      </section>
+
+      <section class="bloco">
+        <div class="bloco-head"><h3>Ordem final da sidebar</h3></div>
+        <div class="bloco-body">
+          <ol class="small" style="line-height:1.9;padding-left:20px">
+            <li>Painel</li>
+            <li>Grupo <strong>CRM</strong> · Empresas · Contatos · Funil · Propostas</li>
+            <li>Organizações</li>
+            <li>Leads (com contador)</li>
+            <li>Arquivos</li>
+            <li>Auditoria</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+  function toggleGroup(id, btn) {
+    var el = document.getElementById(id);
+    var open = el.getAttribute('data-open') === 'true';
+    el.setAttribute('data-open', open ? 'false' : 'true');
+    btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+  }
+</script>
+</body>
+</html>
