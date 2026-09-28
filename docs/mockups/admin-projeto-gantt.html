@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Projeto · Gantt · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .abas { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .abas a { padding: 10px 14px; font-size: var(--text-small); font-weight: 500; color: var(--fg-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .abas a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent-strong); }
+  .controle { display: flex; align-items: center; gap: 16px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); margin-bottom: 12px; flex-wrap: wrap; }
+  .controle .grupo { display: inline-flex; align-items: center; gap: 8px; font-size: var(--text-small); color: var(--fg-muted); }
+  .controle .escala { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 2px; overflow: hidden; }
+  .controle .escala button { border: 0; background: var(--surface); font: inherit; font-size: var(--text-small); padding: 6px 12px; cursor: pointer; color: var(--fg-muted); }
+  .controle .escala button[aria-pressed="true"] { background: var(--link-soft); color: var(--link); font-weight: 500; }
+  .legenda { display: inline-flex; align-items: center; gap: 14px; margin-left: auto; font-size: var(--text-micro); color: var(--fg-muted); }
+  .legenda .swatch { display: inline-flex; align-items: center; gap: 6px; }
+  .legenda .box { display: inline-block; width: 22px; height: 10px; border-radius: 2px; }
+  .legenda .box.fase { background: var(--projeto-100); border: 1px solid var(--link); }
+  .legenda .box.dev-todo { background: color-mix(in srgb, var(--fg-faint) 22%, var(--surface)); border: 1px solid var(--border-strong); }
+  .legenda .box.dev-doing { background: var(--link-soft); border: 1px solid var(--link); }
+  .legenda .box.dev-done { background: var(--success-soft); border: 1px solid var(--success); }
+  .legenda .box.dev-blocked { background: var(--danger-soft); border: 1px solid var(--danger); }
+  .gantt { display: grid; grid-template-columns: 260px 1fr; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); overflow: hidden; }
+  .gantt .lateral { border-right: 1px solid var(--border); }
+  .gantt .lateral .cab { height: 40px; background: var(--bg-subtle); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; font-size: var(--text-micro); color: var(--fg-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+  .lateral .linha { display: flex; align-items: center; padding: 0 16px; font-size: var(--text-small); border-bottom: 1px solid var(--border); }
+  .lateral .linha.fase { background: var(--bg-subtle); font-weight: 500; }
+  .lateral .linha:last-child { border-bottom: 0; }
+  .lateral .linha .caret { display: inline-flex; width: 12px; margin-right: 6px; color: var(--fg-faint); }
+  .lateral .linha .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 8px; background: var(--fg-faint); }
+  .lateral .linha[data-s="doing"] .dot { background: var(--link); }
+  .lateral .linha[data-s="done"] .dot { background: var(--success); }
+  .lateral .linha[data-s="blocked"] .dot { background: var(--danger); }
+  .lateral .linha[data-s="review"] .dot { background: var(--accent); }
+  .lateral .linha .titulo { flex: 1; min-width: 0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+  .lateral .linha .info { font-family: var(--font-mono); font-size: 10px; color: var(--fg-faint); }
+  .grade { position: relative; overflow-x: auto; }
+  .grade svg { display: block; }
+  .grade .semdata { padding: 24px 16px; font-size: var(--text-micro); color: var(--fg-faint); border-top: 1px dashed var(--border); }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <a class="item" href="#" style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--fg-muted)">CRM</a>
+    <a class="item" href="#">Organizações</a>
+    <a class="item" href="admin-projetos-lista.html" aria-current="page">Projetos</a>
+    <a class="item" href="admin-projetos-templates.html">Templates</a>
+    <a class="item" href="#">Leads</a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a class="link" href="admin-projetos-lista.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Projetos</a> <span class="faint" style="margin:0 8px">/</span> <a class="link" href="admin-projeto-detalhe.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Laudo de infra TI</a> <span class="faint" style="margin:0 8px">/</span> Gantt</div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <nav class="abas" aria-label="Sub-nav">
+        <a href="admin-projeto-detalhe.html">Visão geral</a>
+        <a href="admin-projeto-kanban.html">Kanban</a>
+        <a href="admin-projeto-gantt.html" aria-current="page">Gantt</a>
+        <a href="admin-projeto-calendario.html">Calendário</a>
+        <a href="admin-projeto-financeiro.html">Financeiro</a>
+      </nav>
+
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Linha do tempo — Gantt</h1>
+          <div class="small muted" style="margin-top:6px">Fases em barras largas, entregas em barras finas. Clique numa barra pra abrir o diálogo de edição. Sem edição na timeline.</div>
+        </div>
+      </div>
+
+      <div class="controle">
+        <div class="grupo">
+          <span>Escala</span>
+          <div class="escala" role="group" aria-label="Escala da linha do tempo">
+            <button type="button">Dia</button>
+            <button type="button" aria-pressed="true">Semana</button>
+            <button type="button">Mês</button>
+          </div>
+        </div>
+        <div class="grupo">
+          <span>Janela</span>
+          <span class="mono">03/10/2026 → 12/12/2026</span>
+        </div>
+        <div class="grupo">
+          <a class="btn btn-secondary btn-sm" href="#">← anterior</a>
+          <a class="btn btn-secondary btn-sm" href="#">Hoje</a>
+          <a class="btn btn-secondary btn-sm" href="#">próximo →</a>
+        </div>
+        <div class="legenda">
+          <span class="swatch"><span class="box fase"></span>Fase</span>
+          <span class="swatch"><span class="box dev-todo"></span>A fazer</span>
+          <span class="swatch"><span class="box dev-doing"></span>Em progresso</span>
+          <span class="swatch"><span class="box dev-done"></span>Feita</span>
+          <span class="swatch"><span class="box dev-blocked"></span>Bloqueada</span>
+        </div>
+      </div>
+
+      <div class="gantt">
+        <div class="lateral">
+          <div class="cab">Item</div>
+          <div class="linha fase"><span class="caret">▾</span><span class="titulo">Kickoff e escopo</span><span class="info">3 entregas</span></div>
+          <div class="linha" data-s="done"><span class="dot"></span><span class="titulo">Ata da reunião de kickoff</span><span class="info">03/10</span></div>
+          <div class="linha" data-s="done"><span class="dot"></span><span class="titulo">Documento de escopo assinado</span><span class="info">08/10</span></div>
+          <div class="linha" data-s="doing"><span class="dot"></span><span class="titulo">Definição das janelas de manutenção</span><span class="info">10/10</span></div>
+          <div class="linha fase"><span class="caret">▾</span><span class="titulo">Execução (inventário + backup)</span><span class="info">4 entregas</span></div>
+          <div class="linha" data-s="doing"><span class="dot"></span><span class="titulo">Inventário de servidores</span><span class="info">15/10</span></div>
+          <div class="linha" data-s="review"><span class="dot"></span><span class="titulo">Checklist de segurança de rede</span><span class="info">18/10</span></div>
+          <div class="linha" data-s="todo"><span class="dot"></span><span class="titulo">Setup de backup gerenciado</span><span class="info">22/10</span></div>
+          <div class="linha" data-s="blocked"><span class="dot"></span><span class="titulo">Migração do storage secundário</span><span class="info">30/10</span></div>
+          <div class="linha fase"><span class="caret">▾</span><span class="titulo">Aceite e entrega final</span><span class="info">2 entregas</span></div>
+          <div class="linha" data-s="todo"><span class="dot"></span><span class="titulo">Rascunho do laudo</span><span class="info">05/12</span></div>
+          <div class="linha" data-s="todo"><span class="dot"></span><span class="titulo">Laudo final assinado</span><span class="info">12/12</span></div>
+        </div>
+
+        <div class="grade">
+          <!-- 71 dias × ~14px = 994. Escala semana usa 8px/dia (~ 566), mas alargamos pra caber cabeçalho -->
+          <svg width="994" height="504" viewBox="0 0 994 504" role="img" aria-label="Timeline Gantt de 03/10/2026 a 12/12/2026">
+            <!-- Cabeçalho: bandas de mês -->
+            <g>
+              <rect x="0" y="0" width="994" height="40" fill="var(--bg-subtle)"/>
+              <line x1="0" y1="40" x2="994" y2="40" stroke="var(--border)"/>
+              <!-- outubro: 03/10 a 31/10 = 29 dias × 14 = 406 -->
+              <text x="16" y="16" font-family="var(--font-sans)" font-size="11" fill="var(--fg-muted)" font-weight="500">OUTUBRO 2026</text>
+              <line x1="406" y1="0" x2="406" y2="504" stroke="var(--border)"/>
+              <!-- novembro: 01/11 a 30/11 = 30 dias × 14 = 420 → 826 -->
+              <text x="422" y="16" font-family="var(--font-sans)" font-size="11" fill="var(--fg-muted)" font-weight="500">NOVEMBRO 2026</text>
+              <line x1="826" y1="0" x2="826" y2="504" stroke="var(--border)"/>
+              <!-- dezembro: 01/12 a 12/12 = 12 dias × 14 = 168 → 994 -->
+              <text x="842" y="16" font-family="var(--font-sans)" font-size="11" fill="var(--fg-muted)" font-weight="500">DEZEMBRO</text>
+              <!-- semanas -->
+              <g font-family="var(--font-mono)" font-size="10" fill="var(--fg-faint)">
+                <text x="8" y="34">S40</text>
+                <text x="106" y="34">S41</text>
+                <text x="204" y="34">S42</text>
+                <text x="302" y="34">S43</text>
+                <text x="400" y="34">S44</text>
+                <text x="498" y="34">S45</text>
+                <text x="596" y="34">S46</text>
+                <text x="694" y="34">S47</text>
+                <text x="792" y="34">S48</text>
+                <text x="890" y="34">S49</text>
+                <text x="960" y="34">S50</text>
+              </g>
+              <!-- linhas verticais de semana -->
+              <g stroke="color-mix(in srgb, var(--border) 60%, transparent)">
+                <line x1="98" y1="40" x2="98" y2="504"/>
+                <line x1="196" y1="40" x2="196" y2="504"/>
+                <line x1="294" y1="40" x2="294" y2="504"/>
+                <line x1="392" y1="40" x2="392" y2="504"/>
+                <line x1="490" y1="40" x2="490" y2="504"/>
+                <line x1="588" y1="40" x2="588" y2="504"/>
+                <line x1="686" y1="40" x2="686" y2="504"/>
+                <line x1="784" y1="40" x2="784" y2="504"/>
+                <line x1="882" y1="40" x2="882" y2="504"/>
+                <line x1="960" y1="40" x2="960" y2="504"/>
+              </g>
+            </g>
+
+            <!-- Bandas horizontais alternadas por lane (opacidade baixa) -->
+            <g fill="var(--bg-subtle)">
+              <rect x="0" y="40" width="994" height="32" opacity="0.7"/>
+              <rect x="0" y="200" width="994" height="32" opacity="0.7"/>
+              <rect x="0" y="360" width="994" height="32" opacity="0.7"/>
+            </g>
+
+            <!-- Fase Kickoff — larga, 03/10 (x=0) → 12/10 (x=126). Y=40..72 -->
+            <g>
+              <rect x="0" y="46" width="126" height="20" rx="2" fill="var(--projeto-100)" stroke="var(--link)"/>
+              <text x="8" y="60" font-size="11" fill="var(--link)" font-weight="500">Kickoff e escopo</text>
+            </g>
+
+            <!-- Entregas de Kickoff (Y=72,104,136 laneHeight 32, barHeight 12) -->
+            <g>
+              <rect x="0" y="80" width="14" height="12" rx="2" fill="var(--success-soft)" stroke="var(--success)"/>
+              <rect x="70" y="112" width="14" height="12" rx="2" fill="var(--success-soft)" stroke="var(--success)"/>
+              <rect x="98" y="144" width="42" height="12" rx="2" fill="var(--link-soft)" stroke="var(--link)"/>
+            </g>
+
+            <!-- Fase Execução — 13/10 (x=140) → 20/11 (x=672). Y=168..200 -->
+            <g>
+              <rect x="140" y="174" width="532" height="20" rx="2" fill="var(--projeto-100)" stroke="var(--link)"/>
+              <text x="148" y="188" font-size="11" fill="var(--link)" font-weight="500">Execução (inventário + backup)</text>
+            </g>
+
+            <!-- Entregas Execução (Y=208..) -->
+            <g>
+              <!-- Inventário: 13/10-15/10 -->
+              <rect x="140" y="208" width="42" height="12" rx="2" fill="var(--link-soft)" stroke="var(--link)"/>
+              <!-- Checklist: 15/10-18/10 -->
+              <rect x="168" y="240" width="42" height="12" rx="2" fill="var(--accent-soft)" stroke="var(--accent)"/>
+              <!-- Backup: 19/10-22/10 -->
+              <rect x="224" y="272" width="42" height="12" rx="2" fill="color-mix(in srgb, var(--fg-faint) 22%, var(--surface))" stroke="var(--border-strong)"/>
+              <!-- Migração storage: 25/10-30/10 BLOQUEADA -->
+              <rect x="308" y="304" width="70" height="12" rx="2" fill="var(--danger-soft)" stroke="var(--danger)"/>
+            </g>
+
+            <!-- Fase Aceite — 21/11 (x=686) → 12/12 (x=980) — Y=328..360 -->
+            <g>
+              <rect x="686" y="334" width="294" height="20" rx="2" fill="var(--projeto-100)" stroke="var(--link)"/>
+              <text x="694" y="348" font-size="11" fill="var(--link)" font-weight="500">Aceite e entrega final</text>
+            </g>
+
+            <!-- Entregas Aceite -->
+            <g>
+              <!-- Rascunho laudo: 25/11-05/12 -->
+              <rect x="742" y="368" width="140" height="12" rx="2" fill="color-mix(in srgb, var(--fg-faint) 22%, var(--surface))" stroke="var(--border-strong)"/>
+              <!-- Laudo final: 08/12-12/12 -->
+              <rect x="924" y="400" width="56" height="12" rx="2" fill="color-mix(in srgb, var(--fg-faint) 22%, var(--surface))" stroke="var(--border-strong)"/>
+            </g>
+
+            <!-- Dependências: setinhas L-shape -->
+            <g fill="none" stroke="var(--fg-muted)" stroke-width="1.2" marker-end="url(#seta)">
+              <!-- Ata → Definição janelas: fim ata (14, 86) → início janelas (98, 150) -->
+              <path d="M 14 86 L 60 86 L 60 150 L 98 150"/>
+              <!-- Escopo → Inventário: fim escopo (84, 118) → início invent (140, 214) -->
+              <path d="M 84 118 L 112 118 L 112 214 L 140 214"/>
+              <!-- Inventário → Checklist: fim invent (182, 214) → início check (168, 246) -->
+              <path d="M 182 214 L 200 214 L 200 246 L 210 246"/>
+              <!-- Backup → Migração: fim backup (266, 278) → início migração (308, 310) -->
+              <path d="M 266 278 L 288 278 L 288 310 L 308 310"/>
+              <!-- Migração → Rascunho laudo -->
+              <path d="M 378 310 L 720 310 L 720 374 L 742 374"/>
+              <!-- Rascunho → Laudo final -->
+              <path d="M 882 374 L 900 374 L 900 406 L 924 406"/>
+            </g>
+            <defs>
+              <marker id="seta" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0 0 L8 4 L0 8 z" fill="var(--fg-muted)"/>
+              </marker>
+            </defs>
+
+            <!-- Linha "Hoje": 21/10 → x=252 -->
+            <g>
+              <line x1="252" y1="40" x2="252" y2="504" stroke="var(--sinal-500)" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <rect x="230" y="42" width="44" height="16" rx="2" fill="var(--sinal-500)"/>
+              <text x="252" y="53" text-anchor="middle" font-size="10" fill="#fff" font-weight="600">HOJE</text>
+            </g>
+          </svg>
+
+          <div class="semdata">
+            <strong>1 entrega sem data</strong> — <em>Auditoria de logs (opcional)</em>. Sem barra na timeline. Adicione uma data via diálogo pra ela aparecer aqui.
+          </div>
+        </div>
+      </div>
+
+      <section class="bloco" style="margin-top:24px">
+        <div class="bloco-head"><h3>Regras do Gantt</h3></div>
+        <div class="bloco-body small muted" style="max-width:60rem;line-height:1.6;display:grid;gap:10px">
+          <p><strong style="color:var(--fg);font-weight:500">Read-only na Fase 3.5.</strong> Edição continua pelo diálogo/kanban. Clicar numa barra abre o diálogo da entrega.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Sem data = sem barra.</strong> Entregas sem <span class="mono">due_at</span> aparecem em um bloco separado abaixo.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Fora da janela.</strong> Barras que começam antes de <span class="mono">from</span> ou terminam depois de <span class="mono">to</span> são "clampadas" no limite; a UI mostra a barra encurtada.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Escala.</strong> <span class="mono">day = 24px/dia</span>, <span class="mono">week = 8px/dia</span>, <span class="mono">month = 2px/dia</span>. Estado guardado na URL como <span class="mono">?scale=</span>.</p>
+          <p><strong style="color:var(--fg);font-weight:500">Dependências.</strong> Caminho SVG do fim do predecessor até o início do sucessor com seta. Ciclos são impedidos na criação.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>
