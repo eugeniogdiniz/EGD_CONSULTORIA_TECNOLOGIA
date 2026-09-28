@@ -11,7 +11,7 @@ const TEST_ADMIN_EMAIL = "admin@test.local";
 /** Limpa dados de teste antes de cada arquivo: tabelas de domínio inteiras e usuários @test.local. */
 beforeAll(async () => {
   await db.execute(
-    sql`truncate table audit_log, crm_proposal, crm_interaction, crm_opportunity, crm_contact, crm_company, files, leads, invitations, memberships, organizations cascade`,
+    sql`truncate table audit_log, project_deliverable, project_milestone, project_phase, project, crm_proposal, crm_interaction, crm_opportunity, crm_contact, crm_company, files, leads, invitations, memberships, organizations cascade`,
   );
   await db.delete(users).where(like(users.email, "%@test.local"));
 });
