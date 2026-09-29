@@ -37,7 +37,7 @@ npm run dev
 ```bash
 npm run lint && npm run typecheck
 npm test                 # unitários (Vitest)
-npm run test:integration # contra o Postgres do compose
+npm run test:integration # contra o banco separado <nome>_test (criado e migrado sozinho; nunca toca o de dev)
 npm run test:e2e         # Playwright (sobe o dev server se preciso)
 ```
 
