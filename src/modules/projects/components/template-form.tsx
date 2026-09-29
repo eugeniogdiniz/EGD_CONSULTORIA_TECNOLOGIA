@@ -36,7 +36,7 @@ export function SaveAsTemplateDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<span />}>{trigger}</DialogTrigger>
+      <DialogTrigger render={trigger as React.ReactElement} />
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Salvar como template</DialogTitle>
@@ -88,7 +88,7 @@ export function RenameTemplateDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<span />}>{trigger}</DialogTrigger>
+      <DialogTrigger render={trigger as React.ReactElement} />
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Editar template</DialogTitle>

@@ -22,7 +22,7 @@ export function LinkOrganizationDialog({
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<span />}>{trigger}</DialogTrigger>
+      <DialogTrigger render={trigger as React.ReactElement} />
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Vincular ao portal do cliente</DialogTitle>

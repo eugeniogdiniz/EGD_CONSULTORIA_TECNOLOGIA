@@ -33,7 +33,7 @@ export function ConfirmAction({
 }) {
   return (
     <Dialog>
-      <DialogTrigger render={<span />}>{trigger}</DialogTrigger>
+      <DialogTrigger render={trigger as React.ReactElement} />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

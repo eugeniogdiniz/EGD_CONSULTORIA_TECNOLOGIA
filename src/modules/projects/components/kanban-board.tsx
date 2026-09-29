@@ -92,7 +92,7 @@ function CardBody({ card, today }: { card: KanbanCard; today: string }) {
       <div className="text-sm font-medium leading-snug">{card.title}</div>
       <div className="mt-2 flex flex-wrap items-center gap-2 text-[0.75rem] text-muted-foreground">
         {card.phaseName && (
-          <span className="type-data inline-flex h-4 items-center rounded-sm border border-border px-1 text-[10px]">
+          <span title={card.phaseName} className="type-data inline-block h-4 max-w-full truncate rounded-sm border border-border px-1 text-[10px] leading-[14px]">
             {card.phaseName}
           </span>
         )}
