@@ -94,3 +94,13 @@ test.describe("projetos no portal", () => {
     expect(res?.status()).toBe(404);
   });
 });
+
+test("home do portal lista o projeto da organização e leva até ele", async ({ page }) => {
+  const fx = createTwoOrgsWithClientsAndFiles();
+  await loginAs(page, fx.clientA.email, fx.clientA.password);
+  await page.goto("/portal");
+  await expect(page.getByRole("heading", { name: /seus projetos/i })).toBeVisible();
+  await expect(page.getByText(fx.projectB.title)).toHaveCount(0);
+  await page.getByRole("link", { name: new RegExp(fx.projectA.title) }).click();
+  await expect(page.getByRole("heading", { level: 1, name: fx.projectA.title })).toBeVisible();
+});
