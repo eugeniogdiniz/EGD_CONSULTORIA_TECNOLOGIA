@@ -46,14 +46,3 @@ export const FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
     ],
   },
 ];
-
-/** Números medidos: recalculados da tabela de cases (planilha de CAPEX). */
-export const METRICS = [
-  { value: "13", label: "clientes atendidos" },
-  { value: "27", label: "sistemas em produção" },
-  { value: "62", label: "automações entregues" },
-  { value: "R$ 1,03", suffix: "mi/ano", label: "em economia medida" },
-] as const;
-
-export const METRICS_NOTE =
-  "Economia = horas por mês eliminadas × custo do responsável × 12, conforme planilha de CAPEX de cada cliente.";

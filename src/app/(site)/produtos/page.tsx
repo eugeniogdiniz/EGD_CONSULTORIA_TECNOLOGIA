@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/content/seo";
 import Link from "next/link";
 import { Arrow } from "@/components/legacy/ui";
 import { Visual } from "@/components/legacy/product-visual";
 import { PRODUCTS_FULL } from "@/content/legacy-pages";
 
-export const metadata: Metadata = { title: "Produtos", description: "Produtos verticais prontos: gestão de contratos, RH, vistorias de obras e central de chamados." };
+export const metadata: Metadata = pageMeta({
+  title: "Produtos: contratos, RH, vistorias e central de chamados",
+  description: "Produtos verticais prontos para a sua operação: gestão de contratos, RH, vistorias de obras e central de chamados.",
+  path: "/produtos",
+});
 
 export default function ProdutosPage() {
   return (
