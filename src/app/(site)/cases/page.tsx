@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Arrow } from "@/components/legacy/ui";
-import { getPublishedTotals, listPublishedCases } from "@/modules/cases/queries";
+import { getSiteCases } from "@/modules/cases/site";
 
 export const metadata: Metadata = { title: "Cases", description: "Clientes, sistemas e automações em produção, com CAPEX e economia medida." };
 
@@ -31,7 +31,7 @@ function KpiCell({ label, value, prefix, suffix }: { label: string; value: strin
 export const dynamic = "force-dynamic";
 
 export default async function CasesPage() {
-  const [CLIENTES, TOTAIS] = await Promise.all([listPublishedCases(), getPublishedTotals()]);
+  const { cases: CLIENTES, totals: TOTAIS } = await getSiteCases();
   const featured = CLIENTES.filter((c) => c.destaque);
   const sorted = [...CLIENTES].sort((a, b) => b.economia - a.economia);
   const sectors = [...new Set(CLIENTES.map((c) => c.setor.split(" e ")[0]))];
