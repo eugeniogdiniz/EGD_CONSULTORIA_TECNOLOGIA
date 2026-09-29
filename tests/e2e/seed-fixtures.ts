@@ -7,7 +7,7 @@ import "dotenv/config";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { crmCompany, crmOpportunity, files, memberships, project, projectDeliverable } from "@/db/schema";
+import { crmCompany, crmOpportunity, files, memberships, project, projectDeliverable, projectMilestone, projectPhase } from "@/db/schema";
 import { createOrganization } from "@/modules/tenancy/actions";
 import { putObject } from "@/lib/storage";
 import { buildBucketKey } from "@/modules/files/keys";
@@ -55,12 +55,29 @@ async function createProject(ctx: AdminContext, organizationId: string, label: s
     .insert(project)
     .values({ opportunityId: opp.id, companyId: company.id, title, status: "active", ownerId: ctx.user.id })
     .returning({ id: project.id });
+  // datas relativas a hoje: Gantt e calendário mostram algo e a janela não fica gigante
+  const day = (offset: number) => new Date(Date.now() + offset * 86_400_000).toISOString().slice(0, 10);
+  const [phase1] = await db
+    .insert(projectPhase)
+    .values({ projectId: p.id, name: "Levantamento e escopo", position: 0, startedAt: day(-10), endedAt: day(20) })
+    .returning({ id: projectPhase.id });
+  const [phase2] = await db
+    .insert(projectPhase)
+    .values({ projectId: p.id, name: "Execução e entrega final do laudo", position: 1, startedAt: day(21), endedAt: day(60) })
+    .returning({ id: projectPhase.id });
+  await db.insert(projectMilestone).values({ projectId: p.id, phaseId: phase1.id, name: "Aceite do escopo", dueAt: day(5) });
+  await db.insert(projectMilestone).values({ projectId: p.id, phaseId: phase2.id, name: "Aceite formal do laudo", dueAt: day(60) });
   const visibleTitle = `Entrega visível ${label} ${stamp}`;
   const hiddenTitle = `Entrega interna ${label} ${stamp}`;
   const [visible] = await db
     .insert(projectDeliverable)
-    .values({ projectId: p.id, title: visibleTitle, ownerId: ctx.user.id, visibleToClient: true, status: "doing", dueAt: "2030-06-15" })
+    .values({ projectId: p.id, phaseId: phase1.id, title: visibleTitle, ownerId: ctx.user.id, visibleToClient: true, status: "doing", dueAt: day(10) })
     .returning({ id: projectDeliverable.id });
+  await db.insert(projectDeliverable).values([
+    { projectId: p.id, phaseId: phase1.id, title: "Ata da reunião de kickoff", ownerId: ctx.user.id, visibleToClient: true, status: "done", dueAt: day(-8) },
+    { projectId: p.id, phaseId: phase1.id, title: "Migração do storage secundário com um título bem longo para testar a quebra de linha", ownerId: ctx.user.id, visibleToClient: true, status: "blocked", dueAt: day(15) },
+    { projectId: p.id, phaseId: phase2.id, title: "Laudo final assinado", ownerId: ctx.user.id, visibleToClient: true, status: "todo", dueAt: day(58) },
+  ]);
   const [hidden] = await db
     .insert(projectDeliverable)
     .values({ projectId: p.id, title: hiddenTitle, ownerId: ctx.user.id, visibleToClient: false })

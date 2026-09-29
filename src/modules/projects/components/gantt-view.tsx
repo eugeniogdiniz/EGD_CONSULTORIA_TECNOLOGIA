@@ -50,19 +50,19 @@ const MONTH_LABELS = [
 ];
 
 const STATUS_FILL: Record<string, string> = {
-  todo: "color-mix(in srgb, var(--fg-faint) 22%, var(--surface))",
-  doing: "var(--link-soft)",
-  review: "var(--accent-soft)",
-  done: "var(--success-soft)",
-  blocked: "var(--danger-soft)",
+  todo: "color-mix(in srgb, var(--tinta-400) 22%, var(--folha))",
+  doing: "var(--projeto-100)",
+  review: "var(--folha)",
+  done: "var(--aprovado-100)",
+  blocked: "var(--erro-100)",
 };
 
 const STATUS_STROKE: Record<string, string> = {
-  todo: "var(--border-strong)",
-  doing: "var(--link)",
-  review: "var(--accent)",
-  done: "var(--success)",
-  blocked: "var(--danger)",
+  todo: "var(--regua-500)",
+  doing: "var(--projeto-600)",
+  review: "var(--projeto-600)",
+  done: "var(--aprovado-600)",
+  blocked: "var(--erro-600)",
 };
 
 const STATUS_DOT: Record<string, string> = {
@@ -101,8 +101,8 @@ export function GanttView({
   /** Visão do cliente: "Bloqueada" vira "Em espera" (tom de aviso). */
   clientView?: boolean;
 }) {
-  const fillOf = (st: string) => (clientView && st === "blocked" ? "var(--warning-soft)" : STATUS_FILL[st]);
-  const strokeOf = (st: string) => (clientView && st === "blocked" ? "var(--warning)" : STATUS_STROKE[st]);
+  const fillOf = (st: string) => (clientView && st === "blocked" ? "var(--atencao-100)" : STATUS_FILL[st]);
+  const strokeOf = (st: string) => (clientView && st === "blocked" ? "var(--atencao-600)" : STATUS_STROKE[st]);
   const dotOf = (st: string) => (clientView && st === "blocked" ? "bg-warning" : STATUS_DOT[st]);
   type GroupPhase = { id: string; name: string; startedAt: string | null; endedAt: string | null };
   const noPhaseGroup = deliverables.filter((d) => !d.phaseId);
@@ -253,7 +253,7 @@ export function GanttView({
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-3 text-[0.7rem] text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-2.5 w-6 rounded-[2px] border" style={{ background: "var(--projeto-100)", borderColor: "var(--link)" }} />
+            <span className="inline-block h-2.5 w-6 rounded-[2px] border" style={{ background: "var(--projeto-100)", borderColor: "var(--projeto-600)" }} />
             Fase
           </span>
           {(["todo", "doing", "review", "done", "blocked"] as const).map((s) => (
@@ -268,9 +268,9 @@ export function GanttView({
         </div>
       </div>
 
-      <div className="grid grid-cols-[260px_1fr] overflow-hidden rounded-md border border-border bg-card">
+      <div className="grid grid-cols-[136px_1fr] overflow-hidden rounded-md border border-border bg-card md:grid-cols-[260px_1fr]">
         <div className="border-r border-border">
-          <div className="flex h-10 items-center border-b border-border bg-subtle px-4 text-[0.7rem] font-medium tracking-wider text-muted-foreground uppercase">
+          <div className="flex h-10 items-center border-b border-border bg-paper px-2 text-[0.7rem] font-medium tracking-wider text-muted-foreground uppercase md:px-4">
             Item
           </div>
           {lateralRows.map((row) => {
@@ -278,18 +278,18 @@ export function GanttView({
               return (
                 <div
                   key={`p-${row.phaseId}`}
-                  className="flex h-8 items-center gap-2 border-b border-border bg-subtle px-4 text-sm font-medium last:border-b-0"
+                  className="flex h-8 items-center gap-2 border-b border-border bg-paper px-2 text-sm font-medium last:border-b-0 md:px-4"
                 >
                   <span className="w-3 text-faint">▾</span>
                   <span className="flex-1 truncate">{row.name}</span>
-                  <span className="type-micro text-faint">{row.count} entregas</span>
+                  <span className="type-micro hidden text-faint md:inline">{row.count} entregas</span>
                 </div>
               );
             }
             return (
               <div
                 key={`d-${row.id}`}
-                className="flex h-8 items-center gap-2 border-b border-border px-4 text-sm last:border-b-0"
+                className="flex h-8 items-center gap-2 border-b border-border px-2 text-sm last:border-b-0 md:px-4"
               >
                 <span className={cn("inline-block h-1.5 w-1.5 rounded-full", dotOf(row.status))} />
                 <Link
@@ -298,7 +298,7 @@ export function GanttView({
                 >
                   {row.title}
                 </Link>
-                <span className="type-micro text-faint">{formatIsoDate(row.dueAt).slice(0, 5)}</span>
+                <span className="type-micro hidden text-faint md:inline">{formatIsoDate(row.dueAt).slice(0, 5)}</span>
               </div>
             );
           })}
@@ -312,7 +312,7 @@ export function GanttView({
             aria-label={`Timeline Gantt de ${fmtDayMonth(from)} a ${fmtDayMonth(to)}`}
             className="block"
           >
-            <rect x={0} y={0} width={width} height={HEADER_HEIGHT} fill="var(--bg-subtle)" />
+            <rect x={0} y={0} width={width} height={HEADER_HEIGHT} fill="var(--papel-100)" />
             <line x1={0} y1={HEADER_HEIGHT} x2={width} y2={HEADER_HEIGHT} stroke="var(--border)" />
             {monthBands.map((band) => (
               <g key={`mb-${band.x}`}>
@@ -320,7 +320,7 @@ export function GanttView({
                   x={band.x + 8}
                   y={16}
                   fontSize={11}
-                  fill="var(--fg-muted)"
+                  fill="var(--tinta-600)"
                   fontWeight={500}
                 >
                   {band.label}
@@ -333,7 +333,7 @@ export function GanttView({
 
             <defs>
               <marker id="gantt-arrow" viewBox="0 0 8 8" refX={6} refY={4} markerWidth={6} markerHeight={6} orient="auto-start-reverse">
-                <path d="M0 0 L8 4 L0 8 z" fill="var(--fg-muted)" />
+                <path d="M0 0 L8 4 L0 8 z" fill="var(--tinta-600)" />
               </marker>
             </defs>
 
@@ -347,7 +347,7 @@ export function GanttView({
                     y={i * 32}
                     width={width}
                     height={32}
-                    fill="var(--bg-subtle)"
+                    fill="var(--papel-100)"
                     opacity={0.6}
                   />
                 );
@@ -358,8 +358,8 @@ export function GanttView({
                 const isPhase = bar.kind === "phase";
                 const row = lateralRows[bar.laneIndex];
                 const status = row && row.kind === "deliverable" ? row.status : null;
-                const fill = isPhase ? "var(--projeto-100)" : status ? fillOf(status) : "var(--surface)";
-                const stroke = isPhase ? "var(--link)" : status ? strokeOf(status) : "var(--border-strong)";
+                const fill = isPhase ? "var(--projeto-100)" : status ? fillOf(status) : "var(--folha)";
+                const stroke = isPhase ? "var(--projeto-600)" : status ? strokeOf(status) : "var(--regua-500)";
                 return (
                   <g key={bar.id}>
                     <rect
@@ -376,7 +376,7 @@ export function GanttView({
                         x={bar.x + 8}
                         y={bar.y + bar.height / 2 + 4}
                         fontSize={11}
-                        fill="var(--link)"
+                        fill="var(--projeto-600)"
                         fontWeight={500}
                       >
                         {row.name}
@@ -386,7 +386,7 @@ export function GanttView({
                 );
               })}
 
-              <g fill="none" stroke="var(--fg-muted)" strokeWidth={1.2}>
+              <g fill="none" stroke="var(--tinta-600)" strokeWidth={1.2}>
                 {geometry.dependencyPaths.map((path) => (
                   <path
                     key={`${path.predecessorId}-${path.successorId}`}
@@ -410,7 +410,7 @@ export function GanttView({
                 />
                 <rect
                   x={geometry.todayX - 22}
-                  y={2}
+                  y={22}
                   width={44}
                   height={16}
                   rx={2}
@@ -418,7 +418,7 @@ export function GanttView({
                 />
                 <text
                   x={geometry.todayX}
-                  y={13}
+                  y={33}
                   textAnchor="middle"
                   fontSize={10}
                   fill="#fff"

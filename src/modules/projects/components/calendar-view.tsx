@@ -19,9 +19,9 @@ const MONTH_NAMES = [
 ];
 
 const STATUS_CHIP: Record<string, string> = {
-  todo: "border-border bg-subtle text-muted-foreground",
+  todo: "border-border bg-paper text-muted-foreground",
   doing: "border-link bg-link-soft text-link",
-  review: "border-accent bg-accent-soft text-accent",
+  review: "border-strong bg-card text-foreground",
   done: "border-success bg-success-soft text-success",
   blocked: "border-danger bg-danger-soft text-danger",
 };
@@ -108,6 +108,48 @@ export function CalendarView({
   const prev = shiftYearMonth(ym, -1);
   const next = shiftYearMonth(ym, 1);
 
+  const renderMilestone = (m: MilestoneRow) => (
+    <span
+      key={`m-${m.id}`}
+      title={m.name}
+      className={cn(
+        "inline-flex items-center gap-1 truncate rounded-sm border border-dashed border-link bg-link-soft px-1.5 py-0.5 text-[0.7rem] text-link",
+        m.completedAt && "border-success bg-success-soft text-success",
+      )}
+    >
+      <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-current" />
+      <span className="truncate">◇ {m.name}</span>
+    </span>
+  );
+  const renderDeliverable = (d: DeliverableRow) => (
+    <Link
+      key={`d-${d.id}`}
+      href={deliverableHref(d.id)}
+      title={d.title}
+      className={cn("inline-flex items-center gap-1 truncate rounded-sm border px-1.5 py-0.5 text-[0.7rem]", chipOf(d.status))}
+    >
+      <span className={cn("inline-block h-1.5 w-1.5 shrink-0 rounded-full", dotOf(d.status))} />
+      <span className="truncate">{d.title}</span>
+    </Link>
+  );
+
+  // dias do mês exibido que têm algo (para a agenda do celular)
+  const WEEKDAY = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+  const agenda = grid.weeks
+    .flat()
+    .filter((c) => !c.outside)
+    .map((c) => {
+      const iso = isoDay(c.date);
+      return {
+        iso,
+        isToday: iso === today,
+        label: `${WEEKDAY[c.date.getUTCDay()]}, ${String(c.day).padStart(2, "0")}/${String(grid.month).padStart(2, "0")}`,
+        milestones: milestonesByDay.get(iso) ?? [],
+        deliverables: deliverablesByDay.get(iso) ?? [],
+      };
+    })
+    .filter((a) => a.milestones.length > 0 || a.deliverables.length > 0);
+
   return (
     <>
       <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-card p-3">
@@ -147,17 +189,40 @@ export function CalendarView({
         </form>
       </div>
 
-      <div role="grid" aria-label={monthLabel} className="grid grid-cols-7 overflow-hidden rounded-md border border-border bg-card">
+      {/* celular: agenda em lista (a grade de 7 colunas fica ilegível em 390 px) */}
+      <div aria-label={`Agenda de ${monthLabel}`} className="grid gap-2.5 sm:hidden">
+        {agenda.length === 0 ? (
+          <p className="rounded-md border border-border bg-card p-4 text-sm text-muted-foreground">
+            Nenhum marco ou entrega com data neste mês.
+          </p>
+        ) : (
+          agenda.map((a) => (
+            <section
+              key={a.iso}
+              className={cn("rounded-md border border-border bg-card p-3", a.isToday && "border-link bg-link-soft/30")}
+            >
+              <h3 className="type-data flex items-baseline gap-2 text-xs font-medium text-muted-foreground">
+                {a.label}
+                {a.isToday && <span className="text-link">Hoje</span>}
+              </h3>
+              <div className="mt-2 grid gap-1.5">
+                {a.milestones.map(renderMilestone)}
+                {a.deliverables.map(renderDeliverable)}
+              </div>
+            </section>
+          ))
+        )}
+      </div>
+
+      <div role="grid" aria-label={monthLabel} className="hidden grid-cols-7 overflow-hidden rounded-md border border-border bg-card sm:grid">
         {WEEK_HEADS.map((h) => (
-          <div key={h} className="border-b border-r border-border bg-subtle px-3 py-2 text-[0.7rem] font-medium tracking-wider text-muted-foreground uppercase last:border-r-0">
+          <div key={h} className="border-b border-r border-border bg-paper px-3 py-2 text-[0.7rem] font-medium tracking-wider text-muted-foreground uppercase last:border-r-0">
             {h}
           </div>
         ))}
         {grid.weeks.flatMap((week, wi) =>
           week.map((cell, ci) => {
             const iso = isoDay(cell.date);
-            const dayMilestones = milestonesByDay.get(iso) ?? [];
-            const dayDeliverables = deliverablesByDay.get(iso) ?? [];
             const isToday = iso === today;
             const lastCol = ci === 6;
             const lastRow = wi === grid.weeks.length - 1;
@@ -168,7 +233,7 @@ export function CalendarView({
                   "flex min-h-[104px] flex-col gap-1 border-r border-b border-border p-2",
                   lastCol && "border-r-0",
                   lastRow && "border-b-0",
-                  cell.outside && "bg-subtle",
+                  cell.outside && "bg-paper",
                   isToday && "bg-link-soft/30",
                 )}
               >
@@ -186,33 +251,8 @@ export function CalendarView({
                 </div>
                 {!cell.outside && (
                   <>
-                    {dayMilestones.map((m) => (
-                      <span
-                        key={`m-${m.id}`}
-                        title={m.name}
-                        className={cn(
-                          "inline-flex items-center gap-1 truncate rounded-sm border border-dashed border-accent bg-accent-soft px-1.5 py-0.5 text-[0.7rem] text-accent",
-                          m.completedAt && "text-success border-success bg-success-soft",
-                        )}
-                      >
-                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-current" />
-                        <span className="truncate">◇ {m.name}</span>
-                      </span>
-                    ))}
-                    {dayDeliverables.map((d) => (
-                      <Link
-                        key={`d-${d.id}`}
-                        href={`${deliverableHref(d.id)}`}
-                        title={d.title}
-                        className={cn(
-                          "inline-flex items-center gap-1 truncate rounded-sm border px-1.5 py-0.5 text-[0.7rem]",
-                          chipOf(d.status),
-                        )}
-                      >
-                        <span className={cn("inline-block h-1.5 w-1.5 rounded-full", dotOf(d.status))} />
-                        <span className="truncate">{d.title}</span>
-                      </Link>
-                    ))}
+                    {(milestonesByDay.get(iso) ?? []).map(renderMilestone)}
+                    {(deliverablesByDay.get(iso) ?? []).map(renderDeliverable)}
                   </>
                 )}
               </div>
