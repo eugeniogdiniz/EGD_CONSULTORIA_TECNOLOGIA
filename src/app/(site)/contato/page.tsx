@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/content/seo";
 import Link from "next/link";
 import { ContactForm } from "@/components/legacy/contact-form";
 import { SITE } from "@/content/site";
 
-export const metadata: Metadata = { title: "Contato", description: "Conta o seu desafio — respondemos em 48h." };
+export const metadata: Metadata = pageMeta({
+  title: "Fale com a EGD",
+  description: "Conte o seu desafio e respondemos em até 48h úteis. Atendimento de segunda a sexta, das 9h às 18h (horário de Brasília), com trabalho remoto em todo o Brasil.",
+  path: "/contato",
+});
 
 export default function ContatoPage() {
   return (

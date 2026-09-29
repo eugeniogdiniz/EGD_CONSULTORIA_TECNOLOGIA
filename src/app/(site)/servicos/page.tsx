@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/content/seo";
 import Link from "next/link";
 import Image from "next/image";
 import { Arrow, Icon } from "@/components/legacy/ui";
 import { SERVICES } from "@/content/legacy-pages";
 
-export const metadata: Metadata = { title: "Serviços", description: "Seis frentes especializadas: desenvolvimento, automação, dados e BI, agentes de IA, governança e projetos ágeis." };
+export const metadata: Metadata = pageMeta({
+  title: "Serviços de desenvolvimento, automação, dados e IA",
+  description: "Desenvolvimento de sistemas, automação de processos, dados e painéis, agentes de IA, governança de dados e gestão de projetos para consórcios de engenharia, habitação e energia.",
+  path: "/servicos",
+});
 
 export default function ServicosPage() {
   return (

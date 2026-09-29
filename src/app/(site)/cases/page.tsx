@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/content/seo";
 import Link from "next/link";
 import { Arrow } from "@/components/legacy/ui";
 import { getSiteCases } from "@/modules/cases/site";
 
-export const metadata: Metadata = { title: "Cases", description: "Clientes, sistemas e automações em produção, com CAPEX e economia medida." };
+export const metadata: Metadata = pageMeta({
+  title: "Cases: sistemas e automações em produção",
+  description: "Clientes, sistemas e automações em produção, com o investimento (CAPEX) e a economia anual medidos em cada projeto.",
+  path: "/cases",
+});
 
 const fmtBRL = (n: number) => "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const fmtBRLk = (n: number) => (n >= 1_000_000 ? "R$ " + (n / 1_000_000).toFixed(2).replace(".", ",") + "M" : n >= 1000 ? "R$ " + (n / 1000).toFixed(1).replace(".", ",") + "k" : fmtBRL(n));

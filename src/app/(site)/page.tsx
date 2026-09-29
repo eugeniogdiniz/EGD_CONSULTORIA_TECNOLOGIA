@@ -1,10 +1,18 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUR } from "@/components/legacy/ui";
 import { SVC, PRODUCTS } from "@/content/legacy-home";
+import { organizationJsonLd, pageMeta } from "@/content/seo";
 import { getSiteCases } from "@/modules/cases/site";
 import { BrandFilm } from "@/components/site/brand-film";
 import { OperationFlow } from "@/components/site/operation-flow";
+
+export const metadata: Metadata = pageMeta({
+  title: { absolute: "EGD — Tecnologia que conecta projeto e operação" },
+  description: "Consultoria, dados e sistemas para conectar pessoas e transformar a operação. Da primeira conversa ao software em produção.",
+  path: "/",
+});
 
 // Lê os totais dos cases publicados; o admin revalida ao salvar.
 export const dynamic = "force-dynamic";
@@ -13,6 +21,8 @@ export default async function HomePage() {
   const { totals: TOTAIS } = await getSiteCases();
   return (
     <>
+      {/* "<" escapado: o JSON vai dentro de uma tag <script> */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()).replace(/</g, "\\u003c") }} />
       <section className="brand-hero container">
         <div className="brand-kicker"><span className="brand-dot" /> Consultoria &amp; tecnologia <span>São Paulo · Brasil</span></div>
         <div className="brand-hero-heading">
