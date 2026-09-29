@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Arrow } from "@/components/legacy/ui";
-import { CLIENTES, TOTAIS } from "@/content/cases";
+import { getPublishedTotals, listPublishedCases } from "@/modules/cases/queries";
 
-export const metadata: Metadata = { title: "Cases", description: "13 clientes, 27 sistemas e 62 automações em produção, com CAPEX e economia medida." };
+export const metadata: Metadata = { title: "Cases", description: "Clientes, sistemas e automações em produção, com CAPEX e economia medida." };
 
 const fmtBRL = (n: number) => "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const fmtBRLk = (n: number) => (n >= 1_000_000 ? "R$ " + (n / 1_000_000).toFixed(2).replace(".", ",") + "M" : n >= 1000 ? "R$ " + (n / 1000).toFixed(1).replace(".", ",") + "k" : fmtBRL(n));
@@ -28,7 +28,10 @@ function KpiCell({ label, value, prefix, suffix }: { label: string; value: strin
   );
 }
 
-export default function CasesPage() {
+export const dynamic = "force-dynamic";
+
+export default async function CasesPage() {
+  const [CLIENTES, TOTAIS] = await Promise.all([listPublishedCases(), getPublishedTotals()]);
   const featured = CLIENTES.filter((c) => c.destaque);
   const sorted = [...CLIENTES].sort((a, b) => b.economia - a.economia);
   const sectors = [...new Set(CLIENTES.map((c) => c.setor.split(" e ")[0]))];

@@ -23,8 +23,10 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
     { href: "/admin/organizacoes", label: "Organizações" },
     { href: "/admin/projetos", label: "Projetos" },
     { href: "/admin/projetos/templates", label: "Templates" },
+    { href: "/admin/cases", label: "Cases" },
     { href: "/admin/leads", label: "Leads", badge: novos },
     { href: "/admin/arquivos", label: "Arquivos" },
+    { href: "/admin/api", label: "API" },
     { href: "/admin/auditoria", label: "Auditoria" },
   ];
   return (

@@ -2,11 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUR } from "@/components/legacy/ui";
 import { SVC, PRODUCTS } from "@/content/legacy-home";
-import { TOTAIS } from "@/content/cases";
+import { getPublishedTotals } from "@/modules/cases/queries";
 import { BrandFilm } from "@/components/site/brand-film";
 import { OperationFlow } from "@/components/site/operation-flow";
 
-export default function HomePage() {
+// Lê os totais dos cases publicados; o admin revalida ao salvar.
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const TOTAIS = await getPublishedTotals();
   return (
     <>
       <section className="brand-hero container">

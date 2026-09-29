@@ -8,6 +8,12 @@ import type { AdminContext } from "@/modules/auth/context";
 
 const TEST_ADMIN_EMAIL = "admin@test.local";
 
+/** Trava: o truncate abaixo destrói dados. Só roda em banco cujo nome termina em "_test". */
+const dbName = new URL(process.env.DATABASE_URL ?? "postgres://x/").pathname.replace(/^\//, "");
+if (!/_test$/.test(dbName)) {
+  throw new Error(`Testes de integração recusados: o banco "${dbName}" não termina em "_test". Rode via npm run test:integration.`);
+}
+
 /** Limpa dados de teste antes de cada arquivo: tabelas de domínio inteiras e usuários @test.local. */
 beforeAll(async () => {
   await db.execute(

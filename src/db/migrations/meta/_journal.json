@@ -29,6 +29,20 @@
       "when": 1790566798298,
       "tag": "0003_friendly_lyja",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790639528041,
+      "tag": "0004_site_case",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790639804129,
+      "tag": "0005_api_key",
+      "breakpoints": true
     }
   ]
 }
