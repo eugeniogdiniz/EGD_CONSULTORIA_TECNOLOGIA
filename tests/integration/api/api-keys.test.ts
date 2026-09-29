@@ -99,6 +99,29 @@ describe("autenticação", () => {
   });
 });
 
+describe("limite de tentativas inválidas por IP", () => {
+  const xff = (ip: string, key: string | null) => call(key, { headers: { "x-forwarded-for": ip } });
+
+  it("30 tentativas com chave inválida passam (401); a 31ª recebe 429 com Retry-After", async () => {
+    const bad = "egd_" + "b".repeat(43);
+    for (let i = 0; i < 30; i++) expect((await listCases(xff("203.0.113.9", bad))).status).toBe(401);
+    const blocked = await listCases(xff("203.0.113.9", bad));
+    expect(blocked.status).toBe(429);
+    expect(blocked.headers.get("Retry-After")).toBe("60");
+  });
+
+  it("o bloqueio vale só para aquele IP", async () => {
+    expect((await listCases(xff("198.51.100.7", readKey))).status).toBe(200);
+  });
+
+  it("autenticação válida zera o contador do IP", async () => {
+    const bad = "egd_" + "c".repeat(43);
+    for (let i = 0; i < 20; i++) await listCases(xff("192.0.2.5", bad));
+    expect((await listCases(xff("192.0.2.5", readKey))).status).toBe(200);
+    for (let i = 0; i < 29; i++) expect((await listCases(xff("192.0.2.5", bad))).status).toBe(401);
+  });
+});
+
 describe("GET /api/v1/cases", () => {
   it("devolve só publicados, no contrato da API", async () => {
     const a = await createCase(ctx, { name: "Zz Teste Pub", sector: "Setor", size: "small", systems: "1", automations: "1", savings: "10,00", capex: "", featured: false, published: true, deliverables: "X", statusNote: "" });
