@@ -67,7 +67,7 @@ export default async function OrganizacaoPage({ params }: PageProps<"/admin/orga
                     <th className="h-10 px-4 font-medium">Nome</th>
                     <th className="h-10 px-4 font-medium">E-mail</th>
                     <th className="h-10 px-4 font-medium">Status</th>
-                    <th className="h-10 px-4" />
+                    <th className="h-10 px-4"><span className="sr-only">Ações</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -103,7 +103,7 @@ export default async function OrganizacaoPage({ params }: PageProps<"/admin/orga
                     <th className="h-10 px-4 font-medium">E-mail</th>
                     <th className="h-10 px-4 font-medium">Enviado em</th>
                     <th className="h-10 px-4 font-medium">Expira em</th>
-                    <th className="h-10 px-4" />
+                    <th className="h-10 px-4"><span className="sr-only">Ações</span></th>
                   </tr>
                 </thead>
                 <tbody>

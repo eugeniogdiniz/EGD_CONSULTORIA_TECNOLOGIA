@@ -98,7 +98,7 @@ export default async function PortalProjetoPage({ params }: PageProps<"/portal/p
                     <li key={phase.id} className="rounded-md border border-border bg-card p-3.5">
                       <div className="flex items-center gap-2.5">
                         <span className="type-data text-xs text-faint">{String(i + 1).padStart(2, "0")}</span>
-                        <h4 className="text-sm font-semibold">{phase.name}</h4>
+                        <h3 className="text-sm font-semibold">{phase.name}</h3>
                         <span className={cn(chip, "ml-auto", PHASE_STYLE[state])}>{PHASE_LABEL[state]}</span>
                       </div>
                       <div className="type-data mt-1 text-xs text-muted-foreground">

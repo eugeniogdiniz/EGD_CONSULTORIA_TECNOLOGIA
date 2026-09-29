@@ -78,7 +78,7 @@ export default async function FunilPage({ searchParams }: PageProps<"/admin/crm/
               <header className="flex items-center gap-2 border-b border-border px-3 py-2.5">
                 <span className={cn("h-2 w-2 rounded-full", STAGE_PIP[col.stage])} />
                 <div className="min-w-0">
-                  <h3 className="text-sm font-semibold">{STAGE_LABEL[col.stage]}</h3>
+                  <h2 className="text-sm font-semibold">{STAGE_LABEL[col.stage]}</h2>
                   <div className="type-data text-[0.75rem] text-faint">
                     {formatBrlCents(col.totalValueCents)}
                   </div>

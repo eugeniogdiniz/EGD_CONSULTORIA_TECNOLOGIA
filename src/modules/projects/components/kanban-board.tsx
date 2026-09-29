@@ -144,13 +144,7 @@ function SortableCard({
   } as const;
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className="touch-none"
-    >
+    <div ref={setNodeRef} style={style} className="touch-none">
       <DeliverableFormDialog
         projectId={projectId}
         phases={phases}
@@ -167,6 +161,8 @@ function SortableCard({
         trigger={
           <button
             type="button"
+            {...attributes}
+            {...listeners}
             className="block w-full rounded border border-border bg-card p-3 text-left hover:border-strong"
             aria-roledescription="Cartão de entrega arrastável"
           >
@@ -216,7 +212,7 @@ function DroppableColumn({
         )}
       >
         <span className={cn("size-2 rounded-full", STATUS_PIP[status])} />
-        <h3 className="text-sm font-semibold">{STATUS_LABEL[status]}</h3>
+        <h2 className="text-sm font-semibold">{STATUS_LABEL[status]}</h2>
         <span className="type-data ml-auto text-[0.75rem] text-muted-foreground">
           {items.length}
         </span>
@@ -392,6 +388,7 @@ export function KanbanBoard({
   return (
     <div className={cn("relative", pending && "opacity-80")}>
       <DndContext
+        id="kanban-entregas"
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}

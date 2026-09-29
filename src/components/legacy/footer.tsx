@@ -21,7 +21,7 @@ export function Footer() {
 
           </div>
           <div>
-            <h4>Serviços</h4>
+            <h4 aria-level={2}>Serviços</h4>
             <ul>
               <li><Link href="/servicos#dev">Desenvolvimento</Link></li>
               <li><Link href="/servicos#auto">Automação</Link></li>
@@ -32,7 +32,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h4>Empresa</h4>
+            <h4 aria-level={2}>Empresa</h4>
             <ul>
               <li><Link href="/sobre">Sobre</Link></li>
               <li><Link href="/produtos">Produtos</Link></li>
@@ -42,7 +42,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h4>Contato</h4>
+            <h4 aria-level={2}>Contato</h4>
             <ul>
               <li><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
               <li><span style={{ color: "var(--fg-dim)", fontSize: 14 }}>São Paulo · BR</span></li>

@@ -72,7 +72,7 @@ export default async function SobrePage() {
                   <div className="tl-year">{t.y}</div>
                   <div className="tl-dot" style={{ position: "relative" }}><i></i></div>
                   <div className="tl-content">
-                    <h4>{t.t}</h4>
+                    <h4 aria-level={3}>{t.t}</h4>
                     <p>{t.d}</p>
                   </div>
                 </div>

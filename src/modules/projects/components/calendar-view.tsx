@@ -201,10 +201,10 @@ export function CalendarView({
               key={a.iso}
               className={cn("rounded-md border border-border bg-card p-3", a.isToday && "border-link bg-link-soft/30")}
             >
-              <h3 className="type-data flex items-baseline gap-2 text-xs font-medium text-muted-foreground">
+              <h2 className="type-data flex items-baseline gap-2 text-xs font-medium text-muted-foreground">
                 {a.label}
                 {a.isToday && <span className="text-link">Hoje</span>}
-              </h3>
+              </h2>
               <div className="mt-2 grid gap-1.5">
                 {a.milestones.map(renderMilestone)}
                 {a.deliverables.map(renderDeliverable)}
@@ -214,7 +214,7 @@ export function CalendarView({
         )}
       </div>
 
-      <div role="grid" aria-label={monthLabel} className="hidden grid-cols-7 overflow-hidden rounded-md border border-border bg-card sm:grid">
+      <div role="group" aria-label={monthLabel} className="hidden grid-cols-7 overflow-hidden rounded-md border border-border bg-card sm:grid">
         {WEEK_HEADS.map((h) => (
           <div key={h} className="border-b border-r border-border bg-paper px-3 py-2 text-[0.7rem] font-medium tracking-wider text-muted-foreground uppercase last:border-r-0">
             {h}

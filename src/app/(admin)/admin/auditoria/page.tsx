@@ -11,7 +11,7 @@ export default async function AuditoriaPage() {
   return (
     <>
       <PageHeader title="Auditoria" meta="Últimos 200 eventos: logins, convites, arquivos e alterações." />
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+      <div tabIndex={0} role="region" aria-label="Tabela, role horizontalmente se necessário" className="overflow-x-auto rounded-lg border border-border bg-card">
         {rows.length === 0 ? (
           <EmptyState title="Nenhum evento registrado." text="Ações no sistema aparecem aqui com quem fez e quando." />
         ) : (
@@ -32,7 +32,7 @@ export default async function AuditoriaPage() {
                   <td className="px-4 py-2.5 whitespace-nowrap text-muted-foreground">{formatDateTime(r.createdAt)}</td>
                   <td className="type-data px-4 py-2.5 whitespace-nowrap">{r.action}</td>
                   <td className="type-data px-4 py-2.5 text-faint">
-                    {r.entityType} <span className="text-faint/70">{r.entityId.slice(0, 8)}</span>
+                    {r.entityType} <span className="text-faint">{r.entityId.slice(0, 8)}</span>
                   </td>
                   <td className="type-data px-4 py-2.5 text-faint">{r.actorId ? r.actorId.slice(0, 8) : "sistema"}</td>
                   <td className="type-data px-4 py-2.5 text-faint">{r.organizationId ? r.organizationId.slice(0, 8) : "—"}</td>

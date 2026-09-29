@@ -54,7 +54,7 @@ export default async function EmpresasPage({ searchParams }: PageProps<"/admin/c
         <Button type="submit" variant="secondary" size="sm">Filtrar</Button>
       </form>
 
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+      <div tabIndex={0} role="region" aria-label="Tabela, role horizontalmente se necessário" className="overflow-x-auto rounded-lg border border-border bg-card">
         {rows.length === 0 ? (
           <EmptyState
             title="Nenhuma empresa cadastrada."

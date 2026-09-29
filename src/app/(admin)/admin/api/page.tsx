@@ -36,7 +36,7 @@ export default async function AdminApiPage() {
                     <th className="h-10 px-4 font-medium">Chave</th>
                     <th className="h-10 px-4 font-medium">Escopos</th>
                     <th className="h-10 px-4 font-medium">Último uso</th>
-                    <th className="h-10 px-4" />
+                    <th className="h-10 px-4"><span className="sr-only">Ações</span></th>
                   </tr>
                 </thead>
                 <tbody>

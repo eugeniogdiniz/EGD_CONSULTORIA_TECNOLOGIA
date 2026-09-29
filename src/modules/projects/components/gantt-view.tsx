@@ -236,7 +236,7 @@ export function GanttView({
               <Link
                 key={s}
                 href={`${baseHref}?scale=${s}`}
-                aria-pressed={s === scale}
+                aria-current={s === scale ? "true" : undefined}
                 className={cn(
                   "px-3 py-1.5 text-sm",
                   s === scale ? "bg-link-soft text-link font-medium" : "text-muted-foreground hover:bg-muted",

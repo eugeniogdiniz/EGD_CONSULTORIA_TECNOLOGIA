@@ -26,7 +26,7 @@ export default async function AdminCasesPage() {
           </Button>
         }
       />
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+      <div tabIndex={0} role="region" aria-label="Tabela, role horizontalmente se necessário" className="overflow-x-auto rounded-lg border border-border bg-card">
         {cases.length === 0 ? (
           <EmptyState title="Nenhum case ainda." text="Crie o primeiro para ele aparecer em /cases." />
         ) : (
@@ -40,7 +40,7 @@ export default async function AdminCasesPage() {
                 <th className="h-10 px-4 text-right font-medium">Autom.</th>
                 <th className="h-10 px-4 text-right font-medium">Economia anual</th>
                 <th className="h-10 px-4 font-medium">Status</th>
-                <th className="h-10 px-4" />
+                <th className="h-10 px-4"><span className="sr-only">Ações</span></th>
               </tr>
             </thead>
             <tbody>

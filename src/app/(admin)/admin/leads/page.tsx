@@ -50,7 +50,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/admin/lead
           </Link>
         ))}
       </nav>
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+      <div tabIndex={0} role="region" aria-label="Tabela, role horizontalmente se necessário" className="overflow-x-auto rounded-lg border border-border bg-card">
         {leads.length === 0 ? (
           <EmptyState title="Nenhum lead nesse filtro." text="Novos leads chegam pelo formulário do site." />
         ) : (
@@ -63,7 +63,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/admin/lead
                 <th className="h-10 px-4 font-medium">Mensagem</th>
                 <th className="h-10 px-4 font-medium">Recebido em</th>
                 <th className="h-10 px-4 font-medium">Convertido em</th>
-                <th className="h-10 px-4" />
+                <th className="h-10 px-4"><span className="sr-only">Ações</span></th>
               </tr>
             </thead>
             <tbody>

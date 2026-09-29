@@ -18,7 +18,7 @@ export default async function ArquivosPage() {
       <Block title="Enviar arquivo" aside="máximo 50 MB">
         <UploadForm organizations={orgs.filter((o) => o.status === "active").map((o) => ({ id: o.id, name: o.name }))} />
       </Block>
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+      <div tabIndex={0} role="region" aria-label="Tabela, role horizontalmente se necessário" className="overflow-x-auto rounded-lg border border-border bg-card">
         {files.length === 0 ? (
           <EmptyState title="Nenhum arquivo enviado." text="Envie o primeiro pelo formulário acima." />
         ) : (
@@ -29,7 +29,7 @@ export default async function ArquivosPage() {
                 <th className="h-10 px-4 text-right font-medium">Tamanho</th>
                 <th className="h-10 px-4 font-medium">Organização</th>
                 <th className="h-10 px-4 font-medium">Enviado em</th>
-                <th className="h-10 px-4" />
+                <th className="h-10 px-4"><span className="sr-only">Ações</span></th>
               </tr>
             </thead>
             <tbody>
