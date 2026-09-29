@@ -218,11 +218,16 @@ export async function listPortalComments(ctx: PortalContext, deliverableId: stri
   return rows.map((r) => ({ ...r, body: r.deletedAt ? null : r.body }));
 }
 
-/** Entrega visível na organização ativa (só ids). Base das validações de escrita. */
+/** Entrega visível na organização ativa (ids e títulos). Base das validações de escrita. */
 export async function findVisibleDeliverable(ctx: PortalContext, deliverableId: string) {
   if (!isUuid(deliverableId)) return null;
   const [row] = await db
-    .select({ id: projectDeliverable.id, projectId: projectDeliverable.projectId })
+    .select({
+      id: projectDeliverable.id,
+      projectId: projectDeliverable.projectId,
+      title: projectDeliverable.title,
+      projectTitle: project.title,
+    })
     .from(projectDeliverable)
     .innerJoin(project, eq(projectDeliverable.projectId, project.id))
     .innerJoin(crmCompany, eq(project.companyId, crmCompany.id))
