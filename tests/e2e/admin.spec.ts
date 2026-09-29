@@ -63,3 +63,13 @@ test.describe.serial("admin", () => {
     expect(res.headers()["location"]).toContain("X-Amz-Signature");
   });
 });
+
+test("painel mostra os indicadores e os blocos de prazos e comentários", async ({ page }) => {
+  await loginAs(page, ADMIN.email, ADMIN.password);
+  await page.goto("/admin");
+  for (const label of [/leads novos/i, /funil aberto/i, /projetos ativos/i, /entregas atrasadas/i]) {
+    await expect(page.getByText(label).first()).toBeVisible();
+  }
+  await expect(page.getByRole("heading", { name: /^prazos$/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /comentários de clientes/i })).toBeVisible();
+});

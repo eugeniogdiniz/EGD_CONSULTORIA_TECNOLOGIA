@@ -37,3 +37,19 @@ export async function latestMailpitLink(pattern: RegExp, to?: string): Promise<s
   }
   throw new Error(`e-mail com link ${pattern} não chegou no Mailpit`);
 }
+
+/** Espera chegar ao Mailpit uma mensagem cujo assunto contenha `fragment`; devolve o texto dela. */
+export async function waitForMailWithSubject(fragment: string): Promise<string> {
+  for (let i = 0; i < 30; i++) {
+    const list = (await (await fetch(`${MAILPIT}/api/v1/messages?limit=20`)).json()) as {
+      messages?: { ID: string; Subject: string }[];
+    };
+    const hit = (list.messages ?? []).find((m) => m.Subject.includes(fragment));
+    if (hit) {
+      const full = (await (await fetch(`${MAILPIT}/api/v1/message/${hit.ID}`)).json()) as { Text: string };
+      return String(full.Text);
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  throw new Error(`e-mail com assunto contendo "${fragment}" não chegou no Mailpit`);
+}
