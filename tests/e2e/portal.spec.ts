@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { loginAs } from "./helpers";
+import { loginAs, waitForMailWithSubject } from "./helpers";
 import { createTwoOrgsWithClientsAndFiles } from "./fixtures";
 
 test("cliente A não baixa arquivo da organização B, mas baixa o da própria", async ({ page }) => {
@@ -66,6 +66,11 @@ test.describe("projetos no portal", () => {
     await page.getByPlaceholder(/escrever comentário/i).fill(texto);
     await page.getByRole("button", { name: /^comentar$/i }).click();
     await expect(page.getByText(texto)).toBeVisible({ timeout: 10_000 });
+
+    // a equipe é avisada por e-mail, com o texto e o link da entrega no admin
+    const mail = await waitForMailWithSubject(`Comentário de Cliente A (${fx.orgA.name}): ${fx.projectA.visible.title}`);
+    expect(mail).toContain(texto);
+    expect(mail).toContain(`/admin/projetos/${fx.projectA.id}/entregas/${fx.projectA.visible.id}`);
   });
 
   test("cliente A recebe 404 nas rotas do projeto da organização B", async ({ page }) => {

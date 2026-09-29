@@ -1,7 +1,7 @@
 import { transporter } from "@/lib/mail";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
-import { renderInvitation, renderPasswordReset, renderLeadNotification, type MailContent } from "./templates";
+import { renderInvitation, renderPasswordReset, renderLeadNotification, renderClientCommentNotification, type MailContent } from "./templates";
 
 /**
  * Entrega um e-mail. Nunca lança: falha de SMTP é registrada no log e o
@@ -22,3 +22,6 @@ export const sendPasswordResetEmail = (p: { to: string; url: string }) => delive
 
 export const sendLeadNotification = (p: { name: string; email: string; company: string | null; message: string }) =>
   deliver(env.ADMIN_NOTIFY_EMAIL, renderLeadNotification(p));
+
+export const sendClientCommentNotification = (p: Parameters<typeof renderClientCommentNotification>[0]) =>
+  deliver(env.ADMIN_NOTIFY_EMAIL, renderClientCommentNotification(p));

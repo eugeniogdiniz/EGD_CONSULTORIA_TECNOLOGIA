@@ -68,3 +68,29 @@ export function renderLeadNotification(p: {
   );
   return { subject, text, html };
 }
+
+export function renderClientCommentNotification(p: {
+  authorName: string;
+  organizationName: string;
+  projectTitle: string;
+  deliverableTitle: string;
+  body: string;
+  url: string;
+}): MailContent {
+  const subject = `Comentário de ${p.authorName} (${p.organizationName}): ${p.deliverableTitle}`;
+  const text = [
+    `${p.authorName} (${p.organizationName}) comentou na entrega "${p.deliverableTitle}" do projeto "${p.projectTitle}":`,
+    "",
+    p.body,
+    "",
+    `Abrir: ${p.url}`,
+  ].join("\n");
+  const html = layout(
+    subject,
+    `<p><strong>${esc(p.authorName)}</strong> (${esc(p.organizationName)}) comentou na entrega
+  <strong>${esc(p.deliverableTitle)}</strong> do projeto <strong>${esc(p.projectTitle)}</strong>:</p>
+  <pre style="white-space:pre-wrap;font-family:inherit;border-left:3px solid #ccc;padding-left:12px">${esc(p.body)}</pre>
+  <p><a href="${esc(p.url)}">Abrir a entrega</a></p>`,
+  );
+  return { subject, text, html };
+}
