@@ -141,6 +141,14 @@ describe("POST /api/v1/leads", () => {
     expect(Object.keys(error.fields)).toEqual(expect.arrayContaining(["name", "email", "message"]));
   });
 
+  it("413 quando o corpo passa de 32 KB, com ou sem content-length", async () => {
+    const big = JSON.stringify({ ...good, message: "x".repeat(40 * 1024) });
+    expect((await postLead(call(writeKey, { method: "POST", body: big }))).status).toBe(413);
+    const sem = new Request("http://localhost/api/v1/leads", { method: "POST", body: big, headers: { Authorization: `Bearer ${writeKey}` } });
+    sem.headers.delete("content-length");
+    expect((await postLead(sem)).status).toBe(413);
+  });
+
   it("400 para JSON quebrado", async () => {
     expect((await postLead(call(writeKey, { method: "POST", body: "{nope" }))).status).toBe(400);
   });

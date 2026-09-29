@@ -9,6 +9,9 @@ import { sendLeadNotification } from "@/modules/mail/send";
 
 export const dynamic = "force-dynamic";
 
+/** Um lead cabe em poucos KB (mensagem até 4000 caracteres); acima disso é abuso. */
+const MAX_BODY_BYTES = 32 * 1024;
+
 /**
  * POST /api/v1/leads — webhook de entrada: sistemas parceiros enviam leads em JSON.
  * Mesma validação do formulário do site; o lead entra com source "api". Escopo: leads:write.
@@ -17,9 +20,13 @@ export async function POST(req: Request) {
   const auth = await authenticateApiKey(req, "leads:write");
   if (!auth.ok) return auth.response;
 
+  if (Number(req.headers.get("content-length") ?? 0) > MAX_BODY_BYTES)
+    return apiError(413, "payload_too_large", "O corpo excede 32 KB.");
   let body: unknown;
   try {
-    body = await req.json();
+    const raw = await req.text();
+    if (Buffer.byteLength(raw) > MAX_BODY_BYTES) return apiError(413, "payload_too_large", "O corpo excede 32 KB.");
+    body = JSON.parse(raw);
   } catch {
     return apiError(400, "invalid_json", "O corpo precisa ser JSON.");
   }

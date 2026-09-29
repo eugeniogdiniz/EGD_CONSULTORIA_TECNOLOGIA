@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -195,6 +196,12 @@ function EditForm({
 
   return (
     <div className="grid gap-4">
+      <Link
+        href={`/admin/projetos/${projectId}/entregas/${deliverable.id}`}
+        className="text-sm text-link hover:underline"
+      >
+        Abrir a página da entrega (horas, comentários, dependências, portal do cliente) →
+      </Link>
       {/* Status picker embutido */}
       <form action={statusAction} className="grid gap-2 rounded-sm border border-border bg-subtle p-3">
         <input type="hidden" name="id" value={deliverable.id} />
