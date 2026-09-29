@@ -79,6 +79,26 @@ test.describe.serial("projects", () => {
     await expect(feitaColumn.getByText(entregaTitulo)).toBeVisible({ timeout: 15_000 });
   });
 
+  test("Fase 4 — compartilhar entrega avisa que os comentários existentes ficam visíveis ao cliente", async ({ page }) => {
+    await loginAs(page, ADMIN.email, ADMIN.password);
+    await page.goto("/admin/projetos");
+    await page.getByRole("link", { name: oppTitulo }).click();
+    // do kanban: card → diálogo → página da entrega
+    await page.getByRole("link", { name: /^kanban$/i }).click();
+    await page.getByText(entregaTitulo).click();
+    await page.getByRole("dialog").getByRole("link", { name: /abrir a página da entrega/i }).click();
+    await expect(page).toHaveURL(/\/entregas\/[0-9a-f-]+$/);
+    await expect(page.getByText(/esta entrega é interna/i)).toBeVisible();
+
+    await page.getByPlaceholder(/escrever comentário/i).fill("Nota interna da equipe");
+    await page.getByRole("button", { name: /^comentar$/i }).click();
+    await expect(page.getByText("Nota interna da equipe")).toBeVisible({ timeout: 10_000 });
+
+    await page.reload();
+    await expect(page.getByRole("note")).toContainText(/1 comentário/i);
+    await expect(page.getByRole("button", { name: /compartilhar com o cliente/i })).toBeVisible();
+  });
+
   test("/admin/projetos sem sessão redireciona para /entrar", async ({ request }) => {
     const res = await request.get("/admin/projetos", { maxRedirects: 0, failOnStatusCode: false });
     expect([307, 302, 308]).toContain(res.status());

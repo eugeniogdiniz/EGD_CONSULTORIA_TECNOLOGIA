@@ -80,6 +80,7 @@ export default async function DeliverableDetailPage({
       getCurrentUserRateCents(ctx),
     ]);
 
+  const existingComments = comments.filter((c) => !c.deletedAt).length;
   const totalMinutes = timeEntries.reduce((s, e) => s + (e.minutes ?? 0), 0);
 
   const projectHref = `/admin/projetos/${id}`;
@@ -259,6 +260,12 @@ export default async function DeliverableDetailPage({
                   ? "Esta entrega aparece no portal. O cliente vê título, descrição, status, prazo, arquivo e comentários — nunca horas, custos ou o motivo de bloqueio."
                   : "Esta entrega é interna. O cliente não a vê no portal."}
               </p>
+              {!d.visibleToClient && existingComments > 0 && (
+                <p role="note" className="rounded-r-md border-l-[3px] border-warning bg-warning-soft px-3 py-2 text-sm">
+                  Já existem <strong>{existingComments} comentário{existingComments === 1 ? "" : "s"}</strong> nesta entrega. Ao compartilhar, o cliente
+                  passa a ver todos, inclusive os da equipe. Revise a conversa antes.
+                </p>
+              )}
               <div>
                 <Button type="submit" size="sm" variant={d.visibleToClient ? "outline" : "default"}>
                   {d.visibleToClient ? "Ocultar do cliente" : "Compartilhar com o cliente"}

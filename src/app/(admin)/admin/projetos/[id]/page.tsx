@@ -238,7 +238,7 @@ export default async function ProjetoDetalhePage({ params }: PageProps<"/admin/p
                 {upcoming.map((d) => (
                   <li key={d.id} className="grid grid-cols-[1fr_100px_100px] items-center gap-3 py-2 text-sm">
                     <div>
-                      <div className="font-medium">{d.title}</div>
+                      <Link href={`/admin/projetos/${p.id}/entregas/${d.id}`} className="font-medium hover:text-link">{d.title}</Link>
                       <div className="type-micro text-muted-foreground">{d.phaseName ?? "sem fase"}{d.assigneeName ? ` · ${d.assigneeName}` : ""}</div>
                     </div>
                     <div className={cn("type-data text-xs text-right", d.dueAt && d.dueAt <= today && "text-danger font-medium")}>{formatIsoDate(d.dueAt)}</div>
