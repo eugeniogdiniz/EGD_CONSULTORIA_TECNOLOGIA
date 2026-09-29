@@ -70,6 +70,7 @@ test("painel mostra os indicadores e os blocos de prazos e comentários", async 
   for (const label of [/leads novos/i, /funil aberto/i, /projetos ativos/i, /entregas atrasadas/i]) {
     await expect(page.getByText(label).first()).toBeVisible();
   }
+  await expect(page.getByRole("note").filter({ hasText: /proteja sua conta/i })).toBeVisible(); // admin sem 2FA
   await expect(page.getByRole("heading", { name: /^prazos$/i })).toBeVisible();
   await expect(page.getByRole("heading", { name: /comentários de clientes/i })).toBeVisible();
 });

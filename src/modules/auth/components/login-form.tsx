@@ -21,6 +21,9 @@ export function LoginForm() {
         : null;
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  // segundo fator: depois da senha, contas com 2FA ativo informam o código do app ou um de recuperação
+  const [step, setStep] = useState<"password" | "code">("password");
+  const [useBackup, setUseBackup] = useState(false);
   // marca o formulário como hidratado: antes disso um submit faria GET nativo
   const hydrated = useSyncExternalStore(
     () => () => {},
@@ -42,19 +45,80 @@ export function LoginForm() {
       setError(error.status === 429 ? (error.message ?? "Muitas tentativas. Aguarde 15 minutos.") : "E-mail ou senha incorretos.");
       return;
     }
-    const role = (data?.user as { role?: string } | undefined)?.role;
+    if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) {
+      setStep("code");
+      return;
+    }
+    finish((data?.user as { role?: string } | undefined)?.role);
+  }
+
+  function finish(role: string | undefined) {
     router.push(safeNextPath(next) ?? (role === "admin" ? "/admin" : "/portal"));
     router.refresh();
   }
 
+  async function onVerify(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+    const code = String(new FormData(e.currentTarget).get("code") ?? "").trim();
+    const { data, error } = useBackup
+      ? await authClient.twoFactor.verifyBackupCode({ code })
+      : await authClient.twoFactor.verifyTotp({ code: code.replace(/\s/g, "") });
+    setPending(false);
+    if (error) {
+      setError(error.status === 429 ? "Muitas tentativas. Aguarde um pouco." : "Código inválido ou expirado.");
+      return;
+    }
+    finish((data?.user as { role?: string } | undefined)?.role);
+  }
+
   return (
     <>
-      <h1 className="type-h3 mt-5">Entrar no portal</h1>
+      <h1 className="type-h3 mt-5">{step === "code" ? "Verificação em duas etapas" : "Entrar no portal"}</h1>
       {notice && (
         <p role="status" className="mt-4 rounded-r-md border-l-[3px] border-success bg-success-soft px-4 py-3 text-sm">
           {notice}
         </p>
       )}
+      {step === "code" ? (
+        <form onSubmit={onVerify} className="mt-6 grid gap-4" data-hydrated={hydrated ? "" : undefined}>
+          <p className="text-sm text-muted-foreground">
+            {useBackup
+              ? "Digite um dos códigos de recuperação que você guardou. Cada um vale uma vez."
+              : "Digite o código de 6 dígitos do seu aplicativo autenticador."}
+          </p>
+          <div className="grid gap-1.5">
+            <Label htmlFor="code">{useBackup ? "Código de recuperação" : "Código"}</Label>
+            <Input
+              id="code"
+              name="code"
+              inputMode={useBackup ? "text" : "numeric"}
+              autoComplete="one-time-code"
+              autoFocus
+              required
+            />
+          </div>
+          {error && (
+            <p role="alert" className="text-sm text-danger">
+              {error}
+            </p>
+          )}
+          <Button type="submit" disabled={pending} className="w-full">
+            {pending ? "Verificando…" : "Verificar"}
+          </Button>
+          <button
+            type="button"
+            onClick={() => {
+              setUseBackup((v) => !v);
+              setError(null);
+            }}
+            className="text-left text-sm font-medium text-link underline decoration-1 underline-offset-[3px] hover:text-signal-strong"
+          >
+            {useBackup ? "Usar o aplicativo autenticador" : "Usar um código de recuperação"}
+          </button>
+        </form>
+      ) : (
       <form onSubmit={onSubmit} className="mt-6 grid gap-4" data-hydrated={hydrated ? "" : undefined}>
         <div className="grid gap-1.5">
           <Label htmlFor="email">E-mail</Label>
@@ -76,6 +140,7 @@ export function LoginForm() {
           Esqueci minha senha
         </Link>
       </form>
+      )}
       <p className="mt-6 text-[0.8125rem] text-faint">Acesso por convite. Se você é cliente e ainda não tem acesso, fale com a EGD.</p>
     </>
   );

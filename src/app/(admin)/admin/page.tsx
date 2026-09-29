@@ -3,6 +3,7 @@ import { cn } from "cn";
 import { requireAdmin } from "@/modules/auth/context";
 import { countNewLeads, listLeads } from "@/modules/leads/queries";
 import { countOrganizations } from "@/modules/tenancy/queries";
+import { isTwoFactorEnabled } from "@/modules/auth/two-factor";
 import { getAdminOverview, listDeadlines, listRecentClientComments } from "@/modules/dashboard/queries";
 import { PageHeader, Block, EmptyState } from "@/components/shell/page-header";
 import { formatBrlCents, formatDateTime, formatIsoDate } from "@/lib/format";
@@ -21,18 +22,28 @@ function Kpi({ href, label, value, hint, tone }: { href: string; label: string; 
 
 export default async function AdminHome() {
   const ctx = await requireAdmin();
-  const [novos, orgs, ultimos, overview, deadlines, comments] = await Promise.all([
+  const [novos, orgs, ultimos, overview, deadlines, comments, twoFactor] = await Promise.all([
     countNewLeads(),
     countOrganizations(),
     listLeads(ctx),
     getAdminOverview(ctx),
     listDeadlines(ctx),
     listRecentClientComments(ctx),
+    isTwoFactorEnabled(ctx.user.id),
   ]);
 
   return (
     <>
       <PageHeader title="Painel" meta={`Olá, ${ctx.user.name}.`} />
+
+      {!twoFactor && (
+        <div role="note" className="flex flex-wrap items-center justify-between gap-3 rounded-r-md border-l-[3px] border-warning bg-warning-soft px-4 py-3 text-sm">
+          <span>
+            <strong>Proteja sua conta.</strong> O painel guarda dados de clientes; ative a verificação em duas etapas.
+          </span>
+          <Link href="/admin/conta" className="font-medium text-link underline decoration-1 underline-offset-[3px]">Ativar agora</Link>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         <Kpi href="/admin/leads" label="Leads novos" value={novos} />

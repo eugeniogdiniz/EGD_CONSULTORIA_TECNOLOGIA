@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { twoFactor } from "better-auth/plugins";
 import { db } from "@/lib/db";
 import * as schema from "@/db/schema";
 import { env } from "@/lib/env";
@@ -52,24 +53,51 @@ export const auth = betterAuth({
   },
   hooks: { before: beforeHook },
   databaseHooks: {
+    user: {
+      update: {
+        // ativar/desativar o 2FA é evento de segurança: fica na auditoria (o plugin não audita)
+        before: async (data, ctx) => {
+          const changed = (data as { twoFactorEnabled?: unknown }).twoFactorEnabled;
+          const actor = ctx?.context?.session?.user?.id ?? null;
+          if (typeof changed === "boolean" && actor) {
+            await audit({
+              actorId: actor,
+              action: changed ? "auth.2fa.enabled" : "auth.2fa.disabled",
+              entityType: "user",
+              entityId: actor,
+            });
+          }
+        },
+      },
+    },
     session: {
       create: {
-        after: async (session) => {
-          // login bem-sucedido zera o contador de tentativas do e-mail (só falhas consecutivas contam)
-          const u = await db.query.users.findFirst({ where: eq(users.id, session.userId), columns: { email: true } });
+        after: async (session, ctx) => {
+          const u = await db.query.users.findFirst({
+            where: eq(users.id, session.userId),
+            columns: { email: true, twoFactorEnabled: true },
+          });
+          const viaSecondFactor = Boolean(ctx?.path?.startsWith("/two-factor/"));
+          // Com 2FA ativo, a sessão criada após a senha é descartada pelo plugin: o login só vale
+          // depois do segundo fator, então nada é registrado nem zerado nesta etapa.
+          if (u?.twoFactorEnabled && !viaSecondFactor) return;
+          // login completo zera o contador de tentativas do e-mail (só falhas consecutivas contam)
           if (u) loginByEmail.reset(u.email);
           await audit({
             actorId: session.userId,
             action: "auth.login",
             entityType: "user",
             entityId: session.userId,
-            metadata: { ip: session.ipAddress ?? null },
+            metadata: { ip: session.ipAddress ?? null, mfa: viaSecondFactor },
           });
         },
       },
     },
   },
-  plugins: [nextCookies()], // deve ser o último plugin
+  plugins: [
+    twoFactor({ issuer: "EGD" }), // TOTP + códigos de recuperação; opcional por conta
+    nextCookies(), // deve ser o último plugin
+  ],
 });
 
 export type Session = typeof auth.$Infer.Session;
