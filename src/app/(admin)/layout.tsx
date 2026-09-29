@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/modules/auth/context";
 import { countNewLeads } from "@/modules/leads/queries";
+import { countActiveRequests } from "@/modules/requests/queries";
 import { AppShell } from "@/components/shell/app-shell";
 import type { NavEntry } from "@/components/shell/sidebar";
 
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }: LayoutProps<"/">) {
   const ctx = await requireAdmin();
-  const novos = await countNewLeads();
+  const [novos, solicitacoes] = await Promise.all([countNewLeads(), countActiveRequests()]);
   const nav: NavEntry[] = [
     { href: "/admin", label: "Painel" },
     {
@@ -24,6 +25,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
     { href: "/admin/projetos", label: "Projetos" },
     { href: "/admin/projetos/templates", label: "Templates" },
     { href: "/admin/cases", label: "Cases" },
+    { href: "/admin/solicitacoes", label: "Solicitações", badge: solicitacoes },
     { href: "/admin/leads", label: "Leads", badge: novos },
     { href: "/admin/arquivos", label: "Arquivos" },
     { href: "/admin/api", label: "API" },

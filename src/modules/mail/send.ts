@@ -1,7 +1,7 @@
 import { transporter } from "@/lib/mail";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
-import { renderInvitation, renderPasswordReset, renderLeadNotification, renderClientCommentNotification, type MailContent } from "./templates";
+import { renderInvitation, renderPasswordReset, renderLeadNotification, renderClientCommentNotification, renderRequestNotification, type MailContent } from "./templates";
 
 /**
  * Entrega um e-mail. Nunca lança: falha de SMTP é registrada no log e o
@@ -25,3 +25,7 @@ export const sendLeadNotification = (p: { name: string; email: string; company: 
 
 export const sendClientCommentNotification = (p: Parameters<typeof renderClientCommentNotification>[0]) =>
   deliver(env.ADMIN_NOTIFY_EMAIL, renderClientCommentNotification(p));
+
+/** `to` = equipe (ADMIN_NOTIFY_EMAIL) quando omitido; passe o e-mail do autor para avisar o cliente. */
+export const sendRequestNotification = (p: Parameters<typeof renderRequestNotification>[0] & { to?: string }) =>
+  deliver(p.to ?? env.ADMIN_NOTIFY_EMAIL, renderRequestNotification(p));
