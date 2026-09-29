@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUR } from "@/components/legacy/ui";
 import { SVC, PRODUCTS } from "@/content/legacy-home";
-import { getPublishedTotals } from "@/modules/cases/queries";
+import { getSiteCases } from "@/modules/cases/site";
 import { BrandFilm } from "@/components/site/brand-film";
 import { OperationFlow } from "@/components/site/operation-flow";
 
@@ -10,7 +10,7 @@ import { OperationFlow } from "@/components/site/operation-flow";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const TOTAIS = await getPublishedTotals();
+  const { totals: TOTAIS } = await getSiteCases();
   return (
     <>
       <section className="brand-hero container">

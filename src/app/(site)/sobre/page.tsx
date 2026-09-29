@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { getPublishedTotals } from "@/modules/cases/queries";
+import { getSiteCases } from "@/modules/cases/site";
 import { Arrow } from "@/components/legacy/ui";
 import { PRINCIPLES, TIMELINE, SECTORS } from "@/content/legacy-pages";
 import { BrandFilm } from "@/components/site/brand-film";
@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Sobre", description: "A EGD Consulto
 export const dynamic = "force-dynamic";
 
 export default async function SobrePage() {
-  const TOTAIS = await getPublishedTotals();
+  const { totals: TOTAIS } = await getSiteCases();
   return (
     <>
       <section className="page-head">

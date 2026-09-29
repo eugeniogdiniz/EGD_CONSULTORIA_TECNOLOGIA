@@ -1,16 +1,18 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { requireAdmin } from "@/modules/auth/context";
 import type { ActionResult } from "@/lib/action-result";
 import { createCase, deleteCase, setCasePublished, updateCase } from "./actions";
+import { SITE_CASES_TAG } from "./site";
 
 type NullState = ActionResult<null> | null;
 type CreateState = ActionResult<{ id: string; slug: string }> | null;
 
 /** Site público e API leem estes caminhos; invalida todos numa alteração. */
 function revalidatePublic() {
+  updateTag(SITE_CASES_TAG);
   revalidatePath("/", "page");
   revalidatePath("/cases");
   revalidatePath("/sobre");

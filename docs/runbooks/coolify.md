@@ -1,6 +1,6 @@
 # Runbook: provisionar o Coolify e publicar egdsystem.com.br
 
-Passo a passo para colocar a Fase 1 no ar num VPS Hostinger com Coolify. Os passos de painel e DNS são do Eugênio; os comandos são para rodar no VPS via SSH ou na máquina local, conforme indicado.
+Passo a passo para colocar o sistema no ar num VPS Hostinger com Coolify (o provisionamento é o da Fase 1; as seções 9, 11, 12 e 14 cobrem o que as fases seguintes acrescentaram). Os passos de painel e DNS são do Eugênio; os comandos são para rodar no VPS via SSH ou na máquina local, conforme indicado.
 
 Referências: spec `docs/superpowers/specs/2026-09-27-fase-1-fundacao-design.md` §7, `Dockerfile`, `.env.example`.
 
@@ -124,20 +124,45 @@ Em **egd-db → Backups**: agende backup diário às 03:00, retenção de 14 dia
 6. Em `/admin/arquivos`, enviar um arquivo e baixar pelo link **de uma máquina fora do VPS** (o link abre `storage.egdsystem.com.br`).
 7. `/admin/auditoria` lista os eventos acima.
 
+Depois das Fases 5 a 9:
+
+8. `/cases` mostra os 13 cases (a migration `0004` os semeia) e `/admin/cases` permite editar; salvar reflete no site.
+9. Em `/admin/api`, criar uma chave com `cases:read`, chamar `curl -H "Authorization: Bearer <chave>" https://egdsystem.com.br/api/v1/cases` e ver `200`; sem a chave, `401`. Revogar e ver `401`.
+10. No portal (convidado do passo 4): abrir uma solicitação em `/portal/solicitacoes`; o e-mail chega em `ADMIN_NOTIFY_EMAIL`; responder em `/admin/solicitacoes` e o e-mail chega ao cliente.
+11. Em `/admin/conta`, ativar a verificação em duas etapas, guardar os códigos de recuperação, sair e entrar de novo pedindo o código.
+
 ## 10. Desligar o GitHub Pages
 
 No repositório: **Settings → Pages → Source: None**. Depois execute a Task 18 do plano (remove `legacy/` e `.github/workflows/pages.yml`).
 
 ## 11. Proxy e IP do cliente
 
-O Traefik do Coolify deve ser a única porta de entrada (80/443) para o container: o app confia no primeiro valor de `x-forwarded-for` para limitar envios do formulário de contato e tentativas de login. Não exponha a porta 3000 do container publicamente.
+O Traefik do Coolify deve ser a única porta de entrada (80/443) para o container: o app confia no primeiro valor de `x-forwarded-for` para limitar envios do formulário de contato, tentativas de login e, na API pública (`/api/v1/*`), tentativas com chave inválida (30 por minuto por IP). Não exponha a porta 3000 do container publicamente. Sem esse cabeçalho todos os clientes caem no mesmo balde `unknown`.
+
+Os limites de taxa (contato, login, API) ficam **em memória, por processo**: valem para um container só. Com mais de uma réplica cada uma conta separado.
+
+Recomendado no Traefik/Coolify: um limite de tamanho de corpo de requisição (por exemplo 1 MB para `/api/`). O app recusa `POST /api/v1/leads` acima de 32 KB, mas só consegue medir o corpo depois de recebê-lo quando não há `content-length`.
 
 ## 12. Rollback
 
-**Application → Deployments**: escolha um deploy anterior e clique em **Redeploy**. Migrations são aditivas na Fase 1; um rollback de app não exige rollback de banco.
+**Application → Deployments**: escolha um deploy anterior e clique em **Redeploy**. As migrations até a `0007` só acrescentam (tabelas, colunas, índices, restrições e um gatilho; nenhuma remove ou altera dados existentes), então a versão anterior do app continua funcionando sobre o banco novo: um rollback de app não exige rollback de banco. Antes de uma migration que remova ou altere colunas, faça um backup manual (seção 8).
 
 ## 13. Operação do dia a dia
 
 - Logs: **Application → Logs** (o app escreve JSON, uma linha por evento; erros trazem `digest`, que é o código que a tela de erro mostra ao usuário).
 - Atualizar: push na `main` dispara deploy; falha de migration mantém a versão anterior no ar.
 - Rotação de segredo de sessão (`BETTER_AUTH_SECRET`) invalida todas as sessões; avise os clientes.
+
+## 14. Operação: chaves de API e 2FA
+
+**Chaves de API** (`/admin/api`): o segredo (`egd_…`) aparece uma única vez, na criação; o banco guarda só o hash. Crie uma chave por integração, com o menor escopo possível (`cases:read` para leitura de cases, `leads:write` para enviar leads). Suspeita de vazamento: **Revogar** (vale na hora, a chave passa a receber `401`) e crie outra. O uso fica em "Último uso" e na auditoria (`lead.created` traz `apiKeyId`).
+
+**Verificação em duas etapas:** cada pessoa ativa em **Minha conta**. Se alguém perder o aparelho *e* os códigos de recuperação, quem administra o servidor remove o 2FA da conta, dentro do container da aplicação (Coolify → Application → Terminal):
+
+```bash
+node scripts/reset-2fa.mjs pessoa@empresa.com
+```
+
+Isso apaga o segredo, desliga o 2FA, encerra as sessões da pessoa e registra `auth.2fa.reset` na auditoria. A pessoa entra só com a senha e reativa. Não há reset por e-mail, de propósito: ele recriaria o ponto fraco que o 2FA fecha.
+
+**E-mails para a equipe:** `ADMIN_NOTIFY_EMAIL` recebe leads (site e API), solicitações novas e respostas de clientes, e comentários de clientes em entregas. Falha de SMTP não derruba nada; só aparece no log (`mail.failed`).
