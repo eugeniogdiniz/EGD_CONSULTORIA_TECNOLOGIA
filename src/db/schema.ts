@@ -6,4 +6,5 @@ export * from "@/modules/projects/schema-extras";
 export * from "@/modules/cases/schema";
 export * from "@/modules/leads/schema";
 export * from "@/modules/files/schema";
+export * from "@/modules/api-keys/schema";
 export * from "@/modules/audit/schema";
