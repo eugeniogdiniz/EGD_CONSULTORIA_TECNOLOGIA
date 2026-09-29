@@ -65,3 +65,20 @@ Rebranding: [manual da marca](docs/brand/manual-da-marca.md), [análise e entreg
 Kit local em [docs/brand/kit-comercial/index.html](docs/brand/kit-comercial/index.html), com [pacote ZIP](docs/brand/kit-comercial-egd.zip) e [instruções de uso](docs/brand/kit-comercial/LEIA-ME.md). Inclui contrato, proposta, acordo de confidencialidade, aditivo, aceite e papel timbrado em Word/PDF; logos; cartão frente/verso com sangria; assinatura de e-mail e vCard.
 
 Dados em `docs/brand/templates/dados-comerciais.json`; textos em `docs/brand/templates/documentos.py`. Regenerar com `node scripts/build-brand-kit.mjs` (Python 3 com `qrcode`, Playwright e Chrome local). Os campos legais/comerciais ainda não informados permanecem identificados nos modelos. Minutas sujeitas a preenchimento e revisão jurídica.
+
+## Recuperação de acesso (2FA)
+
+Se alguém perder o aparelho e os códigos de recuperação, quem administra o servidor remove o 2FA da conta
+(exige acesso ao banco; encerra as sessões e registra na auditoria):
+
+```bash
+npm run auth:reset-2fa -- pessoa@empresa.com
+```
+
+Em produção, dentro do container do app (a imagem inclui `scripts/` e o `postgres`):
+
+```bash
+node scripts/reset-2fa.mjs pessoa@empresa.com
+```
+
+A pessoa entra só com a senha e reativa em **Minha conta**.

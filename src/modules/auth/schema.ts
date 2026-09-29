@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, text, timestamp, boolean, bigint, uuid, index } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, text, timestamp, boolean, bigint, integer, uuid, index } from "drizzle-orm/pg-core";
 
 export const userRole = pgEnum("user_role", ["admin", "client"]);
 
@@ -18,6 +18,8 @@ export const users = pgTable("users", {
   image: text(),
   role: userRole().default("client").notNull(),
   active: boolean().default(true).notNull(),
+  // verificação em duas etapas (plugin two-factor do Better Auth)
+  twoFactorEnabled: boolean().default(false),
   // cents BRL por hora; usado no cálculo de custo do módulo projects
   hourlyRateCents: bigint({ mode: "number" }),
   ...timestamps,
@@ -70,4 +72,21 @@ export const verifications = pgTable(
     ...timestamps,
   },
   (t) => [index("verifications_identifier_idx").on(t.identifier)],
+);
+
+/** Segredo TOTP e códigos de recuperação (cifrados pelo Better Auth). Um registro por usuário. */
+export const twoFactors = pgTable(
+  "two_factors",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    secret: text().notNull(),
+    backupCodes: text().notNull(),
+    userId: uuid()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    verified: boolean().default(true),
+    failedVerificationCount: integer().default(0),
+    lockedUntil: timestamp({ withTimezone: true }),
+  },
+  (t) => [index("two_factors_user_id_idx").on(t.userId), index("two_factors_secret_idx").on(t.secret)],
 );
