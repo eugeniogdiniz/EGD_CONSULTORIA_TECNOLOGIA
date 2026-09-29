@@ -57,7 +57,7 @@ export function ExpenseFormDialog({
   const isEdit = Boolean(expense);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<span />}>{trigger}</DialogTrigger>
+      <DialogTrigger render={trigger as React.ReactElement} />
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Editar despesa" : "Nova despesa"}</DialogTitle>

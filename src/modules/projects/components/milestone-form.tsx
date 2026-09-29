@@ -28,7 +28,7 @@ export function MilestoneFormDialog({
   const isEdit = Boolean(milestone);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<span />}>{trigger}</DialogTrigger>
+      <DialogTrigger render={trigger as React.ReactElement} />
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{isEdit ? `Editar ${milestone!.name}` : "Novo marco"}</DialogTitle>

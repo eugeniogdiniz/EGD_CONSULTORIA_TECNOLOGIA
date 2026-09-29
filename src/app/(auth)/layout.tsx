@@ -10,7 +10,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           <Logo subtitle />
           <h2 className="mt-12 text-5xl leading-tight tracking-tight">Projeto e operação.<br />Na mesma direção.</h2>
           <p className="mt-5 max-w-md text-muted-foreground">Um espaço para conectar sua equipe, os arquivos e as entregas da EGD.</p>
-          <Image className="mt-10 h-auto w-full rounded-lg" src="/brand/images/territorio-azul.webp" alt="Maquete conceitual de infraestrutura conectada." width={1536} height={1024} sizes="50vw" />
+          <Image className="mt-10 h-auto w-full rounded-lg" src="/brand/images/territorio-azul.webp" alt="Maquete conceitual de infraestrutura conectada." width={1536} height={1024} sizes="50vw" priority />
         </section>
         <div className="mx-auto w-full max-w-[420px]">
           <div className="rounded-lg border border-border bg-card p-8">

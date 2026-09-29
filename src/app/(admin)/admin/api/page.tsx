@@ -23,12 +23,12 @@ export default async function AdminApiPage() {
         meta="Chaves para integrar sistemas ao conteúdo e aos leads da EGD. O segredo aparece uma única vez, na criação."
       />
 
-      <div className="grid items-start gap-6 xl:grid-cols-[2fr_1fr]">
-        <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6">
           <Block title="Chaves" aside={`${keys.filter((k) => !k.revokedAt).length} ativas`} padded={false}>
             {keys.length === 0 ? (
               <p className="px-5 py-6 text-sm text-muted-foreground">Nenhuma chave criada.</p>
             ) : (
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-subtle text-left text-muted-foreground">
@@ -76,13 +76,14 @@ export default async function AdminApiPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </Block>
 
+          <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <Block title="Nova chave">
             <ApiKeyForm />
           </Block>
-        </div>
 
         <Block title="Como usar">
           <div className="grid gap-4 text-xs leading-relaxed text-muted-foreground">
@@ -109,6 +110,7 @@ curl ${base}/api/v1/cases/urbhis \\
             </div>
           </div>
         </Block>
+        </div>
       </div>
     </>
   );

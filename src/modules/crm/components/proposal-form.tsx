@@ -37,7 +37,7 @@ export function ProposalFormDialog({
   const isEdit = Boolean(proposal);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<span />}>{trigger}</DialogTrigger>
+      <DialogTrigger render={trigger as React.ReactElement} />
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Editar rascunho" : "Nova proposta"}</DialogTitle>

@@ -25,7 +25,7 @@ export function LostDialog({
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<span />}>{trigger}</DialogTrigger>
+      <DialogTrigger render={trigger as React.ReactElement} />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Marcar como perdida</DialogTitle>

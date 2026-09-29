@@ -25,7 +25,7 @@ export function PhaseFormDialog({
   const isEdit = Boolean(phase);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<span />}>{trigger}</DialogTrigger>
+      <DialogTrigger render={trigger as React.ReactElement} />
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{isEdit ? `Editar ${phase!.name}` : "Nova fase"}</DialogTitle>
