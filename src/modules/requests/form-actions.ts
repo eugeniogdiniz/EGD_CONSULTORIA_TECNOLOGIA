@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requirePortal } from "@/modules/auth/context";
 import type { ActionResult } from "@/lib/action-result";
-import { createRequest, replyAsClient, replyAsTeam, resolveAsClient, setRequestStatus } from "./actions";
+import { convertRequestToDeliverable, createRequest, replyAsClient, replyAsTeam, resolveAsClient, setRequestPriority, setRequestStatus } from "./actions";
 
 type NullState = ActionResult<null> | null;
 type CreateState = ActionResult<{ id: string }> | null;
@@ -61,4 +61,31 @@ export async function setRequestStatusForm(fd: FormData): Promise<void> {
   revalidatePath(`/admin/solicitacoes/${id}`);
   revalidatePath("/admin/solicitacoes");
   revalidatePath("/admin");
+}
+
+export async function setRequestPriorityForm(fd: FormData): Promise<void> {
+  const ctx = await requireAdmin();
+  const id = String(fd.get("id") ?? "");
+  await setRequestPriority(ctx, id, String(fd.get("priority") ?? ""));
+  revalidatePath(`/admin/solicitacoes/${id}`);
+  revalidatePath("/admin/solicitacoes");
+}
+
+export async function convertRequestForm(_p: ActionResult<{ deliverableId: string }> | null, fd: FormData): Promise<ActionResult<{ deliverableId: string }> | null> {
+  const ctx = await requireAdmin();
+  const id = String(fd.get("id") ?? "");
+  const r = await convertRequestToDeliverable(ctx, id, {
+    projectId: String(fd.get("projectId") ?? ""),
+    assigneeId: String(fd.get("assigneeId") ?? ""),
+    dueAt: String(fd.get("dueAt") ?? ""),
+    priority: String(fd.get("priority") ?? "medium") as "urgent" | "high" | "medium" | "low",
+    visibleToClient: fd.get("visibleToClient") === "on",
+  });
+  if (r.ok) {
+    revalidatePath(`/admin/solicitacoes/${id}`);
+    revalidatePath("/admin/solicitacoes");
+    revalidatePath("/admin/demandas");
+    revalidatePath(`/portal/solicitacoes/${id}`);
+  }
+  return r;
 }

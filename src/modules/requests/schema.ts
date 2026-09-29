@@ -1,7 +1,7 @@
 import { index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "@/modules/auth/schema";
 import { organizations } from "@/modules/tenancy/schema";
-import { project } from "@/modules/projects/schema";
+import { project, projectDeliverable, workPriority } from "@/modules/projects/schema";
 
 export const portalRequestStatus = pgEnum("portal_request_status", ["open", "in_progress", "resolved"]);
 
@@ -21,6 +21,10 @@ export const portalRequest = pgTable(
     title: text().notNull(),
     body: text().notNull(),
     status: portalRequestStatus().default("open").notNull(),
+    // triagem da equipe
+    priority: workPriority().default("medium").notNull(),
+    // entrega criada a partir desta solicitação
+    deliverableId: uuid().references(() => projectDeliverable.id, { onDelete: "set null" }),
     resolvedAt: timestamp({ withTimezone: true }),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp({ withTimezone: true })

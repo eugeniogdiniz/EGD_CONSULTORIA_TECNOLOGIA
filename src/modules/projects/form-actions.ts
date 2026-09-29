@@ -30,6 +30,7 @@ import {
   logManualTime,
   movePhase,
   reorderDeliverable,
+  setDeliverablePriority,
   setDeliverableVisibility,
   startTimer,
   stopTimer,
@@ -209,6 +210,7 @@ function deliverableInput(fd: FormData) {
     description: String(fd.get("description") ?? ""),
     assigneeId: String(fd.get("assigneeId") ?? ""),
     dueAt: String(fd.get("dueAt") ?? ""),
+    priority: String(fd.get("priority") ?? "medium") as "urgent" | "high" | "medium" | "low",
   };
 }
 
@@ -261,6 +263,17 @@ export async function attachDeliverableFileForm(_p: NullState, fd: FormData): Pr
   const projectId = String(fd.get("projectId") ?? "");
   revalidatePath(`/admin/projetos/${projectId}/kanban`);
   return r.ok ? { ok: true, data: null } : r;
+}
+
+export async function setDeliverablePriorityForm(fd: FormData): Promise<void> {
+  const ctx = await requireAdmin();
+  const id = String(fd.get("id") ?? "");
+  const projectId = String(fd.get("projectId") ?? "");
+  await setDeliverablePriority(ctx, id, String(fd.get("priority") ?? ""));
+  revalidatePath(`/admin/projetos/${projectId}`);
+  revalidatePath(`/admin/projetos/${projectId}/kanban`);
+  revalidatePath(`/admin/projetos/${projectId}/entregas/${id}`);
+  revalidatePath("/admin/demandas");
 }
 
 export async function setDeliverableVisibilityForm(fd: FormData): Promise<void> {

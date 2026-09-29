@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PRIORITIES } from "./priority";
 
 const optionalText = (max = 500) =>
   z
@@ -83,8 +84,11 @@ export const deliverableSchema = z.object({
   description: optionalText(8000),
   assigneeId: optionalUuid,
   dueAt: isoDateOptional,
+  priority: z.enum(PRIORITIES).default("medium"),
 });
 export type DeliverableInput = z.input<typeof deliverableSchema>;
+
+export const prioritySchema = z.enum(PRIORITIES);
 
 export const changeDeliverableStatusSchema = z
   .object({

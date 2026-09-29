@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cn } from "cn";
 import { requireAdmin } from "@/modules/auth/context";
 import { listAllRequests } from "@/modules/requests/queries";
+import { PRIORITY_LABEL, PRIORITY_STYLE } from "@/modules/projects/priority";
 import { isRequestStatus, STATUS_LABEL, STATUS_STYLE, type RequestStatus } from "@/modules/requests/status";
 import { PageHeader, EmptyState } from "@/components/shell/page-header";
 import { formatDateTime } from "@/lib/format";
@@ -61,6 +62,11 @@ export default async function AdminSolicitacoesPage({ searchParams }: PageProps<
                   </span>
                   <span className="flex items-center gap-3">
                     <span className="type-data text-xs text-faint">{formatDateTime(r.updatedAt)}</span>
+                    {r.priority !== "medium" && (
+                      <span className={cn("inline-flex h-[22px] items-center rounded-sm border px-2 text-xs font-medium whitespace-nowrap", PRIORITY_STYLE[r.priority])}>
+                        {PRIORITY_LABEL[r.priority]}
+                      </span>
+                    )}
                     <span className={cn("inline-flex h-[22px] items-center rounded-sm border px-2 text-xs font-medium whitespace-nowrap", STATUS_STYLE[r.status])}>
                       {STATUS_LABEL[r.status]}
                     </span>

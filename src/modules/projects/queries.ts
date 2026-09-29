@@ -22,6 +22,7 @@ import {
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import { computeFinancials } from "./time-math";
+import { compareBacklog, isOverdue, type Priority } from "./priority";
 
 const escapeLike = (q: string) => q.replace(/[\\%_]/g, "\\$&");
 const contains = (q: string) => `%${escapeLike(q)}%`;
@@ -198,6 +199,7 @@ export function listDeliverables(
       title: projectDeliverable.title,
       description: projectDeliverable.description,
       status: projectDeliverable.status,
+      priority: projectDeliverable.priority,
       position: projectDeliverable.position,
       dueAt: projectDeliverable.dueAt,
       completedAt: projectDeliverable.completedAt,
@@ -615,4 +617,84 @@ export function listTemplateDeliverables(_ctx: AdminContext, templateId: string)
     .from(projectTemplateDeliverable)
     .where(eq(projectTemplateDeliverable.templateId, templateId))
     .orderBy(asc(projectTemplateDeliverable.position));
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Fase 10 — Demandas (backlog entre projetos)
+// ────────────────────────────────────────────────────────────────────────────
+
+export type BacklogFilters = {
+  projectId?: string;
+  assigneeId?: string | "none";
+  priority?: Priority;
+  status?: DeliverableStatus;
+  overdueOnly?: boolean;
+  /** Inclui entregas concluídas (por padrão só as abertas). */
+  includeDone?: boolean;
+  today: string;
+};
+
+/**
+ * Entregas de projetos não arquivados (e não cancelados/entregues), de todas as empresas, na ordem
+ * de prioridade. É a visão "demandas": o que há para fazer, do mais importante ao menos.
+ */
+export async function listBacklog(_ctx: AdminContext, f: BacklogFilters) {
+  const filters = [
+    isNull(project.archivedAt),
+    inArray(project.status, ["planning", "active", "on_hold"] as const),
+  ];
+  if (!f.includeDone) filters.push(sql`${projectDeliverable.status} <> 'done'`);
+  if (f.projectId && isUuid(f.projectId)) filters.push(eq(projectDeliverable.projectId, f.projectId));
+  if (f.assigneeId === "none") filters.push(isNull(projectDeliverable.assigneeId));
+  else if (f.assigneeId && isUuid(f.assigneeId)) filters.push(eq(projectDeliverable.assigneeId, f.assigneeId));
+  if (f.priority) filters.push(eq(projectDeliverable.priority, f.priority));
+  if (f.status) filters.push(eq(projectDeliverable.status, f.status));
+
+  const rows = await db
+    .select({
+      id: projectDeliverable.id,
+      title: projectDeliverable.title,
+      status: projectDeliverable.status,
+      priority: projectDeliverable.priority,
+      dueAt: projectDeliverable.dueAt,
+      createdAt: projectDeliverable.createdAt,
+      visibleToClient: projectDeliverable.visibleToClient,
+      projectId: project.id,
+      projectTitle: project.title,
+      companyName: crmCompany.name,
+      phaseName: projectPhase.name,
+      assigneeId: projectDeliverable.assigneeId,
+      assigneeName: users.name,
+    })
+    .from(projectDeliverable)
+    .innerJoin(project, eq(projectDeliverable.projectId, project.id))
+    .innerJoin(crmCompany, eq(project.companyId, crmCompany.id))
+    .leftJoin(projectPhase, eq(projectDeliverable.phaseId, projectPhase.id))
+    .leftJoin(users, eq(projectDeliverable.assigneeId, users.id))
+    .where(and(...filters))
+    .limit(1000);
+
+  const withOverdue = rows.map((r) => ({ ...r, overdue: isOverdue(r, f.today) }));
+  const list = f.overdueOnly ? withOverdue.filter((r) => r.overdue) : withOverdue;
+  return list.sort(compareBacklog);
+}
+
+export type BacklogItem = Awaited<ReturnType<typeof listBacklog>>[number];
+
+/** Projetos que aceitam demandas (para o filtro). */
+export function listProjectsForFilter(_ctx: AdminContext) {
+  return db
+    .select({ id: project.id, title: project.title })
+    .from(project)
+    .where(and(isNull(project.archivedAt), inArray(project.status, ["planning", "active", "on_hold"] as const)))
+    .orderBy(asc(project.title));
+}
+
+/** Pessoas da equipe que podem receber demandas. */
+export function listTeamMembers(_ctx: AdminContext) {
+  return db
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(and(eq(users.role, "admin"), eq(users.active, true)))
+    .orderBy(asc(users.name));
 }

@@ -62,7 +62,13 @@ export default async function AdminHome() {
           hint={`${overview.dueThisWeek} vencem em 7 dias`}
           tone={overview.overdueDeliverables > 0 ? "danger" : undefined}
         />
-        <Kpi href="/admin/organizacoes" label="Organizações" value={orgs} hint={`${overview.publishedCases} cases no site`} />
+        <Kpi
+          href="/admin/demandas?prioridade=urgent"
+          label="Demandas urgentes"
+          value={overview.urgentDemands}
+          hint={`${orgs} organizações · ${overview.publishedCases} cases`}
+          tone={overview.urgentDemands > 0 ? "danger" : undefined}
+        />
       </div>
 
       <div className="grid items-start gap-6 xl:grid-cols-2">
