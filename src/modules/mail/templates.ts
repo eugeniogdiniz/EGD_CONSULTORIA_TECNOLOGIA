@@ -94,3 +94,36 @@ export function renderClientCommentNotification(p: {
   );
   return { subject, text, html };
 }
+
+export type RequestNotificationKind = "created" | "client_reply" | "team_reply";
+
+/** Aviso de solicitação: à equipe (nova / resposta do cliente) ou ao autor (resposta da equipe). */
+export function renderRequestNotification(p: {
+  kind: RequestNotificationKind;
+  actorName: string;
+  organizationName: string;
+  title: string;
+  body: string;
+  url: string;
+}): MailContent {
+  const subject =
+    p.kind === "created"
+      ? `Nova solicitação de ${p.organizationName}: ${p.title}`
+      : p.kind === "client_reply"
+        ? `Resposta de ${p.actorName} (${p.organizationName}): ${p.title}`
+        : `A EGD respondeu sua solicitação: ${p.title}`;
+  const intro =
+    p.kind === "created"
+      ? `${p.actorName} (${p.organizationName}) abriu a solicitação "${p.title}":`
+      : p.kind === "client_reply"
+        ? `${p.actorName} (${p.organizationName}) respondeu à solicitação "${p.title}":`
+        : `${p.actorName} respondeu à solicitação "${p.title}":`;
+  const text = [intro, "", p.body, "", `Abrir: ${p.url}`].join("\n");
+  const html = layout(
+    subject,
+    `<p>${esc(intro)}</p>
+  <pre style="white-space:pre-wrap;font-family:inherit;border-left:3px solid #ccc;padding-left:12px">${esc(p.body)}</pre>
+  <p><a href="${esc(p.url)}">Abrir a solicitação</a></p>`,
+  );
+  return { subject, text, html };
+}

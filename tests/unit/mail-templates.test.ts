@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { renderInvitation, renderPasswordReset, renderLeadNotification, renderClientCommentNotification } from "@/modules/mail/templates";
+import { renderInvitation, renderPasswordReset, renderLeadNotification, renderClientCommentNotification, renderRequestNotification } from "@/modules/mail/templates";
 
 it("convite inclui organização e link nas versões texto e HTML", () => {
   const m = renderInvitation({ organizationName: "ACME", acceptUrl: "https://egdsystem.com.br/convite/abc" });
@@ -48,4 +48,15 @@ it("aviso de comentário do cliente traz autor, entrega, texto e link, e escapa 
   expect(m.html).toContain('href="https://egdsystem.com.br/admin/projetos/p/entregas/d"');
   expect(m.html).not.toContain("<script>");
   expect(m.html).not.toContain("<i>S</i>");
+});
+
+it("aviso de solicitação muda assunto e texto conforme o tipo e escapa HTML", () => {
+  const base = { actorName: "Ana <b>", organizationName: "URBHIS", title: "Acesso <x>", body: "<script>1</script> oi", url: "https://egdsystem.com.br/admin/solicitacoes/1" };
+  expect(renderRequestNotification({ ...base, kind: "created" }).subject).toBe("Nova solicitação de URBHIS: Acesso <x>");
+  expect(renderRequestNotification({ ...base, kind: "client_reply" }).subject).toBe("Resposta de Ana <b> (URBHIS): Acesso <x>");
+  const team = renderRequestNotification({ ...base, kind: "team_reply" });
+  expect(team.subject).toBe("A EGD respondeu sua solicitação: Acesso <x>");
+  expect(team.text).toContain("https://egdsystem.com.br/admin/solicitacoes/1");
+  expect(team.html).not.toContain("<script>");
+  expect(team.html).not.toContain("<b>");
 });

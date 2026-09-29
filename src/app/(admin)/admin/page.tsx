@@ -34,7 +34,7 @@ export default async function AdminHome() {
     <>
       <PageHeader title="Painel" meta={`Olá, ${ctx.user.name}.`} />
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         <Kpi href="/admin/leads" label="Leads novos" value={novos} />
         <Kpi
           href="/admin/crm/funil"
@@ -42,6 +42,7 @@ export default async function AdminHome() {
           value={overview.openOpportunities}
           hint={overview.pipelineCents ? formatBrlCents(overview.pipelineCents) : undefined}
         />
+        <Kpi href="/admin/solicitacoes" label="Solicitações abertas" value={overview.activeRequests} />
         <Kpi href="/admin/projetos" label="Projetos ativos" value={overview.activeProjects} />
         <Kpi
           href="/admin/projetos"
