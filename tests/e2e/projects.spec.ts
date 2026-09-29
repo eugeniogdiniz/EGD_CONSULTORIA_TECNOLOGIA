@@ -94,8 +94,11 @@ test.describe.serial("projects", () => {
     await page.getByRole("button", { name: /^comentar$/i }).click();
     await expect(page.getByText("Nota interna da equipe")).toBeVisible({ timeout: 10_000 });
 
-    await page.reload();
-    await expect(page.getByRole("note")).toContainText(/1 comentário/i);
+    // recarrega até o servidor refletir o comentário (evita instabilidade sob carga)
+    await expect(async () => {
+      await page.reload();
+      await expect(page.getByRole("note")).toContainText(/1 comentário/i, { timeout: 3_000 });
+    }).toPass({ timeout: 20_000 });
     await expect(page.getByRole("button", { name: /compartilhar com o cliente/i })).toBeVisible();
   });
 

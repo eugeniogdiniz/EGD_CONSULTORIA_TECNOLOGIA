@@ -135,7 +135,7 @@ export default async function PortalProjetoPage({ params }: PageProps<"/portal/p
                   return (
                     <li
                       key={m.id}
-                      className="grid grid-cols-[20px_92px_1fr_auto] items-center gap-3 border-t border-border py-2 text-sm first:border-t-0"
+                      className="grid grid-cols-[20px_1fr] items-center gap-x-3 gap-y-0.5 border-t border-border py-2 text-sm first:border-t-0 sm:grid-cols-[20px_92px_1fr_auto]"
                     >
                       <span
                         aria-hidden
@@ -154,13 +154,13 @@ export default async function PortalProjetoPage({ params }: PageProps<"/portal/p
                       >
                         {formatIsoDate(m.dueAt)}
                       </span>
-                      <span className={cn(state === "done" && "text-muted-foreground")}>
+                      <span className={cn("max-sm:col-start-2", state === "done" && "text-muted-foreground")}>
                         {m.name}
                         <span className="sr-only">
                           {state === "done" ? " (concluído)" : state === "late" ? " (atrasado)" : " (pendente)"}
                         </span>
                       </span>
-                      <span className="type-micro text-faint">{m.phaseId ? phaseName.get(m.phaseId) : ""}</span>
+                      <span className="type-micro text-faint max-sm:col-start-2">{m.phaseId ? phaseName.get(m.phaseId) : ""}</span>
                     </li>
                   );
                 })}
@@ -177,15 +177,15 @@ export default async function PortalProjetoPage({ params }: PageProps<"/portal/p
                   <li key={d.id} className="border-t border-border first:border-t-0">
                     <Link
                       href={`/portal/projetos/${id}/entregas/${d.id}`}
-                      className="grid grid-cols-[1fr_92px_110px] items-center gap-2.5 py-2.5 text-sm hover:text-link"
+                      className="grid grid-cols-[1fr_auto] items-center gap-x-2.5 gap-y-1.5 py-2.5 text-sm hover:text-link sm:grid-cols-[1fr_92px_110px]"
                     >
-                      <span>
+                      <span className="max-sm:col-span-2">
                         <span className="block font-medium">{d.title}</span>
                         <span className="type-micro block text-muted-foreground">
                           {d.phaseId ? phaseName.get(d.phaseId) : "Sem fase"}
                         </span>
                       </span>
-                      <span className="type-data text-right text-xs text-muted-foreground">{formatIsoDate(d.dueAt)}</span>
+                      <span className="type-data text-xs text-muted-foreground sm:text-right">{formatIsoDate(d.dueAt)}</span>
                       <span className="text-right">
                         <span className={cn(chip, STATUS_STYLE[d.status])}>{portalStatusLabel(d.status)}</span>
                       </span>
@@ -199,7 +199,7 @@ export default async function PortalProjetoPage({ params }: PageProps<"/portal/p
 
         <div className="flex flex-col gap-6">
           <Block title="Resumo">
-            <dl className="grid grid-cols-[120px_1fr] gap-y-2 text-sm">
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
               <dt className="text-muted-foreground">Status</dt>
               <dd>
                 <span className={cn(chip, STATUS_STYLE[project.status])}>{PROJECT_STATUS_LABEL[project.status]}</span>

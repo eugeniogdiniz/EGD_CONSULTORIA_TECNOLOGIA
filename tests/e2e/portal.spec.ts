@@ -52,6 +52,9 @@ test.describe("projetos no portal", () => {
     // abas de linha do tempo e calendário renderizam
     await page.getByRole("link", { name: /^linha do tempo$/i }).click();
     await expect(page.getByRole("heading", { level: 1, name: /linha do tempo/i })).toBeVisible();
+    // variável CSS inexistente faz o SVG pintar preto: nenhum retângulo pode ser preto
+    const pretos = await page.locator('svg[role="img"] rect').evaluateAll((rs) => rs.filter((r) => getComputedStyle(r).fill === "rgb(0, 0, 0)").length);
+    expect(pretos).toBe(0);
     await page.getByRole("link", { name: /^calend[aá]rio$/i }).click();
     await expect(page.getByRole("heading", { level: 1, name: /calend[aá]rio/i })).toBeVisible();
   });
@@ -108,4 +111,27 @@ test("home do portal lista o projeto da organização e leva até ele", async ({
   await expect(page.getByText(fx.projectB.title)).toHaveCount(0);
   await page.getByRole("link", { name: new RegExp(fx.projectA.title) }).click();
   await expect(page.getByRole("heading", { level: 1, name: fx.projectA.title })).toBeVisible();
+});
+
+test("telas do portal cabem em 390 px, sem rolagem horizontal da página", async ({ page }) => {
+  test.setTimeout(90_000);
+  const fx = createTwoOrgsWithClientsAndFiles();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await loginAs(page, fx.clientA.email, fx.clientA.password);
+  const p = fx.projectA;
+  for (const path of [
+    "/portal",
+    "/portal/projetos",
+    `/portal/projetos/${p.id}`,
+    `/portal/projetos/${p.id}/gantt`,
+    `/portal/projetos/${p.id}/calendario`,
+    `/portal/projetos/${p.id}/entregas/${p.visible.id}`,
+    "/portal/solicitacoes",
+    "/portal/solicitacoes/nova",
+    "/portal/conta",
+  ]) {
+    await page.goto(path);
+    const { scrollWidth, innerWidth } = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, innerWidth: window.innerWidth }));
+    expect(scrollWidth, `${path} estoura a largura`).toBeLessThanOrEqual(innerWidth);
+  }
 });

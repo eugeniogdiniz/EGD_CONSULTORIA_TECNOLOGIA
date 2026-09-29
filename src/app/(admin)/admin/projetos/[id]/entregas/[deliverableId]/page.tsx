@@ -36,7 +36,7 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_STYLE: Record<string, string> = {
   todo: "border-border bg-subtle text-muted-foreground",
   doing: "border-link bg-link-soft text-link",
-  review: "border-accent bg-accent-soft text-accent",
+  review: "border-strong bg-card text-foreground",
   done: "border-success bg-success-soft text-success",
   blocked: "border-danger bg-danger-soft text-danger",
 };
