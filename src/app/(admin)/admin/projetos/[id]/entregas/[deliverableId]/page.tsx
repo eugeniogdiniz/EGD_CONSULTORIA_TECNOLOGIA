@@ -16,6 +16,7 @@ import {
 } from "@/modules/projects/queries";
 import { deleteTimeEntryForm, setDeliverableVisibilityForm } from "@/modules/projects/form-actions";
 import { PageHeader, Block } from "@/components/shell/page-header";
+import { PRIORITY_LABEL, PRIORITY_STYLE } from "@/modules/projects/priority";
 import { Button } from "@/components/ui/button";
 import { DeliverableFormDialog } from "@/modules/projects/components/deliverable-form";
 import { TimerPanel, ManualTimeForm } from "@/modules/projects/components/timer-panel";
@@ -94,6 +95,9 @@ export default async function DeliverableDetailPage({
             <span className={cn("inline-flex h-6 items-center rounded-sm border px-2 text-xs font-medium", STATUS_STYLE[d.status])}>
               {STATUS_LABEL[d.status]}
             </span>
+            <span className={cn("ml-1.5 inline-flex h-6 items-center rounded-sm border px-2 text-xs font-medium", PRIORITY_STYLE[d.priority])}>
+              {PRIORITY_LABEL[d.priority]}
+            </span>
             <span className="text-faint"> · </span>
             <Link href={projectHref} className="text-link hover:underline">
               {project.project.title}
@@ -131,6 +135,7 @@ export default async function DeliverableDetailPage({
               phaseId: d.phaseId,
               assigneeId: d.assigneeId,
               dueAt: d.dueAt,
+              priority: d.priority,
             }}
             trigger={<Button variant="secondary" size="sm" type="button">Editar</Button>}
           />
@@ -282,6 +287,8 @@ export default async function DeliverableDetailPage({
                   {STATUS_LABEL[d.status]}
                 </span>
               </dd>
+              <dt className="text-muted-foreground">Prioridade</dt>
+              <dd>{PRIORITY_LABEL[d.priority]}</dd>
               <dt className="text-muted-foreground">Prazo</dt>
               <dd className="type-data">{formatIsoDate(d.dueAt)}</dd>
               <dt className="text-muted-foreground">Fase</dt>

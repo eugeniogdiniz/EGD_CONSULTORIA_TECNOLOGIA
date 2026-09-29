@@ -36,6 +36,7 @@ import {
 import { DeliverableFormDialog } from "./deliverable-form";
 import { reorderDeliverableForm } from "@/modules/projects/form-actions";
 import { formatIsoDate } from "@/lib/format";
+import { PRIORITY_LABEL, PRIORITY_STYLE, type Priority } from "@/modules/projects/priority";
 
 type Status = "todo" | "doing" | "review" | "done" | "blocked";
 
@@ -44,6 +45,7 @@ export type KanbanCard = {
   title: string;
   description: string | null;
   status: Status;
+  priority: Priority;
   position: number;
   phaseId: string | null;
   phaseName: string | null;
@@ -91,6 +93,11 @@ function CardBody({ card, today }: { card: KanbanCard; today: string }) {
     <>
       <div className="text-sm font-medium leading-snug">{card.title}</div>
       <div className="mt-2 flex flex-wrap items-center gap-2 text-[0.75rem] text-muted-foreground">
+        {card.priority !== "medium" && (
+          <span className={cn("inline-flex h-4 items-center rounded-sm border px-1 text-[10px] font-medium", PRIORITY_STYLE[card.priority])}>
+            {PRIORITY_LABEL[card.priority]}
+          </span>
+        )}
         {card.phaseName && (
           <span title={card.phaseName} className="type-data inline-block h-4 max-w-full truncate rounded-sm border border-border px-1 text-[10px] leading-[14px]">
             {card.phaseName}
@@ -157,6 +164,7 @@ function SortableCard({
           phaseId: card.phaseId,
           assigneeId: card.assigneeId,
           dueAt: card.dueAt,
+          priority: card.priority,
         }}
         trigger={
           <button

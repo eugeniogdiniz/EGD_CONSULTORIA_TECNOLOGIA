@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { organizations, portalRequest, portalRequestMessage, project, users } from "@/db/schema";
+import { crmCompany, organizations, portalRequest, portalRequestMessage, project, projectDeliverable, users } from "@/db/schema";
 import type { AdminContext, PortalContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import type { RequestStatus } from "./status";
@@ -11,6 +11,7 @@ const listColumns = {
   id: portalRequest.id,
   title: portalRequest.title,
   status: portalRequest.status,
+  priority: portalRequest.priority,
   createdAt: portalRequest.createdAt,
   updatedAt: portalRequest.updatedAt,
   projectId: portalRequest.projectId,
@@ -38,6 +39,10 @@ const detailColumns = {
   organizationId: portalRequest.organizationId,
   organizationName: organizations.name,
   authorEmail: users.email,
+  deliverableId: portalRequest.deliverableId,
+  deliverableTitle: projectDeliverable.title,
+  deliverableProjectId: projectDeliverable.projectId,
+  deliverableVisible: projectDeliverable.visibleToClient,
 };
 
 export async function getPortalRequest(ctx: PortalContext, id: string) {
@@ -48,9 +53,13 @@ export async function getPortalRequest(ctx: PortalContext, id: string) {
     .innerJoin(users, eq(portalRequest.createdBy, users.id))
     .innerJoin(organizations, eq(portalRequest.organizationId, organizations.id))
     .leftJoin(project, eq(portalRequest.projectId, project.id))
+    .leftJoin(projectDeliverable, eq(portalRequest.deliverableId, projectDeliverable.id))
     .where(and(eq(portalRequest.id, id), eq(portalRequest.organizationId, ctx.organization.id)))
     .limit(1);
-  return row ?? null;
+  if (!row) return null;
+  // entrega interna não vaza para o cliente: só título e projeto quando ela foi compartilhada
+  if (!row.deliverableVisible) return { ...row, deliverableTitle: null, deliverableProjectId: null };
+  return row;
 }
 
 const messageColumns = {
@@ -95,6 +104,7 @@ export async function getRequestForAdmin(_ctx: AdminContext, id: string) {
     .innerJoin(users, eq(portalRequest.createdBy, users.id))
     .innerJoin(organizations, eq(portalRequest.organizationId, organizations.id))
     .leftJoin(project, eq(portalRequest.projectId, project.id))
+    .leftJoin(projectDeliverable, eq(portalRequest.deliverableId, projectDeliverable.id))
     .where(eq(portalRequest.id, id))
     .limit(1);
   return row ?? null;
@@ -114,4 +124,15 @@ export function listRequestMessagesForAdmin(_ctx: AdminContext, requestId: strin
 export async function countActiveRequests(): Promise<number> {
   const [r] = await db.execute<{ n: number }>(sql`select count(*)::int as n from portal_request where status <> 'resolved'`);
   return r.n;
+}
+
+/** Projetos da empresa vinculada à organização (destino possível da conversão de uma solicitação). */
+export function listOrgProjectsForAdmin(_ctx: AdminContext, organizationId: string) {
+  if (!isUuid(organizationId)) return Promise.resolve([]);
+  return db
+    .select({ id: project.id, title: project.title })
+    .from(project)
+    .innerJoin(crmCompany, eq(project.companyId, crmCompany.id))
+    .where(and(eq(crmCompany.linkedOrganizationId, organizationId), sql`${project.archivedAt} is null`))
+    .orderBy(asc(project.title));
 }

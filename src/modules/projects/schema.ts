@@ -33,6 +33,9 @@ export const projectDeliverableStatus = pgEnum("project_deliverable_status", [
   "blocked",
 ]);
 
+/** Prioridade de trabalho, compartilhada por entregas e solicitações. */
+export const workPriority = pgEnum("work_priority", ["urgent", "high", "medium", "low"]);
+
 export const project = pgTable(
   "project",
   {
@@ -134,6 +137,7 @@ export const projectDeliverable = pgTable(
     title: text().notNull(),
     description: text(),
     status: projectDeliverableStatus().default("todo").notNull(),
+    priority: workPriority().default("medium").notNull(),
     // ordem dentro da coluna do kanban; menor = mais em cima
     position: integer().default(0).notNull(),
     assigneeId: uuid().references(() => users.id, { onDelete: "set null" }),
@@ -153,6 +157,7 @@ export const projectDeliverable = pgTable(
   },
   (t) => [
     index("project_deliverable_project_idx").on(t.projectId),
+    index("project_deliverable_priority_idx").on(t.priority),
     index("project_deliverable_status_position_idx").on(t.projectId, t.status, t.position),
     index("project_deliverable_due_idx")
       .on(t.dueAt)

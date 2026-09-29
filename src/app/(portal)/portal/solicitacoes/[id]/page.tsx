@@ -50,6 +50,15 @@ export default async function PortalSolicitacaoPage({ params }: PageProps<"/port
           ) : undefined
         }
       />
+      {req.deliverableId && req.deliverableTitle && req.deliverableProjectId && (
+        <div className="rounded-r-md border-l-[3px] border-link bg-link-soft px-4 py-3 text-sm">
+          Sua solicitação virou a entrega{" "}
+          <Link href={`/portal/projetos/${req.deliverableProjectId}/entregas/${req.deliverableId}`} className="font-medium text-link underline decoration-1 underline-offset-[3px]">
+            {req.deliverableTitle}
+          </Link>
+          . Acompanhe o andamento por lá.
+        </div>
+      )}
       <Block title="Conversa">
         <div className="grid gap-6">
           <RequestThread

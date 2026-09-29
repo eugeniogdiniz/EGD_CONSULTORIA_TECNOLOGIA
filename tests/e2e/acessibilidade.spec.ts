@@ -32,7 +32,7 @@ test("admin sem violações de acessibilidade", async ({ page }) => {
   await loginAs(page, ADMIN.email, ADMIN.password);
   await check(page, [
     "/admin", "/admin/crm/funil", "/admin/crm/empresas", "/admin/leads", "/admin/organizacoes", "/admin/arquivos",
-    "/admin/auditoria", "/admin/cases", "/admin/api", "/admin/solicitacoes", "/admin/conta", "/admin/projetos",
+    "/admin/auditoria", "/admin/cases", "/admin/api", "/admin/solicitacoes", "/admin/demandas", "/admin/demandas?vista=quadro", "/admin/conta", "/admin/projetos",
     `/admin/projetos/${p.id}`, `/admin/projetos/${p.id}/kanban`, `/admin/projetos/${p.id}/gantt`,
     `/admin/projetos/${p.id}/calendario`, `/admin/projetos/${p.id}/financeiro`,
     `/admin/projetos/${p.id}/entregas/${p.visible.id}`, "/admin/projetos/templates",

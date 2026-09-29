@@ -36,6 +36,7 @@ import {
   manualTimeSchema,
   milestoneSchema,
   phaseSchema,
+  prioritySchema,
   projectSchema,
   reorderDeliverableSchema,
   startTimerSchema,
@@ -560,6 +561,7 @@ export async function createDeliverable(
       position: countRow?.n ?? 0,
       assigneeId: data.assigneeId,
       dueAt: data.dueAt,
+      priority: data.priority,
       ownerId: ctx.user.id,
     })
     .returning({ id: projectDeliverable.id });
@@ -591,6 +593,7 @@ export async function updateDeliverable(
       phaseId: data.phaseId,
       assigneeId: data.assigneeId,
       dueAt: data.dueAt,
+      priority: data.priority,
     })
     .where(eq(projectDeliverable.id, id))
     .returning({ id: projectDeliverable.id });
@@ -662,6 +665,31 @@ export async function assignDeliverable(
     entityType: "project_deliverable",
     entityId: id,
     metadata: { to_user_id: userId },
+  });
+  return ok(null);
+}
+
+export async function setDeliverablePriority(
+  ctx: AdminContext,
+  id: string,
+  priority: string,
+): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Entrega não encontrada.");
+  const parsed = prioritySchema.safeParse(priority);
+  if (!parsed.success) return fail("Prioridade inválida.");
+  const existing = await db.query.projectDeliverable.findFirst({
+    where: eq(projectDeliverable.id, id),
+    columns: { priority: true },
+  });
+  if (!existing) return fail("Entrega não encontrada.");
+  if (existing.priority === parsed.data) return ok(null);
+  await db.update(projectDeliverable).set({ priority: parsed.data }).where(eq(projectDeliverable.id, id));
+  await audit({
+    actorId: ctx.user.id,
+    action: "project.deliverable.priority_changed",
+    entityType: "project_deliverable",
+    entityId: id,
+    metadata: { from: existing.priority, to: parsed.data },
   });
   return ok(null);
 }

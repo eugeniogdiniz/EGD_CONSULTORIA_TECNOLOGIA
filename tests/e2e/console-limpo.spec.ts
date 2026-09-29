@@ -37,6 +37,8 @@ test("telas do admin não geram erro nem aviso no console", async ({ page }) => 
     "/admin/cases",
     "/admin/api",
     "/admin/solicitacoes",
+    "/admin/demandas",
+    "/admin/demandas?vista=quadro",
     "/admin/conta",
   ];
   for (const url of urls) {

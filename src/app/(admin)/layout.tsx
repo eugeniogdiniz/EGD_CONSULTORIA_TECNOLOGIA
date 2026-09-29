@@ -22,6 +22,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
       ],
     },
     { href: "/admin/organizacoes", label: "Organizações" },
+    { href: "/admin/demandas", label: "Demandas" },
     { href: "/admin/projetos", label: "Projetos" },
     { href: "/admin/projetos/templates", label: "Templates" },
     { href: "/admin/cases", label: "Cases" },

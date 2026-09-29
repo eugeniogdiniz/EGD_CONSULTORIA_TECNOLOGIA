@@ -16,6 +16,7 @@ export async function getAdminOverview(_ctx: AdminContext, today = todayInSaoPau
     due_this_week: number;
     published_cases: number;
     active_requests: number;
+    urgent_demands: number;
   }>(sql`
     select
       (select count(*)::int from crm_opportunity where stage not in ('won', 'lost')) as open_opportunities,
@@ -28,7 +29,10 @@ export async function getAdminOverview(_ctx: AdminContext, today = todayInSaoPau
          where d.status <> 'done' and d.due_at between ${today}::date and (${today}::date + 7)
            and p.archived_at is null and p.status in ('planning', 'active')) as due_this_week,
       (select count(*)::int from site_case where published) as published_cases,
-      (select count(*)::int from portal_request where status <> 'resolved') as active_requests
+      (select count(*)::int from portal_request where status <> 'resolved') as active_requests,
+      (select count(*)::int from project_deliverable d join project p on p.id = d.project_id
+         where d.priority = 'urgent' and d.status <> 'done'
+           and p.archived_at is null and p.status in ('planning', 'active', 'on_hold')) as urgent_demands
   `);
   return {
     openOpportunities: row.open_opportunities,
@@ -38,6 +42,7 @@ export async function getAdminOverview(_ctx: AdminContext, today = todayInSaoPau
     dueThisWeek: row.due_this_week,
     publishedCases: row.published_cases,
     activeRequests: row.active_requests,
+    urgentDemands: row.urgent_demands,
   };
 }
 

@@ -40,6 +40,7 @@ export default async function KanbanPage({ params, searchParams }: PageProps<"/a
       title: d.title,
       description: d.description,
       status: d.status,
+      priority: d.priority,
       position: d.position,
       phaseId: d.phaseId,
       phaseName: d.phaseName,

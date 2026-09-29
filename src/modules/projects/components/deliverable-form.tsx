@@ -15,6 +15,7 @@ import {
   updateDeliverableForm,
 } from "@/modules/projects/form-actions";
 import type { ActionResult } from "@/lib/action-result";
+import { PRIORITIES, PRIORITY_LABEL } from "@/modules/projects/priority";
 
 type Phase = { id: string; name: string };
 type Assignee = { id: string; name: string };
@@ -26,6 +27,7 @@ type Deliverable = {
   phaseId: string | null;
   assigneeId: string | null;
   dueAt: string | null;
+  priority: "urgent" | "high" | "medium" | "low";
 };
 
 const STATUSES = [
@@ -114,9 +116,19 @@ function Fields({
           </select>
         </div>
       </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="d-due">Prazo <span className="font-normal text-faint">opcional</span></Label>
-        <Input id="d-due" name="dueAt" type="date" defaultValue={deliverable?.dueAt ?? ""} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-1.5">
+          <Label htmlFor="d-priority">Prioridade</Label>
+          <select id="d-priority" name="priority" defaultValue={deliverable?.priority ?? "medium"} className="h-10 rounded-sm border border-input bg-card px-3 text-sm">
+            {PRIORITIES.map((p) => (
+              <option key={p} value={p}>{PRIORITY_LABEL[p]}</option>
+            ))}
+          </select>
+        </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor="d-due">Prazo <span className="font-normal text-faint">opcional</span></Label>
+          <Input id="d-due" name="dueAt" type="date" defaultValue={deliverable?.dueAt ?? ""} />
+        </div>
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="d-desc">Descrição <span className="font-normal text-faint">opcional</span></Label>

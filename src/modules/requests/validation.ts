@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PRIORITIES } from "@/modules/projects/priority";
 
 const optionalUuid = z
   .union([z.uuid(), z.literal("").transform(() => null), z.null()])
@@ -17,3 +18,22 @@ export const messageSchema = z.object({
   body: z.string().trim().min(1, "Mensagem vazia.").max(4000, "Máximo 4000 caracteres"),
 });
 export type MessageInput = z.input<typeof messageSchema>;
+
+const optionalIsoDate = z
+  .string()
+  .optional()
+  .transform((v) => (v ?? "").trim())
+  .refine((v) => v === "" || /^\d{4}-\d{2}-\d{2}$/.test(v), "Data no formato AAAA-MM-DD")
+  .transform((v) => (v === "" ? null : v));
+
+export const convertRequestSchema = z.object({
+  projectId: z.uuid("Escolha o projeto."),
+  assigneeId: optionalUuid,
+  dueAt: optionalIsoDate,
+  priority: z.enum(PRIORITIES),
+  visibleToClient: z
+    .union([z.literal("on"), z.boolean()])
+    .optional()
+    .transform((v) => v === true || v === "on"),
+});
+export type ConvertRequestInput = z.input<typeof convertRequestSchema>;
