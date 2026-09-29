@@ -14,7 +14,7 @@ export default async function OrganizacoesPage() {
   return (
     <>
       <PageHeader title="Organizações" actions={<Button size="sm" render={<Link href="/admin/organizacoes/nova" />}>Nova organização</Button>} />
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+      <div tabIndex={0} role="region" aria-label="Tabela, role horizontalmente se necessário" className="overflow-x-auto rounded-lg border border-border bg-card">
         {orgs.length === 0 ? (
           <EmptyState
             title="Nenhuma organização ainda."

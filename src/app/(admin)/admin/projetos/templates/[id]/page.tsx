@@ -74,7 +74,7 @@ export default async function TemplateDetailPage({ params }: PageProps<"/admin/p
           <section key={g.phase.id} className="rounded-md border border-border bg-card p-5">
             <div className="flex items-baseline gap-3 border-b border-border pb-3">
               <span className="type-data text-sm text-faint">{String(g.index).padStart(2, "0")}</span>
-              <h3 className="text-base font-semibold">{g.phase.name}</h3>
+              <h2 className="text-base font-semibold">{g.phase.name}</h2>
               {g.phase.notes && <span className="text-xs text-faint">{g.phase.notes}</span>}
             </div>
             {g.deliverables.length === 0 ? (
@@ -100,7 +100,7 @@ export default async function TemplateDetailPage({ params }: PageProps<"/admin/p
           <section className="rounded-md border border-border bg-card p-5">
             <div className="flex items-baseline gap-3 border-b border-border pb-3">
               <span className="type-data text-sm text-faint">—</span>
-              <h3 className="text-base font-semibold">Sem fase</h3>
+              <h2 className="text-base font-semibold">Sem fase</h2>
             </div>
             <ul className="grid gap-2 pt-3">
               {noPhaseDels.map((d) => (

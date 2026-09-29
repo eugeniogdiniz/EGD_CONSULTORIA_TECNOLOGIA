@@ -49,7 +49,7 @@ export default async function PortalProjetosPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-base font-semibold">{p.title}</h3>
+                    <h2 className="text-base font-semibold">{p.title}</h2>
                     <div className="type-micro mt-0.5 text-muted-foreground">{p.companyName}</div>
                   </div>
                   <span

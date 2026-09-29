@@ -145,7 +145,7 @@ export default async function ProjetoDetalhePage({ params }: PageProps<"/admin/p
                   <li key={phase.id} className="rounded-md border border-border bg-card p-3">
                     <div className="flex items-center gap-3">
                       <span className="type-data text-faint">{String(i + 1).padStart(2, "0")}</span>
-                      <h4 className="text-sm font-semibold">{phase.name}</h4>
+                      <h3 className="text-sm font-semibold">{phase.name}</h3>
                       <div className="ml-auto flex items-center gap-1">
                         <form action={movePhaseForm} className="contents">
                           <input type="hidden" name="id" value={phase.id} />

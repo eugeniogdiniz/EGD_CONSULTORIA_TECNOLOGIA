@@ -55,7 +55,7 @@ export function DependencyPicker({
   return (
     <div className="grid gap-4">
       <div>
-        <h4 className="mb-2 text-sm font-medium">Depende de</h4>
+        <h3 className="mb-2 text-sm font-medium">Depende de</h3>
         {predecessors.length === 0 ? (
           <p className="text-xs text-muted-foreground">Sem dependências.</p>
         ) : (
@@ -84,6 +84,7 @@ export function DependencyPicker({
           <input type="hidden" name="successorId" value={deliverableId} />
           <select
             name="predecessorId"
+            aria-label="Entrega predecessora"
             value={pick}
             onChange={(e) => setPick(e.target.value)}
             className="h-9 rounded-sm border border-input bg-card px-2 text-sm"
@@ -104,7 +105,7 @@ export function DependencyPicker({
 
       {successors.length > 0 && (
         <div>
-          <h4 className="mb-2 text-sm font-medium">É pré-requisito de</h4>
+          <h3 className="mb-2 text-sm font-medium">É pré-requisito de</h3>
           <ul className="grid gap-1.5">
             {successors.map((s) => (
               <li key={s.id} className="flex items-center gap-3 rounded-sm border border-dashed border-border bg-subtle px-3 py-2 text-sm">

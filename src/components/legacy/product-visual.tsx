@@ -7,7 +7,7 @@ export function Visual({ kind }: { kind: ProductVisual }) {
       <>
         <div className="kpi-grid">
           <div className="kpi"><div className="lbl">Vigentes</div><div className="val">428</div></div>
-          <div className="kpi"><div className="lbl">A vencer (30d)</div><div className="val" style={{ color: "oklch(0.80 0.15 80)" }}>17</div></div>
+          <div className="kpi"><div className="lbl">A vencer (30d)</div><div className="val" style={{ color: "var(--warn)" }}>17</div></div>
           <div className="kpi"><div className="lbl">Valor anual</div><div className="val">R$ 84<small>M</small></div></div>
         </div>
         <div className="mock-window" style={{ marginTop: 14 }}>

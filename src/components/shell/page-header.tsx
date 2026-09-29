@@ -28,7 +28,7 @@ export function Block({ title, aside, children, padded = true }: { title: ReactN
 export function EmptyState({ title, text, action }: { title: string; text: string; action?: ReactNode }) {
   return (
     <div className="grid max-w-[32rem] gap-2 px-6 py-12">
-      <h3 className="text-base font-semibold">{title}</h3>
+      <h2 className="text-base font-semibold">{title}</h2>
       <p className="text-sm text-muted-foreground">{text}</p>
       {action && <div className="mt-2">{action}</div>}
     </div>

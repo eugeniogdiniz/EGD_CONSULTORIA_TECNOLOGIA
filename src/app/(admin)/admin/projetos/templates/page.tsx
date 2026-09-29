@@ -35,11 +35,11 @@ export default async function TemplatesListPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {templates.map((t) => (
             <article key={t.id} className="flex flex-col gap-3 rounded-md border border-border bg-card p-5">
-              <h3 className="text-base font-semibold">
+              <h2 className="text-base font-semibold">
                 <Link href={`/admin/projetos/templates/${t.id}`} className="hover:text-link">
                   {t.name}
                 </Link>
-              </h3>
+              </h2>
               {t.description && (
                 <p className="text-sm leading-relaxed text-muted-foreground line-clamp-3">
                   {t.description}

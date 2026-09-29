@@ -90,7 +90,7 @@ export default async function ProjetosPage({ searchParams }: PageProps<"/admin/p
         <button type="submit" className="h-10 rounded-sm border border-input px-3 text-sm hover:bg-muted">Filtrar</button>
       </form>
 
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+      <div tabIndex={0} role="region" aria-label="Tabela, role horizontalmente se necessário" className="overflow-x-auto rounded-lg border border-border bg-card">
         {rows.length === 0 ? (
           <EmptyState
             title={search ? "Nenhum projeto bate com essa busca." : "Nenhum projeto ainda."}

@@ -29,22 +29,22 @@ export default function ContatoPage() {
 
             <div className="contact-info reveal">
               <div className="ci-block">
-                <h4>E-mail</h4>
+                <h4 aria-level={2}>E-mail</h4>
                 <div className="v">{SITE.email}</div>
                 <div className="d">Resposta em até 48h úteis.</div>
               </div>
               <div className="ci-block">
-                <h4>Atendimento</h4>
+                <h4 aria-level={2}>Atendimento</h4>
                 <div className="v">Seg–Sex · 9h às 18h</div>
                 <div className="d">Horário de Brasília (BRT).</div>
               </div>
               <div className="ci-block">
-                <h4>Endereço</h4>
+                <h4 aria-level={2}>Endereço</h4>
                 <div className="v">São Paulo · BR</div>
                 <div className="d">Atuamos remoto em todo o Brasil. Presencial sob demanda.</div>
               </div>
               <div className="ci-block">
-                <h4>Portal do cliente</h4>
+                <h4 aria-level={2}>Portal do cliente</h4>
                 <div className="v">egdsystem.com.br/portal</div>
                 <div className="d">Acompanhamento de projetos e documentos para clientes com acesso.</div>
                 <Link href="/entrar" className="btn btn-ghost btn-sm" style={{ marginTop: 14 }}>Entrar no portal</Link>
