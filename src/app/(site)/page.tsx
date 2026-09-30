@@ -5,6 +5,7 @@ import { ArrowUR } from "@/components/legacy/ui";
 import { SVC, PRODUCTS } from "@/content/legacy-home";
 import { organizationJsonLd, pageMeta } from "@/content/seo";
 import { getSiteCases } from "@/modules/cases/site";
+import { SHOW_CASES } from "@/content/site";
 import { BrandFilm } from "@/components/site/brand-film";
 import { OperationFlow } from "@/components/site/operation-flow";
 
@@ -18,7 +19,8 @@ export const metadata: Metadata = pageMeta({
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const { totals: TOTAIS } = await getSiteCases();
+  // Com os cases ocultos, a faixa de números sai e o banco nem é consultado.
+  const TOTAIS = SHOW_CASES ? (await getSiteCases()).totals : null;
   return (
     <>
       {/* "<" escapado: o JSON vai dentro de uma tag <script> */}
@@ -36,6 +38,7 @@ export default async function HomePage() {
           <Image src="/brand/images/territorio-azul.webp" alt="Maquete conceitual de infraestrutura, edifícios e energia conectados por um percurso azul." width={1536} height={1024} sizes="(max-width: 768px) 100vw, 1180px" priority />
           <figcaption><span>Do campo à decisão.</span><span>Engenharia + dados + sistemas</span></figcaption>
         </figure>
+        {TOTAIS && (
         <div className="brand-proof">
           <p>Experiência que<br /><strong>se traduz em operação.</strong></p>
           <div><strong>{TOTAIS.clientes}</strong><span>clientes no portfólio</span></div>
@@ -43,6 +46,7 @@ export default async function HomePage() {
           <div><strong>{TOTAIS.automacoes}</strong><span>automações entregues</span></div>
           <Link href="/cases">Conheça os cases <ArrowUR /></Link>
         </div>
+        )}
       </section>
 
       <section className="brand-section container">

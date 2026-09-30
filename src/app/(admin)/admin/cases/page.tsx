@@ -19,7 +19,7 @@ export default async function AdminCasesPage() {
     <>
       <PageHeader
         title="Cases"
-        meta={`${cases.length} cases, ${published} publicados. O site (/cases, início e sobre) lê esta lista.`}
+        meta={`${cases.length} cases, ${published} publicados. Os cases estão ocultos no site público por enquanto; a API continua lendo esta lista.`}
         actions={
           <Button size="sm" render={<Link href="/admin/cases/novo" />}>
             Novo case

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SHOW_CASES } from "@/content/site";
 import { pageMeta } from "@/content/seo";
 import Link from "next/link";
 import { Arrow } from "@/components/legacy/ui";
@@ -45,7 +46,7 @@ export default function ProdutosPage() {
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
                 <Link href="/contato" className="btn btn-primary btn-sm">Solicitar demo <Arrow size={13} /></Link>
-                <Link href="/cases" className="btn btn-ghost btn-sm">Ver caso real</Link>
+                {SHOW_CASES && <Link href="/cases" className="btn btn-ghost btn-sm">Ver caso real</Link>}
               </div>
             </div>
             <div className="product-visual">

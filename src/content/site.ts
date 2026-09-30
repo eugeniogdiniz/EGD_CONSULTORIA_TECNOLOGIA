@@ -1,3 +1,14 @@
+/**
+ * Cases fora do site público até o dono decidir o conteúdo (pedido de 2026-09-30).
+ * O cadastro no admin e a API `/api/v1/cases` continuam funcionando.
+ * Para voltar a mostrar, troque para `true`.
+ */
+export const SHOW_CASES = false;
+
+/** Tira `/cases` de uma lista de links quando os cases estão ocultos. */
+export const withoutHiddenCases = <T extends { href: string }>(links: T[]): T[] =>
+  SHOW_CASES ? links : links.filter((l) => l.href !== "/cases");
+
 export const SITE = {
   name: "EGD Consultoria em Tecnologia",
   shortName: "EGD",
@@ -14,14 +25,14 @@ export const SITE = {
 
 export type NavLink = { href: string; label: string };
 
-export const NAV_LINKS: NavLink[] = [
+export const NAV_LINKS: NavLink[] = withoutHiddenCases([
   { href: "/", label: "Início" },
   { href: "/servicos", label: "Serviços" },
   { href: "/produtos", label: "Produtos" },
   { href: "/cases", label: "Cases" },
   { href: "/sobre", label: "Sobre" },
   { href: "/contato", label: "Contato" },
-];
+]);
 
 export const FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
   {
@@ -39,7 +50,7 @@ export const FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
     title: "Empresa",
     links: [
       { href: "/produtos", label: "Produtos" },
-      { href: "/cases", label: "Cases" },
+      ...(SHOW_CASES ? [{ href: "/cases", label: "Cases" }] : []),
       { href: "/sobre", label: "Sobre" },
       { href: "/contato", label: "Contato" },
       { href: "/entrar", label: "Entrar no portal" },

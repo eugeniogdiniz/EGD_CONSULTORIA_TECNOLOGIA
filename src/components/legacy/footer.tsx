@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { LogoMark } from "./ui";
-import { SITE } from "@/content/site";
+import { SHOW_CASES, SITE } from "@/content/site";
 import { BrandWordmark } from "@/components/site/brand-mark";
 
 export function Footer() {
@@ -36,7 +36,7 @@ export function Footer() {
             <ul>
               <li><Link href="/sobre">Sobre</Link></li>
               <li><Link href="/produtos">Produtos</Link></li>
-              <li><Link href="/cases">Cases</Link></li>
+              {SHOW_CASES && <li><Link href="/cases">Cases</Link></li>}
               <li><Link href="/contato">Contato</Link></li>
               <li><Link href="/entrar">Portal do cliente</Link></li>
             </ul>

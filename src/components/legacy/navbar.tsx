@@ -5,15 +5,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Arrow, LogoMark } from "./ui";
 import { BrandWordmark } from "@/components/site/brand-mark";
+import { withoutHiddenCases } from "@/content/site";
 
-export const NAV_LINKS = [
+export const NAV_LINKS = withoutHiddenCases([
   { href: "/", label: "Início" },
   { href: "/servicos", label: "Serviços" },
   { href: "/produtos", label: "Produtos" },
   { href: "/cases", label: "Cases" },
   { href: "/sobre", label: "Sobre" },
   { href: "/contato", label: "Contato" },
-];
+]);
 
 export function Navbar() {
   const pathname = usePathname();

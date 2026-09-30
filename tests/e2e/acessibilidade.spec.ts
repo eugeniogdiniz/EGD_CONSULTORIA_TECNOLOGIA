@@ -22,7 +22,7 @@ async function check(page: Page, urls: string[]) {
 
 test("site e login sem violações de acessibilidade", async ({ page }) => {
   test.setTimeout(120_000);
-  await check(page, ["/", "/servicos", "/produtos", "/sobre", "/cases", "/contato", "/entrar"]);
+  await check(page, ["/", "/servicos", "/produtos", "/sobre", "/contato", "/entrar"]);
 });
 
 test("admin sem violações de acessibilidade", async ({ page }) => {
