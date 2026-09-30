@@ -1,7 +1,7 @@
 # EGD — Fases 10 a 12: demandas, priorização, atas de reunião e relatórios
 
 **Data:** 2026-09-29
-**Status:** Fases 10 e 11 implementadas; Fase 12 a seguir
+**Status:** Fases 10, 11 e 12 implementadas (Fase 12: `docs/superpowers/specs/2026-09-30-fase-12-relatorios-design.md`)
 **Por quê:** o sistema já tem projetos, fases, marcos, entregas em kanban, horas, financeiro e solicitações de clientes, mas não permite **priorizar**, não tem uma **visão única de demandas** entre projetos, não registra **atas de reunião** e não gera **relatórios**. Prioridade do dono: desenvolver a gestão de demandas, kanbans, projetos, priorização, relatórios e atas.
 
 ## Fase 10 — Demandas e priorização

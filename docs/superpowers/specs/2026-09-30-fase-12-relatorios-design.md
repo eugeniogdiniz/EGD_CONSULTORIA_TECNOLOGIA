@@ -1,7 +1,7 @@
 # EGD — Fase 12: relatórios
 
 **Data:** 2026-09-30
-**Status:** aprovado em conversa; aguardando revisão do spec e dos mockups
+**Status:** aprovado (spec e mockups em 2026-09-30); implementado
 **Base:** `docs/superpowers/specs/2026-09-29-fases-10-12-gestao-design.md` (seção "Fase 12"). Parte da branch `fase-11-atas`, porque o relatório de status lista as atas.
 **Mockups:** `docs/mockups/admin-projeto-relatorio.html`, `admin-relatorios-portfolio.html`, `admin-relatorios-semanal.html`, `portal-projeto-relatorio.html` (estilos em `relatorio.css`; capturas e PDFs em `docs/mockups/screenshots/`).
 
