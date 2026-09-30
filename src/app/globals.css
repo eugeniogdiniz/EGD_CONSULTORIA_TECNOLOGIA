@@ -218,6 +218,7 @@
 /* Relatórios (Fase 12): folha A4. O shell já some em `print`. */
 @media print {
   @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; }
   .report-sheet { border: 0 !important; }
   .report-sheet .report-head,
   .report-sheet section { padding-left: 0 !important; padding-right: 0 !important; }

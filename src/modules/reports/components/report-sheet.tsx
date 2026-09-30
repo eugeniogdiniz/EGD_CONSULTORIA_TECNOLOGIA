@@ -73,7 +73,7 @@ export function Stamp({ cells }: { cells: { k: string; v: string }[] }) {
   return (
     <footer className="report-stamp mt-auto grid grid-cols-2 border-t border-strong sm:grid-cols-[1.6fr_1.6fr_1fr_0.8fr_1.4fr]">
       {cells.map((c) => (
-        <div key={c.k} className="min-w-0 border-r border-b border-border px-3 py-2.5 last:border-r-0 sm:border-b-0">
+        <div key={c.k} className="min-w-0 border-r border-b border-border px-3 py-2.5 last:col-span-2 last:border-r-0 sm:border-b-0 sm:last:col-span-1">
           <div className="text-[0.8125rem] font-medium text-faint">{c.k}</div>
           <div className="mt-0.5 font-mono text-[0.8125rem] leading-snug">{c.v}</div>
         </div>

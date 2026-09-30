@@ -25,6 +25,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
     { href: "/admin/demandas", label: "Demandas" },
     { href: "/admin/projetos", label: "Projetos" },
     { href: "/admin/atas", label: "Atas" },
+    { href: "/admin/relatorios", label: "Relatórios" },
     { href: "/admin/projetos/templates", label: "Templates" },
     { href: "/admin/cases", label: "Cases" },
     { href: "/admin/solicitacoes", label: "Solicitações", badge: solicitacoes },
