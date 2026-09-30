@@ -4,6 +4,7 @@
  * o mesmo resultado, então os números nunca divergem.
  */
 import { isOverdue, priorityRank, PRIORITY_LABEL, type Priority } from "@/modules/projects/priority";
+import { portalStatusLabel } from "@/modules/portal-projects/scope";
 import { csvCents, csvDecimal, type CsvCell } from "./csv";
 import { addDays, dateInSaoPaulo, daysBetween, formatBr, isoWeekLabel } from "./dates";
 import { ADMIN_STATUS_LABEL, PROJECT_STATUS_ADMIN_LABEL } from "./labels";
@@ -381,4 +382,77 @@ export function weeklyCsv(report: WeeklyReport) {
     }
   }
   return { headers: ["Projeto", "Cliente", "Tipo", "Grupo", "Título", "Data", "Dias de atraso"], rows };
+}
+
+// ── 4. versão do cliente ────────────────────────────────────────────────────
+
+/**
+ * Entrada já filtrada pelo portal: só entregas visíveis e atas compartilhadas.
+ * O tipo não tem campos de dinheiro, prioridade nem responsável por entrega,
+ * então nada disso pode vazar para a página ou o CSV do cliente.
+ */
+export type ClientReportInput = {
+  project: { title: string; companyName: string; startedAt: string | null; endedAt: string | null; ownerName: string; showHoursToClient: boolean };
+  phases: ReportPhase[];
+  milestones: ReportMilestone[];
+  deliverables: { id: string; title: string; status: DeliverableStatus; dueAt: string | null; completedAt: Date | null; phaseId: string | null }[];
+  meetings: { id: string; title: string; heldAt: Date; decisions: string | null }[];
+  /** Todos os lançamentos encerrados do projeto, somados por fase. */
+  minutesByPhase: { phaseId: string | null; minutes: number }[];
+};
+
+export function buildClientReport(input: ClientReportInput, today: string) {
+  const ds = input.deliverables;
+  const done = ds.filter((x) => x.status === "done").length;
+  const phases = phaseProgress(input.phases, ds);
+  const phaseName = new Map(input.phases.map((p) => [p.id, p.name]));
+
+  const open = ds
+    .filter((x) => x.status !== "done")
+    .sort(byDueThenTitle)
+    .map((x) => ({
+      id: x.id,
+      title: x.title,
+      phaseName: x.phaseId ? (phaseName.get(x.phaseId) ?? null) : null,
+      statusLabel: portalStatusLabel(x.status),
+      blocked: x.status === "blocked",
+      dueAt: x.dueAt,
+      late: isOverdue(x, today),
+    }));
+
+  let hours: { totalMinutes: number; byPhase: { name: string; minutes: number }[] } | null = null;
+  if (input.project.showHoursToClient) {
+    const byPhase = [...input.phases]
+      .sort((a, b) => a.position - b.position)
+      .map((p) => ({ name: p.name, minutes: input.minutesByPhase.filter((m) => m.phaseId === p.id).reduce((s, m) => s + m.minutes, 0) }))
+      .filter((p) => p.minutes > 0);
+    const known = new Set(input.phases.map((p) => p.id));
+    const loose = input.minutesByPhase.filter((m) => m.phaseId === null || !known.has(m.phaseId)).reduce((s, m) => s + m.minutes, 0);
+    if (loose > 0) byPhase.push({ name: "Sem fase", minutes: loose });
+    hours = { totalMinutes: input.minutesByPhase.reduce((s, m) => s + m.minutes, 0), byPhase };
+  }
+
+  return {
+    progress: { total: ds.length, done, percent: ds.length === 0 ? null : pct(done, ds.length) },
+    phases,
+    milestones: milestoneLines(input.milestones, input.phases, today),
+    open,
+    hours,
+    meetings: [...input.meetings].sort((a, b) => b.heldAt.getTime() - a.heldAt.getTime()),
+  };
+}
+export type ClientReport = ReturnType<typeof buildClientReport>;
+
+export function clientReportCsv(input: ClientReportInput) {
+  const phases = phaseProgress(input.phases, input.deliverables);
+  return {
+    headers: ["Fase", "Entrega", "Status", "Prazo", "Concluída em"],
+    rows: inPhaseOrder(input.deliverables, phases).map(({ item: x, phaseName }): CsvCell[] => [
+      phaseName,
+      x.title,
+      portalStatusLabel(x.status),
+      formatBr(x.dueAt),
+      x.completedAt ? formatBr(dateInSaoPaulo(x.completedAt)) : "",
+    ]),
+  };
 }

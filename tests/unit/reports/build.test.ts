@@ -1,12 +1,15 @@
 import { describe, it, expect } from "vitest";
 import {
   budgetBand,
+  buildClientReport,
   buildPortfolio,
   buildProjectStatus,
   buildWeekly,
+  clientReportCsv,
   portfolioCsv,
   projectStatusCsv,
   weeklyCsv,
+  type ClientReportInput,
   type PortfolioProjectInput,
   type ProjectStatusInput,
   type ReportDeliverable,
@@ -197,5 +200,59 @@ describe("semanal", () => {
     const w = buildWeekly([proj({})], MON, TODAY);
     expect(w.projects).toEqual([]);
     expect(w.doneCount).toBe(0);
+  });
+});
+
+const clientBase = (over: Partial<ClientReportInput> = {}): ClientReportInput => ({
+  project: { title: "Laudo", companyName: "Vale Norte", startedAt: "2026-09-01", endedAt: null, ownerName: "Eugênio", showHoursToClient: false },
+  phases: [{ id: "f1", name: "Levantamento", position: 0, startedAt: null, endedAt: null }],
+  milestones: [],
+  deliverables: [
+    { id: "1", title: "Inventário", status: "blocked", dueAt: "2026-09-22", completedAt: null, phaseId: "f1" },
+    { id: "2", title: "Relatório", status: "done", dueAt: "2026-09-10", completedAt: new Date("2026-09-10T12:00:00Z"), phaseId: "f1" },
+    { id: "3", title: "Sem prazo", status: "todo", dueAt: null, completedAt: null, phaseId: null },
+  ],
+  meetings: [],
+  minutesByPhase: [{ phaseId: null, minutes: 180 }, { phaseId: "f1", minutes: 1860 }],
+  ...over,
+});
+
+describe("relatório do cliente", () => {
+  it("sem nenhum campo de dinheiro, prioridade ou responsável", () => {
+    const r = buildClientReport(clientBase({ project: { ...clientBase().project, showHoursToClient: true } }), TODAY);
+    const json = JSON.stringify(r);
+    for (const k of ["Cents", "budget", "priority", "assignee", "cost"]) expect(json).not.toContain(k);
+  });
+
+  it("em aberto por prazo: bloqueada aparece como Em espera e atrasada é marcada", () => {
+    const r = buildClientReport(clientBase(), TODAY);
+    expect(r.open).toEqual([
+      { id: "1", title: "Inventário", phaseName: "Levantamento", statusLabel: "Em espera", blocked: true, dueAt: "2026-09-22", late: true },
+      { id: "3", title: "Sem prazo", phaseName: null, statusLabel: "A fazer", blocked: false, dueAt: null, late: false },
+    ]);
+    expect(r.progress).toEqual({ total: 3, done: 1, percent: 33 });
+    expect(r.phases.map((p) => p.name)).toEqual(["Levantamento", "Sem fase"]);
+  });
+
+  it("horas só com a chave ligada, por fase e Sem fase no fim", () => {
+    expect(buildClientReport(clientBase(), TODAY).hours).toBeNull();
+    const on = buildClientReport(clientBase({ project: { ...clientBase().project, showHoursToClient: true } }), TODAY);
+    expect(on.hours).toEqual({ totalMinutes: 2040, byPhase: [{ name: "Levantamento", minutes: 1860 }, { name: "Sem fase", minutes: 180 }] });
+  });
+
+  it("atas compartilhadas da mais recente para a mais antiga", () => {
+    const m = (id: string, at: string) => ({ id, title: id, heldAt: new Date(at), decisions: null });
+    const r = buildClientReport(clientBase({ meetings: [m("a", "2026-09-10"), m("b", "2026-09-24")] }), TODAY);
+    expect(r.meetings.map((x) => x.id)).toEqual(["b", "a"]);
+  });
+
+  it("CSV com cinco colunas, na ordem de fase e prazo", () => {
+    const { headers, rows } = clientReportCsv(clientBase());
+    expect(headers).toEqual(["Fase", "Entrega", "Status", "Prazo", "Concluída em"]);
+    expect(rows).toEqual([
+      ["Levantamento", "Relatório", "Concluída", "10/09/2026", "10/09/2026"],
+      ["Levantamento", "Inventário", "Em espera", "22/09/2026", ""],
+      ["Sem fase", "Sem prazo", "A fazer", "", ""],
+    ]);
   });
 });
