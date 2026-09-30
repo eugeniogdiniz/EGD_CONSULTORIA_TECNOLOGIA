@@ -12,6 +12,7 @@ export function ProjectTabs({ projectId }: { projectId: string }) {
     { href: `${base}/kanban`, label: "Kanban", match: (p: string) => p.startsWith(`${base}/kanban`) },
     { href: `${base}/gantt`, label: "Gantt", match: (p: string) => p.startsWith(`${base}/gantt`) },
     { href: `${base}/calendario`, label: "Calendário", match: (p: string) => p.startsWith(`${base}/calendario`) },
+    { href: `${base}/atas`, label: "Atas", match: (p: string) => p.startsWith(`${base}/atas`) },
     { href: `${base}/financeiro`, label: "Financeiro", match: (p: string) => p.startsWith(`${base}/financeiro`) },
   ];
   return (

@@ -36,6 +36,7 @@ test("admin sem violações de acessibilidade", async ({ page }) => {
     `/admin/projetos/${p.id}`, `/admin/projetos/${p.id}/kanban`, `/admin/projetos/${p.id}/gantt`,
     `/admin/projetos/${p.id}/calendario`, `/admin/projetos/${p.id}/financeiro`,
     `/admin/projetos/${p.id}/entregas/${p.visible.id}`, "/admin/projetos/templates",
+    `/admin/projetos/${p.id}/atas`, "/admin/atas", "/admin/atas/nova",
   ]);
 });
 
@@ -47,6 +48,6 @@ test("portal sem violações de acessibilidade", async ({ page }) => {
   await check(page, [
     "/portal", "/portal/projetos", `/portal/projetos/${p.id}`, `/portal/projetos/${p.id}/gantt`,
     `/portal/projetos/${p.id}/calendario`, `/portal/projetos/${p.id}/entregas/${p.visible.id}`,
-    "/portal/solicitacoes", "/portal/solicitacoes/nova", "/portal/conta",
+    "/portal/solicitacoes", "/portal/solicitacoes/nova", "/portal/atas", "/portal/conta",
   ]);
 });

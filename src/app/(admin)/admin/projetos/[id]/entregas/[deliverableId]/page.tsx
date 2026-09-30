@@ -15,6 +15,7 @@ import {
   listTimeEntries,
 } from "@/modules/projects/queries";
 import { deleteTimeEntryForm, setDeliverableVisibilityForm } from "@/modules/projects/form-actions";
+import { getDeliverableOrigin } from "@/modules/meetings/queries";
 import { PageHeader, Block } from "@/components/shell/page-header";
 import { PRIORITY_LABEL, PRIORITY_STYLE } from "@/modules/projects/priority";
 import { Button } from "@/components/ui/button";
@@ -69,7 +70,7 @@ export default async function DeliverableDetailPage({
   if (!row || row.deliverable.projectId !== id) notFound();
 
   const d = row.deliverable;
-  const [predecessors, successors, comments, timeEntries, openTimer, projectDeliverables, phases, rateCents] =
+  const [predecessors, successors, comments, timeEntries, openTimer, projectDeliverables, phases, rateCents, origin] =
     await Promise.all([
       listPredecessors(ctx, deliverableId),
       listSuccessors(ctx, deliverableId),
@@ -79,6 +80,7 @@ export default async function DeliverableDetailPage({
       listDeliverables(ctx, id, { limit: 500 }),
       listPhases(ctx, id),
       getCurrentUserRateCents(ctx),
+      getDeliverableOrigin(ctx, deliverableId),
     ]);
 
   const existingComments = comments.filter((c) => !c.deletedAt).length;
@@ -118,6 +120,15 @@ export default async function DeliverableDetailPage({
               <>
                 <span className="text-faint"> · </span>
                 {row.assignee.name}
+              </>
+            )}
+            {origin && (
+              <>
+                <span className="text-faint"> · </span>
+                da ata{" "}
+                <Link href={`/admin/atas/${origin.id}`} className="text-link hover:underline">
+                  {origin.title}
+                </Link>
               </>
             )}
           </>
