@@ -103,13 +103,17 @@ export async function updateMeeting(ctx: AdminContext, id: string, input: Meetin
   if (!parsed.success) return fromZod(parsed.error);
   const data = parsed.data;
 
-  const current = await db.query.meeting.findFirst({ where: eq(meeting.id, id), columns: { id: true, companyId: true } });
+  const current = await db.query.meeting.findFirst({
+    where: eq(meeting.id, id),
+    columns: { id: true, companyId: true, sharedWithClient: true },
+  });
   if (!current) return fail("Ata não encontrada.");
   const owner = await resolveOwner(data.companyId, data.projectId);
   if (!owner.ok) return owner;
 
+  const companyChanged = owner.data.companyId !== current.companyId;
   // itens de ação são entregas de projetos desta empresa: não dá para levar a ata para outra
-  if (owner.data.companyId !== current.companyId) {
+  if (companyChanged) {
     const [items] = await db
       .select({ n: sql<number>`count(*)::int` })
       .from(meetingActionItem)
@@ -130,6 +134,8 @@ export async function updateMeeting(ctx: AdminContext, id: string, input: Meetin
         agenda: data.agenda,
         discussion: data.discussion,
         decisions: data.decisions,
+        // Compartilhar é uma decisão por cliente: ao mudar de empresa, a ata volta a ser interna.
+        ...(companyChanged ? { sharedWithClient: false } : {}),
       })
       .where(eq(meeting.id, id));
     await writeParticipants(tx, id, data.teamIds, data.externals);
@@ -141,6 +147,7 @@ export async function updateMeeting(ctx: AdminContext, id: string, input: Meetin
     entityType: "meeting",
     entityId: id,
     organizationId: owner.data.organizationId,
+    ...(companyChanged && current.sharedWithClient ? { metadata: { unsharedOnCompanyChange: true } } : {}),
   });
   return ok(null);
 }

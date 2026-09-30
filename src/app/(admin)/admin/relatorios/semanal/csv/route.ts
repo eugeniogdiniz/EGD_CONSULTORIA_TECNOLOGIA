@@ -8,7 +8,7 @@ export async function GET(req: Request) {
   const ctx = await requireAdmin();
   const today = todayInSaoPaulo();
   const monday = parseWeekParam(new URL(req.url).searchParams.get("semana") ?? undefined, today);
-  const w = buildWeekly(await loadPortfolioData(ctx), monday, today);
+  const w = buildWeekly(await loadPortfolioData(ctx, { includeClosed: true }), monday, today);
   const { headers, rows } = weeklyCsv(w);
   return csvResponse(`relatorio-semanal-${w.label}.csv`, toCsv(headers, rows));
 }

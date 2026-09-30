@@ -90,8 +90,15 @@ export async function loadProjectStatus(
   };
 }
 
-/** Projetos em andamento (planejamento, ativo, pausado) e não arquivados, com o necessário para portfólio e semanal. */
-export async function loadPortfolioData(_ctx: AdminContext): Promise<PortfolioProjectInput[]> {
+/**
+ * Projetos não arquivados em andamento (planejamento, ativo, pausado), com o
+ * necessário para portfólio e semanal. `includeClosed` traz também entregues e
+ * cancelados, para o semanal mostrar o que foi concluído na última semana deles.
+ */
+export async function loadPortfolioData(_ctx: AdminContext, opts: { includeClosed?: boolean } = {}): Promise<PortfolioProjectInput[]> {
+  const statuses: PortfolioProjectInput["status"][] = opts.includeClosed
+    ? ["planning", "active", "on_hold", "delivered", "cancelled"]
+    : ["planning", "active", "on_hold"];
   const projects = await db
     .select({
       id: project.id,
@@ -102,7 +109,7 @@ export async function loadPortfolioData(_ctx: AdminContext): Promise<PortfolioPr
     })
     .from(project)
     .innerJoin(crmCompany, eq(project.companyId, crmCompany.id))
-    .where(and(isNull(project.archivedAt), inArray(project.status, ["planning", "active", "on_hold"])));
+    .where(and(isNull(project.archivedAt), inArray(project.status, statuses)));
   if (projects.length === 0) return [];
   const ids = projects.map((p) => p.id);
 

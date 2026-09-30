@@ -205,12 +205,14 @@ export function projectStatusCsv(input: ProjectStatusInput, report: ProjectStatu
 // ── 2. portfólio ────────────────────────────────────────────────────────────
 
 export type PortfolioStatus = "planning" | "active" | "on_hold";
+/** Encerrados só entram no semanal (para a semana em que foram concluídos não sumir). */
+export type ClosedStatus = "delivered" | "cancelled";
 export type PortfolioProjectInput = {
   id: string;
   title: string;
   slug: string;
   companyName: string;
-  status: PortfolioStatus;
+  status: PortfolioStatus | ClosedStatus;
   budgetCents: number | null;
   minutes: number;
   laborCents: number;
@@ -240,7 +242,8 @@ export type PortfolioRow = {
 };
 
 export function buildPortfolio(projects: PortfolioProjectInput[], today: string) {
-  const rows: PortfolioRow[] = projects.map((p) => {
+  const open = projects.filter((p): p is PortfolioProjectInput & { status: PortfolioStatus } => p.status !== "delivered" && p.status !== "cancelled");
+  const rows: PortfolioRow[] = open.map((p) => {
     const done = p.deliverables.filter((x) => x.status === "done").length;
     const pendingMilestones = p.milestones.filter((m) => m.completedAt === null).sort((a, b) => a.dueAt.localeCompare(b.dueAt));
     const upcoming = [
@@ -328,12 +331,15 @@ export function buildWeekly(projects: PortfolioProjectInput[], monday: string, t
     const done: WeeklyItem[] = [];
     const due: WeeklyItem[] = [];
     const late: WeeklyItem[] = [];
+    // Projeto encerrado: só o que foi concluído conta; o que ficou em aberto não vence nem atrasa mais.
+    const closed = p.status === "delivered" || p.status === "cancelled";
     for (const x of p.deliverables) {
       if (x.status === "done") {
         const on = x.completedAt ? dateInSaoPaulo(x.completedAt) : null;
         if (on && inRange(on, start, end)) done.push({ kind: "deliverable", title: x.title, date: on, daysLate: null });
         continue;
       }
+      if (closed) continue;
       if (x.dueAt && inRange(x.dueAt, nextStart, nextEnd)) due.push({ kind: "deliverable", title: x.title, date: x.dueAt, daysLate: null });
       if (isOverdue(x, today)) late.push({ kind: "deliverable", title: x.title, date: x.dueAt as string, daysLate: daysBetween(x.dueAt as string, today) });
     }
@@ -341,7 +347,7 @@ export function buildWeekly(projects: PortfolioProjectInput[], monday: string, t
       const on = m.completedAt ? dateInSaoPaulo(m.completedAt) : null;
       if (on) {
         if (inRange(on, start, end)) done.push({ kind: "milestone", title: m.name, date: on, daysLate: null });
-      } else if (inRange(m.dueAt, nextStart, nextEnd)) {
+      } else if (!closed && inRange(m.dueAt, nextStart, nextEnd)) {
         due.push({ kind: "milestone", title: m.name, date: m.dueAt, daysLate: null });
       }
     }

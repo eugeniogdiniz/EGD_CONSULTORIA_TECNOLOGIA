@@ -17,6 +17,11 @@ describe("csv", () => {
     expect(toCsv(["t"], [["=HYPERLINK(1)"], [-3]])).toBe(`${BOM}t\r\n'=HYPERLINK(1)\r\n-3\r\n`);
   });
 
+  it("neutraliza fórmula escondida atrás de tabulação ou CR", () => {
+    expect(toCsv(["t"], [["\t=HYPERLINK(1)"]])).toBe(`${BOM}t\r\n'\t=HYPERLINK(1)\r\n`);
+    expect(toCsv(["t"], [["\r=1+1"]])).toBe(`${BOM}t\r\n"'\r=1+1"\r\n`);
+  });
+
   it("decimais e reais com vírgula", () => {
     expect(csvDecimal(86.5, 1)).toBe("86,5");
     expect(csvDecimal(2, 2)).toBe("2,00");

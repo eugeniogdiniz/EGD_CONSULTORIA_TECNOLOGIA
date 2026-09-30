@@ -196,6 +196,23 @@ describe("semanal", () => {
     expect(csv.rows.at(-1)).toEqual(["Laudo", "C", "Entrega", "Atrasado", "Failover", "26/09/2026", 4]);
   });
 
+  it("projeto encerrado na semana aparece só com o que foi concluído", () => {
+    const w = buildWeekly([
+      proj({ id: "e", title: "Entregue", status: "delivered", deliverables: [
+        { id: "1", title: "Laudo final", status: "done", dueAt: "2026-09-30", completedAt: new Date("2026-09-30T15:00:00Z") },
+        { id: "2", title: "Pendência esquecida", status: "todo", dueAt: "2026-09-01", completedAt: null },
+        { id: "3", title: "Vence depois", status: "todo", dueAt: "2026-10-06", completedAt: null },
+      ], milestones: [{ id: "m", name: "Entrega final", dueAt: "2026-10-01", completedAt: new Date("2026-10-01T12:00:00Z") }] }),
+      proj({ id: "c", title: "Cancelado antigo", status: "cancelled", deliverables: [
+        { id: "4", title: "Atrasada", status: "todo", dueAt: "2026-09-01", completedAt: null },
+      ] }),
+    ], "2026-09-28", TODAY);
+    expect(w.projects.map((p) => p.id)).toEqual(["e"]);
+    expect(w.projects[0].done.map((i) => i.title)).toEqual(["Laudo final", "Entrega final"]);
+    expect(w.projects[0].due).toEqual([]);
+    expect(w.projects[0].late).toEqual([]);
+  });
+
   it("semana sem nenhum movimento", () => {
     const w = buildWeekly([proj({})], MON, TODAY);
     expect(w.projects).toEqual([]);

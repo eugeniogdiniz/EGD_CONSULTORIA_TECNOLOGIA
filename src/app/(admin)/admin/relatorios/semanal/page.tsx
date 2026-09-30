@@ -45,7 +45,7 @@ export default async function SemanalPage({ searchParams }: PageProps<"/admin/re
   const ctx = await requireAdmin();
   const today = todayInSaoPaulo();
   const monday = parseWeekParam((await searchParams).semana, today);
-  const w = buildWeekly(await loadPortfolioData(ctx), monday, today);
+  const w = buildWeekly(await loadPortfolioData(ctx, { includeClosed: true }), monday, today);
   const periodo = `${formatBrShort(w.start)} – ${formatBr(w.end)}`;
   const semanaAtual = parseWeekParam(undefined, today) === monday;
 

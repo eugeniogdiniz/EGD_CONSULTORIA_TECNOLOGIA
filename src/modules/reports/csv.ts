@@ -4,8 +4,8 @@ export type CsvCell = string | number | null;
 function cell(v: CsvCell): string {
   if (v === null) return "";
   let s = String(v);
-  // Texto começando com = + - @ vira fórmula no Excel; o apóstrofo desarma.
-  if (typeof v === "string" && /^[=+\-@]/.test(s)) s = `'${s}`;
+  // Texto começando com = + - @ (ou tabulação/CR na frente) vira fórmula no Excel; o apóstrofo desarma.
+  if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return /[;"\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 

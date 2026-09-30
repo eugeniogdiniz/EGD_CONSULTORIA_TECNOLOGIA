@@ -181,3 +181,29 @@ describe("portal", () => {
     expect(await getPortalMeeting(ctxA, sharedId)).toBeNull();
   });
 });
+
+describe("trocar a ata de empresa", () => {
+  it("ata compartilhada deixa de ser compartilhada ao ir para outra empresa", async () => {
+    const r = await createMeeting(admin, { title: "Ata que muda de cliente", heldAt: "2026-10-03T10:00", projectId: projA });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect((await setMeetingShared(admin, r.data.id, true)).ok).toBe(true);
+    expect((await listPortalMeetings(ctxA)).map((m) => m.id)).toContain(r.data.id);
+
+    const moved = await updateMeeting(admin, r.data.id, { title: "Ata que muda de cliente", heldAt: "2026-10-03T10:00", projectId: projB });
+    expect(moved.ok).toBe(true);
+    const row = await db.query.meeting.findFirst({ where: eq(meeting.id, r.data.id) });
+    expect(row?.companyId).toBe(companyB);
+    expect(row?.sharedWithClient).toBe(false);
+    expect((await listPortalMeetings(ctxB)).map((m) => m.id)).not.toContain(r.data.id);
+    expect((await listPortalMeetings(ctxA)).map((m) => m.id)).not.toContain(r.data.id);
+  });
+
+  it("editar sem trocar de empresa mantém o compartilhamento", async () => {
+    const r = await createMeeting(admin, { title: "Ata que fica", heldAt: "2026-10-04T10:00", projectId: projA });
+    if (!r.ok) throw new Error(r.error);
+    await setMeetingShared(admin, r.data.id, true);
+    expect((await updateMeeting(admin, r.data.id, { title: "Ata que fica (revisada)", heldAt: "2026-10-04T10:00", projectId: projA2 })).ok).toBe(true);
+    expect((await db.query.meeting.findFirst({ where: eq(meeting.id, r.data.id) }))?.sharedWithClient).toBe(true);
+  });
+});

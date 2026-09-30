@@ -134,6 +134,13 @@ describe("portfólio (admin)", () => {
     expect(a).toMatchObject({ minutes: 120, laborCents: 30_000, expenseCents: 15_000, budgetCents: 100_000, companyName: "Construtora Rel", slug: "laudo-de-infra-ti" });
     expect(a?.deliverables).toHaveLength(2);
   });
+
+  it("para o semanal, inclui projetos entregues (não os arquivados)", async () => {
+    const ids = (await loadPortfolioData(admin, { includeClosed: true })).map((r) => r.id);
+    expect(ids).toContain(projA);
+    expect(ids).toContain(projDelivered);
+    expect(ids).not.toContain(projArchived);
+  });
 });
 
 describe("relatório do cliente (portal)", () => {
