@@ -1,8 +1,13 @@
 import { describe, it, expect } from "vitest";
 import {
   budgetBand,
+  buildPortfolio,
   buildProjectStatus,
+  buildWeekly,
+  portfolioCsv,
   projectStatusCsv,
+  weeklyCsv,
+  type PortfolioProjectInput,
   type ProjectStatusInput,
   type ReportDeliverable,
 } from "@/modules/reports/build";
@@ -116,5 +121,81 @@ describe("relatório de status", () => {
       ["Levantamento", "Sem prazo", "A fazer", "Média", "", "", "", null, "0,0", "0,00"],
       ["Sem fase", "Solta", "Concluída", "Média", "", "19/09/2026", "20/09/2026", null, "0,0", "0,00"],
     ]);
+  });
+});
+
+
+const proj = (over: Partial<PortfolioProjectInput>): PortfolioProjectInput => ({
+  id: "p", title: "P", slug: "p", companyName: "C", status: "active", budgetCents: null, minutes: 0, laborCents: 0, expenseCents: 0,
+  deliverables: [], milestones: [], ...over,
+});
+
+describe("portfólio", () => {
+  it("ordena por atrasadas e depois pelo próximo prazo; conta status", () => {
+    const r = buildPortfolio([
+      proj({ id: "a", title: "Sem atraso", deliverables: [{ id: "1", title: "x", status: "todo", dueAt: "2026-10-02", completedAt: null }] }),
+      proj({ id: "b", title: "Dois atrasos", status: "on_hold", deliverables: [
+        { id: "2", title: "x", status: "todo", dueAt: "2026-09-01", completedAt: null },
+        { id: "3", title: "y", status: "blocked", dueAt: "2026-09-02", completedAt: null },
+      ] }),
+      proj({ id: "c", title: "Vazio" }),
+      proj({ id: "d", title: "Próximo antes", milestones: [{ id: "m", name: "Go-live", dueAt: "2026-10-01", completedAt: null }] }),
+    ], TODAY);
+    expect(r.rows.map((x) => x.id)).toEqual(["b", "d", "a", "c"]);
+    expect(r.rows[0]).toMatchObject({ overdue: 2, blocked: 1, percent: 0 });
+    expect(r.rows.find((x) => x.id === "c")?.percent).toBeNull();
+    expect(r.rows.find((x) => x.id === "d")?.nextMilestone).toEqual({ name: "Go-live", dueAt: "2026-10-01" });
+    expect(r.counts).toEqual({ planning: 0, active: 3, on_hold: 1 });
+    expect(r.overdueTotal).toBe(2);
+  });
+
+  it("consumo do orçamento e CSV", () => {
+    const r = buildPortfolio([proj({ title: "Obras", budgetCents: 1_000_000, laborCents: 900_000, expenseCents: 60_000, minutes: 7200 })], TODAY);
+    expect(r.rows[0]).toMatchObject({ costCents: 960_000, consumption: 96, band: "alert" });
+    const csv = portfolioCsv(r);
+    expect(csv.headers).toEqual([
+      "Projeto", "Cliente", "Status", "Progresso (%)", "Próximo marco", "Data do próximo marco", "Atrasadas", "Bloqueadas",
+      "Horas", "Orçamento (R$)", "Custo de horas (R$)", "Despesas (R$)", "Consumo do orçamento (%)",
+    ]);
+    expect(csv.rows[0]).toEqual(["Obras", "C", "Ativo", null, "", "", 0, 0, "120,0", "10000,00", "9000,00", "600,00", 96]);
+  });
+});
+
+describe("semanal", () => {
+  const MON = "2026-09-28";
+  it("agrupa concluído, vence na semana seguinte e atrasado; omite projeto parado", () => {
+    const w = buildWeekly([
+      proj({ id: "b", title: "Parado", deliverables: [{ id: "7", title: "Futuro", status: "todo", dueAt: "2026-12-01", completedAt: null }] }),
+      proj({ id: "a", title: "Laudo", deliverables: [
+        { id: "1", title: "Nobreaks", status: "done", dueAt: "2026-09-29", completedAt: new Date("2026-09-29T15:00:00Z") },
+        { id: "2", title: "Domingo tarde", status: "done", dueAt: null, completedAt: new Date("2026-10-05T02:00:00Z") }, // 04/10 23h em Brasília
+        { id: "3", title: "Semana passada", status: "done", dueAt: null, completedAt: new Date("2026-09-27T12:00:00Z") },
+        { id: "4", title: "Vulnerabilidades", status: "todo", dueAt: "2026-10-07", completedAt: null },
+        { id: "5", title: "Switches", status: "doing", dueAt: "2026-09-22", completedAt: null },
+        { id: "8", title: "Failover", status: "doing", dueAt: "2026-09-26", completedAt: null },
+        { id: "6", title: "Longe", status: "todo", dueAt: "2026-11-20", completedAt: null },
+      ], milestones: [
+        { id: "m1", name: "Levantamento aprovado", dueAt: "2026-09-25", completedAt: new Date("2026-09-30T18:00:00Z") },
+        { id: "m2", name: "Laudo preliminar", dueAt: "2026-10-09", completedAt: null },
+      ] }),
+    ], MON, TODAY);
+    expect(w).toMatchObject({ start: "2026-09-28", end: "2026-10-04", nextStart: "2026-10-05", nextEnd: "2026-10-11", label: "2026-S40", doneCount: 3 });
+    expect(w.projects.map((p) => p.id)).toEqual(["a"]);
+    const a = w.projects[0];
+    expect(a.done.map((i) => [i.kind, i.title, i.date])).toEqual([
+      ["deliverable", "Nobreaks", "2026-09-29"], ["milestone", "Levantamento aprovado", "2026-09-30"], ["deliverable", "Domingo tarde", "2026-10-04"],
+    ]);
+    expect(a.due.map((i) => i.title)).toEqual(["Vulnerabilidades", "Laudo preliminar"]);
+    expect(a.late.map((i) => [i.title, i.daysLate])).toEqual([["Switches", 8], ["Failover", 4]]);
+    const csv = weeklyCsv(w);
+    expect(csv.headers).toEqual(["Projeto", "Cliente", "Tipo", "Grupo", "Título", "Data", "Dias de atraso"]);
+    expect(csv.rows[0]).toEqual(["Laudo", "C", "Entrega", "Concluído", "Nobreaks", "29/09/2026", null]);
+    expect(csv.rows.at(-1)).toEqual(["Laudo", "C", "Entrega", "Atrasado", "Failover", "26/09/2026", 4]);
+  });
+
+  it("semana sem nenhum movimento", () => {
+    const w = buildWeekly([proj({})], MON, TODAY);
+    expect(w.projects).toEqual([]);
+    expect(w.doneCount).toBe(0);
   });
 });

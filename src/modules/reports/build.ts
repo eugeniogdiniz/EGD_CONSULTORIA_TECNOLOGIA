@@ -5,8 +5,8 @@
  */
 import { isOverdue, priorityRank, PRIORITY_LABEL, type Priority } from "@/modules/projects/priority";
 import { csvCents, csvDecimal, type CsvCell } from "./csv";
-import { dateInSaoPaulo, daysBetween, formatBr } from "./dates";
-import { ADMIN_STATUS_LABEL } from "./labels";
+import { addDays, dateInSaoPaulo, daysBetween, formatBr, isoWeekLabel } from "./dates";
+import { ADMIN_STATUS_LABEL, PROJECT_STATUS_ADMIN_LABEL } from "./labels";
 
 export type DeliverableStatus = "todo" | "doing" | "review" | "done" | "blocked";
 
@@ -199,4 +199,186 @@ export function projectStatusCsv(input: ProjectStatusInput, report: ProjectStatu
     headers: ["Fase", "Entrega", "Status", "Prioridade", "Responsável", "Prazo", "Concluída em", "Dias de atraso", "Horas", "Custo de horas (R$)"],
     rows,
   };
+}
+
+// ── 2. portfólio ────────────────────────────────────────────────────────────
+
+export type PortfolioStatus = "planning" | "active" | "on_hold";
+export type PortfolioProjectInput = {
+  id: string;
+  title: string;
+  slug: string;
+  companyName: string;
+  status: PortfolioStatus;
+  budgetCents: number | null;
+  minutes: number;
+  laborCents: number;
+  expenseCents: number;
+  deliverables: { id: string; title: string; status: DeliverableStatus; dueAt: string | null; completedAt: Date | null }[];
+  milestones: { id: string; name: string; dueAt: string; completedAt: Date | null }[];
+};
+export type PortfolioRow = {
+  id: string;
+  title: string;
+  companyName: string;
+  status: PortfolioStatus;
+  percent: number | null;
+  total: number;
+  done: number;
+  nextMilestone: { name: string; dueAt: string } | null;
+  overdue: number;
+  blocked: number;
+  minutes: number;
+  laborCents: number;
+  expenseCents: number;
+  costCents: number;
+  budgetCents: number | null;
+  consumption: number | null;
+  band: BudgetBand | null;
+  nextDue: string | null;
+};
+
+export function buildPortfolio(projects: PortfolioProjectInput[], today: string) {
+  const rows: PortfolioRow[] = projects.map((p) => {
+    const done = p.deliverables.filter((x) => x.status === "done").length;
+    const pendingMilestones = p.milestones.filter((m) => m.completedAt === null).sort((a, b) => a.dueAt.localeCompare(b.dueAt));
+    const upcoming = [
+      ...p.deliverables.filter((x) => x.status !== "done" && x.dueAt !== null).map((x) => x.dueAt as string),
+      ...pendingMilestones.map((m) => m.dueAt),
+    ]
+      .filter((dt) => dt >= today)
+      .sort();
+    const costCents = p.laborCents + p.expenseCents;
+    const consumption = p.budgetCents !== null && p.budgetCents > 0 ? Math.round((costCents / p.budgetCents) * 100) : null;
+    return {
+      id: p.id,
+      title: p.title,
+      companyName: p.companyName,
+      status: p.status,
+      percent: p.deliverables.length === 0 ? null : pct(done, p.deliverables.length),
+      total: p.deliverables.length,
+      done,
+      nextMilestone: pendingMilestones[0] ? { name: pendingMilestones[0].name, dueAt: pendingMilestones[0].dueAt } : null,
+      overdue: p.deliverables.filter((x) => isOverdue(x, today)).length,
+      blocked: p.deliverables.filter((x) => x.status === "blocked").length,
+      minutes: p.minutes,
+      laborCents: p.laborCents,
+      expenseCents: p.expenseCents,
+      costCents,
+      budgetCents: p.budgetCents,
+      consumption,
+      band: budgetBand(consumption),
+      nextDue: upcoming[0] ?? null,
+    };
+  });
+  rows.sort(
+    (a, b) =>
+      b.overdue - a.overdue ||
+      (a.nextDue ?? NO_DATE).localeCompare(b.nextDue ?? NO_DATE) ||
+      a.title.localeCompare(b.title, "pt-BR"),
+  );
+  const counts: Record<PortfolioStatus, number> = { planning: 0, active: 0, on_hold: 0 };
+  for (const r of rows) counts[r.status] += 1;
+  return { rows, counts, overdueTotal: rows.reduce((s, r) => s + r.overdue, 0) };
+}
+export type PortfolioReport = ReturnType<typeof buildPortfolio>;
+
+export function portfolioCsv(report: PortfolioReport) {
+  return {
+    headers: [
+      "Projeto", "Cliente", "Status", "Progresso (%)", "Próximo marco", "Data do próximo marco", "Atrasadas", "Bloqueadas",
+      "Horas", "Orçamento (R$)", "Custo de horas (R$)", "Despesas (R$)", "Consumo do orçamento (%)",
+    ],
+    rows: report.rows.map((r): CsvCell[] => [
+      r.title,
+      r.companyName,
+      PROJECT_STATUS_ADMIN_LABEL[r.status],
+      r.percent,
+      r.nextMilestone?.name ?? "",
+      formatBr(r.nextMilestone?.dueAt ?? null),
+      r.overdue,
+      r.blocked,
+      csvDecimal(r.minutes / 60, 1),
+      csvCents(r.budgetCents),
+      csvCents(r.laborCents),
+      csvCents(r.expenseCents),
+      r.consumption,
+    ]),
+  };
+}
+
+// ── 3. semanal ──────────────────────────────────────────────────────────────
+
+export type WeeklyItem = { kind: "deliverable" | "milestone"; title: string; date: string; daysLate: number | null };
+export type WeeklyProject = { id: string; title: string; companyName: string; done: WeeklyItem[]; due: WeeklyItem[]; late: WeeklyItem[] };
+
+const byDate = (a: WeeklyItem, b: WeeklyItem) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title, "pt-BR");
+
+/** Semana de segunda (`monday`) a domingo. "Vence" olha a semana seguinte; "atrasado", o dia de hoje. */
+export function buildWeekly(projects: PortfolioProjectInput[], monday: string, today: string) {
+  const start = monday;
+  const end = addDays(monday, 6);
+  const nextStart = addDays(monday, 7);
+  const nextEnd = addDays(monday, 13);
+  const inRange = (dt: string, a: string, b: string) => dt >= a && dt <= b;
+
+  const out: WeeklyProject[] = [];
+  for (const p of [...projects].sort((a, b) => a.title.localeCompare(b.title, "pt-BR"))) {
+    const done: WeeklyItem[] = [];
+    const due: WeeklyItem[] = [];
+    const late: WeeklyItem[] = [];
+    for (const x of p.deliverables) {
+      if (x.status === "done") {
+        const on = x.completedAt ? dateInSaoPaulo(x.completedAt) : null;
+        if (on && inRange(on, start, end)) done.push({ kind: "deliverable", title: x.title, date: on, daysLate: null });
+        continue;
+      }
+      if (x.dueAt && inRange(x.dueAt, nextStart, nextEnd)) due.push({ kind: "deliverable", title: x.title, date: x.dueAt, daysLate: null });
+      if (isOverdue(x, today)) late.push({ kind: "deliverable", title: x.title, date: x.dueAt as string, daysLate: daysBetween(x.dueAt as string, today) });
+    }
+    for (const m of p.milestones) {
+      const on = m.completedAt ? dateInSaoPaulo(m.completedAt) : null;
+      if (on) {
+        if (inRange(on, start, end)) done.push({ kind: "milestone", title: m.name, date: on, daysLate: null });
+      } else if (inRange(m.dueAt, nextStart, nextEnd)) {
+        due.push({ kind: "milestone", title: m.name, date: m.dueAt, daysLate: null });
+      }
+    }
+    if (done.length + due.length + late.length === 0) continue;
+    out.push({
+      id: p.id,
+      title: p.title,
+      companyName: p.companyName,
+      done: done.sort(byDate),
+      due: due.sort(byDate),
+      late: late.sort((a, b) => (b.daysLate ?? 0) - (a.daysLate ?? 0) || a.title.localeCompare(b.title, "pt-BR")),
+    });
+  }
+  return {
+    start,
+    end,
+    nextStart,
+    nextEnd,
+    label: isoWeekLabel(monday),
+    projects: out,
+    doneCount: out.reduce((s, p) => s + p.done.length, 0),
+  };
+}
+export type WeeklyReport = ReturnType<typeof buildWeekly>;
+
+export function weeklyCsv(report: WeeklyReport) {
+  const groups: [keyof Pick<WeeklyProject, "done" | "due" | "late">, string][] = [
+    ["done", "Concluído"],
+    ["due", "Vence"],
+    ["late", "Atrasado"],
+  ];
+  const rows: CsvCell[][] = [];
+  for (const p of report.projects) {
+    for (const [key, label] of groups) {
+      for (const i of p[key]) {
+        rows.push([p.title, p.companyName, i.kind === "milestone" ? "Marco" : "Entrega", label, i.title, formatBr(i.date), i.daysLate]);
+      }
+    }
+  }
+  return { headers: ["Projeto", "Cliente", "Tipo", "Grupo", "Título", "Data", "Dias de atraso"], rows };
 }
