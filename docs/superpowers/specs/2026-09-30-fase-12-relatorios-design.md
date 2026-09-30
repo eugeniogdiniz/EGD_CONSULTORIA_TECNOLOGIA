@@ -55,7 +55,7 @@ Escopo e visibilidade iguais ao portal atual (`portal-projects/queries`): só pr
 
 Seções: cabeçalho (sem cliente, com responsável EGD); 01 Progresso por fase; 02 Marcos; 03 Em andamento e próximas entregas (não concluídas, por prazo); 04 Horas dedicadas (só com `show_hours_to_client`); 05 Atas compartilhadas (link para a ata no portal). Carimbo com versão "cliente". Nenhum valor monetário, orçamento, responsável interno por entrega ou prioridade.
 
-CSV: uma linha por entrega visível — fase, entrega, status, prazo, concluída em (e horas, se a chave estiver ligada).
+CSV: uma linha por entrega visível — fase, entrega, status, prazo, concluída em. Sem horas no CSV: horas por entrega exporiam o esforço em trabalho interno. As horas da seção 04 somam todos os lançamentos encerrados do projeto (total e por fase), sem citar entregas internas.
 
 ## Arquitetura
 
