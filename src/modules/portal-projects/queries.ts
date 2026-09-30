@@ -78,6 +78,7 @@ export async function getPortalProject(ctx: PortalContext, id: string) {
       status: project.status,
       startedAt: project.startedAt,
       endedAt: project.endedAt,
+      showHoursToClient: project.showHoursToClient,
       companyName: crmCompany.name,
       ownerName: users.name,
     })
@@ -129,6 +130,7 @@ export function listPortalDeliverables(ctx: PortalContext, projectId: string) {
       title: projectDeliverable.title,
       status: projectDeliverable.status,
       dueAt: projectDeliverable.dueAt,
+      completedAt: projectDeliverable.completedAt,
       phaseId: projectDeliverable.phaseId,
     })
     .from(projectDeliverable)

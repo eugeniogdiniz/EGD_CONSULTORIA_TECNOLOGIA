@@ -1,0 +1,1 @@
+ALTER TABLE "project" ADD COLUMN "show_hours_to_client" boolean DEFAULT false NOT NULL;

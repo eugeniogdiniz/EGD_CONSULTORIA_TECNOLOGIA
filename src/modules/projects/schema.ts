@@ -57,6 +57,8 @@ export const project = pgTable(
       .notNull()
       .references(() => users.id),
     notes: text(),
+    /** Liga a seção de horas no relatório do portal. Nunca expõe valores. */
+    showHoursToClient: boolean().default(false).notNull(),
     archivedAt: timestamp({ withTimezone: true }),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp({ withTimezone: true })

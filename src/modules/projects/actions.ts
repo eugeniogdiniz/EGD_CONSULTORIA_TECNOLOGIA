@@ -207,6 +207,7 @@ export async function updateProject(
       startedAt: data.startedAt,
       endedAt: data.endedAt,
       notes: data.notes,
+      showHoursToClient: data.showHoursToClient,
     })
     .where(eq(project.id, id));
 

@@ -41,6 +41,10 @@ export const projectSchema = z.object({
   startedAt: isoDateOptional,
   endedAt: isoDateOptional,
   notes: optionalText(4000),
+  showHoursToClient: z
+    .union([z.literal("on"), z.literal(""), z.boolean()])
+    .optional()
+    .transform((v) => v === true || v === "on"),
 });
 export type ProjectInput = z.input<typeof projectSchema>;
 
