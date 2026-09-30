@@ -26,6 +26,7 @@ export default async function EditarProjetoPage({ params }: PageProps<"/admin/pr
             startedAt: p.startedAt,
             endedAt: p.endedAt,
             notes: p.notes,
+            showHoursToClient: p.showHoursToClient,
           }}
         />
       </Block>

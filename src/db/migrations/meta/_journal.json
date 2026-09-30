@@ -64,6 +64,20 @@
       "when": 1790651231780,
       "tag": "0008_work_priority",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790726517244,
+      "tag": "0009_meetings",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790774808823,
+      "tag": "0010_show_hours_to_client",
+      "breakpoints": true
     }
   ]
 }

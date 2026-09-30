@@ -4,7 +4,7 @@ import { loginAs, ADMIN } from "./helpers";
 test.describe.serial("cases", () => {
   const nome = `Cliente E2E ${Date.now()}`;
 
-  test("admin cria um case e ele aparece em /cases", async ({ page }) => {
+  test("admin cria um case; o site público continua sem /cases enquanto os cases estão ocultos", async ({ page }) => {
     await loginAs(page, ADMIN.email, ADMIN.password);
     await page.goto("/admin/cases/novo");
     await page.getByLabel(/^cliente$/i).fill(nome);
@@ -17,19 +17,17 @@ test.describe.serial("cases", () => {
     await expect(page).toHaveURL(/\/admin\/cases\/[0-9a-f-]+$/);
     await expect(page.getByRole("heading", { level: 1, name: nome })).toBeVisible();
 
-    await page.goto("/cases");
-    await expect(page.getByText(nome).first()).toBeVisible();
+    const res = await page.goto("/cases");
+    expect(res?.status()).toBe(404);
   });
 
-  test("despublicar tira do site; excluir remove do admin", async ({ page }) => {
+  test("despublicar marca como rascunho; excluir remove do admin", async ({ page }) => {
     await loginAs(page, ADMIN.email, ADMIN.password);
     await page.goto("/admin/cases");
     const row = page.getByRole("row", { name: new RegExp(nome) });
     await row.getByRole("button", { name: /^despublicar$/i }).click();
     await expect(row.getByText(/rascunho/i)).toBeVisible({ timeout: 10_000 });
 
-    await page.goto("/cases");
-    await expect(page.getByText(nome)).toHaveCount(0);
 
     await page.goto("/admin/cases");
     await page.getByRole("link", { name: nome }).click();

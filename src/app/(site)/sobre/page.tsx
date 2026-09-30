@@ -3,6 +3,7 @@ import { pageMeta } from "@/content/seo";
 import Link from "next/link";
 import Image from "next/image";
 import { getSiteCases } from "@/modules/cases/site";
+import { SHOW_CASES } from "@/content/site";
 import { Arrow } from "@/components/legacy/ui";
 import { PRINCIPLES, TIMELINE, SECTORS } from "@/content/legacy-pages";
 import { BrandFilm } from "@/components/site/brand-film";
@@ -16,7 +17,7 @@ export const metadata: Metadata = pageMeta({
 export const dynamic = "force-dynamic";
 
 export default async function SobrePage() {
-  const { totals: TOTAIS } = await getSiteCases();
+  const TOTAIS = SHOW_CASES ? (await getSiteCases()).totals : null;
   return (
     <>
       <section className="page-head">
@@ -31,12 +32,14 @@ export default async function SobrePage() {
             <p className="lead">A EGD Consultoria nasceu para preencher um espaço pouco ocupado: consultoria de tecnologia que entrega código em produção, não apenas diagnóstico. Somos engenheiros que viram consultores — não o contrário.</p>
           </div>
           <Image className="brand-editorial-image" src="/brand/images/fluxo-azul.webp" alt="Maquete conceitual de três etapas conectadas por um percurso azul, representando o método EGD." width={1536} height={1024} sizes="(max-width: 800px) 100vw, 1180px" />
+          {TOTAIS && (
           <div className="hero-meta" style={{ marginTop: 40 }}>
             <div className="meta-item"><div className="num">{TOTAIS.clientes}</div><div className="lbl">Clientes no portfólio</div></div>
             <div className="meta-item"><div className="num">{TOTAIS.sistemas}</div><div className="lbl">Sistemas entregues</div></div>
             <div className="meta-item"><div className="num">{TOTAIS.automacoes}</div><div className="lbl">Automações entregues</div></div>
             <div className="meta-item"><Link href="/cases" className="btn btn-ghost">Conheça os cases</Link></div>
           </div>
+          )}
         </div>
       </section>
 

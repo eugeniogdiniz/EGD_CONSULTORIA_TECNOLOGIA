@@ -214,3 +214,26 @@
 }
 @keyframes egd-draw { to { stroke-dashoffset: 0; } }
 @keyframes egd-fade { to { opacity: 1; } }
+
+/* Relatórios (Fase 12): folha A4. O shell já some em `print`. */
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; }
+  .report-sheet { border: 0 !important; }
+  .report-sheet .report-head,
+  .report-sheet section { padding-left: 0 !important; padding-right: 0 !important; }
+  .report-sheet section, .report-sheet .report-stamp { break-inside: avoid; }
+  /* A4 tem ~720px e cairia no layout de celular: mantém o de mesa. */
+  .report-sheet .report-head { grid-template-columns: 1fr auto !important; }
+  .report-sheet .report-head > div:last-child { text-align: right; }
+  .report-sheet .report-figures { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .report-sheet .report-figures > div { border-bottom: 0 !important; border-right: 1px solid var(--color-border) !important; }
+  .report-sheet .report-figures > div:last-child { border-right: 0 !important; }
+  .report-sheet .report-phase { grid-template-columns: 150px 1fr 90px !important; }
+  .report-sheet .report-phase > [role="img"] { order: 0 !important; grid-column: auto !important; }
+  .report-sheet .report-cols { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .report-sheet .report-stamp { grid-template-columns: 1.6fr 1.6fr 1fr 0.8fr 1.4fr !important; }
+  .report-sheet .report-stamp > div { border-bottom: 0 !important; border-right: 1px solid var(--color-border) !important; }
+  .report-sheet .report-stamp > div:last-child { border-right: 0 !important; }
+  .report-sheet table { font-size: 9.5pt; }
+}

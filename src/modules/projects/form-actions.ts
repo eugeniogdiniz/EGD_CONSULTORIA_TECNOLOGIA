@@ -73,6 +73,7 @@ function projectInput(fd: FormData) {
     startedAt: String(fd.get("startedAt") ?? ""),
     endedAt: String(fd.get("endedAt") ?? ""),
     notes: String(fd.get("notes") ?? ""),
+    showHoursToClient: fd.get("showHoursToClient") === "on",
   };
 }
 

@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 
 const SITE_URL = "https://egdsystem.com.br";
-const PAGES = ["/", "/servicos", "/produtos", "/cases", "/sobre", "/contato"];
+// /cases está oculto por enquanto (SHOW_CASES = false em src/content/site.ts).
+const PAGES = ["/", "/servicos", "/produtos", "/sobre", "/contato"];
 
 for (const path of PAGES) {
   test(`SEO ${path}: título, descrição, canonical, Open Graph e um único h1`, async ({ page }) => {
@@ -53,10 +54,11 @@ test("SEO: páginas de acesso saem do índice (noindex)", async ({ page }) => {
   }
 });
 
-test("SEO: sitemap lista as 6 páginas públicas sem lastmod e robots aponta para ele", async ({ request }) => {
+test("SEO: sitemap lista as páginas públicas (sem /cases) sem lastmod e robots aponta para ele", async ({ request }) => {
   const sitemap = await (await request.get("/sitemap.xml")).text();
   for (const path of PAGES) expect(sitemap).toContain(`<loc>${SITE_URL}${path === "/" ? "/" : path}</loc>`);
   expect(sitemap).not.toContain("<lastmod>");
+  expect(sitemap).not.toContain("/cases");
   expect(sitemap).not.toContain("/admin");
   const robots = await (await request.get("/robots.txt")).text();
   expect(robots).toContain(`Sitemap: ${SITE_URL}/sitemap.xml`);

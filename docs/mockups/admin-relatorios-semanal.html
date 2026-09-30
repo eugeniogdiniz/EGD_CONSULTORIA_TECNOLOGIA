@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Relatórios · Semanal · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<link rel="stylesheet" href="relatorio.css">
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <a class="item" href="#">Demandas</a>
+    <a class="item" href="admin-projetos-lista.html">Projetos</a>
+    <a class="item" href="#">Atas</a>
+    <a class="item" href="admin-relatorios-portfolio.html" aria-current="page">Relatórios</a>
+    <a class="item" href="#">Solicitações</a>
+    <a class="item" href="#">Arquivos</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo">Relatórios</div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <nav class="abas" aria-label="Relatórios">
+        <a href="admin-relatorios-portfolio.html">Portfólio</a>
+        <a href="admin-relatorios-semanal.html" aria-current="page">Semanal</a>
+      </nav>
+
+      <div class="barra">
+        <nav class="semana-nav" aria-label="Semana">
+          <a class="btn btn-secondary btn-sm" href="#" aria-label="Semana anterior">←</a>
+          <span class="rotulo">28/09 – 04/10/2026</span>
+          <a class="btn btn-secondary btn-sm" href="#" aria-label="Próxima semana">→</a>
+          <a class="btn btn-secondary btn-sm" href="#">Esta semana</a>
+        </nav>
+        <div class="acoes">
+          <a class="btn btn-secondary btn-sm" href="#">Baixar CSV</a>
+          <button class="btn btn-primary btn-sm" type="button" onclick="window.print()">Imprimir</button>
+        </div>
+      </div>
+
+      <article class="rel" aria-labelledby="rel-titulo">
+        <header class="rel-head">
+          <div>
+            <div class="tipo">RELATÓRIO SEMANAL · SEMANA 40</div>
+            <h1 id="rel-titulo">28/09 a 04/10/2026</h1>
+            <p class="sub">Concluído na semana, o que vence de 05/10 a 11/10 e o que segue atrasado</p>
+          </div>
+          <div class="grande">
+            <div class="n">9</div>
+            <div class="l">entregas e marcos concluídos</div>
+          </div>
+        </header>
+
+        <section class="rel-sec" aria-labelledby="w1">
+          <h2 id="w1"><span class="num">01</span>Por projeto <span class="dir">só projetos com movimento</span></h2>
+
+          <div class="proj-bloco">
+            <h3>Laudo de infra TI <small>Construtora Vale Norte</small></h3>
+            <div class="col3">
+              <div><h4>Concluído (4)</h4><ul>
+                <li><span>Levantamento de nobreaks</span><span class="mono">29/09</span></li>
+                <li><span>Planilha de ativos de rede</span><span class="mono">29/09</span></li>
+                <li><span>Entrevista com o suporte</span><span class="mono">30/09</span></li>
+                <li class="marco"><span>Levantamento aprovado</span><span class="mono">30/09</span></li>
+              </ul></div>
+              <div><h4>Vence de 05/10 a 11/10 (2)</h4><ul>
+                <li><span>Relatório de vulnerabilidades</span><span class="mono">07/10</span></li>
+                <li class="marco"><span>Laudo preliminar</span><span class="mono">09/10</span></li>
+              </ul></div>
+              <div><h4>Atrasado (3)</h4><ul>
+                <li><span>Inventário dos switches do bloco B</span><span class="atraso">8 d</span></li>
+                <li><span>Teste de failover do link secundário</span><span class="atraso">4 d</span></li>
+                <li><span>Mapa de rede do almoxarifado</span><span class="atraso">1 d</span></li>
+              </ul></div>
+            </div>
+          </div>
+
+          <div class="proj-bloco">
+            <h3>Portal de obras <small>Grupo Aurora</small></h3>
+            <div class="col3">
+              <div><h4>Concluído (3)</h4><ul>
+                <li><span>Tela de diário de obra</span><span class="mono">28/09</span></li>
+                <li><span>Upload de fotos</span><span class="mono">01/10</span></li>
+                <li><span>Revisão de permissões</span><span class="mono">02/10</span></li>
+              </ul></div>
+              <div><h4>Vence de 05/10 a 11/10 (1)</h4><ul>
+                <li><span>Relatório de medição em PDF</span><span class="mono">10/10</span></li>
+              </ul></div>
+              <div><h4>Atrasado (2)</h4><ul>
+                <li><span>Integração com o ERP</span><span class="atraso">12 d</span></li>
+                <li><span>Login por SSO</span><span class="atraso">2 d</span></li>
+              </ul></div>
+            </div>
+          </div>
+
+          <div class="proj-bloco">
+            <h3>Automação de medições <small>Bonin Engenharia</small></h3>
+            <div class="col3">
+              <div><h4>Concluído (2)</h4><ul>
+                <li><span>Robô de coleta das planilhas</span><span class="mono">30/09</span></li>
+                <li><span>Validação com o financeiro</span><span class="mono">02/10</span></li>
+              </ul></div>
+              <div><h4>Vence de 05/10 a 11/10 (0)</h4><p class="nada">nada vence</p></div>
+              <div><h4>Atrasado (1)</h4><ul>
+                <li><span>Manual de operação</span><span class="atraso">3 d</span></li>
+              </ul></div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="carimbo">
+          <div><div class="k">Relatório</div><div class="v">Semanal · 2026-S40</div></div>
+          <div><div class="k">Período</div><div class="v">28/09 – 04/10/2026</div></div>
+          <div><div class="k">Emitido em</div><div class="v">30/09/2026 14:20</div></div>
+          <div><div class="k">Versão</div><div class="v">interna</div></div>
+          <div><div class="k">Emitente</div><div class="v">EGD Consultoria &amp; Tecnologia</div></div>
+        </footer>
+      </article>
+
+      <div class="anot">Mockup. Semana de segunda a domingo, no fuso de Brasília. "Vence" olha a semana seguinte à exibida; "Atrasado" é o que está em aberto com prazo vencido no dia de hoje. Projeto sem nenhum item nas três colunas não aparece. O CSV traz uma linha por item: projeto, cliente, tipo (entrega ou marco), grupo (concluído, vence ou atrasado), título e data.</div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

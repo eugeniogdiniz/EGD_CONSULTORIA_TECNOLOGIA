@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/content/seo";
 import Link from "next/link";
 import { Arrow } from "@/components/legacy/ui";
+import { notFound } from "next/navigation";
 import { getSiteCases } from "@/modules/cases/site";
+import { SHOW_CASES } from "@/content/site";
 
 export const metadata: Metadata = pageMeta({
   title: "Cases: sistemas e automações em produção",
@@ -36,6 +38,7 @@ function KpiCell({ label, value, prefix, suffix }: { label: string; value: strin
 export const dynamic = "force-dynamic";
 
 export default async function CasesPage() {
+  if (!SHOW_CASES) notFound();
   const { cases: CLIENTES, totals: TOTAIS } = await getSiteCases();
   const featured = CLIENTES.filter((c) => c.destaque);
   const sorted = [...CLIENTES].sort((a, b) => b.economia - a.economia);

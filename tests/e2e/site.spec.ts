@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-for (const path of ["/", "/servicos", "/produtos", "/sobre", "/contato", "/cases"]) {
+for (const path of ["/", "/servicos", "/produtos", "/sobre", "/contato"]) {
   test(`página ${path} responde e tem h1`, async ({ page }) => {
     const res = await page.goto(path);
     expect(res?.status()).toBe(200);
@@ -28,4 +28,16 @@ test("página inexistente devolve 404 com o chrome do site", async ({ page }) =>
   const res = await page.goto("/nao-existe");
   expect(res?.status()).toBe(404);
   await expect(page.getByRole("heading", { name: /página não encontrada/i })).toBeVisible();
+});
+
+test("cases ocultos no site: /cases responde 404 e nenhum link público aponta para ele", async ({ page }) => {
+  const res = await page.goto("/cases");
+  expect(res?.status()).toBe(404);
+  for (const path of ["/", "/sobre", "/produtos"]) {
+    await page.goto(path);
+    await expect(page.locator('a[href="/cases"]')).toHaveCount(0);
+  }
+  await page.goto("/");
+  await expect(page.getByText(/clientes no portfólio/i)).toHaveCount(0);
+  await expect(page.getByText(/conheça os cases/i)).toHaveCount(0);
 });

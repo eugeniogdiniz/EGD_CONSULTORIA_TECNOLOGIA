@@ -20,6 +20,7 @@ export function ProjectForm({
     startedAt: string | null;
     endedAt: string | null;
     notes: string | null;
+    showHoursToClient: boolean;
   };
 }) {
   const [state, formAction, pending] = useActionState<ActionResult<null> | null, FormData>(action, null);
@@ -50,6 +51,13 @@ export function ProjectForm({
         <Label htmlFor="notes">Notas</Label>
         <Textarea id="notes" name="notes" defaultValue={initial.notes ?? ""} rows={5} />
       </div>
+      <label className="flex items-start gap-2 text-sm">
+        <input type="checkbox" name="showHoursToClient" defaultChecked={initial.showHoursToClient} className="mt-0.5" />
+        <span>
+          Mostrar horas ao cliente
+          <span className="block text-muted-foreground">O relatório do portal passa a mostrar o total de horas e as horas por fase. Nunca mostra valores.</span>
+        </span>
+      </label>
       {state && !state.ok && !fe && <p role="alert" className="text-sm text-danger">{state.error}</p>}
       {state?.ok && <p role="status" className="text-sm text-success">Dados salvos.</p>}
       <div><Button type="submit" disabled={pending}>{pending ? "Salvando…" : "Salvar"}</Button></div>
