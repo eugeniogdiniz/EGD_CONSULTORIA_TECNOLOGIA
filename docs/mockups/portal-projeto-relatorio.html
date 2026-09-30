@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Portal · Projeto · Relatório · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<link rel="stylesheet" href="relatorio.css">
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Início</a>
+    <a class="item" href="portal-projetos-lista.html" aria-current="page">Projetos</a>
+    <a class="item" href="#">Solicitações</a>
+    <a class="item" href="#">Atas</a>
+    <a class="item" href="#">Arquivos</a>
+    <div class="rodape">Construtora Vale Norte</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo"><a href="portal-projetos-lista.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Projetos</a> <span class="faint" style="margin:0 8px">/</span> <a href="portal-projeto-detalhe.html" style="text-decoration:none;color:var(--fg-muted);font-weight:500">Laudo de infra TI</a> <span class="faint" style="margin:0 8px">/</span> Relatório</div>
+      <div class="user"><span>Marina Costa</span><span class="avatar">M</span></div>
+    </header>
+
+    <main class="content">
+      <div class="barra">
+        <p class="muted small" style="margin:0">Situação do projeto hoje. Você pode imprimir ou salvar em PDF.</p>
+        <div class="acoes">
+          <a class="btn btn-secondary btn-sm" href="#">Baixar CSV</a>
+          <button class="btn btn-primary btn-sm" type="button" onclick="window.print()">Imprimir</button>
+        </div>
+      </div>
+
+      <article class="rel" aria-labelledby="rel-titulo">
+        <header class="rel-head">
+          <div>
+            <div class="tipo">RELATÓRIO DE ANDAMENTO</div>
+            <h1 id="rel-titulo">Laudo de infra TI</h1>
+            <p class="sub">início 01/09/2026 · término previsto 31/10/2026 · responsável EGD: Eugênio Diniz</p>
+          </div>
+          <div class="grande">
+            <div class="n">61<small>%</small></div>
+            <div class="l">11 de 18 entregas concluídas</div>
+          </div>
+        </header>
+
+        <section class="rel-sec" aria-labelledby="c1">
+          <h2 id="c1"><span class="num">01</span>Progresso por fase</h2>
+          <div class="fases">
+            <div class="fase"><div class="nome">Levantamento<small>01/09 – 15/09</small></div><div class="regua feito"><span style="width:100%"></span></div><div class="pct">7/7 · 100%</div></div>
+            <div class="fase"><div class="nome">Diagnóstico<small>16/09 – 09/10</small></div><div class="regua"><span style="width:57%"></span></div><div class="pct">4/7 · 57%</div></div>
+            <div class="fase"><div class="nome">Laudo e recomendações<small>10/10 – 31/10</small></div><div class="regua"><span style="width:0%"></span></div><div class="pct">0/4 · 0%</div></div>
+          </div>
+        </section>
+
+        <section class="rel-sec" aria-labelledby="c2">
+          <h2 id="c2"><span class="num">02</span>Marcos</h2>
+          <table class="tab">
+            <thead><tr><th>Marco</th><th>Previsto</th><th>Situação</th></tr></thead>
+            <tbody>
+              <tr><td>Kickoff com a TI do cliente</td><td class="mono">02/09/2026</td><td><span class="status ok">concluído em 02/09</span></td></tr>
+              <tr><td>Levantamento aprovado</td><td class="mono">15/09/2026</td><td><span class="status ok">concluído em 17/09</span></td></tr>
+              <tr><td>Laudo preliminar</td><td class="mono">09/10/2026</td><td><span class="status info">em 9 dias</span></td></tr>
+              <tr><td>Entrega do laudo final</td><td class="mono">31/10/2026</td><td><span class="status">pendente</span></td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="rel-sec" aria-labelledby="c3">
+          <h2 id="c3"><span class="num">03</span>Em andamento e próximas entregas</h2>
+          <table class="tab">
+            <thead><tr><th>Entrega</th><th>Fase</th><th>Status</th><th>Prazo</th></tr></thead>
+            <tbody>
+              <tr><td>Inventário dos switches do bloco B</td><td>Diagnóstico</td><td>em progresso</td><td class="mono">22/09/2026 <span class="atraso">· atrasada</span></td></tr>
+              <tr><td>Acesso ao firewall do data center</td><td>Diagnóstico</td><td><span class="badge badge-warn">em espera</span></td><td class="mono">03/10/2026</td></tr>
+              <tr><td>Relatório de vulnerabilidades</td><td>Diagnóstico</td><td>a fazer</td><td class="mono">07/10/2026</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="rel-sec" aria-labelledby="c4">
+          <h2 id="c4"><span class="num">04</span>Horas dedicadas</h2>
+          <div class="cotas-rel" style="grid-template-columns:repeat(4,1fr)">
+            <div><div class="k">Total</div><div class="v">86<small>h</small> 30<small>min</small></div></div>
+            <div><div class="k">Levantamento</div><div class="v">31<small>h</small></div></div>
+            <div><div class="k">Diagnóstico</div><div class="v">52<small>h</small> 30<small>min</small></div></div>
+            <div><div class="k">Sem fase</div><div class="v">3<small>h</small></div></div>
+          </div>
+          <p class="nota">Esta seção só aparece quando o projeto está configurado para mostrar horas ao cliente.</p>
+        </section>
+
+        <section class="rel-sec" aria-labelledby="c5">
+          <h2 id="c5"><span class="num">05</span>Atas compartilhadas</h2>
+          <table class="tab">
+            <thead><tr><th>Data</th><th>Reunião</th><th>Decisões</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">24/09/2026</td><td><a class="link" href="#">Revisão do diagnóstico</a></td><td>Priorizar o failover do link; cliente libera acesso ao firewall até 03/10.</td></tr>
+              <tr><td class="mono">10/09/2026</td><td><a class="link" href="#">Fechamento do levantamento</a></td><td>Escopo do laudo inclui o almoxarifado.</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <footer class="carimbo">
+          <div><div class="k">Projeto</div><div class="v">Laudo de infra TI</div></div>
+          <div><div class="k">Cliente</div><div class="v">Construtora Vale Norte</div></div>
+          <div><div class="k">Emitido em</div><div class="v">30/09/2026 14:20</div></div>
+          <div><div class="k">Versão</div><div class="v">cliente</div></div>
+          <div><div class="k">Emitente</div><div class="v">EGD Consultoria &amp; Tecnologia</div></div>
+        </footer>
+      </article>
+
+      <div class="anot">Mockup. O cliente só vê entregas marcadas como visíveis e atas compartilhadas; os números (61%, 18 entregas) contam apenas essas. Nada em reais. "Bloqueada" aparece como "em espera", como no resto do portal. A seção de horas depende da chave "Mostrar horas ao cliente" no projeto. O CSV traz uma linha por entrega visível: fase, entrega, status, prazo e concluída em.</div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

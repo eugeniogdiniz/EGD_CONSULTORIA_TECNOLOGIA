@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Relatórios · Portfólio · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<link rel="stylesheet" href="relatorio.css">
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <a class="item" href="#">Demandas</a>
+    <a class="item" href="admin-projetos-lista.html">Projetos</a>
+    <a class="item" href="#">Atas</a>
+    <a class="item" href="admin-relatorios-portfolio.html" aria-current="page">Relatórios</a>
+    <a class="item" href="#">Solicitações</a>
+    <a class="item" href="#">Arquivos</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo">Relatórios</div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <nav class="abas" aria-label="Relatórios">
+        <a href="admin-relatorios-portfolio.html" aria-current="page">Portfólio</a>
+        <a href="admin-relatorios-semanal.html">Semanal</a>
+      </nav>
+
+      <div class="barra">
+        <p class="muted small" style="margin:0">Projetos em planejamento, ativos e pausados. O relatório de cada projeto fica na aba "Relatório" dele.</p>
+        <div class="acoes">
+          <a class="btn btn-secondary btn-sm" href="#">Baixar CSV</a>
+          <button class="btn btn-primary btn-sm" type="button" onclick="window.print()">Imprimir</button>
+        </div>
+      </div>
+
+      <article class="rel" aria-labelledby="rel-titulo">
+        <header class="rel-head">
+          <div>
+            <div class="tipo">PORTFÓLIO DE PROJETOS</div>
+            <h1 id="rel-titulo">5 projetos em andamento</h1>
+            <p class="sub">4 ativos · 1 pausado · 0 em planejamento</p>
+          </div>
+          <div class="grande">
+            <div class="n" style="color:var(--danger)">7</div>
+            <div class="l">entregas atrasadas no total</div>
+          </div>
+        </header>
+
+        <section class="rel-sec" aria-labelledby="p1">
+          <h2 id="p1"><span class="num">01</span>Projetos <span class="dir">ordenados por atrasadas, depois por prazo</span></h2>
+          <div style="overflow-x:auto">
+          <table class="tab">
+            <thead><tr><th>Projeto</th><th>Status</th><th>Progresso</th><th>Próximo marco</th><th class="n">Atrasadas</th><th class="n">Bloqueadas</th><th class="n">Horas</th><th>Orçamento consumido</th></tr></thead>
+            <tbody>
+              <tr><td class="proj"><a class="link" href="admin-projeto-relatorio.html">Laudo de infra TI</a><small>Construtora Vale Norte</small></td><td><span class="status ok">Ativo</span></td><td><span class="mini"><span style="width:58%"></span></span><span class="mono small">58%</span></td><td>Laudo preliminar<br><span class="faint mono small">09/10</span></td><td class="n" style="color:var(--danger);font-weight:600">3</td><td class="n">1</td><td class="n">86,5</td><td><span class="mini warn"><span style="width:74%"></span></span><span class="mono small">74%</span></td></tr>
+              <tr><td class="proj"><a class="link" href="#">Portal de obras</a><small>Grupo Aurora</small></td><td><span class="status ok">Ativo</span></td><td><span class="mini"><span style="width:35%"></span></span><span class="mono small">35%</span></td><td>Protótipo aprovado<br><span class="faint mono small">14/10</span></td><td class="n" style="color:var(--danger);font-weight:600">2</td><td class="n">0</td><td class="n">120,0</td><td><span class="mini err"><span style="width:100%"></span></span><span class="mono small" style="color:var(--danger)">96%</span></td></tr>
+              <tr><td class="proj"><a class="link" href="#">Automação de medições</a><small>Bonin Engenharia</small></td><td><span class="status ok">Ativo</span></td><td><span class="mini"><span style="width:80%"></span></span><span class="mono small">80%</span></td><td>Go-live<br><span class="faint mono small">20/10</span></td><td class="n" style="color:var(--danger);font-weight:600">1</td><td class="n">0</td><td class="n">42,0</td><td><span class="mini"><span style="width:51%"></span></span><span class="mono small">51%</span></td></tr>
+              <tr><td class="proj"><a class="link" href="#">BI de suprimentos</a><small>Construtora Vale Norte</small></td><td><span class="status ok">Ativo</span></td><td><span class="mini"><span style="width:12%"></span></span><span class="mono small">12%</span></td><td>Modelo de dados<br><span class="faint mono small">28/10</span></td><td class="n">0</td><td class="n">0</td><td class="n">9,5</td><td><span class="faint small">sem orçamento</span></td></tr>
+              <tr><td class="proj"><a class="link" href="#">Migração de e-mail</a><small>Clínica Serra</small></td><td><span class="status warn">Pausado</span></td><td><span class="mini"><span style="width:40%"></span></span><span class="mono small">40%</span></td><td><span class="faint">sem marco pendente</span></td><td class="n" style="color:var(--danger);font-weight:600">1</td><td class="n">0</td><td class="n">14,0</td><td><span class="mini"><span style="width:30%"></span></span><span class="mono small">30%</span></td></tr>
+            </tbody>
+          </table>
+          </div>
+          <p class="nota">Orçamento consumido = (custo de horas + despesas) ÷ orçamento. Acima de 90% fica em vermelho; entre 70% e 90%, em amarelo.</p>
+        </section>
+
+        <footer class="carimbo">
+          <div><div class="k">Relatório</div><div class="v">Portfólio</div></div>
+          <div><div class="k">Escopo</div><div class="v">projetos não arquivados</div></div>
+          <div><div class="k">Emitido em</div><div class="v">30/09/2026 14:20</div></div>
+          <div><div class="k">Versão</div><div class="v">interna</div></div>
+          <div><div class="k">Emitente</div><div class="v">EGD Consultoria &amp; Tecnologia</div></div>
+        </footer>
+      </article>
+
+      <div class="anot">Mockup. O CSV traz uma linha por projeto com as mesmas colunas, mais orçamento, custo de horas e despesas em reais. Estado vazio: "Nenhum projeto em andamento. Projetos entregues e cancelados não entram no portfólio."</div>
+    </main>
+  </div>
+</div>
+</body>
+</html>
