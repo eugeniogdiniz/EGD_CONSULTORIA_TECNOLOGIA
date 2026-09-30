@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 /** Baixar CSV e Imprimir. Some na impressão. */
 export function ReportToolbar({ csvHref, note, children }: { csvHref: string; note?: ReactNode; children?: ReactNode }) {
@@ -9,9 +9,10 @@ export function ReportToolbar({ csvHref, note, children }: { csvHref: string; no
     <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
       {children ?? <p className="text-sm text-muted-foreground">{note}</p>}
       <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" size="sm" render={<a href={csvHref} download />}>
+        {/* Link de verdade (não role="button"): baixar um arquivo é navegação. */}
+        <a href={csvHref} download className={buttonVariants({ variant: "secondary", size: "sm" })}>
           Baixar CSV
-        </Button>
+        </a>
         <Button size="sm" type="button" onClick={() => window.print()}>
           Imprimir
         </Button>

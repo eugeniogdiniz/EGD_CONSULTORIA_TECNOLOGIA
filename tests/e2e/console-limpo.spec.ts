@@ -42,6 +42,9 @@ test("telas do admin não geram erro nem aviso no console", async ({ page }) => 
     "/admin/atas",
     "/admin/atas/nova",
     `/admin/projetos/${p.id}/atas`,
+    `/admin/projetos/${p.id}/relatorio`,
+    "/admin/relatorios",
+    "/admin/relatorios/semanal",
     "/admin/conta",
   ];
   for (const url of urls) {
@@ -68,6 +71,7 @@ test("telas do portal não geram erro nem aviso no console", async ({ page }) =>
     "/portal/solicitacoes",
     "/portal/solicitacoes/nova",
     "/portal/atas",
+    `/portal/projetos/${p.id}/relatorio`,
     "/portal/conta",
   ]) {
     await page.goto(url);

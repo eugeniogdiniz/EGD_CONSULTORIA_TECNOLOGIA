@@ -6,9 +6,11 @@ import { addDays, formatBr, formatBrShort, parseWeekParam, todayInSaoPaulo } fro
 import { EmptyLine, ReportSection, ReportSheet } from "@/modules/reports/components/report-sheet";
 import { ReportToolbar } from "@/modules/reports/components/report-toolbar";
 import { issuedAt } from "@/modules/reports/components/report-bits";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export const metadata = { title: "Relatórios · Semanal" };
+
+const nav = buttonVariants({ variant: "secondary", size: "sm" });
 
 function Column({ title, items, empty }: { title: string; items: WeeklyItem[]; empty: string }) {
   return (
@@ -51,17 +53,17 @@ export default async function SemanalPage({ searchParams }: PageProps<"/admin/re
     <>
       <ReportToolbar csvHref={`/admin/relatorios/semanal/csv?semana=${monday}`}>
         <nav aria-label="Semana" className="flex flex-wrap items-center gap-2">
-          <Button variant="secondary" size="sm" aria-label="Semana anterior" render={<Link href={`/admin/relatorios/semanal?semana=${addDays(monday, -7)}`} />}>
+          <Link className={nav} aria-label="Semana anterior" href={`/admin/relatorios/semanal?semana=${addDays(monday, -7)}`}>
             ←
-          </Button>
+          </Link>
           <span data-testid="semana-rotulo" className="px-2 font-mono text-sm">{periodo}</span>
-          <Button variant="secondary" size="sm" aria-label="Próxima semana" render={<Link href={`/admin/relatorios/semanal?semana=${addDays(monday, 7)}`} />}>
+          <Link className={nav} aria-label="Próxima semana" href={`/admin/relatorios/semanal?semana=${addDays(monday, 7)}`}>
             →
-          </Button>
+          </Link>
           {!semanaAtual && (
-            <Button variant="secondary" size="sm" render={<Link href="/admin/relatorios/semanal" />}>
+            <Link className={nav} href="/admin/relatorios/semanal">
               Esta semana
-            </Button>
+            </Link>
           )}
         </nav>
       </ReportToolbar>
