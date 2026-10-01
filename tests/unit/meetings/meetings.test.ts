@@ -41,6 +41,7 @@ describe("data/hora local (Brasília)", () => {
     expect(parseLocalDateTime("")).toBeNull();
     expect(parseLocalDateTime("01/10/2026 14:30")).toBeNull();
     expect(parseLocalDateTime("2026-13-01T14:30")).toBeNull();
+    expect(parseLocalDateTime("2026-02-30T14:30")).toBeNull();
   });
 
   it("ida e volta", () => {
@@ -86,5 +87,16 @@ describe("validação da ata", () => {
     });
     expect(r.success && r.data.priority).toBe("medium");
     expect(r.success && r.data.dueAt).toBeNull();
+  });
+
+  it("item de ação recusa prazo que não existe no calendário", () => {
+    const r = actionItemSchema.safeParse({
+      meetingId: "0b9d6c52-8a4c-4c7e-9f7e-1d2a3b4c5d6e",
+      projectId: "0b9d6c52-8a4c-4c7e-9f7e-1d2a3b4c5d6f",
+      title: "Enviar cronograma",
+      dueAt: "2026-02-30",
+    });
+    expect(r.success).toBe(false);
+    if (!r.success) expect(r.error.issues[0].path).toEqual(["dueAt"]);
   });
 });

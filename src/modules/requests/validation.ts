@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isIsoDate } from "@/lib/iso-date";
 import { PRIORITIES } from "@/modules/projects/priority";
 
 const optionalUuid = z
@@ -23,7 +24,7 @@ const optionalIsoDate = z
   .string()
   .optional()
   .transform((v) => (v ?? "").trim())
-  .refine((v) => v === "" || /^\d{4}-\d{2}-\d{2}$/.test(v), "Data no formato AAAA-MM-DD")
+  .refine((v) => v === "" || isIsoDate(v), "Data inválida (AAAA-MM-DD)")
   .transform((v) => (v === "" ? null : v));
 
 export const convertRequestSchema = z.object({

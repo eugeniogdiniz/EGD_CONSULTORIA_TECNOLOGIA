@@ -25,7 +25,7 @@ function Column({ title, items, empty }: { title: string; items: WeeklyItem[]; e
           {items.map((i, n) => (
             <li key={`${i.kind}-${i.title}-${n}`} className="flex justify-between gap-2.5 py-1">
               <span>
-                {i.kind === "milestone" && <span aria-label="marco" className="mr-1.5 align-[1px] text-[9px] text-signal-strong">◆</span>}
+                {i.kind === "milestone" && <span role="img" aria-label="marco" className="mr-1.5 align-[1px] text-[9px] text-signal-strong">◆</span>}
                 {i.title}
               </span>
               {i.daysLate !== null ? (

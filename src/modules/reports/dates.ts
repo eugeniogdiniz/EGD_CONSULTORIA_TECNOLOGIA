@@ -2,13 +2,14 @@
  * Datas dos relatórios. Tudo em 'YYYY-MM-DD'; "hoje" e semanas no fuso de
  * Brasília, não no do servidor. A aritmética é feita em UTC (sem horário de verão).
  */
+import { isIsoDate } from "@/lib/iso-date";
+
 const SP = new Intl.DateTimeFormat("en-CA", {
   timeZone: "America/Sao_Paulo",
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
 });
-const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
 export const dateInSaoPaulo = (d: Date): string => SP.format(d);
 export const todayInSaoPaulo = (now: Date = new Date()): string => dateInSaoPaulo(now);
@@ -31,12 +32,10 @@ export function mondayOf(iso: string): string {
   return addDays(iso, dow === 0 ? -6 : 1 - dow);
 }
 
-const isValidIso = (v: string) => ISO.test(v) && !Number.isNaN(toUtc(v).getTime()) && fromUtc(toUtc(v)) === v;
-
 /** `?semana=` vira a segunda-feira da semana pedida; inválido ou ausente, a de hoje. */
 export function parseWeekParam(v: string | string[] | undefined, today: string): string {
   const raw = Array.isArray(v) ? v[0] : v;
-  return mondayOf(raw && isValidIso(raw) ? raw : today);
+  return mondayOf(raw && isIsoDate(raw) ? raw : today);
 }
 
 /** Semana ISO 8601: a semana pertence ao ano da sua quinta-feira. */

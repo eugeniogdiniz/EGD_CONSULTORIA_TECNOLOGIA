@@ -1,5 +1,7 @@
 /** Regras puras das atas: participantes externos e data/hora local. Sem banco. */
 
+import { isIsoDate } from "@/lib/iso-date";
+
 export type ExternalParticipant = { name: string; organization: string | null };
 
 /**
@@ -43,7 +45,7 @@ const SAO_PAULO_OFFSET = "-03:00";
  */
 export function parseLocalDateTime(v: string): Date | null {
   const m = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})(:\d{2})?$/.exec(v.trim());
-  if (!m) return null;
+  if (!m || !isIsoDate(m[1])) return null;
   const d = new Date(`${m[1]}T${m[2]}${m[3] ?? ":00"}${SAO_PAULO_OFFSET}`);
   return Number.isNaN(d.getTime()) ? null : d;
 }

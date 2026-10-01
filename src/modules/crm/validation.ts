@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isIsoDate } from "@/lib/iso-date";
 import { normalizeEmail } from "@/modules/auth/normalize-email";
 
 const CURRENCY = ["BRL"] as const;
@@ -36,7 +37,7 @@ const isoDate = z
   .string()
   .optional()
   .transform((v) => (v ?? "").trim())
-  .refine((v) => v === "" || /^\d{4}-\d{2}-\d{2}$/.test(v), "Data no formato AAAA-MM-DD")
+  .refine((v) => v === "" || isIsoDate(v), "Data inválida (AAAA-MM-DD)")
   .transform((v) => (v === "" ? null : v));
 
 const isoDateTime = z.coerce.date({ error: "Data e hora inválidas" });
