@@ -12,7 +12,7 @@ export function OrganizationForm<T>({
   initial,
 }: {
   action: (prev: ActionResult<T> | null, fd: FormData) => Promise<ActionResult<T> | null>;
-  initial?: { id: string; name: string; cnpj: string | null; slug: string };
+  initial?: { id: string; name: string; cnpj: string | null; slug: string; weeklyDigest: boolean };
 }) {
   const [state, formAction, pending] = useActionState<ActionResult<T> | null, FormData>(action, null);
   const fe = state && !state.ok ? state.fieldErrors : undefined;
@@ -38,6 +38,20 @@ export function OrganizationForm<T>({
         <Input id="slug" name="slug" defaultValue={initial?.slug} className="font-mono" aria-invalid={fe?.slug ? true : undefined} />
         <FieldError errors={fe?.slug} />
       </div>
+      {initial && (
+        <div className="grid gap-1.5">
+          <input type="hidden" name="weeklyDigestField" value="1" />
+          <label className="flex items-start gap-2 text-sm">
+            <input type="checkbox" name="weeklyDigest" defaultChecked={initial.weeklyDigest} className="mt-0.5" />
+            <span>
+              Resumo semanal por e-mail
+              <span className="block text-xs text-muted-foreground">
+                Toda segunda, os membros ativos recebem o andamento dos projetos visíveis no portal. Eles também podem ligar ou desligar em Minha conta.
+              </span>
+            </span>
+          </label>
+        </div>
+      )}
       {state && !state.ok && !fe && (
         <p role="alert" className="text-sm text-danger">
           {state.error}

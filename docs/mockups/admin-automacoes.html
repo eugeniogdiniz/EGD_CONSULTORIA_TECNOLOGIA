@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Admin · Automações · EGD</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..600&family=Fragment+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="mockup.css">
+<link rel="stylesheet" href="relatorio.css">
+<style>
+  .switch { display: inline-flex; align-items: center; gap: 8px; font-size: var(--text-small); color: var(--fg-muted); cursor: pointer; }
+  .switch input { appearance: none; width: 34px; height: 20px; border-radius: 10px; background: var(--border-strong); position: relative; margin: 0; cursor: pointer; }
+  .switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+  .switch input:checked { background: var(--success); }
+  .switch input:checked::after { left: 16px; }
+  .acoes-linha { display: flex; gap: 6px; white-space: nowrap; }
+  .resumo { font-size: var(--text-small); color: var(--fg-muted); }
+  .resumo .mono { display: block; color: var(--fg-faint); margin-top: 2px; }
+  td.quando { white-space: nowrap; }
+  .hist td { vertical-align: top; }
+  .erro { color: var(--danger); font-family: var(--font-mono); font-size: var(--text-micro); max-width: 28rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+  .previa-head { display: grid; grid-template-columns: 120px 1fr; gap: 6px 16px; font-size: var(--text-small); padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .previa-head .k { color: var(--fg-faint); font-family: var(--font-mono); font-size: var(--text-micro); }
+  .previa-frame { background: #fff; padding: 24px; }
+  .mail { font-family: Georgia, 'Times New Roman', serif; max-width: 560px; margin: 0 auto; color: #111; line-height: 1.5; font-size: 15px; }
+  .mail h1 { font-size: 20px; margin: 0 0 16px; }
+  .mail h2 { font-size: 15px; margin: 20px 0 6px; text-transform: uppercase; letter-spacing: .04em; color: #555; }
+  .mail table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  .mail td { padding: 4px 8px 4px 0; vertical-align: top; border-bottom: 1px solid #eee; }
+  .mail .late { color: #b42318; font-weight: 600; }
+  .mail .foot { margin-top: 32px; font-size: 12px; color: #666; }
+</style>
+</head>
+<body class="theme-app">
+<div class="app">
+  <aside class="sidebar" aria-label="Menu do administrador">
+    <a class="logo" href="#"><span class="mark"></span>EGD</a>
+    <a class="item" href="#">Painel</a>
+    <a class="item" href="#">Demandas</a>
+    <a class="item" href="admin-projetos-lista.html">Projetos</a>
+    <a class="item" href="#">Atas</a>
+    <a class="item" href="admin-relatorios-portfolio.html">Relatórios</a>
+    <a class="item" href="#">Solicitações</a>
+    <a class="item" href="#">Arquivos</a>
+    <a class="item" href="#">API</a>
+    <a class="item" href="#" aria-current="page">Automações</a>
+    <a class="item" href="#">Auditoria</a>
+    <div class="rodape">Portal administrativo</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="titulo">Automações</div>
+      <div class="user"><span>Eugênio</span><span class="avatar">E</span></div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="h1">Automações</h1>
+          <div class="small muted" style="margin-top:6px">O que o sistema faz sozinho: resumos por e-mail e propostas vencidas. Horários em Brasília.</div>
+        </div>
+      </div>
+
+      <div class="alert ok" role="status" style="margin:16px 0 20px">
+        <strong>Agendador ligado neste servidor.</strong> Último tique há 40 s · próxima automação: Resumo diário da equipe, amanhã às 08:00.
+      </div>
+
+      <!-- Variante quando JOBS_ENABLED está desligado:
+      <div class="alert warn" role="status"><strong>Agendador desligado</strong> (JOBS_ENABLED). As automações só rodam por "Enviar agora".</div>
+      -->
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Automação</th><th>Quando</th><th>Para quem</th><th>Ligada</th><th>Última execução</th><th>Ações</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Expirar propostas vencidas</strong><div class="micro faint" style="margin-top:2px">Propostas enviadas com validade passada viram "Expirada".</div></td>
+              <td class="quando">todo dia, 07:30</td>
+              <td class="muted">ninguém (entra no resumo diário)</td>
+              <td><label class="switch"><input type="checkbox" checked aria-label="Ligada"></label></td>
+              <td class="resumo"><span class="status ok">hoje, 07:30</span><span class="mono">2 propostas expiradas</span></td>
+              <td class="acoes-linha"><a class="btn btn-secondary btn-sm" href="#previa">Prévia</a><button class="btn btn-secondary btn-sm" type="button">Executar agora</button></td>
+            </tr>
+            <tr>
+              <td><strong>Resumo diário da equipe</strong><div class="micro faint" style="margin-top:2px">Atrasadas, vencem hoje e nos próximos 7 dias, solicitações aguardando, propostas.</div></td>
+              <td class="quando">seg–sex, 08:00</td>
+              <td class="mono">admin@egdsystem.com.br</td>
+              <td><label class="switch"><input type="checkbox" checked aria-label="Ligada"></label></td>
+              <td class="resumo"><span class="status ok">hoje, 08:00</span><span class="mono">1 e-mail enviado · 3 atrasadas, 2 vencem hoje</span></td>
+              <td class="acoes-linha"><a class="btn btn-secondary btn-sm" href="#previa">Prévia</a><button class="btn btn-primary btn-sm" type="button">Enviar agora</button></td>
+            </tr>
+            <tr>
+              <td><strong>Relatório semanal da equipe</strong><div class="micro faint" style="margin-top:2px">O semanal da semana que fechou, por projeto.</div></td>
+              <td class="quando">segunda, 08:15</td>
+              <td class="mono">admin@egdsystem.com.br</td>
+              <td><label class="switch"><input type="checkbox" checked aria-label="Ligada"></label></td>
+              <td class="resumo"><span class="status ok">seg 28/09, 08:15</span><span class="mono">1 e-mail enviado · semana 2026-S39</span></td>
+              <td class="acoes-linha"><a class="btn btn-secondary btn-sm" href="#previa">Prévia</a><button class="btn btn-primary btn-sm" type="button">Enviar agora</button></td>
+            </tr>
+            <tr>
+              <td><strong>Andamento semanal para clientes</strong><div class="micro faint" style="margin-top:2px">Só para organizações com o resumo ligado. Nunca mostra valores nem entregas internas.</div></td>
+              <td class="quando">segunda, 09:00</td>
+              <td class="muted">2 organizações · 5 pessoas</td>
+              <td><label class="switch"><input type="checkbox" aria-label="Ligada"></label></td>
+              <td class="resumo"><span class="status err">seg 28/09, 09:00</span><span class="mono">falhou na 3ª tentativa: SMTP recusou conexão</span></td>
+              <td class="acoes-linha"><a class="btn btn-secondary btn-sm" href="#previa">Prévia</a><button class="btn btn-primary btn-sm" type="button">Enviar agora</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted" style="margin:10px 0 0">Enviar agora manda de verdade, agora, com os dados atuais, e não substitui a execução agendada do dia. Desligar uma automação não apaga o histórico.</p>
+
+      <section class="bloco" style="margin-top:32px">
+        <div class="bloco-head"><h3>Histórico</h3><span class="small muted">últimas 30 execuções</span></div>
+        <div class="table-wrap hist" style="border:0;border-radius:0">
+          <table>
+            <thead><tr><th>Quando</th><th>Automação</th><th>Gatilho</th><th>Status</th><th class="num">Duração</th><th>Resumo</th></tr></thead>
+            <tbody>
+              <tr><td class="quando muted">02/10 08:00</td><td>Resumo diário da equipe</td><td class="muted">agendada</td><td><span class="badge badge-ok">ok</span></td><td class="num mono">1,8 s</td><td class="resumo">1 e-mail enviado · 3 atrasadas, 2 vencem hoje, 1 solicitação aguardando</td></tr>
+              <tr><td class="quando muted">02/10 07:30</td><td>Expirar propostas vencidas</td><td class="muted">agendada</td><td><span class="badge badge-ok">ok</span></td><td class="num mono">0,2 s</td><td class="resumo">2 propostas expiradas: PROP-26-014, PROP-26-017</td></tr>
+              <tr><td class="quando muted">01/10 16:42</td><td>Resumo diário da equipe</td><td class="muted">manual · Eugênio</td><td><span class="badge badge-ok">ok</span></td><td class="num mono">1,6 s</td><td class="resumo">1 e-mail enviado</td></tr>
+              <tr><td class="quando muted">01/10 08:00</td><td>Resumo diário da equipe</td><td class="muted">agendada</td><td><span class="badge badge-ok">ok</span></td><td class="num mono">1,1 s</td><td class="resumo">nada a enviar</td></tr>
+              <tr><td class="quando muted">28/09 09:02</td><td>Andamento semanal para clientes</td><td class="muted">agendada · 3ª tentativa</td><td><span class="badge badge-err">erro</span></td><td class="num mono">30,0 s</td><td><span class="erro">Error: connect ECONNREFUSED 187.127.51.52:587 — smtp.hostinger.com</span></td></tr>
+              <tr><td class="quando muted">28/09 09:01</td><td>Andamento semanal para clientes</td><td class="muted">agendada · 2ª tentativa</td><td><span class="badge badge-err">erro</span></td><td class="num mono">30,0 s</td><td><span class="erro">Error: connect ECONNREFUSED 187.127.51.52:587 — smtp.hostinger.com</span></td></tr>
+              <tr><td class="quando muted">28/09 08:15</td><td>Relatório semanal da equipe</td><td class="muted">agendada</td><td><span class="badge badge-ok">ok</span></td><td class="num mono">2,3 s</td><td class="resumo">1 e-mail enviado · semana 2026-S39: 9 concluídos, 6 vencem, 3 atrasados</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ─── Prévia (rota /admin/automacoes/resumo-diario/previa) ─────────── -->
+      <h2 id="previa" class="h1" style="font-size:1.25rem;margin:40px 0 12px">Prévia · Resumo diário da equipe</h2>
+      <div class="small muted" style="margin-bottom:12px"><a class="link" href="#">← Automações</a> · Renderizado agora com os dados atuais. Nada foi enviado.</div>
+      <section class="bloco">
+        <div class="previa-head">
+          <span class="k">Assunto</span><span>Resumo de 02/10: 3 atrasadas, 2 vencem hoje, 1 solicitação aguardando</span>
+          <span class="k">Para</span><span class="mono">admin@egdsystem.com.br</span>
+          <span class="k">Enviaria?</span><span class="status ok">sim, há conteúdo</span>
+        </div>
+        <div class="previa-frame" aria-label="Prévia do e-mail (iframe sandbox na implementação)">
+          <div class="mail">
+            <h1>Resumo de quinta, 02/10/2026</h1>
+            <h2>Atrasadas (3)</h2>
+            <table>
+              <tr><td>Laudo de infra TI</td><td>Relatório de vulnerabilidades</td><td>urgente</td><td class="late">4 dias</td><td>Eugênio</td></tr>
+              <tr><td>Portal de obras</td><td>Protótipo da tela de medições</td><td>alta</td><td class="late">2 dias</td><td>Eugênio</td></tr>
+              <tr><td>Portal de obras</td><td>Revisão do modelo de dados</td><td>média</td><td class="late">1 dia</td><td>—</td></tr>
+            </table>
+            <h2>Vencem hoje (2)</h2>
+            <table>
+              <tr><td>Automação de medições</td><td>Homologação com o cliente</td><td>alta</td><td>Eugênio</td></tr>
+              <tr><td>BI de suprimentos</td><td>◆ Modelo de dados aprovado</td><td>marco</td><td></td></tr>
+            </table>
+            <h2>Próximos 7 dias (4)</h2>
+            <table>
+              <tr><td>06/10</td><td>Laudo de infra TI</td><td>Laudo preliminar</td></tr>
+              <tr><td>07/10</td><td>Portal de obras</td><td>◆ Protótipo aprovado</td></tr>
+              <tr><td>09/10</td><td>Automação de medições</td><td>Treinamento da equipe</td></tr>
+              <tr><td>09/10</td><td>Automação de medições</td><td>Manual do usuário</td></tr>
+            </table>
+            <h2>Solicitações aguardando a equipe (1)</h2>
+            <table>
+              <tr><td>Grupo Aurora</td><td>Acesso para o novo engenheiro</td><td class="late">há 3 dias úteis</td></tr>
+            </table>
+            <h2>Propostas</h2>
+            <table>
+              <tr><td>PROP-26-021</td><td>Diagnóstico de TI — Clínica Serra</td><td>vence em 3 dias (05/10)</td></tr>
+              <tr><td>PROP-26-014</td><td>Portal de fornecedores — Vale Norte</td><td>expirada em 02/10</td></tr>
+            </table>
+            <p style="margin-top:20px">Demandas urgentes em aberto: <strong>2</strong>.</p>
+            <p>Abrir: demandas · solicitações · propostas</p>
+            <p class="foot">EGD Consultoria &amp; Tecnologia · egdsystem.com.br</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="anot" style="margin-top:16px">Mockup. A prévia real é um <code>iframe sandbox</code> com o HTML exato do e-mail. Para "Andamento semanal para clientes" a prévia tem um seletor de organização (entre as que ligaram o resumo); para "Expirar propostas" mostra a tabela do que seria expirado. "Enviar agora" pede confirmação e fica desabilitado enquanto há execução em andamento.</div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

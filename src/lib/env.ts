@@ -19,6 +19,8 @@ const schema = z.object({
   S3_BUCKET: z.string().min(1),
   S3_ACCESS_KEY: z.string().min(1),
   S3_SECRET_KEY: z.string().min(1),
+  /** Agendador das automações: "1" liga, "0" desliga. Sem valor: ligado só em produção. */
+  JOBS_ENABLED: z.enum(["0", "1"]).optional(),
   SEED_ADMIN_EMAIL: z.email().optional(),
   SEED_ADMIN_PASSWORD: z.string().min(10).optional(),
 });

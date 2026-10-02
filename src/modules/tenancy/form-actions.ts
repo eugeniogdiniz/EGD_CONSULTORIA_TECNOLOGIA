@@ -13,7 +13,13 @@ type S<T = null> = ActionResult<T> | null;
 
 function orgInput(fd: FormData) {
   const slug = String(fd.get("slug") ?? "").trim();
-  return { name: String(fd.get("name") ?? ""), cnpj: String(fd.get("cnpj") ?? ""), slug: slug || undefined };
+  return {
+    name: String(fd.get("name") ?? ""),
+    cnpj: String(fd.get("cnpj") ?? ""),
+    slug: slug || undefined,
+    // o campo só existe no formulário de edição; na criação fica indefinido (padrão do banco: desligado)
+    weeklyDigest: fd.has("weeklyDigestField") ? fd.get("weeklyDigest") === "on" : undefined,
+  };
 }
 
 export async function createOrganizationForm(_p: S<{ id: string }>, fd: FormData): Promise<S<{ id: string }>> {

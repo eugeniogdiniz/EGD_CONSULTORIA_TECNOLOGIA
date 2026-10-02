@@ -5,7 +5,7 @@ import { organizations, memberships, invitations, users } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
 import { auth } from "@/lib/auth";
-import type { AdminContext } from "@/modules/auth/context";
+import type { AdminContext, PortalContext } from "@/modules/auth/context";
 import { sendInvitationEmail } from "@/modules/mail/send";
 import { organizationSchema, inviteSchema, acceptInvitationSchema, type OrganizationInput } from "./validation";
 import { slugify } from "./slug";
@@ -55,7 +55,12 @@ export async function updateOrganization(
 
   await db
     .update(organizations)
-    .set({ name: parsed.data.name, cnpj: parsed.data.cnpj, slug })
+    .set({
+      name: parsed.data.name,
+      cnpj: parsed.data.cnpj,
+      slug,
+      ...(parsed.data.weeklyDigest === undefined ? {} : { weeklyDigest: parsed.data.weeklyDigest }),
+    })
     .where(eq(organizations.id, id));
   await audit({
     actorId: ctx.user.id,
@@ -63,7 +68,31 @@ export async function updateOrganization(
     entityType: "organization",
     entityId: id,
     organizationId: id,
-    metadata: { name: parsed.data.name, slug, cnpj: parsed.data.cnpj },
+    metadata: { name: parsed.data.name, slug, cnpj: parsed.data.cnpj, ...(parsed.data.weeklyDigest === undefined ? {} : { weeklyDigest: parsed.data.weeklyDigest }) },
+  });
+  return ok(null);
+}
+
+/**
+ * Liga/desliga o andamento semanal por e-mail (Fase 13). O admin pode para
+ * qualquer organização; um membro do portal, só para a organização ativa.
+ */
+export async function setOrganizationWeeklyDigest(
+  ctx: AdminContext | PortalContext,
+  id: string,
+  enabled: boolean,
+): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Organização não encontrada.");
+  if (ctx.kind === "portal" && ctx.organization.id !== id) return fail("Organização não encontrada.");
+  const [row] = await db.update(organizations).set({ weeklyDigest: enabled }).where(eq(organizations.id, id)).returning({ id: organizations.id });
+  if (!row) return fail("Organização não encontrada.");
+  await audit({
+    actorId: ctx.user.id,
+    action: "organization.updated",
+    entityType: "organization",
+    entityId: id,
+    organizationId: id,
+    metadata: { weeklyDigest: enabled, by: ctx.kind },
   });
   return ok(null);
 }

@@ -36,8 +36,9 @@ jobs:
       - name: Build de produção
         run: npm run build
       - name: Servidor para os e2e
+        # JOBS_ENABLED=0: o agendador das automações não dispara e-mails durante os testes
         run: |
-          npm run start &
+          JOBS_ENABLED=0 npm run start &
           npx wait-on --timeout 120000 http://localhost:3000/api/health
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

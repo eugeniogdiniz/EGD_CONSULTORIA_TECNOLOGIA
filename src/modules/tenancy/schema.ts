@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, text, timestamp, uuid, primaryKey, index } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, text, timestamp, uuid, primaryKey, index, boolean } from "drizzle-orm/pg-core";
 import { users } from "@/modules/auth/schema";
 
 export const organizationStatus = pgEnum("organization_status", ["active", "inactive"]);
@@ -9,6 +9,8 @@ export const organizations = pgTable("organizations", {
   slug: text().notNull().unique(),
   cnpj: text(),
   status: organizationStatus().default("active").notNull(),
+  /** Andamento semanal por e-mail aos membros (Fase 13). Desligado até alguém ligar. */
+  weeklyDigest: boolean().default(false).notNull(),
   createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp({ withTimezone: true })
     .defaultNow()

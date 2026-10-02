@@ -78,6 +78,13 @@
       "when": 1790774808823,
       "tag": "0010_show_hours_to_client",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790981615898,
+      "tag": "0011_jobs",
+      "breakpoints": true
     }
   ]
 }

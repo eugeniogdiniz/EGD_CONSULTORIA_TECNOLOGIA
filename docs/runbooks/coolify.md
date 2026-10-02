@@ -168,3 +168,15 @@ node scripts/reset-2fa.mjs pessoa@empresa.com
 Isso apaga o segredo, desliga o 2FA, encerra as sessões da pessoa e registra `auth.2fa.reset` na auditoria. A pessoa entra só com a senha e reativa. Não há reset por e-mail, de propósito: ele recriaria o ponto fraco que o 2FA fecha.
 
 **E-mails para a equipe:** `ADMIN_NOTIFY_EMAIL` recebe leads (site e API), solicitações novas e respostas de clientes, e comentários de clientes em entregas. Falha de SMTP não derruba nada; só aparece no log (`mail.failed`).
+
+## 15. Automações (Fase 13)
+
+O agendador roda **dentro do container da aplicação**: a cada minuto confere, para cada automação ligada, se o período corrente (dia ou semana, em Brasília) está devido e ainda não foi executado. O livro-razão em `job_run` (índice único por automação, período e tentativa) garante uma execução por período mesmo com reinício ou com dois containers vivos durante um deploy. Não há cron no Coolify nem worker separado.
+
+- **Ligar em produção:** o padrão com `NODE_ENV=production` já é ligado. `JOBS_ENABLED=1` força; `JOBS_ENABLED=0` desliga (o CI usa `0` no servidor dos E2E). A tela `/admin/automacoes` diz se o agendador deste servidor está ligado e quando foi a última verificação.
+- **Horários (Brasília):** expirar propostas 07:30 todo dia; resumo diário da equipe 08:00 seg–sex; relatório semanal da equipe segunda 08:15; andamento semanal para clientes segunda 09:00 (só organizações com o resumo ligado, em `/admin/organizacoes/<id>` ou pelo cliente em `/portal/conta`).
+- **Servidor fora do ar no horário:** a automação roda no primeiro minuto em que o servidor voltar, desde que ainda seja o mesmo dia (ou a mesma semana). Períodos passados nunca são executados.
+- **Falha (SMTP fora, por exemplo):** até 3 tentativas por período, uma por minuto; depois a automação aparece em vermelho na tela com o erro. Resolva a causa e use **Enviar agora**, que executa de verdade sem depender do período.
+- **Prévia:** cada automação tem uma prévia que renderiza o e-mail com os dados atuais sem enviar; use antes de ligar o andamento semanal para um cliente.
+- **Logs:** `scheduler.started`, `scheduler.disabled`, `job.ok` e `job.failed` (JSON) em **Application → Logs**.
+
