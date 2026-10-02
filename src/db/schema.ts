@@ -10,3 +10,4 @@ export * from "@/modules/leads/schema";
 export * from "@/modules/files/schema";
 export * from "@/modules/api-keys/schema";
 export * from "@/modules/audit/schema";
+export * from "@/modules/jobs/schema";

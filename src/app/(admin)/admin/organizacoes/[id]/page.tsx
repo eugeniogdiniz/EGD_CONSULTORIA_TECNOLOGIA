@@ -157,7 +157,7 @@ export default async function OrganizacaoPage({ params }: PageProps<"/admin/orga
             <InviteForm organizationId={org.id} />
           </Block>
           <Block title="Dados">
-            <OrganizationForm action={updateOrganizationForm} initial={{ id: org.id, name: org.name, cnpj: org.cnpj, slug: org.slug }} />
+            <OrganizationForm action={updateOrganizationForm} initial={{ id: org.id, name: org.name, cnpj: org.cnpj, slug: org.slug, weeklyDigest: org.weeklyDigest }} />
           </Block>
         </div>
       </div>

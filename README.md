@@ -8,7 +8,7 @@ Site público e sistema (portal do cliente e portal administrativo) da EGD, em N
 - Módulos por domínio em `src/modules/*` (auth, tenancy, leads, files, audit, mail), cada um com `schema.ts` (Drizzle), `queries.ts` e `actions.ts`. Páginas nunca acessam o banco direto.
 - Better Auth para login por e-mail e senha; cadastro só por convite; autorização por `requireAdmin()` / `requirePortal()`.
 - Postgres 16 (Drizzle ORM), armazenamento S3-compatível (RustFS), SMTP para e-mail transacional.
-- Um container Docker que aplica migrations e sobe o servidor; deploy pelo Coolify a cada push na `main`.
+- Um container Docker que aplica migrations e sobe o servidor; deploy pelo Coolify a cada push na `main`. O agendador das automações (resumos por e-mail, propostas vencidas) roda dentro desse mesmo processo (`JOBS_ENABLED`; ver `docs/runbooks/coolify.md` §15).
 
 Documentos: spec em `docs/superpowers/specs/2026-09-27-fase-1-fundacao-design.md`, plano em `docs/superpowers/plans/2026-09-27-fase-1-fundacao.md`, design system em `docs/specs/design-system.md`, deploy em `docs/runbooks/coolify.md`.
 

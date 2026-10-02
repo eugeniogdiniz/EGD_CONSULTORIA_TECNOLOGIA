@@ -12,3 +12,9 @@ export async function validateEnvOrExit() {
     process.exit(1);
   }
 }
+
+/** Sobe o agendador das automações (Fase 13) quando `JOBS_ENABLED` permite. Só depois do env validado. */
+export async function startJobsScheduler() {
+  const { startSchedulerIfEnabled } = await import("@/modules/jobs/scheduler");
+  startSchedulerIfEnabled();
+}

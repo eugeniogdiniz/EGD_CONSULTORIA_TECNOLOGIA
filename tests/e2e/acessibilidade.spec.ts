@@ -38,6 +38,7 @@ test("admin sem violações de acessibilidade", async ({ page }) => {
     `/admin/projetos/${p.id}/entregas/${p.visible.id}`, "/admin/projetos/templates",
     `/admin/projetos/${p.id}/atas`, "/admin/atas", "/admin/atas/nova",
     `/admin/projetos/${p.id}/relatorio`, "/admin/relatorios", "/admin/relatorios/semanal",
+    "/admin/automacoes", "/admin/automacoes/resumo-diario/previa", "/admin/automacoes/propostas-expirar/previa",
   ]);
 });
 

@@ -4,16 +4,19 @@
  */
 export type MailContent = { subject: string; text: string; html: string };
 
-const ESCAPES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ESCAPES[c]);
+export const ESCAPES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+export const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ESCAPES[c]);
 
-function layout(title: string, body: string) {
+export function layout(title: string, body: string) {
   return `<!doctype html>
 <html lang="pt-BR">
-<body style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:24px;color:#111;line-height:1.5">
+<head><meta charset="utf-8"><title>${esc(title)}</title></head>
+<body style="margin:0;padding:0;color:#111">
+<main aria-label="E-mail" style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;padding:24px;line-height:1.5">
   <h1 style="font-size:20px;margin:0 0 16px">${esc(title)}</h1>
   ${body}
   <p style="margin-top:32px;font-size:12px;color:#666">EGD Consultoria &amp; Tecnologia · egdsystem.com.br</p>
+</main>
 </body>
 </html>`;
 }

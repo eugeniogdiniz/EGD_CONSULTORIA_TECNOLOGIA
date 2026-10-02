@@ -28,7 +28,18 @@ const nextConfig: NextConfig = {
   // upload de arquivos via server action: spec permite até 50 MB
   experimental: { serverActions: { bodySizeLimit: "52mb" } },
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    return [
+      { source: "/(.*)", headers: securityHeaders },
+      // Prévia dos e-mails das automações: documento servido para um iframe do próprio admin,
+      // sem script nem recurso externo. A última entrada vence para a mesma chave.
+      {
+        source: "/admin/automacoes/:job/previa/html",
+        headers: [
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Content-Security-Policy", value: "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'" },
+        ],
+      },
+    ];
   },
 };
 export default nextConfig;

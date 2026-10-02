@@ -19,6 +19,8 @@ export const organizationSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Use só letras minúsculas, números e hífen")
     .max(80)
     .optional(),
+  /** Andamento semanal por e-mail aos membros (Fase 13). */
+  weeklyDigest: z.boolean().optional(),
 });
 export type OrganizationInput = z.input<typeof organizationSchema>;
 
