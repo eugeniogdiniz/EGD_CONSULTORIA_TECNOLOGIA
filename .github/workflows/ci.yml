@@ -80,3 +80,20 @@ jobs:
             ${{ github.ref_name == 'main' && format('{0}:latest', steps.meta.outputs.image) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Com a imagem nova no GHCR, dispara o deploy no Coolify (runbook, seção 13).
+  # Secrets: COOLIFY_DEPLOY_URL (POST /api/v1/deploy?uuid=...) e COOLIFY_TOKEN
+  # (token de API com permissão "deploy"). Falha de migration no container
+  # mantém a versão anterior no ar.
+  deploy:
+    runs-on: ubuntu-latest
+    needs: image
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    steps:
+      - name: Dispara o deploy no Coolify
+        run: |
+          resposta=$(curl -fsS -X POST \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" \
+            "${{ secrets.COOLIFY_DEPLOY_URL }}")
+          echo "$resposta"
+          echo "$resposta" | grep -q deployment_uuid
