@@ -150,7 +150,7 @@ Recomendado no Traefik/Coolify: um limite de tamanho de corpo de requisição (p
 ## 13. Operação do dia a dia
 
 - Logs: **Application → Logs** (o app escreve JSON, uma linha por evento; erros trazem `digest`, que é o código que a tela de erro mostra ao usuário).
-- Atualizar: o push na `main` faz o CI publicar a imagem `ghcr.io/eugeniogdiniz/egd-app:main` (e `sha-<commit>`), mas **não dispara o deploy**. Com o CI verde, abra **Application → Deploy** no Coolify (a aplicação usa a tag `main`). Falha de migration mantém a versão anterior no ar.
+- Atualizar: o push na `main` faz o CI publicar a imagem `ghcr.io/eugeniogdiniz/egd-app:main` (e `sha-<commit>`) e, com os testes verdes, o job `deploy` do CI dispara o deploy no Coolify via API (secrets `COOLIFY_DEPLOY_URL` e `COOLIFY_TOKEN` no GitHub; o token precisa da permissão **deploy**). Falha de migration mantém a versão anterior no ar. Fallback manual: **Application → Deploy** no Coolify, ou `POST /api/v1/deploy?uuid=<uuid-da-aplicação>` com o token.
 - A aplicação ficou presa na tag `fase-1-fundacao` até 2026-09-30, o que deixou as Fases 2 a 11 fora do ar mesmo já estando na `main`. Confira a tag em **Application → General → Docker Image Tag** antes de investigar "a mudança não apareceu".
 - Certificado: o Traefik tenta o Let's Encrypt quando o domínio aparece na configuração. Se o DNS ainda não existia naquele momento, ele desiste e o navegador mostra "conexão não segura" com o certificado padrão do Traefik. Depois que o DNS resolver, reinicie **só** os containers da EGD (app e storage) para ele tentar de novo. Não reinicie o `coolify-proxy`, que atende outros projetos do VPS.
 - Rotação de segredo de sessão (`BETTER_AUTH_SECRET`) invalida todas as sessões; avise os clientes.
