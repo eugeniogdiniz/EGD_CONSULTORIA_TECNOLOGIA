@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { isUniqueViolation } from "@/lib/pg-errors";
 import {
   crmOpportunity,
   files as filesTable,
@@ -172,7 +173,7 @@ export async function createProjectFromOpportunity(
     return ok({ id: projectId });
   } catch (err) {
     // 23505 = unique_violation. Se dois cliques rápidos criam duas vezes.
-    if ((err as { code?: string } | undefined)?.code === "23505") {
+    if (isUniqueViolation(err)) {
       const dup = await db.query.project.findFirst({
         where: eq(project.opportunityId, opportunityId),
         columns: { id: true, title: true },

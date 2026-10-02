@@ -7,6 +7,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { jobRun } from "@/db/schema";
 import { logger } from "@/lib/logger";
+import { isUniqueViolation } from "@/lib/pg-errors";
 import { todayInSaoPaulo } from "@/modules/reports/dates";
 import { decideClaim } from "./claim";
 import { periodKey } from "./schedule";
@@ -50,8 +51,8 @@ export async function claimAndRun(job: JobDefinition, now: Date): Promise<RunOut
       .returning({ id: jobRun.id });
     runId = row.id;
   } catch (err) {
-    // 23505 = unique_violation: outro processo (ou outro tique) reivindicou esta tentativa antes.
-    if ((err as { code?: string } | undefined)?.code === "23505") return null;
+    // outro processo (ou outro tique) reivindicou esta tentativa antes
+    if (isUniqueViolation(err)) return null;
     throw err;
   }
   return execute(runId, job, now);
