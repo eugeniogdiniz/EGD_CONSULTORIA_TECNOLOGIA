@@ -12,8 +12,10 @@ export async function enqueueWebhook(event: WebhookEvent, data: Record<string, u
       .from(webhookEndpoint)
       .where(and(eq(webhookEndpoint.active, true), opts.endpointId ? eq(webhookEndpoint.id, opts.endpointId) : sql`${webhookEndpoint.events} ? ${event}`));
     if (endpoints.length === 0) return 0;
-    const payload = { event, occurredAt: new Date().toISOString(), data };
-    await db.insert(webhookDelivery).values(endpoints.map((e) => ({ endpointId: e.id, event, payload })));
+    const now = new Date();
+    const payload = { event, occurredAt: now.toISOString(), data };
+    // nextAttemptAt pelo relógio do app (não o do banco): quem processa compara com o mesmo relógio
+    await db.insert(webhookDelivery).values(endpoints.map((e) => ({ endpointId: e.id, event, payload, nextAttemptAt: now })));
     return endpoints.length;
   } catch (err) {
     logger.error("webhook.enqueue_failed", { event, err: String(err) });

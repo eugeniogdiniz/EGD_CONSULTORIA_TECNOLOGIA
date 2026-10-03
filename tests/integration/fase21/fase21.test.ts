@@ -68,7 +68,8 @@ describe("webhooks de saída", () => {
     // evento não inscrito não enfileira; inscrito enfileira
     expect(await enqueueWebhook("invoice.paid", { x: 1 })).toBe(0);
     expect(await enqueueWebhook("lead.created", { id: "l1", name: "Ana" })).toBe(1);
-    const r = await processWebhookDeliveries(new Date());
+    // relógio um pouco à frente: nunca depende de o banco e o app estarem no mesmo milissegundo
+    const r = await processWebhookDeliveries(new Date(Date.now() + 2000));
     expect(r).toEqual({ processed: 1, ok: 1 });
     const last = received.at(-1)!;
     expect(last.headers["x-egd-event"]).toBe("lead.created");
@@ -79,7 +80,7 @@ describe("webhooks de saída", () => {
     // falha → pendente com próxima tentativa em ~1 min; depois ok ao reenviar
     mode = "fail";
     await enqueueWebhook("proposal.sent", { id: "p1" });
-    const now = new Date();
+    const now = new Date(Date.now() + 2000);
     await processWebhookDeliveries(now);
     let deliveries = await listDeliveries(admin, id);
     const failed = deliveries.find((d) => d.event === "proposal.sent")!;
@@ -103,7 +104,7 @@ describe("webhooks de saída", () => {
     await db.update(webhookEndpoint).set({ failureCount: 19 }).where(eq(webhookEndpoint.id, id));
     mode = "fail";
     await enqueueWebhook("lead.created", { id: "l2" });
-    await processWebhookDeliveries(new Date());
+    await processWebhookDeliveries(new Date(Date.now() + 2000));
     expect((await db.query.webhookEndpoint.findFirst({ where: eq(webhookEndpoint.id, id) }))?.active).toBe(false);
     expect(await db.select().from(notification).where(eq(notification.kind, "webhook.disabled"))).not.toHaveLength(0);
     mode = "ok";
