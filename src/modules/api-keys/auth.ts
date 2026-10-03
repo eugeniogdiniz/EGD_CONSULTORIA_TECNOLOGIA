@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, gt, isNull, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { apiKey } from "@/db/schema";
 import { createPgRateLimiter } from "@/lib/rate-limit";
@@ -32,11 +32,13 @@ export async function authenticateApiKey(req: Request, scope: Scope): Promise<Ap
   const raw = parseBearer(req.headers.get("authorization"));
   if (!raw) return { ok: false, response: apiError(401, "unauthorized", "Envie Authorization: Bearer <chave>.") };
 
+  const now = new Date();
   const row = await db.query.apiKey.findFirst({
-    where: and(eq(apiKey.keyHash, hashApiKey(raw)), isNull(apiKey.revokedAt)),
-    columns: { id: true, name: true, scopes: true, lastUsedAt: true },
+    where: and(eq(apiKey.keyHash, hashApiKey(raw)), or(isNull(apiKey.revokedAt), gt(apiKey.revokedAt, now))),
+    columns: { id: true, name: true, scopes: true, lastUsedAt: true, expiresAt: true },
   });
   if (!row) return { ok: false, response: apiError(401, "unauthorized", "Chave inválida ou revogada.") };
+  if (row.expiresAt && row.expiresAt <= now) return { ok: false, response: apiError(401, "expired", "Chave expirada. Rotacione-a em /admin/api.") };
   if (!hasScope(row.scopes, scope))
     return { ok: false, response: apiError(403, "forbidden", `A chave não tem o escopo ${scope}.`) };
 

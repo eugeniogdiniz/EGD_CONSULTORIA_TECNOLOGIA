@@ -23,6 +23,7 @@ import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
 import { notifyDeliverableAssigned, notifyDeliverableDone, notifyTeamComment } from "@/modules/notifications/events";
 import { resolveRateForDeliverable } from "./queries";
+import { enqueueWebhook } from "@/modules/webhooks/queue";
 import { invoiceSchema, markPaidSchema, projectRateSchema, type InvoiceInput, type ProjectRateInput } from "./validation";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
@@ -661,7 +662,10 @@ export async function changeDeliverableStatus(
     entityId: id,
     metadata: to === "blocked" ? { from: existing.status, to, reason: blockReason } : { from: existing.status, to },
   });
-  if (to === "done") await notifyDeliverableDone({ deliverableId: id, hasFile: existing.fileId !== null, actorId: ctx.user.id });
+  if (to === "done") {
+    await notifyDeliverableDone({ deliverableId: id, hasFile: existing.fileId !== null, actorId: ctx.user.id });
+    await enqueueWebhook("project.deliverable.done", { id, title: existing.title, projectId: existing.projectId, completedAt: patch.completedAt });
+  }
   return ok(null);
 }
 
@@ -1551,6 +1555,7 @@ export async function markInvoicePaid(ctx: AdminContext, id: string, paidAt: str
     .returning({ id: projectInvoice.id, amountCents: projectInvoice.amountCents });
   if (!row) return fail("Parcela não encontrada ou já decidida.");
   await audit({ actorId: ctx.user.id, action: "project.invoice.paid", entityType: "project_invoice", entityId: id, metadata: { paidAt: parsed.data.paidAt, amountCents: row.amountCents } });
+  await enqueueWebhook("invoice.paid", { id, amountCents: row.amountCents, paidAt: parsed.data.paidAt });
   return ok(null);
 }
 

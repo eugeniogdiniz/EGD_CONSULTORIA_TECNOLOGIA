@@ -13,6 +13,8 @@ export function listApiKeys(_ctx: AdminContext) {
       scopes: apiKey.scopes,
       lastUsedAt: apiKey.lastUsedAt,
       revokedAt: apiKey.revokedAt,
+      expiresAt: apiKey.expiresAt,
+      rotatedToId: apiKey.rotatedToId,
       createdAt: apiKey.createdAt,
       createdByName: users.name,
     })

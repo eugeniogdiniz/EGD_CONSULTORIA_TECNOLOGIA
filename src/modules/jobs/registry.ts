@@ -18,12 +18,15 @@ import { invoiceState } from "@/modules/projects/invoices";
 import { notifyInvoicesOverdue } from "@/modules/notifications/events";
 import { formatBrlCents, formatIsoDate } from "@/lib/format";
 import { listBackupFolders, runBackup } from "@/modules/backup/run";
+import { writeDailySnapshot } from "@/modules/reports/queries";
+import { listExpiringApiKeys } from "@/modules/api-keys/actions";
+import { notifyApiKeyExpiring } from "@/modules/notifications/events";
 import { notifyBackupFailed } from "@/modules/notifications/events";
 import { sweepRateLimitBuckets } from "@/lib/rate-limit";
 import { db } from "@/lib/db";
 import { countOldNotifications, deleteOldNotifications, READ_RETENTION_DAYS, UNREAD_RETENTION_DAYS } from "@/modules/notifications/cleanup";
 
-export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente", "notificacoes-limpar", "solicitacoes-lembrete", "parcelas-vencidas", "backup-diario"] as const;
+export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente", "notificacoes-limpar", "solicitacoes-lembrete", "parcelas-vencidas", "backup-diario", "snapshot-diario", "chaves-expirando"] as const;
 export type JobKey = (typeof JOB_KEYS)[number];
 export const isJobKey = (v: string): v is JobKey => (JOB_KEYS as readonly string[]).includes(v);
 
@@ -266,5 +269,49 @@ const backupDiario: JobDefinition = {
   },
 };
 
-export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente, solicitacoesLembrete, parcelasVencidas, backupDiario, notificacoesLimpar];
+const snapshotDiario: JobDefinition = {
+  key: "snapshot-diario",
+  name: "Foto diária dos projetos",
+  description: "Grava progresso, abertas e atrasadas de cada projeto por dia: é a base do Δ de 7 dias no portfólio.",
+  schedule: { kind: "daily", hour: 0, minute: 30 },
+  recipients: async () => "ninguém (só grava)",
+  async run(ctx) {
+    const n = await writeDailySnapshot(ctx.today);
+    return { text: n === 0 ? "nenhum projeto aberto" : `${plural(n, "projeto fotografado", "projetos fotografados")}`, projects: n };
+  },
+  async preview(ctx) {
+    return { kind: "table", columns: ["Dia", "O que seria gravado"], rows: [[formatBr(ctx.today), "um snapshot por projeto aberto (progresso, abertas, atrasadas)"]], note: "Regravar o mesmo dia só atualiza os números." };
+  },
+};
+
+const DAYS_WARN = [14, 3];
+const chavesExpirando: JobDefinition = {
+  key: "chaves-expirando",
+  name: "Avisar chaves de API expirando",
+  description: `Aviso ao administrador ${DAYS_WARN.join(" e ")} dias antes de uma chave de API expirar.`,
+  schedule: { kind: "daily", hour: 8, minute: 45 },
+  recipients: async () => "administradores",
+  async run(ctx) {
+    const keys = await listExpiringApiKeys(ctx.now, 15);
+    let sent = 0;
+    for (const k of keys) {
+      const daysLeft = Math.ceil((k.expiresAt!.getTime() - ctx.now.getTime()) / 86_400_000);
+      if (!DAYS_WARN.includes(daysLeft)) continue;
+      const r = await notifyApiKeyExpiring({ keyId: k.id, name: k.name, prefix: k.prefix, daysLeft });
+      sent += r.inApp > 0 ? 1 : 0;
+    }
+    return { text: sent === 0 ? "nenhuma chave nos marcos de aviso" : `${plural(sent, "chave avisada", "chaves avisadas")}`, sent };
+  },
+  async preview(ctx) {
+    const keys = await listExpiringApiKeys(ctx.now, 15);
+    return {
+      kind: "table",
+      columns: ["Chave", "Prefixo", "Expira em"],
+      rows: keys.map((k) => [k.name, `${k.prefix}…`, `${Math.ceil((k.expiresAt!.getTime() - ctx.now.getTime()) / 86_400_000)} dias`]),
+      note: keys.length === 0 ? "Nenhuma chave expira nos próximos 15 dias." : `Avisa só nos marcos de ${DAYS_WARN.join(" e ")} dias.`,
+    };
+  },
+};
+
+export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente, solicitacoesLembrete, parcelasVencidas, backupDiario, snapshotDiario, chavesExpirando, notificacoesLimpar];
 export const getJob = (key: string): JobDefinition | null => JOBS.find((j) => j.key === key) ?? null;

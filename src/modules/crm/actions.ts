@@ -24,6 +24,7 @@ import { parseStoredDocument, proposalDocumentSchema } from "./document";
 import { serviceSchema, type ServiceInput } from "./validation";
 import { renderProposalPdf } from "./proposal-pdf";
 import { BRAND } from "./brand";
+import { enqueueWebhook } from "@/modules/webhooks/queue";
 import { z } from "zod";
 import { nextProposalNumber } from "./proposal-number";
 import {
@@ -1026,6 +1027,9 @@ export async function changeProposalStatus(
     entityId: id,
     metadata: { from: existing.status, to },
   });
+  if (to === "sent" || to === "accepted") {
+    await enqueueWebhook(to === "sent" ? "proposal.sent" : "proposal.accepted", { id, number: existing.number, title: existing.title, valueCents: existing.valueCents, opportunityId: existing.opportunityId, validUntil: patch.validUntil });
+  }
   return ok(null);
 }
 

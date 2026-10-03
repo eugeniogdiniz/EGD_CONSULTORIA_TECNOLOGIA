@@ -10,6 +10,7 @@ import { createPgRateLimiter } from "@/lib/rate-limit";
 import { audit } from "@/modules/audit/log";
 import { sendLeadNotification } from "@/modules/mail/send";
 import { notifyLeadCreated } from "@/modules/notifications/events";
+import { enqueueWebhook } from "@/modules/webhooks/queue";
 import { leadSchema } from "./validation";
 
 /*
@@ -65,5 +66,6 @@ export async function submitContact(_prev: ContactState, formData: FormData): Pr
     message: parsed.data.message,
   });
   await notifyLeadCreated({ leadId: row.id, ...parsed.data, company: parsed.data.company ?? null });
+  await enqueueWebhook("lead.created", { id: row.id, name: parsed.data.name, email: parsed.data.email, company: parsed.data.company ?? null, message: parsed.data.message, source: "site" });
   return ok(null);
 }

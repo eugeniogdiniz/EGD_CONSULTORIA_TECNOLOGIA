@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/modules/auth/context";
 import { loadPortfolioData } from "@/modules/reports/queries";
-import { buildWeekly, type WeeklyItem } from "@/modules/reports/build";
+import { buildWeekly, compareWeekly, deltaLabel, type WeeklyItem } from "@/modules/reports/build";
 import { addDays, formatBr, formatBrShort, parseWeekParam, todayInSaoPaulo } from "@/modules/reports/dates";
 import { EmptyLine, ReportSection, ReportSheet } from "@/modules/reports/components/report-sheet";
 import { ReportToolbar } from "@/modules/reports/components/report-toolbar";
@@ -45,7 +45,9 @@ export default async function SemanalPage({ searchParams }: PageProps<"/admin/re
   const ctx = await requireAdmin();
   const today = todayInSaoPaulo();
   const monday = parseWeekParam((await searchParams).semana, today);
-  const w = buildWeekly(await loadPortfolioData(ctx, { includeClosed: true }), monday, today);
+  const data = await loadPortfolioData(ctx, { includeClosed: true });
+  const w = buildWeekly(data, monday, today);
+  const cmp = compareWeekly(w, buildWeekly(data, addDays(monday, -7), today));
   const periodo = `${formatBrShort(w.start)} – ${formatBr(w.end)}`;
   const semanaAtual = parseWeekParam(undefined, today) === monday;
 
@@ -70,7 +72,7 @@ export default async function SemanalPage({ searchParams }: PageProps<"/admin/re
       <ReportSheet
         kind={`RELATÓRIO SEMANAL · SEMANA ${Number(w.label.slice(6))} DE ${w.label.slice(0, 4)}`}
         title={`${formatBrShort(w.start)} a ${formatBr(w.end)}`}
-        subtitle={`Concluído na semana, o que vence de ${formatBrShort(w.nextStart)} a ${formatBrShort(w.nextEnd)} e o que segue atrasado`}
+        subtitle={`Concluído na semana, o que vence de ${formatBrShort(w.nextStart)} a ${formatBrShort(w.nextEnd)} e o que segue atrasado · vs. semana anterior: concluído ${deltaLabel(cmp.done - cmp.prevDone)}, vence ${deltaLabel(cmp.due - cmp.prevDue)}, atrasado ${deltaLabel(cmp.late - cmp.prevLate)}`}
         figure={w.doneCount}
         figureLabel={w.doneCount === 1 ? "entrega ou marco concluído" : "entregas e marcos concluídos"}
         stamp={[

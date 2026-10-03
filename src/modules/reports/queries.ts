@@ -1,5 +1,6 @@
 import { and, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { SYSTEM_CONTEXT } from "@/modules/jobs/system-context";
 import {
   crmCompany,
   meeting,
@@ -172,4 +173,28 @@ export async function loadPortfolioData(_ctx: AdminContext, opts: { includeClose
       .filter((m) => m.projectId === p.id)
       .map((m) => ({ id: m.id, name: m.name, dueAt: m.dueAt, completedAt: m.completedAt })),
   }));
+}
+
+// ── Fase 21: snapshot diário ────────────────────────────────────────────────
+
+/** Grava (ou regrava) o snapshot do dia para os projetos abertos. */
+export async function writeDailySnapshot(day: string): Promise<number> {
+  const { buildPortfolio, snapshotRows } = await import("./build");
+  const { projectDailySnapshot } = await import("@/db/schema");
+  const rows = snapshotRows(buildPortfolio(await loadPortfolioData(SYSTEM_CONTEXT), day));
+  if (rows.length === 0) return 0;
+  await db
+    .insert(projectDailySnapshot)
+    .values(rows.map((r) => ({ projectId: r.projectId, day, doneCount: r.doneCount, openCount: r.openCount, overdueCount: r.overdueCount, progressPct: r.progressPct })))
+    .onConflictDoUpdate({ target: [projectDailySnapshot.projectId, projectDailySnapshot.day], set: { doneCount: sql`excluded.done_count`, openCount: sql`excluded.open_count`, overdueCount: sql`excluded.overdue_count`, progressPct: sql`excluded.progress_pct` } });
+  return rows.length;
+}
+
+/** Snapshot mais recente até `day` (inclusive) por projeto: a referência do Δ. */
+export async function loadSnapshotsUpTo(day: string): Promise<Map<string, { projectId: string; doneCount: number; openCount: number; overdueCount: number; progressPct: number; day: string }>> {
+  const rows = await db.execute<{ project_id: string; day: string; done_count: number; open_count: number; overdue_count: number; progress_pct: number }>(sql`
+    select distinct on (project_id) project_id, day::text as day, done_count, open_count, overdue_count, progress_pct
+    from project_daily_snapshot where day <= ${day}::date order by project_id, day desc
+  `);
+  return new Map(rows.map((r) => [r.project_id, { projectId: r.project_id, day: r.day, doneCount: r.done_count, openCount: r.open_count, overdueCount: r.overdue_count, progressPct: r.progress_pct }]));
 }

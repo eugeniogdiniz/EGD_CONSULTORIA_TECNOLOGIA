@@ -5,6 +5,7 @@ import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
 import type { AdminContext, PortalContext } from "@/modules/auth/context";
 import { notifyRequestAssigned, notifyRequestEvent } from "@/modules/notifications/events";
+import { enqueueWebhook } from "@/modules/webhooks/queue";
 import { getPortalProject } from "@/modules/portal-projects/queries";
 import { storeFile } from "@/modules/files/actions";
 import { isUuid } from "@/lib/uuid";
@@ -90,6 +91,7 @@ export async function createRequest(
     metadata: { projectId: data.projectId },
   });
   await attachFiles(ctx, { requestId: row.id, messageId: null, organizationId: ctx.organization.id, actorAction: "portal.request.attached" }, files);
+  await enqueueWebhook("request.created", { id: row.id, title: data.title, organization: { id: ctx.organization.id, name: ctx.organization.name }, projectId: data.projectId, author: ctx.user.name });
   await notifyRequestEvent({
     kind: "created",
     requestId: row.id,

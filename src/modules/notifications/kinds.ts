@@ -24,6 +24,8 @@ export const KINDS = [
   { key: "invoice.overdue", audience: "admin", label: "Parcelas vencidas", description: "Um aviso por dia com as parcelas a receber vencidas (só para administradores).", emailable: true },
   { key: "error.spike", audience: "admin", label: "Erro novo no servidor", description: "Uma origem de erro apareceu pela primeira vez (ou voltou depois de resolvida).", emailable: true },
   { key: "backup.failed", audience: "admin", label: "Backup falhou", description: "O backup lógico diário não concluiu.", emailable: true },
+  { key: "webhook.disabled", audience: "admin", label: "Webhook desativado", description: "Um destino de webhook falhou 20 vezes seguidas e foi desativado.", emailable: true },
+  { key: "api_key.expiring", audience: "admin", label: "Chave de API expirando", description: "Uma chave de API expira em 14 ou em 3 dias.", emailable: true },
   { key: "request.team_reply", audience: "client", label: "Resposta da equipe", description: "A EGD respondeu a uma solicitação da sua organização.", emailable: true },
   { key: "comment.team", audience: "client", label: "Comentário da equipe", description: "A EGD comentou numa entrega compartilhada com você.", emailable: true },
   { key: "deliverable.done", audience: "client", label: "Entrega concluída", description: "Uma entrega compartilhada com você foi concluída.", emailable: true },

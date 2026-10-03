@@ -229,3 +229,11 @@ Toda ação relevante de uma parte vira uma notificação para a outra, no sino 
 - **Backup lógico** (`backup-diario`, 03:30): uma pasta `backups/AAAA-MM-DD/` no bucket do app com um `<tabela>.json.gz` por tabela e um `manifest.json`; guarda 14 dias; falha vira notificação `backup.failed`. **Restaurar**: num banco já migrado, `node --env-file=.env scripts/restore-backup.mjs AAAA-MM-DD [--only tabela,tabela] [--truncate]` (em produção, dentro do container). O backup do Postgres no Coolify (§8) continua sendo o principal.
 - **Limite de taxa** do formulário de contato, da API pública e das tentativas de login por e-mail agora fica no banco (`rate_limit_bucket`): vale entre containers e sobrevive a reinícios. A limpeza diária apaga janelas com mais de 2 dias.
 - **Busca global**: caixa no topo do admin → `/admin/busca?q=`. Dono busca em tudo; colaborador, só em projetos, entregas, solicitações e atas.
+
+## 23. Automações e integrações (Fase 21)
+
+- **Horário por automação**: em `/admin/automacoes`, cada linha tem um campo HH:MM (Brasília). Vazio volta ao padrão do código; "(ajustado)" marca o horário sobrescrito.
+- **Retentativa com espera**: falha de uma automação espera 5 min antes da 2ª tentativa e 15 min antes da 3ª (antes era a cada minuto).
+- **Webhooks de saída** (aba em `/admin/api`): URL (https em produção), eventos (`lead.created`, `request.created`, `proposal.sent`, `proposal.accepted`, `project.deliverable.done`, `invoice.paid`), segredo mostrado uma vez. Entrega assíncrona pelo agendador: `POST` JSON com `X-EGD-Event`, `X-EGD-Delivery`, `X-EGD-Timestamp` e `X-EGD-Signature: sha256=HMAC(segredo, timestamp.corpo)`; 5 tentativas (1, 5, 15, 60, 180 min); 20 falhas seguidas desativam o destino e avisam o administrador. "Testar" envia um `ping`; a página do webhook lista as entregas e permite reenviar.
+- **Chaves de API**: expiram em 1 ano (chaves antigas sem validade continuam sem). **Rotacionar** cria a nova com os mesmos escopos e mantém a antiga por 7 dias; aviso ao administrador 14 e 3 dias antes de expirar (`chaves-expirando`). Chave expirada responde `401 expired`.
+- **Comparação entre períodos**: o semanal mostra a variação contra a semana anterior; o portfólio, "Δ 7 dias" de atrasadas e progresso a partir da foto diária (`snapshot-diario`, 00:30). O Δ aparece "—" até existir foto de uma semana atrás.

@@ -7,9 +7,10 @@
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { JOBS } from "./registry";
-import { isDue } from "./schedule";
+import { applyOverride, isDue } from "./schedule";
 import { claimAndRun } from "./runner";
-import { listDisabledJobKeys } from "./queries";
+import { listJobSettings } from "./queries";
+import { processWebhookDeliveries } from "@/modules/webhooks/deliver";
 
 export const TICK_MS = 60_000;
 const FIRST_TICK_MS = 30_000;
@@ -26,11 +27,14 @@ export async function tick(now = new Date()): Promise<void> {
   state.ticking = true;
   try {
     state.lastTickAt = now;
-    const disabled = await listDisabledJobKeys();
+    const settings = await listJobSettings();
     for (const job of JOBS) {
-      if (disabled.has(job.key) || !isDue(job.schedule, now)) continue;
-      await claimAndRun(job, now);
+      const s = settings.get(job.key);
+      if (s?.enabled === false || !isDue(applyOverride(job.schedule, s), now)) continue;
+      await claimAndRun(job, now, applyOverride(job.schedule, s));
     }
+    // webhooks de saída (Fase 21): entregas pendentes com nova tentativa devida
+    await processWebhookDeliveries(now);
   } catch (err) {
     logger.error("scheduler.tick_failed", { err: String(err) });
   } finally {

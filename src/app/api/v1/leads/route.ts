@@ -7,6 +7,7 @@ import { authenticateApiKey, apiError } from "@/modules/api-keys/auth";
 import { leadSchema } from "@/modules/leads/validation";
 import { sendLeadNotification } from "@/modules/mail/send";
 import { notifyLeadCreated } from "@/modules/notifications/events";
+import { enqueueWebhook } from "@/modules/webhooks/queue";
 
 export const dynamic = "force-dynamic";
 
@@ -59,5 +60,6 @@ export async function POST(req: Request) {
     message: parsed.data.message,
   });
   await notifyLeadCreated({ leadId: row.id, name: parsed.data.name, email: parsed.data.email, company: parsed.data.company ?? null, message: parsed.data.message });
+  await enqueueWebhook("lead.created", { id: row.id, name: parsed.data.name, email: parsed.data.email, company: parsed.data.company ?? null, message: parsed.data.message, source: "api" });
   return Response.json({ data: { id: row.id } }, { status: 201, headers: { "Cache-Control": "no-store" } });
 }

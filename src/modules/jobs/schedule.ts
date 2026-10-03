@@ -73,3 +73,19 @@ export function describeSchedule(s: Schedule): string {
   if (s.kind === "weekdays") return `seg–sex, ${time}`;
   return `${WEEKDAY_NAME[s.weekday]}, ${time}`;
 }
+
+/** Agenda efetiva: horário sobrescrito pelo dono (Fase 21) sobre o padrão do código. */
+export function applyOverride(s: Schedule, o: { hour: number | null; minute: number | null } | null | undefined): Schedule {
+  if (!o || o.hour === null || o.minute === null) return s;
+  return { ...s, hour: o.hour, minute: o.minute };
+}
+
+/** "HH:MM" → { hour, minute } ou null quando inválido/vazio. */
+export function parseTime(v: string): { hour: number; minute: number } | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(v.trim());
+  if (!m) return null;
+  const hour = Number(m[1]);
+  const minute = Number(m[2]);
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+  return { hour, minute };
+}
