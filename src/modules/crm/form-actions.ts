@@ -118,6 +118,7 @@ export async function createCompanyForm(_p: CompanyState, fd: FormData): Promise
   return r;
 }
 
+type S<T = null> = ActionResult<T> | null;
 type NullState = ActionResult<null> | null;
 
 export async function updateCompanyForm(_p: NullState, fd: FormData): Promise<NullState> {
@@ -387,4 +388,39 @@ export async function changeProposalStatusForm(fd: FormData): Promise<void> {
   });
   revalidatePath(`/admin/crm/propostas/${id}`);
   revalidatePath("/admin/crm/propostas");
+}
+
+// Catálogo de serviços (Fase 19) ─────────────────────────────────────────
+
+function serviceInput(fd: FormData) {
+  return {
+    name: String(fd.get("name") ?? ""),
+    description: String(fd.get("description") ?? ""),
+    unit: String(fd.get("unit") ?? "projeto"),
+    defaultPriceCents: String(fd.get("defaultPriceCents") ?? "0"),
+    position: String(fd.get("position") ?? "0"),
+  };
+}
+
+export async function createServiceForm(_p: S<{ id: string }>, fd: FormData): Promise<S<{ id: string }>> {
+  const ctx = await requireOwner();
+  const { createService } = await import("./actions");
+  const r = await createService(ctx, serviceInput(fd));
+  if (r.ok) revalidatePath("/admin/crm/servicos");
+  return r;
+}
+
+export async function updateServiceForm(_p: NullState, fd: FormData): Promise<NullState> {
+  const ctx = await requireOwner();
+  const { updateService } = await import("./actions");
+  const r = await updateService(ctx, String(fd.get("id") ?? ""), serviceInput(fd));
+  if (r.ok) revalidatePath("/admin/crm/servicos");
+  return r;
+}
+
+export async function setServiceActiveForm(fd: FormData): Promise<void> {
+  const ctx = await requireOwner();
+  const { setServiceActive } = await import("./actions");
+  await setServiceActive(ctx, String(fd.get("id") ?? ""), fd.get("active") === "1");
+  revalidatePath("/admin/crm/servicos");
 }

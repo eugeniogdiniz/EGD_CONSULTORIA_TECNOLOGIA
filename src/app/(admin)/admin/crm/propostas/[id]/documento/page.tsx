@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOwner } from "@/modules/auth/context";
-import { getProposal } from "@/modules/crm/queries";
+import { getProposal, listServices } from "@/modules/crm/queries";
 import { parseStoredDocument } from "@/modules/crm/document";
 import { ProposalDocumentForm } from "@/modules/crm/components/proposal-document-form";
 import { PageHeader } from "@/components/shell/page-header";
@@ -11,7 +11,7 @@ export const metadata = { title: "Documento da proposta" };
 export default async function PropostaDocumentoPage({ params }: PageProps<"/admin/crm/propostas/[id]/documento">) {
   const ctx = await requireOwner();
   const { id } = await params;
-  const row = await getProposal(ctx, id);
+  const [row, services] = await Promise.all([getProposal(ctx, id), listServices(ctx, { activeOnly: true })]);
   if (!row) notFound();
   const p = row.proposal;
   return (
@@ -43,6 +43,7 @@ export default async function PropostaDocumentoPage({ params }: PageProps<"/admi
         valueCents={p.valueCents}
         readOnly={p.status !== "draft"}
         pdfHref={`/admin/crm/propostas/${p.id}/documento/pdf`}
+        services={services.map((s) => ({ id: s.id, name: s.name, unit: s.unit, defaultPriceCents: s.defaultPriceCents }))}
       />
     </>
   );

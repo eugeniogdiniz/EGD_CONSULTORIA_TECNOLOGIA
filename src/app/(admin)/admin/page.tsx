@@ -56,7 +56,7 @@ export default async function AdminHome() {
               href="/admin/crm/funil"
               label="Funil aberto"
               value={overview.openOpportunities}
-              hint={overview.pipelineCents ? formatBrlCents(overview.pipelineCents) : undefined}
+              hint={overview.pipelineCents ? `${formatBrlCents(overview.pipelineCents)} · ponderado ${formatBrlCents(overview.weightedCents)}` : undefined}
             />
           </>
         ) : (

@@ -217,3 +217,8 @@ Toda ação relevante de uma parte vira uma notificação para a outra, no sino 
 - **Rate por projeto**: bloco "Rate por hora neste projeto" (vazio = rate da pessoa). Toda entrada de tempo congela o rate ao fechar: mudar rates depois não altera o custo do que já foi apontado; entradas anteriores à Fase 18 (sem rate congelado) usam o rate do projeto, senão o da pessoa.
 - **Horas por pessoa** em `/admin/relatorios/horas` (dono): período, pessoa e projeto, com CSV. Para o fechamento do mês.
 - **Estimativa** (h) no diálogo da entrega; "Estimado × apontado" no financeiro; **Burndown** na aba do projeto (equipe), por semana, com a linha ideal até o último prazo.
+
+## 21. CRM comercial: catálogo de serviços e previsão (Fase 19)
+
+- **Serviços** (`/admin/crm/servicos`): nome, preço de referência, unidade, descrição, ordem; desativar tira do seletor sem apagar o histórico. No documento da proposta, "Adicionar do catálogo" cria o item de investimento com preço × quantidade (o item fica desvinculado do serviço: mudar o preço não altera propostas antigas).
+- **Previsão** (`/admin/crm/previsao`): pipeline aberto ponderado por probabilidade fixa de estágio (novo 10 %, qualificado 25 %, reunião 50 %, proposta 70 %), esperado por mês de fechamento (vencidas no mês corrente), conversão em 90 e 365 dias com ticket e ciclo médios, motivos de perda. CSV com as quatro tabelas. O KPI "Funil aberto" do painel mostra o ponderado.

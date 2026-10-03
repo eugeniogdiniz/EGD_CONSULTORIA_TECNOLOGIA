@@ -21,10 +21,13 @@ export async function getAdminOverview(_ctx: AdminContext, today = todayInSaoPau
     receivable_cents: string;
     overdue_invoices: number;
     overdue_cents: string;
+    weighted_cents: string;
   }>(sql`
     select
       (select count(*)::int from crm_opportunity where stage not in ('won', 'lost')) as open_opportunities,
       (select coalesce(sum(value_cents), 0)::text from crm_opportunity where stage not in ('won', 'lost')) as pipeline_cents,
+      (select coalesce(sum(round(coalesce(value_cents, 0) * case stage when 'new' then 0.10 when 'qualified' then 0.25 when 'meeting' then 0.50 when 'proposal' then 0.70 else 0 end)), 0)::text
+         from crm_opportunity where stage not in ('won', 'lost')) as weighted_cents,
       (select count(*)::int from project where status = 'active' and archived_at is null) as active_projects,
       (select count(*)::int from project_deliverable d join project p on p.id = d.project_id
          where d.status <> 'done' and d.due_at < ${today}::date
@@ -45,6 +48,7 @@ export async function getAdminOverview(_ctx: AdminContext, today = todayInSaoPau
   return {
     openOpportunities: row.open_opportunities,
     pipelineCents: Number(row.pipeline_cents),
+    weightedCents: Number(row.weighted_cents),
     activeProjects: row.active_projects,
     overdueDeliverables: row.overdue_deliverables,
     dueThisWeek: row.due_this_week,

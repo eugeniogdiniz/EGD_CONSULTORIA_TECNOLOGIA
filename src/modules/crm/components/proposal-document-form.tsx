@@ -27,13 +27,24 @@ const TEXT_SECTIONS: { key: keyof Pick<Doc, "context" | "objective" | "assumptio
 ];
 
 /** Formulário do documento em seções, na ordem do modelo. Listas editáveis; o estado vai num campo oculto em JSON. */
-export function ProposalDocumentForm({ proposalId, initial, valueCents, readOnly, pdfHref }: { proposalId: string; initial: Doc; valueCents: number; readOnly: boolean; pdfHref: string }) {
+export type CatalogService = { id: string; name: string; unit: string; defaultPriceCents: number };
+
+export function ProposalDocumentForm({ proposalId, initial, valueCents, readOnly, pdfHref, services = [] }: { proposalId: string; initial: Doc; valueCents: number; readOnly: boolean; pdfHref: string; services?: CatalogService[] }) {
   const [doc, setDoc] = useState<Doc>(initial);
   const [state, formAction, pending] = useActionState<ActionResult<null> | null, FormData>(updateProposalDocumentForm, null);
   const fe = state && !state.ok ? state.fieldErrors : undefined;
   const mismatch = useMemo(() => investmentMismatch(doc, valueCents), [doc, valueCents]);
   const set = <K extends keyof Doc>(k: K, v: Doc[K]) => setDoc((d) => ({ ...d, [k]: v }));
   const ro = readOnly;
+  const [catalogId, setCatalogId] = useState(services[0]?.id ?? "");
+  const [catalogQty, setCatalogQty] = useState("1");
+  const addFromCatalog = () => {
+    const svc = services.find((s) => s.id === catalogId);
+    const qty = Number(catalogQty.replace(",", "."));
+    if (!svc || !Number.isFinite(qty) || qty <= 0 || doc.investment.length >= 12) return;
+    const item = qty === 1 ? svc.name : `${svc.name} (${catalogQty} ${svc.unit}${qty > 1 && !svc.unit.endsWith("s") ? "s" : ""})`;
+    set("investment", [...doc.investment, { item, amountCents: Math.round(svc.defaultPriceCents * qty), condition: "" }]);
+  };
 
   return (
     <form action={formAction} className="grid gap-6">
@@ -88,6 +99,23 @@ export function ProposalDocumentForm({ proposalId, initial, valueCents, readOnly
             empty={{ item: "", amountCents: "", condition: "" }}
             addLabel="Adicionar item"
           />
+          {!ro && services.length > 0 && (
+            <div className="flex flex-wrap items-end gap-2 rounded-sm border border-dashed border-border bg-subtle/50 p-3" data-testid="catalogo">
+              <div className="grid min-w-0 flex-1 gap-1">
+                <Label htmlFor="catalog-service" className="type-micro text-muted-foreground">Adicionar do catálogo</Label>
+                <select id="catalog-service" value={catalogId} onChange={(e) => setCatalogId(e.target.value)} className="h-9 rounded-sm border border-input bg-card px-2 text-sm">
+                  {services.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name} · {formatBrlCents(s.defaultPriceCents)}/{s.unit}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid w-24 gap-1">
+                <Label htmlFor="catalog-qty" className="type-micro text-muted-foreground">Quantidade</Label>
+                <Input id="catalog-qty" inputMode="decimal" value={catalogQty} onChange={(e) => setCatalogQty(e.target.value)} />
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={addFromCatalog}>Adicionar item</Button>
+            </div>
+          )}
           {mismatch !== 0 && (
             <p role="note" className="rounded-r-md border-l-[3px] border-warning bg-warning-soft px-4 py-2 text-sm">
               A soma dos itens ({formatBrlCents(valueCents + mismatch)}) difere do valor da proposta ({formatBrlCents(valueCents)}). O PDF mostra o total da proposta; confira os itens.

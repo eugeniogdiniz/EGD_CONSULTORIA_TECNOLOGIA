@@ -9,6 +9,7 @@ import {
   files,
   leads,
   organizations,
+  crmService,
 } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
@@ -20,6 +21,7 @@ import { getObject } from "@/lib/storage";
 import { sendProposalEmail } from "@/modules/mail/send";
 import { formatIsoDate } from "@/lib/format";
 import { parseStoredDocument, proposalDocumentSchema } from "./document";
+import { serviceSchema, type ServiceInput } from "./validation";
 import { renderProposalPdf } from "./proposal-pdf";
 import { BRAND } from "./brand";
 import { z } from "zod";
@@ -1161,5 +1163,35 @@ export async function sendProposalByEmail(ctx: AdminContext, id: string, input: 
     .returning({ id: crmInteraction.id });
   await audit({ actorId: ctx.user.id, action: "crm.interaction.created", entityType: "crm_interaction", entityId: interaction.id, metadata: { type: "email", companyId: row.company.id, contactId: contact.id, opportunityId: row.opportunity.id, proposalId: id } });
   await audit({ actorId: ctx.user.id, action: "crm.proposal.emailed", entityType: "crm_proposal", entityId: id, metadata: { contactId: contact.id, version: row.proposal.documentVersion, fileId: file.id } });
+  return ok(null);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Catálogo de serviços (Fase 19)
+// ────────────────────────────────────────────────────────────────────────────
+
+export async function createService(ctx: AdminContext, input: ServiceInput): Promise<ActionResult<{ id: string }>> {
+  const parsed = serviceSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const [row] = await db.insert(crmService).values(parsed.data).returning({ id: crmService.id });
+  await audit({ actorId: ctx.user.id, action: "crm.service.created", entityType: "crm_service", entityId: row.id, metadata: { name: parsed.data.name, defaultPriceCents: parsed.data.defaultPriceCents } });
+  return ok({ id: row.id });
+}
+
+export async function updateService(ctx: AdminContext, id: string, input: ServiceInput): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Serviço não encontrado.");
+  const parsed = serviceSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const [row] = await db.update(crmService).set(parsed.data).where(eq(crmService.id, id)).returning({ id: crmService.id });
+  if (!row) return fail("Serviço não encontrado.");
+  await audit({ actorId: ctx.user.id, action: "crm.service.updated", entityType: "crm_service", entityId: id, metadata: { name: parsed.data.name, defaultPriceCents: parsed.data.defaultPriceCents } });
+  return ok(null);
+}
+
+export async function setServiceActive(ctx: AdminContext, id: string, active: boolean): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Serviço não encontrado.");
+  const [row] = await db.update(crmService).set({ active }).where(eq(crmService.id, id)).returning({ id: crmService.id });
+  if (!row) return fail("Serviço não encontrado.");
+  await audit({ actorId: ctx.user.id, action: active ? "crm.service.unarchived" : "crm.service.archived", entityType: "crm_service", entityId: id });
   return ok(null);
 }

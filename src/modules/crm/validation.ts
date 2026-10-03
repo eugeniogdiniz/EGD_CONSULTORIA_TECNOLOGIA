@@ -141,3 +141,12 @@ export const changeProposalStatusSchema = z.object({
   validUntil: isoDate,
 });
 export type ChangeProposalStatusInput = z.input<typeof changeProposalStatusSchema>;
+
+export const serviceSchema = z.object({
+  name: z.string().trim().min(2, "Mínimo 2 caracteres").max(120, "Máximo 120 caracteres"),
+  description: optionalText(1000),
+  unit: z.string().trim().min(1, "Informe a unidade").max(20, "Máximo 20 caracteres").default("projeto"),
+  defaultPriceCents: z.coerce.number().int("Somente centavos inteiros").min(0, "Preço não pode ser negativo"),
+  position: z.coerce.number().int().min(0).default(0),
+});
+export type ServiceInput = z.input<typeof serviceSchema>;

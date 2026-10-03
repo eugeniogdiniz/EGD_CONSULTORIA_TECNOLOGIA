@@ -120,6 +120,13 @@
       "when": 1791053786398,
       "tag": "0016_finance",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791054843947,
+      "tag": "0017_crm_services",
+      "breakpoints": true
     }
   ]
 }
