@@ -199,3 +199,21 @@ export function renderRequestAssigned(p: { title: string; organizationName: stri
   const html = layout(subject, `<p>${esc(intro)}</p>\n  <p><a href="${esc(p.url)}">Abrir a solicitação</a></p>`);
   return { subject, text, html };
 }
+
+// ── Fase 16: proposta comercial ──────────────────────────────────────────────
+
+/** E-mail da proposta ao contato. `message` é o texto escrito pela equipe (texto puro). */
+export function renderProposalEmail(p: { contactName: string; number: string; title: string; validUntil: string | null; message: string; senderName: string }): MailContent {
+  const subject = `Proposta ${p.number} · ${p.title}`;
+  const validity = p.validUntil ? `A proposta é válida até ${p.validUntil}.` : "";
+  const text = [`Olá, ${p.contactName}.`, "", p.message, "", validity, "", `${p.senderName}`, "EGD Consultoria & Tecnologia"].filter((l, i, a) => !(l === "" && a[i - 1] === "")).join("\n");
+  const html = layout(
+    subject,
+    `<p>Olá, ${esc(p.contactName)}.</p>
+  <pre style="white-space:pre-wrap;font-family:inherit">${esc(p.message)}</pre>
+  ${validity ? `<p>${esc(validity)}</p>` : ""}
+  <p>O documento segue em anexo (PDF).</p>
+  <p>${esc(p.senderName)}<br>EGD Consultoria &amp; Tecnologia</p>`,
+  );
+  return { subject, text, html };
+}

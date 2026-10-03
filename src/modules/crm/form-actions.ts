@@ -336,6 +336,45 @@ export async function attachProposalFileForm(_p: NullState, fd: FormData): Promi
   return r.ok ? { ok: true, data: null } : r;
 }
 
+export async function updateProposalDocumentForm(_p: NullState, fd: FormData): Promise<NullState> {
+  const ctx = await requireAdmin();
+  const id = String(fd.get("id") ?? "");
+  let doc: unknown = {};
+  try {
+    doc = JSON.parse(String(fd.get("document") ?? "{}"));
+  } catch {
+    return { ok: false, error: "Documento inválido." };
+  }
+  const { updateProposalDocument } = await import("./actions");
+  const r = await updateProposalDocument(ctx, id, doc);
+  if (r.ok) {
+    revalidatePath(`/admin/crm/propostas/${id}`);
+    revalidatePath(`/admin/crm/propostas/${id}/documento`);
+  }
+  return r;
+}
+
+export async function generateProposalPdfForm(fd: FormData): Promise<void> {
+  const ctx = await requireAdmin();
+  const id = String(fd.get("id") ?? "");
+  const { generateProposalPdf } = await import("./actions");
+  await generateProposalPdf(ctx, id);
+  revalidatePath(`/admin/crm/propostas/${id}`);
+  revalidatePath(`/admin/crm/propostas/${id}/documento`);
+}
+
+export async function sendProposalByEmailForm(_p: NullState, fd: FormData): Promise<NullState> {
+  const ctx = await requireAdmin();
+  const id = String(fd.get("id") ?? "");
+  const { sendProposalByEmail } = await import("./actions");
+  const r = await sendProposalByEmail(ctx, id, { contactId: String(fd.get("contactId") ?? ""), message: String(fd.get("message") ?? "") });
+  if (r.ok) {
+    revalidatePath(`/admin/crm/propostas/${id}`);
+    revalidatePath("/admin/crm/propostas");
+  }
+  return r;
+}
+
 export async function changeProposalStatusForm(fd: FormData): Promise<void> {
   const ctx = await requireAdmin();
   const id = String(fd.get("id") ?? "");

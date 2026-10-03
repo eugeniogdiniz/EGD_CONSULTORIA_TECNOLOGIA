@@ -25,6 +25,8 @@ const nextConfig: NextConfig = {
   // O E2E sobe um segundo `next dev` com outro diretório de build (o lock do dev é por distDir).
   distDir: process.env.NEXT_DIST_DIR || ".next",
   output: "standalone",
+  // pdfkit (PDF da proposta, Fase 16) lê fontes e dados do próprio pacote em runtime: fica fora do bundle
+  serverExternalPackages: ["pdfkit"],
   // upload de arquivos via server action: spec permite até 50 MB
   experimental: { serverActions: { bodySizeLimit: "52mb" } },
   async headers() {

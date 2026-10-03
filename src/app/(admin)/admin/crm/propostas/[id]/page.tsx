@@ -2,7 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cn } from "cn";
 import { requireAdmin } from "@/modules/auth/context";
-import { getProposal } from "@/modules/crm/queries";
+import { getProposal, listContactsByCompany } from "@/modules/crm/queries";
+import { generateProposalPdfForm } from "@/modules/crm/form-actions";
+import { SendProposalDialog } from "@/modules/crm/components/send-proposal-dialog";
+import { ConfirmAction } from "@/components/shell/confirm-action";
+import { DEFAULT_PROPOSAL_MESSAGE } from "@/modules/crm/brand";
 import { getDownloadUrl } from "@/modules/files/actions";
 import {
   attachProposalFileForm,
@@ -38,6 +42,10 @@ export default async function PropostaDetalhePage({ params }: PageProps<"/admin/
   const opp = row.opportunity;
   const company = row.company;
   const file = row.file;
+
+  const contacts = (await listContactsByCompany(ctx, company.id)).filter((c) => c.email).map((c) => ({ id: c.id, name: c.name, email: c.email as string }));
+  const canSend = (p.status === "draft" || p.status === "sent") && Boolean(file) && contacts.length > 0;
+  const sendDisabledReason = !file ? "Gere o PDF ou anexe o arquivo antes de enviar." : contacts.length === 0 ? "A empresa não tem contato com e-mail." : p.status !== "draft" && p.status !== "sent" ? "Proposta decidida." : null;
 
   // Assina o download só quando há anexo. URL vale 5 min — o usuário está na tela agora.
   let downloadUrl: string | null = null;
@@ -100,6 +108,43 @@ export default async function PropostaDetalhePage({ params }: PageProps<"/admin/
           <span className="text-foreground">Marque como Expirada, ou renove pra continuar enviada.</span>
         </div>
       )}
+
+      <Block title="Documento" aside={p.documentVersion > 0 ? `PDF v${p.documentVersion}` : "nenhum PDF gerado"}>
+        <div className="grid gap-3">
+          <p className="text-sm text-muted-foreground">
+            {p.documentVersion > 0
+              ? `A versão ${p.documentVersion} do PDF é o anexo atual da proposta.${p.emailedAt ? ` Enviada por e-mail em ${formatDate(p.emailedAt)}.` : ""}`
+              : "Escreva as seções do modelo do kit comercial e gere o PDF; ele vira o anexo da proposta."}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" size="sm" render={<Link href={`/admin/crm/propostas/${p.id}/documento`} />}>
+              {p.status === "draft" ? "Editar documento" : "Ver documento"}
+            </Button>
+            {(p.status === "draft" || p.status === "sent") && (
+              <ConfirmAction
+                trigger={<Button variant="outline" size="sm" type="button">Gerar PDF</Button>}
+                title={p.documentVersion > 0 ? `Gerar a versão ${p.documentVersion + 1} do PDF?` : "Gerar o PDF da proposta?"}
+                description="O PDF é gerado com o conteúdo atual do documento e passa a ser o anexo da proposta (o anterior fica guardado em Arquivos)."
+                confirmLabel="Gerar PDF"
+                destructive={false}
+                action={generateProposalPdfForm}
+                fields={{ id: p.id }}
+              />
+            )}
+            <Button variant="outline" size="sm" render={<a href={`/admin/crm/propostas/${p.id}/documento/pdf`} target="_blank" rel="noopener" />}>
+              Ver PDF
+            </Button>
+            <SendProposalDialog
+              proposalId={p.id}
+              contacts={contacts}
+              defaultContactId={p.contactId}
+              defaultMessage={DEFAULT_PROPOSAL_MESSAGE({ title: p.title, number: p.number })}
+              filename={file?.originalName ?? null}
+              disabledReason={canSend ? null : sendDisabledReason}
+            />
+          </div>
+        </div>
+      </Block>
 
       <div className="grid gap-6 md:grid-cols-[1.4fr_1fr]">
         <Block title="Dados">

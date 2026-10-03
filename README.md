@@ -8,6 +8,7 @@ Site público e sistema (portal do cliente e portal administrativo) da EGD, em N
 - Módulos por domínio em `src/modules/*` (auth, tenancy, leads, files, audit, mail), cada um com `schema.ts` (Drizzle), `queries.ts` e `actions.ts`. Páginas nunca acessam o banco direto.
 - Better Auth para login por e-mail e senha; cadastro só por convite; autorização por `requireAdmin()` / `requirePortal()`.
 - Postgres 16 (Drizzle ORM), armazenamento S3-compatível (RustFS), SMTP para e-mail transacional.
+- Documento da proposta comercial escrito no CRM, PDF gerado no servidor (`pdfkit`, sem navegador) e envio por e-mail ao contato com interação registrada (`src/modules/crm/document.ts`, `proposal-pdf.ts`; ver `docs/runbooks/coolify.md` §18).
 - Solicitações do portal com anexos, notas internas da equipe, SLA de primeira resposta em horas úteis, responsável e lembrete automático ao cliente (`src/modules/requests`; ver `docs/runbooks/coolify.md` §17).
 - Notificações no sistema (sino e página) para admin e cliente, com e-mail por pessoa conforme a preferência em Minha conta (`src/modules/notifications`; ver `docs/runbooks/coolify.md` §16).
 - Um container Docker que aplica migrations e sobe o servidor; deploy pelo Coolify a cada push na `main`. O agendador das automações (resumos por e-mail, propostas vencidas) roda dentro desse mesmo processo (`JOBS_ENABLED`; ver `docs/runbooks/coolify.md` §15).

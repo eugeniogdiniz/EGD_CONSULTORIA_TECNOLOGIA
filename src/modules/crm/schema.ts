@@ -1,17 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-  bigint,
-  char,
-  check,
-  date,
-  index,
-  pgEnum,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { bigint, char, check, date, index, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid, jsonb, integer } from "drizzle-orm/pg-core";
 import { users } from "@/modules/auth/schema";
 import { files } from "@/modules/files/schema";
 import { organizations } from "@/modules/tenancy/schema";
@@ -216,6 +204,11 @@ export const crmProposal = pgTable(
     decidedAt: timestamp({ withTimezone: true }),
     decisionNotes: text(),
     fileId: uuid().references(() => files.id, { onDelete: "set null" }),
+    // Fase 16: documento da proposta (seções do modelo do kit), versão do PDF gerado, contato e envio
+    document: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
+    documentVersion: integer().default(0).notNull(),
+    contactId: uuid().references(() => crmContact.id, { onDelete: "set null" }),
+    emailedAt: timestamp({ withTimezone: true }),
     ownerId: uuid()
       .notNull()
       .references(() => users.id),

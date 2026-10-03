@@ -53,11 +53,18 @@ export async function notify(input: NotifyInput): Promise<NotifyResult> {
       .select({ userId: notificationPreference.userId, kind: notificationPreference.kind, email: notificationPreference.email })
       .from(notificationPreference)
       .where(and(eq(notificationPreference.kind, input.kind), inArray(notificationPreference.userId, recipients.map((r) => r.id))));
-    for (const r of pickEmailRecipients(recipients, prefs, input.kind)) {
-      const content = typeof input.mail === "function" ? input.mail(r) : input.mail;
-      if (!content) continue;
-      if (await sendMail(r.email, content)) result.emailed++;
-      else result.failed++;
+    // e-mails em paralelo: a action que chamou está esperando esta promessa
+    const mail = input.mail;
+    const outcomes = await Promise.all(
+      pickEmailRecipients(recipients, prefs, input.kind).map(async (r) => {
+        const content = typeof mail === "function" ? mail(r) : mail;
+        if (!content) return null;
+        return sendMail(r.email, content);
+      }),
+    );
+    for (const o of outcomes) {
+      if (o === true) result.emailed++;
+      else if (o === false) result.failed++;
     }
     return result;
   } catch (err) {

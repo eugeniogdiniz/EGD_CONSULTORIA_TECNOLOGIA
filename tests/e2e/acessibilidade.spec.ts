@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { loginAs, ADMIN } from "./helpers";
 import { createTwoOrgsWithClientsAndFiles } from "./fixtures";
+import { proposalRoutes } from "./proposal-fixture";
 
 /**
  * axe-core (WCAG 2.0/2.1 A e AA + boas práticas) em site, login, admin e portal.
@@ -41,6 +42,7 @@ test("admin sem violações de acessibilidade", async ({ page }) => {
     "/admin/automacoes", "/admin/automacoes/resumo-diario/previa", "/admin/automacoes/propostas-expirar/previa",
     "/admin/notificacoes", "/admin/notificacoes?filtro=nao-lidas", "/admin/solicitacoes?sla=estourado", "/admin/solicitacoes?responsavel=eu",
     "/admin/automacoes/solicitacoes-lembrete/previa",
+    ...(await proposalRoutes(page)),
   ]);
 });
 

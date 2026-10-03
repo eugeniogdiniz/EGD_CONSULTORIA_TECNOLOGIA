@@ -197,3 +197,9 @@ Toda ação relevante de uma parte vira uma notificação para a outra, no sino 
 - **SLA de primeira resposta** em horas úteis (seg–sex, 9h–18h, Brasília): urgente 2 h, alta 4 h, média 8 h, baixa 16 h. Mudar a prioridade antes da primeira resposta recalcula o prazo. A lista do admin tem a aba "SLA estourado" e o painel mostra a contagem. Solicitações anteriores à Fase 15 não têm SLA (selo ausente).
 - **Responsável:** definido na triagem; a aba "Minhas" filtra; quem é atribuído por outra pessoa recebe notificação.
 - **Lembrete ao cliente:** automação `solicitacoes-lembrete` (seg–sex 09:30) avisa por e-mail e no portal quando a última mensagem é da equipe há 5 dias úteis ou mais; no máximo 2 lembretes, com 5 dias úteis entre eles. Prévia em `/admin/automacoes`. Nada é resolvido automaticamente.
+
+## 18. Documento da proposta em PDF e envio por e-mail (Fase 16)
+
+- Em `/admin/crm/propostas/<id>` o bloco **Documento** leva à página onde as seções do modelo do kit comercial são preenchidas (só em rascunho). **Gerar PDF** cria a versão seguinte (`PROP-AA-NNN-vN.pdf`), grava em Arquivos (interno) e passa a ser o anexo da proposta; **Ver PDF** mostra a prévia com o conteúdo atual sem gravar.
+- **Enviar por e-mail** manda o PDF anexado ao contato da empresa escolhido; em rascunho, a proposta vira Enviada; a interação de e-mail entra na linha do tempo da oportunidade. Exige PDF (ou arquivo anexado à mão) e contato com e-mail.
+- O PDF é gerado no servidor com `pdfkit` (sem navegador) e fontes padrão (Helvetica); o logo vem de `public/brand/logo-horizontal.png`. Não há variável de ambiente nova. Se a geração falhar, o log traz `proposal_pdf.*`.

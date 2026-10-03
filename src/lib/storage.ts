@@ -58,3 +58,10 @@ export function getSignedDownloadUrl(key: string, filename: string): Promise<str
     { expiresIn: 300 },
   );
 }
+
+/** Lê o objeto inteiro em memória (anexos de e-mail; arquivos pequenos). */
+export async function getObject(key: string): Promise<Buffer> {
+  const r = await s3.send(new GetObjectCommand({ Bucket: env.S3_BUCKET, Key: key }));
+  if (!r.Body) throw new Error(`objeto vazio: ${key}`);
+  return Buffer.from(await r.Body.transformToByteArray());
+}
