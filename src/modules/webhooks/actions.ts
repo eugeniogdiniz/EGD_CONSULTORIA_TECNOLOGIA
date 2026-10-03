@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { env } from "@/lib/env";
 import { webhookEndpoint } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
@@ -12,7 +13,7 @@ import { deliverOne, requeueDelivery } from "./deliver";
 
 export const webhookSchema = z.object({
   name: z.string().trim().min(2, "Mínimo 2 caracteres").max(80, "Máximo 80 caracteres"),
-  url: z.url("URL inválida").refine((u) => u.startsWith("https://") || process.env.NODE_ENV !== "production", "Use https:// em produção"),
+  url: z.url("URL inválida").refine((u) => u.startsWith("https://") || env.NODE_ENV !== "production" || env.E2E === "1", "Use https:// em produção"),
   events: z.array(z.string()).min(1, "Escolha ao menos um evento.").refine((l) => l.every(isWebhookEvent), "Evento desconhecido."),
 });
 export type WebhookInput = z.input<typeof webhookSchema>;
