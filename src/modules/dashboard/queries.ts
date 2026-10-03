@@ -16,6 +16,7 @@ export async function getAdminOverview(_ctx: AdminContext, today = todayInSaoPau
     due_this_week: number;
     published_cases: number;
     active_requests: number;
+    breached_sla: number;
     urgent_demands: number;
   }>(sql`
     select
@@ -30,6 +31,7 @@ export async function getAdminOverview(_ctx: AdminContext, today = todayInSaoPau
            and p.archived_at is null and p.status in ('planning', 'active')) as due_this_week,
       (select count(*)::int from site_case where published) as published_cases,
       (select count(*)::int from portal_request where status <> 'resolved') as active_requests,
+      (select count(*)::int from portal_request where status <> 'resolved' and first_response_at is null and first_response_due_at < now()) as breached_sla,
       (select count(*)::int from project_deliverable d join project p on p.id = d.project_id
          where d.priority = 'urgent' and d.status <> 'done'
            and p.archived_at is null and p.status in ('planning', 'active', 'on_hold')) as urgent_demands
@@ -42,6 +44,7 @@ export async function getAdminOverview(_ctx: AdminContext, today = todayInSaoPau
     dueThisWeek: row.due_this_week,
     publishedCases: row.published_cases,
     activeRequests: row.active_requests,
+    breachedSla: row.breached_sla,
     urgentDemands: row.urgent_demands,
   };
 }

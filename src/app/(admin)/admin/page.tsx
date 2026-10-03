@@ -53,7 +53,13 @@ export default async function AdminHome() {
           value={overview.openOpportunities}
           hint={overview.pipelineCents ? formatBrlCents(overview.pipelineCents) : undefined}
         />
-        <Kpi href="/admin/solicitacoes" label="Solicitações abertas" value={overview.activeRequests} />
+        <Kpi
+          href={overview.breachedSla > 0 ? "/admin/solicitacoes?sla=estourado" : "/admin/solicitacoes"}
+          label="Solicitações abertas"
+          value={overview.activeRequests}
+          hint={`${overview.breachedSla} com SLA estourado`}
+          tone={overview.breachedSla > 0 ? "danger" : undefined}
+        />
         <Kpi href="/admin/projetos" label="Projetos ativos" value={overview.activeProjects} />
         <Kpi
           href="/admin/projetos"

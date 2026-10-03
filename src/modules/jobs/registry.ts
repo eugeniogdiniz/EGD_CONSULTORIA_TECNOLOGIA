@@ -12,9 +12,10 @@ import { expireProposals, loadExpirableProposals, proposalsToExpire } from "./di
 import { buildDailyDigest, loadDailyDigestInput } from "./digests/daily";
 import { loadWeeklyTeamReport } from "./digests/weekly-team";
 import { buildClientDigest, listDigestRecipients, loadClientDigestInput } from "./digests/weekly-client";
+import { loadReminderCandidates, requestsToRemind, sendReminders, MAX_REMINDERS, REMINDER_AFTER_BUSINESS_DAYS } from "@/modules/requests/reminders";
 import { countOldNotifications, deleteOldNotifications, READ_RETENTION_DAYS, UNREAD_RETENTION_DAYS } from "@/modules/notifications/cleanup";
 
-export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente", "notificacoes-limpar"] as const;
+export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente", "notificacoes-limpar", "solicitacoes-lembrete"] as const;
 export type JobKey = (typeof JOB_KEYS)[number];
 export const isJobKey = (v: string): v is JobKey => (JOB_KEYS as readonly string[]).includes(v);
 
@@ -172,5 +173,32 @@ const notificacoesLimpar: JobDefinition = {
   },
 };
 
-export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente, notificacoesLimpar];
+const solicitacoesLembrete: JobDefinition = {
+  key: "solicitacoes-lembrete",
+  name: "Lembrar clientes de solicitações paradas",
+  description: `Solicitação respondida pela equipe sem retorno do cliente há ${REMINDER_AFTER_BUSINESS_DAYS} dias úteis: lembrete por e-mail e no portal, no máximo ${MAX_REMINDERS}.`,
+  schedule: { kind: "weekdays", hour: 9, minute: 30 },
+  recipients: async () => "membros das organizações com solicitação parada",
+  async run(ctx) {
+    const r = await sendReminders(ctx.now);
+    if (r.failed > 0 && r.sent === 0 && r.reminded > 0) throw new Error(`SMTP recusou todos os ${r.failed} lembretes`);
+    return {
+      text: r.reminded === 0 ? "nenhuma solicitação parada" : `${plural(r.reminded, "lembrete enviado", "lembretes enviados")} (${plural(r.sent, "e-mail", "e-mails")})${r.failed ? ` · ${r.failed} falharam` : ""}`,
+      sent: r.sent,
+      failed: r.failed,
+      reminded: r.reminded,
+    };
+  },
+  async preview(ctx) {
+    const rows = requestsToRemind(await loadReminderCandidates(), ctx.now);
+    return {
+      kind: "table",
+      columns: ["Solicitação", "Organização", "Parada há", "Lembrete nº"],
+      rows: rows.map((r) => [r.title, r.organizationName, `${r.idleBusinessDays} dias úteis`, String(r.reminderCount + 1)]),
+      note: rows.length === 0 ? "Nenhuma solicitação aguardando o cliente há 5 dias úteis ou mais. Nada seria enviado." : `${plural(rows.length, "cliente receberia", "clientes receberiam")} lembrete agora.`,
+    };
+  },
+};
+
+export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente, solicitacoesLembrete, notificacoesLimpar];
 export const getJob = (key: string): JobDefinition | null => JOBS.find((j) => j.key === key) ?? null;

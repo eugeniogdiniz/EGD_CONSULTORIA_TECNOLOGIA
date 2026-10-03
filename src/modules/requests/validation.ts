@@ -17,6 +17,8 @@ export type RequestInput = z.input<typeof requestSchema>;
 export const messageSchema = z.object({
   requestId: z.uuid(),
   body: z.string().trim().min(1, "Mensagem vazia.").max(4000, "Máximo 4000 caracteres"),
+  /** nota interna (só a equipe; ignorado para o cliente) */
+  internal: z.boolean().optional().default(false),
 });
 export type MessageInput = z.input<typeof messageSchema>;
 

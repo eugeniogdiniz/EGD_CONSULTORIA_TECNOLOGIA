@@ -39,7 +39,8 @@ test("admin sem violações de acessibilidade", async ({ page }) => {
     `/admin/projetos/${p.id}/atas`, "/admin/atas", "/admin/atas/nova",
     `/admin/projetos/${p.id}/relatorio`, "/admin/relatorios", "/admin/relatorios/semanal",
     "/admin/automacoes", "/admin/automacoes/resumo-diario/previa", "/admin/automacoes/propostas-expirar/previa",
-    "/admin/notificacoes", "/admin/notificacoes?filtro=nao-lidas",
+    "/admin/notificacoes", "/admin/notificacoes?filtro=nao-lidas", "/admin/solicitacoes?sla=estourado", "/admin/solicitacoes?responsavel=eu",
+    "/admin/automacoes/solicitacoes-lembrete/previa",
   ]);
 });
 

@@ -4,8 +4,11 @@
  * úteis entre eles. Regra pura `requestsToRemind`; o carregador e o envio ficam
  * na mesma unidade para a automação.
  */
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { portalRequest } from "@/db/schema";
+import { audit } from "@/modules/audit/log";
+import { notifyRequestReminder } from "@/modules/notifications/events";
 import { businessDaysBetween } from "./sla";
 
 export const REMINDER_AFTER_BUSINESS_DAYS = 5;
@@ -73,4 +76,31 @@ export async function loadReminderCandidates(): Promise<ReminderCandidate[]> {
     lastAuthorRole: r.last_author_role,
     lastMessageAt: r.last_message_at ? new Date(r.last_message_at) : null,
   }));
+}
+
+/** Automação: envia os lembretes devidos agora e atualiza os contadores. */
+export async function sendReminders(now: Date): Promise<{ reminded: number; sent: number; failed: number; titles: string[] }> {
+  const due = requestsToRemind(await loadReminderCandidates(), now);
+  let sent = 0;
+  let failed = 0;
+  const titles: string[] = [];
+  for (const r of due) {
+    const res = await notifyRequestReminder({ requestId: r.id, title: r.title, organizationId: r.organizationId, organizationName: r.organizationName, idleBusinessDays: r.idleBusinessDays });
+    sent += res.emailed;
+    failed += res.failed;
+    await db
+      .update(portalRequest)
+      .set({ reminderCount: r.reminderCount + 1, lastReminderAt: now })
+      .where(eq(portalRequest.id, r.id));
+    await audit({
+      actorId: null,
+      action: "request.reminded",
+      entityType: "portal_request",
+      entityId: r.id,
+      organizationId: r.organizationId,
+      metadata: { reminder: r.reminderCount + 1, idleBusinessDays: r.idleBusinessDays, emailed: res.emailed },
+    });
+    titles.push(r.title);
+  }
+  return { reminded: due.length, sent, failed, titles };
 }

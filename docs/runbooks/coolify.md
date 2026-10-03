@@ -189,3 +189,11 @@ Toda ação relevante de uma parte vira uma notificação para a outra, no sino 
 - Uma pessoa que não deve receber nada por e-mail desliga os tipos em Minha conta; para não receber nada no sistema, desative a conta.
 - Retenção: a automação **Limpar notificações antigas** (03:00) apaga lidas com mais de 90 dias e não lidas com mais de 180.
 - Logs: `notify.failed` (JSON) quando a gravação ou o envio falha; a action que gerou o evento não é afetada.
+
+## 17. Solicitações: anexos, SLA, notas internas e lembretes (Fase 15)
+
+- **Anexos:** cliente e equipe anexam até 5 arquivos (50 MB no total) por mensagem; tipos aceitos: PDF, Office, imagens, CSV, TXT e ZIP. Os arquivos ficam no mesmo storage, na organização da solicitação, e aparecem em `/admin/arquivos`.
+- **Nota interna:** na resposta da equipe, a caixa "Nota interna" grava um texto que o cliente nunca vê (nem na conversa, nem na contagem, nem por e-mail). Não muda o status.
+- **SLA de primeira resposta** em horas úteis (seg–sex, 9h–18h, Brasília): urgente 2 h, alta 4 h, média 8 h, baixa 16 h. Mudar a prioridade antes da primeira resposta recalcula o prazo. A lista do admin tem a aba "SLA estourado" e o painel mostra a contagem. Solicitações anteriores à Fase 15 não têm SLA (selo ausente).
+- **Responsável:** definido na triagem; a aba "Minhas" filtra; quem é atribuído por outra pessoa recebe notificação.
+- **Lembrete ao cliente:** automação `solicitacoes-lembrete` (seg–sex 09:30) avisa por e-mail e no portal quando a última mensagem é da equipe há 5 dias úteis ou mais; no máximo 2 lembretes, com 5 dias úteis entre eles. Prévia em `/admin/automacoes`. Nada é resolvido automaticamente.

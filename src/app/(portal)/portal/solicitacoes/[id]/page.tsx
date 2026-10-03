@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cn } from "cn";
 import { requirePortal } from "@/modules/auth/context";
-import { getPortalRequest, listPortalRequestMessages } from "@/modules/requests/queries";
+import { getPortalRequest, listPortalRequestMessages, listRequestAttachments } from "@/modules/requests/queries";
 import { canClientResolve, STATUS_LABEL, STATUS_STYLE } from "@/modules/requests/status";
 import { replyAsClientForm, resolveAsClientForm } from "@/modules/requests/form-actions";
 import { RequestThread } from "@/modules/requests/components/request-thread";
@@ -18,7 +18,7 @@ export default async function PortalSolicitacaoPage({ params }: PageProps<"/port
   const { id } = await params;
   const req = await getPortalRequest(ctx, id);
   if (!req) notFound();
-  const messages = await listPortalRequestMessages(ctx, id);
+  const [messages, attachments] = await Promise.all([listPortalRequestMessages(ctx, id), listRequestAttachments(ctx, id)]);
 
   return (
     <>
@@ -64,6 +64,8 @@ export default async function PortalSolicitacaoPage({ params }: PageProps<"/port
           <RequestThread
             opener={{ authorName: req.authorName, body: req.body, createdAt: req.createdAt }}
             messages={messages}
+            attachments={attachments}
+            area="portal"
           />
           <ReplyForm
             requestId={req.id}

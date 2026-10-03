@@ -31,6 +31,9 @@ export type DailyRequest = {
   lastAuthor: "team" | "client" | null;
   /** quando a solicitação passou a esperar (última mensagem ou criação) */
   waitingSince: Date;
+  /** SLA de primeira resposta (Fase 15); ausente nas solicitações antigas */
+  firstResponseDueAt?: Date | null;
+  firstResponseAt?: Date | null;
 };
 export type DailyProposal = {
   id: string;
@@ -99,7 +102,13 @@ export function buildDailyDigest(input: DailyDigestInput, today: string) {
 
   const requests = input.requests
     .filter((r) => r.status !== "resolved" && r.lastAuthor !== "team")
-    .map((r) => ({ id: r.id, title: r.title, organizationName: r.organizationName, businessDays: businessDaysBetween(dateInSaoPaulo(r.waitingSince), today) }))
+    .map((r) => ({
+      id: r.id,
+      title: r.title,
+      organizationName: r.organizationName,
+      businessDays: businessDaysBetween(dateInSaoPaulo(r.waitingSince), today),
+      slaBreached: Boolean(r.firstResponseDueAt && !r.firstResponseAt && dateInSaoPaulo(r.firstResponseDueAt) <= today && r.firstResponseDueAt.getTime() < new Date(`${today}T23:59:59-03:00`).getTime()),
+    }))
     .sort((a, b) => b.businessDays - a.businessDays || a.title.localeCompare(b.title, "pt-BR"));
 
   const expiring = input.proposals
@@ -168,9 +177,11 @@ export async function loadDailyDigestInput(today: string): Promise<DailyDigestIn
         title: portalRequest.title,
         organizationName: organizations.name,
         status: portalRequest.status,
-        lastAuthorRole: sql<string | null>`(select u.role::text from portal_request_message m join users u on u.id = m.author_id where m.request_id = portal_request.id order by m.created_at desc limit 1)`,
-        lastMessageAt: sql<Date | null>`(select m.created_at from portal_request_message m where m.request_id = portal_request.id order by m.created_at desc limit 1)`,
+        lastAuthorRole: sql<string | null>`(select u.role::text from portal_request_message m join users u on u.id = m.author_id where m.request_id = portal_request.id and m.internal = false order by m.created_at desc limit 1)`,
+        lastMessageAt: sql<Date | null>`(select m.created_at from portal_request_message m where m.request_id = portal_request.id and m.internal = false order by m.created_at desc limit 1)`,
         createdAt: portalRequest.createdAt,
+        firstResponseDueAt: portalRequest.firstResponseDueAt,
+        firstResponseAt: portalRequest.firstResponseAt,
       })
       .from(portalRequest)
       .innerJoin(organizations, eq(portalRequest.organizationId, organizations.id))
@@ -200,6 +211,8 @@ export async function loadDailyDigestInput(today: string): Promise<DailyDigestIn
       status: r.status,
       lastAuthor: r.lastAuthorRole === "admin" ? "team" : r.lastAuthorRole === "client" ? "client" : null,
       waitingSince: r.lastMessageAt ? new Date(r.lastMessageAt) : r.createdAt,
+      firstResponseDueAt: r.firstResponseDueAt,
+      firstResponseAt: r.firstResponseAt,
     })),
     proposals,
   };

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FieldError } from "@/components/shell/field-error";
 import type { ActionResult } from "@/lib/action-result";
+import { AttachmentsField } from "./attachments-field";
 
 export function RequestForm({
   action,
@@ -18,7 +19,7 @@ export function RequestForm({
   const [state, formAction, pending] = useActionState<ActionResult<{ id: string }> | null, FormData>(action, null);
   const fe = state && !state.ok ? state.fieldErrors : undefined;
   return (
-    <form action={formAction} className="grid max-w-2xl gap-4">
+    <form action={formAction} className="grid max-w-2xl gap-4" encType="multipart/form-data">
       <div className="grid gap-1.5">
         <Label htmlFor="title">Assunto</Label>
         <Input id="title" name="title" required aria-invalid={fe?.title ? true : undefined} />
@@ -41,6 +42,7 @@ export function RequestForm({
         <Textarea id="body" name="body" rows={7} required aria-invalid={fe?.body ? true : undefined} />
         <FieldError errors={fe?.body} />
       </div>
+      <AttachmentsField id="files" errors={fe?.files} />
       {state && !state.ok && !fe && <p role="alert" className="text-sm text-danger">{state.error}</p>}
       <div>
         <Button type="submit" disabled={pending}>{pending ? "Enviando…" : "Enviar solicitação"}</Button>

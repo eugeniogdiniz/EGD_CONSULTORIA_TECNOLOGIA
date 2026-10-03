@@ -3,6 +3,9 @@
  * depois de gravarem. Cada um resolve destinatários, monta título e e-mail e
  * delega ao `notify()`. Nenhum lança.
  */
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { organizations } from "@/db/schema";
 import { env } from "@/lib/env";
 import { formatDate } from "@/lib/format";
 import {
@@ -10,7 +13,9 @@ import {
   renderDeliverableDoneNotification,
   renderLeadNotification,
   renderMeetingSharedNotification,
+  renderRequestAssigned,
   renderRequestNotification,
+  renderRequestReminder,
   renderTeamCommentNotification,
   type RequestNotificationKind,
 } from "@/modules/mail/templates";
@@ -166,5 +171,45 @@ export async function notifyProposalExpired(p: { proposalId: string; number: str
     url: `/admin/crm/propostas/${p.proposalId}`,
     entity: { type: "crm_proposal", id: p.proposalId },
     recipients: await activeAdmins(),
+  });
+}
+
+/** Alguém da equipe virou responsável por uma solicitação (não avisa quem se atribuiu). */
+export async function notifyRequestAssigned(p: {
+  requestId: string;
+  title: string;
+  organizationId: string;
+  assignee: { id: string; name: string; email: string };
+  actorId: string;
+  actorName: string;
+}): Promise<NotifyResult> {
+  const path = `/admin/solicitacoes/${p.requestId}`;
+  const [org] = await db.select({ name: organizations.name }).from(organizations).where(eq(organizations.id, p.organizationId)).limit(1);
+  const organizationName = org?.name ?? "";
+  return notify({
+    kind: "request.assigned",
+    title: `Solicitação atribuída a você: ${p.title}`,
+    body: organizationName,
+    url: path,
+    entity: { type: "portal_request", id: p.requestId },
+    organizationId: p.organizationId,
+    recipients: [p.assignee],
+    excludeUserId: p.actorId,
+    mail: renderRequestAssigned({ title: p.title, organizationName, actorName: p.actorName, url: `${base()}${path}` }),
+  });
+}
+
+/** Lembrete da automação ao cliente: a solicitação aguarda retorno dele. */
+export async function notifyRequestReminder(p: { requestId: string; title: string; organizationId: string; organizationName: string; idleBusinessDays: number }): Promise<NotifyResult> {
+  const path = `/portal/solicitacoes/${p.requestId}`;
+  return notify({
+    kind: "request.reminder",
+    title: `Aguardamos seu retorno: ${p.title}`,
+    body: `Respondida pela equipe há ${p.idleBusinessDays} dias úteis.`,
+    url: path,
+    entity: { type: "portal_request", id: p.requestId },
+    organizationId: p.organizationId,
+    recipients: await organizationMembers(p.organizationId),
+    mail: renderRequestReminder({ title: p.title, organizationName: p.organizationName, idleBusinessDays: p.idleBusinessDays, url: `${base()}${path}` }),
   });
 }

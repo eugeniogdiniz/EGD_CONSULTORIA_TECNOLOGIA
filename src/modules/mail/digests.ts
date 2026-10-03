@@ -71,9 +71,9 @@ export function renderDailyDigest(d: DailyDigest, baseUrl: string): MailContent 
   if (d.requests.total) {
     html.push(
       sec("Solicitações aguardando a equipe", d.requests.total),
-      `${TABLE_OPEN}${d.requests.items.map((r) => tr([esc(r.organizationName), `<a href="${esc(`${baseUrl}/admin/solicitacoes/${r.id}`)}">${esc(r.title)}</a>`, `<span style="${r.businessDays >= 2 ? LATE : ""}">há ${diasUteis(r.businessDays)}</span>`])).join("")}</table>${more(d.requests)}`,
+      `${TABLE_OPEN}${d.requests.items.map((r) => tr([esc(r.organizationName), `<a href="${esc(`${baseUrl}/admin/solicitacoes/${r.id}`)}">${esc(r.title)}</a>`, `<span style="${r.businessDays >= 2 ? LATE : ""}">há ${diasUteis(r.businessDays)}</span>`, r.slaBreached ? `<span style="${LATE}">⚠ SLA</span>` : ""])).join("")}</table>${more(d.requests)}`,
     );
-    text.push(`SOLICITAÇÕES AGUARDANDO A EQUIPE (${d.requests.total})`, ...d.requests.items.map((r) => `  - ${r.organizationName} · ${r.title} · há ${diasUteis(r.businessDays)} · ${baseUrl}/admin/solicitacoes/${r.id}`), ...moreText(d.requests), "");
+    text.push(`SOLICITAÇÕES AGUARDANDO A EQUIPE (${d.requests.total})`, ...d.requests.items.map((r) => `  - ${r.organizationName} · ${r.title} · há ${diasUteis(r.businessDays)}${r.slaBreached ? " · SLA estourado" : ""} · ${baseUrl}/admin/solicitacoes/${r.id}`), ...moreText(d.requests), "");
   }
   if (d.expiring.total || d.expired.total) {
     const rows = [

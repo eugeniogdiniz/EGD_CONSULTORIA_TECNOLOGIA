@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { extensionOf, validateAttachments, MAX_FILES } from "@/modules/requests/attachments";
+import { extensionOf, filesFrom, validateAttachments, MAX_FILES } from "@/modules/requests/attachments";
 
 const f = (name: string, size = 1000) => ({ name, size });
 
@@ -21,4 +21,14 @@ describe("validateAttachments", () => {
     expect(extensionOf(".bashrc")).toBe("");
     expect(extensionOf("arquivo.")).toBe("");
   });
+});
+
+it("filesFrom descarta o arquivo vazio sem nome que o navegador manda quando nada foi escolhido", () => {
+  const fd = new FormData();
+  fd.append("files", new File([], ""));
+  fd.append("files", new File([], undefined as unknown as string)); // nome vira a string "undefined"
+  fd.append("files", new File(["x"], "a.txt"));
+  fd.append("files", new File([], "vazio.txt")); // escolhido de verdade, mesmo vazio: fica para a validação acusar
+  fd.append("files", "texto");
+  expect(filesFrom(fd).map((f) => f.name)).toEqual(["a.txt", "vazio.txt"]);
 });

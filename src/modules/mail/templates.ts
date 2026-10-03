@@ -173,3 +173,29 @@ export function renderMeetingSharedNotification(p: { meetingTitle: string; heldA
   );
   return { subject, text, html };
 }
+
+// ── Fase 15: solicitações ────────────────────────────────────────────────────
+
+/** Lembrete ao cliente: a equipe respondeu e aguarda retorno. */
+export function renderRequestReminder(p: { title: string; organizationName: string; idleBusinessDays: number; url: string }): MailContent {
+  const subject = `Aguardamos seu retorno: ${p.title}`;
+  const intro = `A solicitação "${p.title}" (${p.organizationName}) foi respondida pela equipe da EGD e aguarda seu retorno há ${p.idleBusinessDays} dias úteis.`;
+  const hint = "Se já estiver resolvida, marque como resolvida no portal; se precisar de mais alguma coisa, responda por lá.";
+  const text = [intro, "", hint, "", `Abrir: ${p.url}`].join("\n");
+  const html = layout(
+    subject,
+    `<p>${esc(intro)}</p>
+  <p>${esc(hint)}</p>
+  <p><a href="${esc(p.url)}">Abrir a solicitação</a></p>`,
+  );
+  return { subject, text, html };
+}
+
+/** Aviso ao admin que virou responsável por uma solicitação. */
+export function renderRequestAssigned(p: { title: string; organizationName: string; actorName: string; url: string }): MailContent {
+  const subject = `Solicitação atribuída a você: ${p.title}`;
+  const intro = `${p.actorName} definiu você como responsável pela solicitação "${p.title}" (${p.organizationName}).`;
+  const text = [intro, "", `Abrir: ${p.url}`].join("\n");
+  const html = layout(subject, `<p>${esc(intro)}</p>\n  <p><a href="${esc(p.url)}">Abrir a solicitação</a></p>`);
+  return { subject, text, html };
+}

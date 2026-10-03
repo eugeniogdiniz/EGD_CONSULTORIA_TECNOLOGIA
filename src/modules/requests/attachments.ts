@@ -25,7 +25,13 @@ export function validateAttachments(files: AttachmentCandidate[]): string | null
   return null;
 }
 
-/** Só `File` reais e não vazios do campo múltiplo de um FormData. */
+/**
+ * Só `File` reais do campo múltiplo de um FormData. Um input de arquivo em que
+ * nada foi escolhido chega como um File de tamanho zero sem nome: o navegador
+ * manda `filename=""` e, ao reconstruir a FormData da server action, o nome
+ * vira "" ou a string "undefined" (`new File([], undefined)`). Esses saem.
+ */
+const PLACEHOLDER_NAMES = new Set(["", "undefined", "blob"]);
 export function filesFrom(fd: FormData, field = "files"): File[] {
-  return fd.getAll(field).filter((v): v is File => v instanceof File && (v.size > 0 || v.name !== ""));
+  return fd.getAll(field).filter((v): v is File => v instanceof File && !(v.size === 0 && PLACEHOLDER_NAMES.has(String(v.name))));
 }
