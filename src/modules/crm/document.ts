@@ -53,14 +53,15 @@ export function investmentMismatch(doc: Pick<ProposalDocument, "investment">, va
 }
 
 /** As seções com conteúdo, na ordem e com numeração sequencial do modelo. */
-export type Section =
-  | { kind: "text"; number: string; title: string; body: string }
-  | { kind: "table"; number: string; title: string; columns: string[]; rows: string[][]; note?: string };
+type SectionBody =
+  | { kind: "text"; title: string; body: string }
+  | { kind: "table"; title: string; columns: string[]; rows: string[][]; note?: string };
+export type Section = SectionBody & { number: string };
 
 export function documentSections(doc: ProposalDocument, p: { valueFormatted: string; place: string; dateFormatted: string }): Section[] {
   const out: Section[] = [];
   const num = () => String(out.length + 1).padStart(2, "0");
-  const push = (s: Omit<Section, "number">) => out.push({ ...s, number: num() } as Section);
+  const push = (s: SectionBody) => out.push({ ...s, number: num() });
   if (doc.context) push({ kind: "text", title: "Contexto", body: doc.context });
   if (doc.objective) push({ kind: "text", title: "Objetivo", body: doc.objective });
   const approach = doc.approach.filter((a) => a.stage || a.description);
