@@ -18,6 +18,8 @@ import {
   projectTemplatePhase,
   projectTimeEntry,
   users,
+  projectInvoice,
+  projectRate,
 } from "@/db/schema";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
@@ -467,14 +469,16 @@ export async function getProjectFinancials(_ctx: AdminContext, projectId: string
   });
   if (!projectRow) return null;
 
+  // rate efetivo: o congelado na entrada; nas antigas, o do projeto para a pessoa, senão o da pessoa
   const entries = await db
     .select({
       minutes: projectTimeEntry.minutes,
-      hourlyRateCents: users.hourlyRateCents,
+      hourlyRateCents: sql<number | null>`coalesce(${projectTimeEntry.rateCents}, ${projectRate.hourlyRateCents}, ${users.hourlyRateCents})`,
     })
     .from(projectTimeEntry)
     .innerJoin(projectDeliverable, eq(projectTimeEntry.deliverableId, projectDeliverable.id))
     .innerJoin(users, eq(projectTimeEntry.userId, users.id))
+    .leftJoin(projectRate, and(eq(projectRate.projectId, projectDeliverable.projectId), eq(projectRate.userId, projectTimeEntry.userId)))
     .where(eq(projectDeliverable.projectId, projectId));
 
   const expenses = await db
@@ -503,6 +507,7 @@ export async function listTimeCostsByDeliverable(_ctx: AdminContext, projectId: 
   const rows = await db.execute<{
     deliverable_id: string;
     title: string;
+    estimate_minutes: number | null;
     total_minutes: number;
     labor_cents: number;
     entries_without_rate: number;
@@ -510,19 +515,23 @@ export async function listTimeCostsByDeliverable(_ctx: AdminContext, projectId: 
     select
       d.id as deliverable_id,
       d.title,
+      d.estimate_minutes,
       coalesce(sum(t.minutes), 0)::int as total_minutes,
-      coalesce(sum(case when u.hourly_rate_cents is not null then floor(t.minutes * u.hourly_rate_cents / 60)::bigint else 0 end), 0)::bigint as labor_cents,
-      coalesce(sum(case when t.ended_at is not null and u.hourly_rate_cents is null then 1 else 0 end), 0)::int as entries_without_rate
+      coalesce(sum(case when coalesce(t.rate_cents, pr.hourly_rate_cents, u.hourly_rate_cents) is not null
+                        then floor(t.minutes * coalesce(t.rate_cents, pr.hourly_rate_cents, u.hourly_rate_cents) / 60)::bigint else 0 end), 0)::bigint as labor_cents,
+      coalesce(sum(case when t.ended_at is not null and coalesce(t.rate_cents, pr.hourly_rate_cents, u.hourly_rate_cents) is null then 1 else 0 end), 0)::int as entries_without_rate
     from project_deliverable d
     left join project_time_entry t on t.deliverable_id = d.id and t.ended_at is not null
     left join users u on u.id = t.user_id
+    left join project_rate pr on pr.project_id = d.project_id and pr.user_id = t.user_id
     where d.project_id = ${projectId}
-    group by d.id, d.title
+    group by d.id, d.title, d.estimate_minutes
     order by d.title asc
   `);
   return rows.map((r) => ({
     deliverableId: r.deliverable_id,
     title: r.title,
+    estimateMinutes: r.estimate_minutes,
     totalMinutes: r.total_minutes,
     laborCents: Number(r.labor_cents),
     entriesWithoutRate: r.entries_without_rate,
@@ -697,4 +706,113 @@ export function listTeamMembers(_ctx: AdminContext) {
     .from(users)
     .where(and(inArray(users.role, ["admin", "collaborator"]), eq(users.active, true)))
     .orderBy(asc(users.name));
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Fase 18 — Faturamento, rate por projeto, horas por pessoa, burndown
+// ────────────────────────────────────────────────────────────────────────────
+
+/** Rate a congelar numa entrada: o do projeto para a pessoa, senão o da pessoa, senão null. */
+export async function resolveRateForDeliverable(deliverableId: string, userId: string): Promise<number | null> {
+  const [row] = await db
+    .select({ rate: sql<number | null>`coalesce(${projectRate.hourlyRateCents}, ${users.hourlyRateCents})` })
+    .from(projectDeliverable)
+    .innerJoin(users, eq(users.id, userId))
+    .leftJoin(projectRate, and(eq(projectRate.projectId, projectDeliverable.projectId), eq(projectRate.userId, userId)))
+    .where(eq(projectDeliverable.id, deliverableId))
+    .limit(1);
+  return row?.rate === null || row?.rate === undefined ? null : Number(row.rate);
+}
+
+export function listInvoices(_ctx: AdminContext, projectId: string) {
+  if (!isUuid(projectId)) return Promise.resolve([]);
+  return db
+    .select({
+      id: projectInvoice.id,
+      number: projectInvoice.number,
+      description: projectInvoice.description,
+      amountCents: projectInvoice.amountCents,
+      dueAt: projectInvoice.dueAt,
+      status: projectInvoice.status,
+      paidAt: projectInvoice.paidAt,
+      notes: projectInvoice.notes,
+    })
+    .from(projectInvoice)
+    .where(eq(projectInvoice.projectId, projectId))
+    .orderBy(asc(projectInvoice.dueAt), asc(projectInvoice.number));
+}
+
+/** Pendentes de todos os projetos (para o painel, o resumo diário e a automação). */
+export function listPendingInvoices() {
+  return db
+    .select({
+      id: projectInvoice.id,
+      projectId: projectInvoice.projectId,
+      projectTitle: project.title,
+      number: projectInvoice.number,
+      description: projectInvoice.description,
+      amountCents: projectInvoice.amountCents,
+      dueAt: projectInvoice.dueAt,
+      status: projectInvoice.status,
+    })
+    .from(projectInvoice)
+    .innerJoin(project, eq(projectInvoice.projectId, project.id))
+    .where(and(eq(projectInvoice.status, "pending"), isNull(project.archivedAt)))
+    .orderBy(asc(projectInvoice.dueAt));
+}
+
+/** Equipe com o rate da pessoa e o rate neste projeto (se houver). */
+export async function listProjectRates(ctx: AdminContext, projectId: string) {
+  if (!isUuid(projectId)) return [];
+  const team = await listTeamMembers(ctx);
+  const rates = await db.select({ userId: projectRate.userId, hourlyRateCents: projectRate.hourlyRateCents }).from(projectRate).where(eq(projectRate.projectId, projectId));
+  const personal = await db.select({ id: users.id, hourlyRateCents: users.hourlyRateCents }).from(users).where(inArray(users.id, team.map((t) => t.id)));
+  return team.map((t) => ({
+    userId: t.id,
+    name: t.name,
+    personalRateCents: personal.find((p) => p.id === t.id)?.hourlyRateCents ?? null,
+    projectRateCents: rates.find((r) => r.userId === t.id)?.hourlyRateCents ?? null,
+  }));
+}
+
+export type HoursFilters = { from: string; to: string; userId?: string; projectId?: string };
+
+/** Horas fechadas por pessoa e projeto no período (data de início da entrada, em Brasília). */
+export async function listHoursByPerson(_ctx: AdminContext, f: HoursFilters) {
+  const rows = await db.execute<{
+    user_id: string;
+    user_name: string;
+    project_id: string;
+    project_title: string;
+    minutes: number;
+    cost_cents: string;
+    entries_without_rate: number;
+  }>(sql`
+    select u.id as user_id, u.name as user_name, p.id as project_id, p.title as project_title,
+           coalesce(sum(t.minutes), 0)::int as minutes,
+           coalesce(sum(case when coalesce(t.rate_cents, pr.hourly_rate_cents, u.hourly_rate_cents) is not null
+                             then floor(t.minutes * coalesce(t.rate_cents, pr.hourly_rate_cents, u.hourly_rate_cents) / 60)::bigint else 0 end), 0)::text as cost_cents,
+           coalesce(sum(case when coalesce(t.rate_cents, pr.hourly_rate_cents, u.hourly_rate_cents) is null then 1 else 0 end), 0)::int as entries_without_rate
+    from project_time_entry t
+    join users u on u.id = t.user_id
+    join project_deliverable d on d.id = t.deliverable_id
+    join project p on p.id = d.project_id
+    left join project_rate pr on pr.project_id = p.id and pr.user_id = t.user_id
+    where t.ended_at is not null
+      and (t.started_at at time zone 'America/Sao_Paulo')::date between ${f.from}::date and ${f.to}::date
+      ${f.userId && isUuid(f.userId) ? sql`and t.user_id = ${f.userId}` : sql``}
+      ${f.projectId && isUuid(f.projectId) ? sql`and p.id = ${f.projectId}` : sql``}
+    group by u.id, u.name, p.id, p.title
+    order by u.name, p.title
+  `);
+  return rows.map((r) => ({ userId: r.user_id, userName: r.user_name, projectId: r.project_id, projectTitle: r.project_title, minutes: r.minutes, costCents: Number(r.cost_cents), entriesWithoutRate: r.entries_without_rate }));
+}
+
+/** Entregas com o que o burndown precisa. */
+export function listDeliverablesForBurndown(_ctx: AdminContext, projectId: string) {
+  if (!isUuid(projectId)) return Promise.resolve([]);
+  return db
+    .select({ estimateMinutes: projectDeliverable.estimateMinutes, completedAt: projectDeliverable.completedAt, dueAt: projectDeliverable.dueAt, status: projectDeliverable.status })
+    .from(projectDeliverable)
+    .where(eq(projectDeliverable.projectId, projectId));
 }

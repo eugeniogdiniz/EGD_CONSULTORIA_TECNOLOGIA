@@ -40,8 +40,9 @@ export const auth = betterAuth({
     window: 60,
     max: 100,
     customRules: {
-      // login: 60 por IP a cada 15 min (o limite de 5 por e-mail, no hook, é a defesa contra força bruta)
-      "/sign-in/email": { window: 15 * 60, max: 60 },
+      // login: 60 por IP a cada 15 min (o limite de 5 por e-mail, no hook, é a defesa contra força bruta).
+      // Fora de produção a suíte E2E inteira entra pelo mesmo IP: o limite por IP fica folgado.
+      "/sign-in/email": { window: 15 * 60, max: env.NODE_ENV === "production" ? 60 : 1000 },
       "/get-session": false,
     },
   },

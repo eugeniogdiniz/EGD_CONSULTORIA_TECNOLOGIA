@@ -18,6 +18,9 @@ export async function getAdminOverview(_ctx: AdminContext, today = todayInSaoPau
     active_requests: number;
     breached_sla: number;
     urgent_demands: number;
+    receivable_cents: string;
+    overdue_invoices: number;
+    overdue_cents: string;
   }>(sql`
     select
       (select count(*)::int from crm_opportunity where stage not in ('won', 'lost')) as open_opportunities,
@@ -32,6 +35,9 @@ export async function getAdminOverview(_ctx: AdminContext, today = todayInSaoPau
       (select count(*)::int from site_case where published) as published_cases,
       (select count(*)::int from portal_request where status <> 'resolved') as active_requests,
       (select count(*)::int from portal_request where status <> 'resolved' and first_response_at is null and first_response_due_at < now()) as breached_sla,
+      (select coalesce(sum(i.amount_cents), 0)::text from project_invoice i join project p on p.id = i.project_id where i.status = 'pending' and p.archived_at is null) as receivable_cents,
+      (select count(*)::int from project_invoice i join project p on p.id = i.project_id where i.status = 'pending' and i.due_at < ${today}::date and p.archived_at is null) as overdue_invoices,
+      (select coalesce(sum(i.amount_cents), 0)::text from project_invoice i join project p on p.id = i.project_id where i.status = 'pending' and i.due_at < ${today}::date and p.archived_at is null) as overdue_cents,
       (select count(*)::int from project_deliverable d join project p on p.id = d.project_id
          where d.priority = 'urgent' and d.status <> 'done'
            and p.archived_at is null and p.status in ('planning', 'active', 'on_hold')) as urgent_demands
@@ -45,6 +51,9 @@ export async function getAdminOverview(_ctx: AdminContext, today = todayInSaoPau
     publishedCases: row.published_cases,
     activeRequests: row.active_requests,
     breachedSla: row.breached_sla,
+    receivableCents: Number(row.receivable_cents),
+    overdueInvoices: row.overdue_invoices,
+    overdueCents: Number(row.overdue_cents),
     urgentDemands: row.urgent_demands,
   };
 }

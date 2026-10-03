@@ -69,7 +69,17 @@ export default async function AdminHome() {
           hint={`${overview.breachedSla} com SLA estourado`}
           tone={overview.breachedSla > 0 ? "danger" : undefined}
         />
-        <Kpi href="/admin/projetos" label="Projetos ativos" value={overview.activeProjects} />
+        {owner ? (
+          <Kpi
+            href="/admin/projetos"
+            label="A receber"
+            value={formatBrlCents(overview.receivableCents)}
+            hint={overview.overdueInvoices > 0 ? `${overview.overdueInvoices} vencida${overview.overdueInvoices === 1 ? "" : "s"} · ${formatBrlCents(overview.overdueCents)}` : `${overview.activeProjects} projetos ativos`}
+            tone={overview.overdueInvoices > 0 ? "danger" : undefined}
+          />
+        ) : (
+          <Kpi href="/admin/projetos" label="Projetos ativos" value={overview.activeProjects} />
+        )}
         <Kpi
           href="/admin/projetos"
           label="Entregas atrasadas"

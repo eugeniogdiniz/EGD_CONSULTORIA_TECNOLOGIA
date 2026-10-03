@@ -9,6 +9,7 @@ import { crmCompany, crmOpportunity, crmProposal, organizations, portalRequest, 
 import { compareBacklog, isOverdue, type Priority } from "@/modules/projects/priority";
 import { addDays, dateInSaoPaulo, daysBetween, formatBrShort } from "@/modules/reports/dates";
 import { isoWeekday } from "../schedule";
+import { listPendingInvoices } from "@/modules/projects/queries";
 
 export type DailyDeliverable = {
   id: string;
@@ -44,11 +45,14 @@ export type DailyProposal = {
   validUntil: string | null;
   decidedAt: Date | null;
 };
+export type DailyInvoice = { id: string; projectId: string; projectTitle: string; number: number; description: string; amountCents: number; dueAt: string };
 export type DailyDigestInput = {
   deliverables: DailyDeliverable[];
   milestones: DailyMilestone[];
   requests: DailyRequest[];
   proposals: DailyProposal[];
+  /** parcelas pendentes (Fase 18); opcional para os testes antigos */
+  invoices?: DailyInvoice[];
 };
 
 export type DigestLine = { projectTitle: string; title: string; priority: Priority | null; assigneeName: string | null; dueAt: string; daysLate: number; kind: "deliverable" | "milestone" };
@@ -123,6 +127,10 @@ export function buildDailyDigest(input: DailyDigestInput, today: string) {
 
   const urgentCount = open.filter((d) => d.priority === "urgent").length;
 
+  const pendingInvoices = input.invoices ?? [];
+  const overdueInvoices = pendingInvoices.filter((i) => i.dueAt < today).map((i) => ({ ...i, daysLate: daysBetween(i.dueAt, today) })).sort((a, b) => a.dueAt.localeCompare(b.dueAt));
+  const dueInvoices = pendingInvoices.filter((i) => i.dueAt >= today && i.dueAt <= horizon).sort((a, b) => a.dueAt.localeCompare(b.dueAt));
+
   const sections = {
     late: section([...late, ...lateMilestones.map((m) => ({ ...m, daysLate: daysBetween(m.dueAt, today) }))]),
     dueToday: section([...dueToday, ...todayMilestones]),
@@ -130,6 +138,8 @@ export function buildDailyDigest(input: DailyDigestInput, today: string) {
     requests: section(requests),
     expiring: section(expiring),
     expired: section(expired),
+    overdueInvoices: section(overdueInvoices),
+    dueInvoices: section(dueInvoices),
   };
   const isEmpty = Object.values(sections).every((s) => s.total === 0) && urgentCount === 0;
   const parts = [
@@ -148,7 +158,7 @@ const ACTIVE = ["planning", "active", "on_hold"] as const;
 export async function loadDailyDigestInput(today: string): Promise<DailyDigestInput> {
   const horizon = addDays(today, 7);
   const since = addDays(today, -7);
-  const [deliverables, milestones, requests, proposals] = await Promise.all([
+  const [deliverables, milestones, requests, proposals, invoices] = await Promise.all([
     db
       .select({
         id: projectDeliverable.id,
@@ -200,6 +210,7 @@ export async function loadDailyDigestInput(today: string): Promise<DailyDigestIn
       .innerJoin(crmOpportunity, eq(crmProposal.opportunityId, crmOpportunity.id))
       .innerJoin(crmCompany, eq(crmOpportunity.companyId, crmCompany.id))
       .where(or(eq(crmProposal.status, "sent"), and(eq(crmProposal.status, "expired"), gte(crmProposal.decidedAt, new Date(`${since}T00:00:00-03:00`))))),
+    listPendingInvoices(),
   ]);
   return {
     deliverables,
@@ -215,5 +226,6 @@ export async function loadDailyDigestInput(today: string): Promise<DailyDigestIn
       firstResponseAt: r.firstResponseAt,
     })),
     proposals,
+    invoices: invoices.map((i) => ({ id: i.id, projectId: i.projectId, projectTitle: i.projectTitle, number: i.number, description: i.description, amountCents: i.amountCents, dueAt: i.dueAt })),
   };
 }

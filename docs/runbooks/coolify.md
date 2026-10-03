@@ -210,3 +210,10 @@ Toda ação relevante de uma parte vira uma notificação para a outra, no sino 
 - **Convidar:** `/admin/equipe` → e-mail e papel. O link vale 7 dias; quem já é cliente e aceita um convite da equipe muda de papel (sessões encerradas). Mudar papel e desativar também ficam nessa tela; o último administrador ativo não pode ser rebaixado.
 - **2FA obrigatório:** `/admin/configuracoes` → "2FA obrigatório para a equipe" e "para clientes". Com a regra ligada, quem não ativou só abre Minha conta (o administrador também alcança Configurações). Quem perder o aparelho continua sendo resolvido pelo `auth:reset-2fa` (§14).
 - **Dispositivo confiável:** na etapa do código do login há "Confiar neste dispositivo por 30 dias" (cookie assinado do Better Auth). Trocar a senha não limpa a confiança; desativar e reativar o 2FA, sim.
+
+## 20. Financeiro: parcelas, rate por projeto, horas por pessoa, estimativas (Fase 18)
+
+- **Parcelas** em Financeiro do projeto: nova parcela (descrição, valor, vencimento), marcar paga (data), cancelar, editar enquanto pendente. "Vencida" é derivada do vencimento. O painel do dono mostra "A receber" com a contagem de vencidas; o resumo diário ganha a seção Financeiro; a automação `parcelas-vencidas` (seg–sex 08:30) manda um aviso por dia ao administrador só quando há vencida.
+- **Rate por projeto**: bloco "Rate por hora neste projeto" (vazio = rate da pessoa). Toda entrada de tempo congela o rate ao fechar: mudar rates depois não altera o custo do que já foi apontado; entradas anteriores à Fase 18 (sem rate congelado) usam o rate do projeto, senão o da pessoa.
+- **Horas por pessoa** em `/admin/relatorios/horas` (dono): período, pessoa e projeto, com CSV. Para o fechamento do mês.
+- **Estimativa** (h) no diálogo da entrega; "Estimado × apontado" no financeiro; **Burndown** na aba do projeto (equipe), por semana, com a linha ideal até o último prazo.

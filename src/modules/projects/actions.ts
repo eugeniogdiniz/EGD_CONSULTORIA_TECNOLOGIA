@@ -16,10 +16,14 @@ import {
   projectTemplatePhase,
   projectTimeEntry,
   users,
+  projectInvoice,
+  projectRate,
 } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
 import { notifyDeliverableAssigned, notifyDeliverableDone, notifyTeamComment } from "@/modules/notifications/events";
+import { resolveRateForDeliverable } from "./queries";
+import { invoiceSchema, markPaidSchema, projectRateSchema, type InvoiceInput, type ProjectRateInput } from "./validation";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import { uploadFile } from "@/modules/files/actions";
@@ -565,6 +569,7 @@ export async function createDeliverable(
       assigneeId: data.assigneeId,
       dueAt: data.dueAt,
       priority: data.priority,
+      estimateMinutes: data.estimateHours,
       ownerId: ctx.user.id,
     })
     .returning({ id: projectDeliverable.id });
@@ -599,6 +604,7 @@ export async function updateDeliverable(
       assigneeId: data.assigneeId,
       dueAt: data.dueAt,
       priority: data.priority,
+      estimateMinutes: data.estimateHours,
     })
     .where(eq(projectDeliverable.id, id))
     .returning({ id: projectDeliverable.id });
@@ -1007,7 +1013,7 @@ export async function startTimer(
       const minutes = computeMinutes(openEntry.startedAt, endedAt);
       await tx
         .update(projectTimeEntry)
-        .set({ endedAt, minutes })
+        .set({ endedAt, minutes, rateCents: await resolveRateForDeliverable(openEntry.deliverableId, ctx.user.id) })
         .where(eq(projectTimeEntry.id, openEntry.id));
       closed = { id: openEntry.id, deliverableId: openEntry.deliverableId };
     }
@@ -1061,7 +1067,7 @@ export async function stopTimer(
   const minutes = computeMinutes(existing.startedAt, endedAt);
   await db
     .update(projectTimeEntry)
-    .set({ endedAt, minutes })
+    .set({ endedAt, minutes, rateCents: await resolveRateForDeliverable(existing.deliverableId, ctx.user.id) })
     .where(eq(projectTimeEntry.id, entryId));
 
   await audit({
@@ -1097,6 +1103,7 @@ export async function logManualTime(
       startedAt: data.startedAt,
       endedAt: data.endedAt,
       minutes,
+      rateCents: await resolveRateForDeliverable(data.deliverableId, ctx.user.id),
       source: "manual",
       notes: data.notes,
     })
@@ -1496,5 +1503,84 @@ export async function updateAccountRate(
     entityId: ctx.user.id,
     metadata: { hourlyRateCents: rate },
   });
+  return ok(null);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Fase 18 — Faturamento (parcelas) e rate por projeto
+// ────────────────────────────────────────────────────────────────────────────
+
+export async function createInvoice(ctx: AdminContext, input: InvoiceInput): Promise<ActionResult<{ id: string }>> {
+  const parsed = invoiceSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const data = parsed.data;
+  const proj = await db.query.project.findFirst({ where: eq(project.id, data.projectId), columns: { id: true } });
+  if (!proj) return fail("Projeto não encontrado.");
+  const id = await db.transaction(async (tx) => {
+    const [n] = await tx.select({ next: sql<number>`coalesce(max(${projectInvoice.number}), 0)::int + 1` }).from(projectInvoice).where(eq(projectInvoice.projectId, data.projectId));
+    const [row] = await tx
+      .insert(projectInvoice)
+      .values({ projectId: data.projectId, number: n?.next ?? 1, description: data.description, amountCents: data.amountCents, dueAt: data.dueAt, notes: data.notes, createdBy: ctx.user.id })
+      .returning({ id: projectInvoice.id });
+    return row.id;
+  });
+  await audit({ actorId: ctx.user.id, action: "project.invoice.created", entityType: "project_invoice", entityId: id, metadata: { projectId: data.projectId, amountCents: data.amountCents, dueAt: data.dueAt } });
+  return ok({ id });
+}
+
+export async function updateInvoice(ctx: AdminContext, id: string, input: InvoiceInput): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Parcela não encontrada.");
+  const parsed = invoiceSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const existing = await db.query.projectInvoice.findFirst({ where: eq(projectInvoice.id, id) });
+  if (!existing) return fail("Parcela não encontrada.");
+  if (existing.status !== "pending") return fail("Só parcelas pendentes podem ser editadas.");
+  await db.update(projectInvoice).set({ description: parsed.data.description, amountCents: parsed.data.amountCents, dueAt: parsed.data.dueAt, notes: parsed.data.notes }).where(eq(projectInvoice.id, id));
+  await audit({ actorId: ctx.user.id, action: "project.invoice.updated", entityType: "project_invoice", entityId: id, metadata: { amountCents: parsed.data.amountCents, dueAt: parsed.data.dueAt } });
+  return ok(null);
+}
+
+export async function markInvoicePaid(ctx: AdminContext, id: string, paidAt: string): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Parcela não encontrada.");
+  const parsed = markPaidSchema.safeParse({ paidAt });
+  if (!parsed.success) return fromZod(parsed.error);
+  const [row] = await db
+    .update(projectInvoice)
+    .set({ status: "paid", paidAt: parsed.data.paidAt })
+    .where(and(eq(projectInvoice.id, id), eq(projectInvoice.status, "pending")))
+    .returning({ id: projectInvoice.id, amountCents: projectInvoice.amountCents });
+  if (!row) return fail("Parcela não encontrada ou já decidida.");
+  await audit({ actorId: ctx.user.id, action: "project.invoice.paid", entityType: "project_invoice", entityId: id, metadata: { paidAt: parsed.data.paidAt, amountCents: row.amountCents } });
+  return ok(null);
+}
+
+export async function cancelInvoice(ctx: AdminContext, id: string): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Parcela não encontrada.");
+  const [row] = await db
+    .update(projectInvoice)
+    .set({ status: "cancelled" })
+    .where(and(eq(projectInvoice.id, id), eq(projectInvoice.status, "pending")))
+    .returning({ id: projectInvoice.id });
+  if (!row) return fail("Parcela não encontrada ou já decidida.");
+  await audit({ actorId: ctx.user.id, action: "project.invoice.cancelled", entityType: "project_invoice", entityId: id });
+  return ok(null);
+}
+
+/** Rate de uma pessoa neste projeto. Vazio remove (volta ao rate da pessoa). Só afeta entradas fechadas daqui em diante. */
+export async function setProjectRate(ctx: AdminContext, input: ProjectRateInput): Promise<ActionResult<null>> {
+  const parsed = projectRateSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const { projectId, userId, hourlyRateCents } = parsed.data;
+  const proj = await db.query.project.findFirst({ where: eq(project.id, projectId), columns: { id: true } });
+  if (!proj) return fail("Projeto não encontrado.");
+  if (hourlyRateCents === null) {
+    await db.delete(projectRate).where(and(eq(projectRate.projectId, projectId), eq(projectRate.userId, userId)));
+  } else {
+    await db
+      .insert(projectRate)
+      .values({ projectId, userId, hourlyRateCents })
+      .onConflictDoUpdate({ target: [projectRate.projectId, projectRate.userId], set: { hourlyRateCents, updatedAt: new Date() } });
+  }
+  await audit({ actorId: ctx.user.id, action: "project.rate.set", entityType: "project", entityId: projectId, metadata: { userId, hourlyRateCents } });
   return ok(null);
 }

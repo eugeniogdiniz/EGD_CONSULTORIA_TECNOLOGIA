@@ -15,6 +15,11 @@ import {
   createDependency,
   createDeliverable,
   createExpense,
+  createInvoice,
+  updateInvoice,
+  markInvoicePaid,
+  cancelInvoice,
+  setProjectRate,
   createMilestone,
   createPhase,
   createProjectFromOpportunity,
@@ -212,6 +217,7 @@ function deliverableInput(fd: FormData) {
     assigneeId: String(fd.get("assigneeId") ?? ""),
     dueAt: String(fd.get("dueAt") ?? ""),
     priority: String(fd.get("priority") ?? "medium") as "urgent" | "high" | "medium" | "low",
+    estimateHours: String(fd.get("estimateHours") ?? ""),
   };
 }
 
@@ -500,4 +506,51 @@ export async function updateAccountRateForm(_p: NullState, fd: FormData): Promis
   });
   if (r.ok) revalidatePath("/admin/conta");
   return r;
+}
+
+// ── Fase 18: faturamento e rate por projeto (só o dono) ──────────────────────
+
+function invoiceInput(fd: FormData) {
+  return {
+    projectId: String(fd.get("projectId") ?? ""),
+    description: String(fd.get("description") ?? ""),
+    amountCents: String(fd.get("amountCents") ?? "0"),
+    dueAt: String(fd.get("dueAt") ?? ""),
+    notes: String(fd.get("notes") ?? ""),
+  };
+}
+
+export async function createInvoiceForm(_p: CreateState, fd: FormData): Promise<CreateState> {
+  const ctx = await requireOwner();
+  const r = await createInvoice(ctx, invoiceInput(fd));
+  if (r.ok) revalidatePath(`/admin/projetos/${invoiceInput(fd).projectId}/financeiro`);
+  return r;
+}
+
+export async function updateInvoiceForm(_p: NullState, fd: FormData): Promise<NullState> {
+  const ctx = await requireOwner();
+  const r = await updateInvoice(ctx, String(fd.get("id") ?? ""), invoiceInput(fd));
+  if (r.ok) revalidatePath(`/admin/projetos/${invoiceInput(fd).projectId}/financeiro`);
+  return r;
+}
+
+export async function markInvoicePaidForm(fd: FormData): Promise<void> {
+  const ctx = await requireOwner();
+  await markInvoicePaid(ctx, String(fd.get("id") ?? ""), String(fd.get("paidAt") ?? ""));
+  revalidatePath(`/admin/projetos/${String(fd.get("projectId") ?? "")}/financeiro`);
+  revalidatePath("/admin");
+}
+
+export async function cancelInvoiceForm(fd: FormData): Promise<void> {
+  const ctx = await requireOwner();
+  await cancelInvoice(ctx, String(fd.get("id") ?? ""));
+  revalidatePath(`/admin/projetos/${String(fd.get("projectId") ?? "")}/financeiro`);
+  revalidatePath("/admin");
+}
+
+export async function setProjectRateForm(fd: FormData): Promise<void> {
+  const ctx = await requireOwner();
+  const projectId = String(fd.get("projectId") ?? "");
+  await setProjectRate(ctx, { projectId, userId: String(fd.get("userId") ?? ""), hourlyRateCents: String(fd.get("hourlyRateCents") ?? "") });
+  revalidatePath(`/admin/projetos/${projectId}/financeiro`);
 }

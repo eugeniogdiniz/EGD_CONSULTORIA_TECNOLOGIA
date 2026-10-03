@@ -240,3 +240,20 @@ export async function notifyDeliverableAssigned(p: { deliverableId: string; assi
     mail: renderDeliverableAssigned({ actorName: p.actorName, deliverableTitle: row.title, projectTitle: row.projectTitle, dueAt, url: `${base()}${path}` }),
   });
 }
+
+/** Automação diária: um aviso ao dono com as parcelas vencidas (nada quando não há). */
+export async function notifyInvoicesOverdue(p: { count: number; totalCents: number; oldestDueAt: string; sample: string[] }): Promise<NotifyResult> {
+  const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(p.totalCents / 100);
+  const title = `${p.count} parcela${p.count === 1 ? "" : "s"} vencida${p.count === 1 ? "" : "s"}: ${brl} a receber`;
+  const body = p.sample.join(" · ");
+  const url = "/admin/projetos";
+  const text = [title, "", ...p.sample.map((s) => `- ${s}`), "", `Mais antiga vence em ${p.oldestDueAt}.`, "", `Abrir: ${base()}${url}`].join("\n");
+  return notify({
+    kind: "invoice.overdue",
+    title,
+    body,
+    url,
+    recipients: await activeOwners(),
+    mail: { subject: title, text, html: `<p>${title}</p><ul>${p.sample.map((s) => `<li>${s.replace(/[<>&]/g, "")}</li>`).join("")}</ul><p>Mais antiga vence em ${p.oldestDueAt}.</p><p><a href="${base()}${url}">Abrir projetos</a></p>` },
+  });
+}

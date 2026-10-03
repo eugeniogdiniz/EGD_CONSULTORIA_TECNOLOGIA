@@ -13,9 +13,13 @@ import { buildDailyDigest, loadDailyDigestInput } from "./digests/daily";
 import { loadWeeklyTeamReport } from "./digests/weekly-team";
 import { buildClientDigest, listDigestRecipients, loadClientDigestInput } from "./digests/weekly-client";
 import { loadReminderCandidates, requestsToRemind, sendReminders, MAX_REMINDERS, REMINDER_AFTER_BUSINESS_DAYS } from "@/modules/requests/reminders";
+import { listPendingInvoices } from "@/modules/projects/queries";
+import { invoiceState } from "@/modules/projects/invoices";
+import { notifyInvoicesOverdue } from "@/modules/notifications/events";
+import { formatBrlCents, formatIsoDate } from "@/lib/format";
 import { countOldNotifications, deleteOldNotifications, READ_RETENTION_DAYS, UNREAD_RETENTION_DAYS } from "@/modules/notifications/cleanup";
 
-export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente", "notificacoes-limpar", "solicitacoes-lembrete"] as const;
+export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente", "notificacoes-limpar", "solicitacoes-lembrete", "parcelas-vencidas"] as const;
 export type JobKey = (typeof JOB_KEYS)[number];
 export const isJobKey = (v: string): v is JobKey => (JOB_KEYS as readonly string[]).includes(v);
 
@@ -200,5 +204,34 @@ const solicitacoesLembrete: JobDefinition = {
   },
 };
 
-export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente, solicitacoesLembrete, notificacoesLimpar];
+const parcelasVencidas: JobDefinition = {
+  key: "parcelas-vencidas",
+  name: "Avisar parcelas vencidas",
+  description: "Um aviso por dia ao administrador com as parcelas a receber vencidas. Nada é enviado quando não há vencida.",
+  schedule: { kind: "weekdays", hour: 8, minute: 30 },
+  recipients: async () => "administradores",
+  async run(ctx) {
+    const overdue = (await listPendingInvoices()).filter((i) => invoiceState(i, ctx.today) === "overdue");
+    if (overdue.length === 0) return { text: "nenhuma parcela vencida", sent: 0 };
+    const total = overdue.reduce((s, i) => s + i.amountCents, 0);
+    const r = await notifyInvoicesOverdue({
+      count: overdue.length,
+      totalCents: total,
+      oldestDueAt: formatIsoDate(overdue[0].dueAt),
+      sample: overdue.slice(0, 8).map((i) => `${i.projectTitle} · #${i.number} ${i.description} · ${formatBrlCents(i.amountCents)} · venceu ${formatIsoDate(i.dueAt)}`),
+    });
+    return { text: `${plural(overdue.length, "parcela vencida", "parcelas vencidas")} (${formatBrlCents(total)}) · ${plural(r.emailed, "e-mail", "e-mails")}`, sent: r.emailed, failed: r.failed, overdue: overdue.length };
+  },
+  async preview(ctx) {
+    const overdue = (await listPendingInvoices()).filter((i) => invoiceState(i, ctx.today) === "overdue");
+    return {
+      kind: "table",
+      columns: ["Projeto", "Parcela", "Valor", "Venceu em"],
+      rows: overdue.map((i) => [i.projectTitle, `#${i.number} ${i.description}`, formatBrlCents(i.amountCents), formatIsoDate(i.dueAt)]),
+      note: overdue.length === 0 ? "Nenhuma parcela vencida. Nada seria enviado." : `${plural(overdue.length, "parcela vencida seria avisada", "parcelas vencidas seriam avisadas")} numa única notificação.`,
+    };
+  },
+};
+
+export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente, solicitacoesLembrete, parcelasVencidas, notificacoesLimpar];
 export const getJob = (key: string): JobDefinition | null => JOBS.find((j) => j.key === key) ?? null;

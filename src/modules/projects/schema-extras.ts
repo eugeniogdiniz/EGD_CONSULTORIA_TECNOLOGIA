@@ -90,6 +90,8 @@ export const projectTimeEntry = pgTable(
     endedAt: timestamp({ withTimezone: true }),
     // ceil((endedAt - startedAt)/60000); null enquanto aberto
     minutes: integer(),
+    // Fase 18: rate congelado quando a entrada fecha (rate do projeto, senão o da pessoa); null nas antigas
+    rateCents: bigint({ mode: "number" }),
     source: projectTimeSource().notNull(),
     notes: text(),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
@@ -135,6 +137,58 @@ export const projectExpense = pgTable(
     index("expense_project_date_idx").on(t.projectId, t.dateAt.desc()),
     check("expense_amount_positive", sql`${t.amountCents} >= 0`),
   ],
+);
+
+// Faturamento e rate por projeto (Fase 18) ──────────────────────────────────
+
+export const projectInvoiceStatus = pgEnum("project_invoice_status", ["pending", "paid", "cancelled"]);
+
+/** Parcela a faturar/receber. "Vencida" é derivada (pending e due_at < hoje). */
+export const projectInvoice = pgTable(
+  "project_invoice",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    projectId: uuid()
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    number: integer().notNull(),
+    description: text().notNull(),
+    amountCents: bigint({ mode: "number" }).notNull(),
+    dueAt: date().notNull(),
+    status: projectInvoiceStatus().default("pending").notNull(),
+    paidAt: date(),
+    notes: text(),
+    createdBy: uuid()
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp({ withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("invoice_project_due_idx").on(t.projectId, t.dueAt),
+    index("invoice_status_due_idx").on(t.status, t.dueAt),
+    uniqueIndex("invoice_project_number_uniq").on(t.projectId, t.number),
+    check("invoice_amount_positive", sql`${t.amountCents} >= 0`),
+  ],
+);
+
+/** Rate por hora de uma pessoa num projeto; sobrescreve `users.hourly_rate_cents` só ali. */
+export const projectRate = pgTable(
+  "project_rate",
+  {
+    projectId: uuid()
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    userId: uuid()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    hourlyRateCents: bigint({ mode: "number" }).notNull(),
+    updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.projectId, t.userId] })],
 );
 
 // Templates de projeto ──────────────────────────────────────────────────────
