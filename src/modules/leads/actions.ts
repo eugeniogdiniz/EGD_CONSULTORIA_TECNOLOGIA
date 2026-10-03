@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { leads } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
-import { createRateLimiter } from "@/lib/rate-limit";
+import { createPgRateLimiter } from "@/lib/rate-limit";
 import { audit } from "@/modules/audit/log";
 import { sendLeadNotification } from "@/modules/mail/send";
 import { notifyLeadCreated } from "@/modules/notifications/events";
@@ -20,7 +20,7 @@ import { leadSchema } from "./validation";
 
 export type ContactState = ActionResult<null> | null;
 
-const contactLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 3 });
+const contactLimiter = createPgRateLimiter(db, { scope: "contato", windowMs: 60 * 60_000, max: 3 });
 
 async function clientIpHash(): Promise<string> {
   const h = await headers();
@@ -43,7 +43,7 @@ export async function submitContact(_prev: ContactState, formData: FormData): Pr
   if (!parsed.success) return fromZod(parsed.error);
 
   const ipHash = await clientIpHash();
-  if (!contactLimiter.hit(ipHash).allowed) {
+  if (!(await contactLimiter.hit(ipHash)).allowed) {
     return fail("Recebemos várias mensagens deste endereço. Tente novamente em uma hora.");
   }
 

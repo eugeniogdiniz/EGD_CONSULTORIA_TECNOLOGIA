@@ -83,7 +83,7 @@ export const auth = betterAuth({
           // depois do segundo fator, então nada é registrado nem zerado nesta etapa.
           if (u?.twoFactorEnabled && !viaSecondFactor) return;
           // login completo zera o contador de tentativas do e-mail (só falhas consecutivas contam)
-          if (u) loginByEmail.reset(u.email);
+          if (u) await loginByEmail.reset(u.email);
           await audit({
             actorId: session.userId,
             action: "auth.login",

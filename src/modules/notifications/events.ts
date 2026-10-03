@@ -257,3 +257,33 @@ export async function notifyInvoicesOverdue(p: { count: number; totalCents: numb
     mail: { subject: title, text, html: `<p>${title}</p><ul>${p.sample.map((s) => `<li>${s.replace(/[<>&]/g, "")}</li>`).join("")}</ul><p>Mais antiga vence em ${p.oldestDueAt}.</p><p><a href="${base()}${url}">Abrir projetos</a></p>` },
   });
 }
+
+/** Erro de servidor com origem nova: avisa o dono (uma vez por origem, até ela ser resolvida e voltar). */
+export async function notifyErrorSpike(p: { errorId: string; name: string; message: string; path: string }): Promise<NotifyResult> {
+  const title = `Erro novo no servidor: ${p.name}`;
+  const body = `${p.message.slice(0, 160)} · ${p.path}`;
+  const url = "/admin/erros";
+  return notify({
+    kind: "error.spike",
+    title,
+    body,
+    url,
+    entity: { type: "app_error", id: p.errorId },
+    recipients: await activeOwners(),
+    mail: { subject: title, text: `${body}\n\nAbrir: ${base()}${url}`, html: `<p>${body.replace(/[<>&]/g, "")}</p><p><a href="${base()}${url}">Abrir erros</a></p>` },
+  });
+}
+
+/** Backup lógico diário falhou. */
+export async function notifyBackupFailed(p: { error: string }): Promise<NotifyResult> {
+  const title = "Backup diário falhou";
+  const url = "/admin/automacoes";
+  return notify({
+    kind: "backup.failed",
+    title,
+    body: p.error.slice(0, 300),
+    url,
+    recipients: await activeOwners(),
+    mail: { subject: title, text: `${p.error}\n\nAbrir: ${base()}${url}`, html: `<p>${p.error.replace(/[<>&]/g, "").slice(0, 600)}</p><p><a href="${base()}${url}">Abrir automações</a></p>` },
+  });
+}

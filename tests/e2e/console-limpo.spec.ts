@@ -59,6 +59,8 @@ test("telas do admin não geram erro nem aviso no console", async ({ page }) => 
     "/admin/relatorios/horas",
     "/admin/crm/servicos",
     "/admin/crm/previsao",
+    "/admin/erros",
+    "/admin/busca?q=projeto",
   ];
   for (const url of urls) {
     await page.goto(url);

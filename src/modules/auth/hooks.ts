@@ -19,7 +19,7 @@ const PASSWORD_PATHS = new Set(["/sign-up/email", "/reset-password", "/change-pa
 export const beforeHook = createAuthMiddleware(async (ctx) => {
   if (ctx.path === "/sign-in/email") {
     const email = normalizeEmail(String(ctx.body?.email ?? ""));
-    if (!loginByEmail.hit(email).allowed) {
+    if (!(await loginByEmail.hit(email)).allowed) {
       throw new APIError("TOO_MANY_REQUESTS", { message: "Muitas tentativas. Aguarde 15 minutos." });
     }
     const u = await db.query.users.findFirst({ where: eq(users.email, email), columns: { active: true } });

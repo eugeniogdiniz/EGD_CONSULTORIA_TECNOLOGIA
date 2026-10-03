@@ -13,3 +13,5 @@ export * from "@/modules/audit/schema";
 export * from "@/modules/jobs/schema";
 export * from "@/modules/notifications/schema";
 export * from "@/modules/settings/schema";
+export * from "@/modules/errors/schema";
+export * from "@/modules/rate-limit/schema";

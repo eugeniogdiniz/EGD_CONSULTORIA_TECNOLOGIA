@@ -222,3 +222,10 @@ Toda ação relevante de uma parte vira uma notificação para a outra, no sino 
 
 - **Serviços** (`/admin/crm/servicos`): nome, preço de referência, unidade, descrição, ordem; desativar tira do seletor sem apagar o histórico. No documento da proposta, "Adicionar do catálogo" cria o item de investimento com preço × quantidade (o item fica desvinculado do serviço: mudar o preço não altera propostas antigas).
 - **Previsão** (`/admin/crm/previsao`): pipeline aberto ponderado por probabilidade fixa de estágio (novo 10 %, qualificado 25 %, reunião 50 %, proposta 70 %), esperado por mês de fechamento (vencidas no mês corrente), conversão em 90 e 365 dias com ticket e ciclo médios, motivos de perda. CSV com as quatro tabelas. O KPI "Funil aberto" do painel mostra o ponderado.
+
+## 22. Operação: erros, backup lógico, limite de taxa e busca (Fase 20)
+
+- **Erros** (`/admin/erros`, dono): erros de servidor agrupados por origem com contagem, caminho, referência (o mesmo código da tela de erro) e stack. "Resolver" tira da lista; se a origem voltar, reabre e o dono recebe a notificação `error.spike` de novo. Fora de produção, `GET /admin/erros/testar` gera um erro de propósito.
+- **Backup lógico** (`backup-diario`, 03:30): uma pasta `backups/AAAA-MM-DD/` no bucket do app com um `<tabela>.json.gz` por tabela e um `manifest.json`; guarda 14 dias; falha vira notificação `backup.failed`. **Restaurar**: num banco já migrado, `node --env-file=.env scripts/restore-backup.mjs AAAA-MM-DD [--only tabela,tabela] [--truncate]` (em produção, dentro do container). O backup do Postgres no Coolify (§8) continua sendo o principal.
+- **Limite de taxa** do formulário de contato, da API pública e das tentativas de login por e-mail agora fica no banco (`rate_limit_bucket`): vale entre containers e sobrevive a reinícios. A limpeza diária apaga janelas com mais de 2 dias.
+- **Busca global**: caixa no topo do admin → `/admin/busca?q=`. Dono busca em tudo; colaborador, só em projetos, entregas, solicitações e atas.

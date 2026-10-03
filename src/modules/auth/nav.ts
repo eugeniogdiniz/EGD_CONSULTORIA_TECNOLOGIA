@@ -32,6 +32,7 @@ export function navFor(role: "admin" | "collaborator", badges: { leads: number; 
       { href: "/admin/api", label: "API" },
       { href: "/admin/automacoes", label: "Automações" },
       { href: "/admin/auditoria", label: "Auditoria" },
+      { href: "/admin/erros", label: "Erros" },
       { href: "/admin/configuracoes", label: "Configurações" },
     );
   }

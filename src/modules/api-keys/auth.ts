@@ -1,12 +1,12 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { apiKey } from "@/db/schema";
-import { createRateLimiter } from "@/lib/rate-limit";
+import { createPgRateLimiter } from "@/lib/rate-limit";
 import { hasScope, hashApiKey, parseBearer, type Scope } from "./keys";
 
-const limiter = createRateLimiter({ windowMs: 60_000, max: 120 });
+const limiter = createPgRateLimiter(db, { scope: "api-key", windowMs: 60_000, max: 120 });
 // Por IP, antes de tocar o banco: quem só erra a chave é freado; uma autenticação válida zera o contador.
-const ipLimiter = createRateLimiter({ windowMs: 60_000, max: 30 });
+const ipLimiter = createPgRateLimiter(db, { scope: "api-ip", windowMs: 60_000, max: 30 });
 
 const clientIp = (req: Request) =>
   req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "unknown";
@@ -26,7 +26,7 @@ export type ApiKeyAuth =
  */
 export async function authenticateApiKey(req: Request, scope: Scope): Promise<ApiKeyAuth> {
   const ip = clientIp(req);
-  if (!ipLimiter.hit(ip).allowed)
+  if (!(await ipLimiter.hit(ip)).allowed)
     return { ok: false, response: apiError(429, "rate_limited", "Muitas tentativas. Aguarde um minuto.", { "Retry-After": "60" }) };
 
   const raw = parseBearer(req.headers.get("authorization"));
@@ -40,8 +40,8 @@ export async function authenticateApiKey(req: Request, scope: Scope): Promise<Ap
   if (!hasScope(row.scopes, scope))
     return { ok: false, response: apiError(403, "forbidden", `A chave não tem o escopo ${scope}.`) };
 
-  ipLimiter.reset(ip);
-  if (!limiter.hit(row.id).allowed)
+  await ipLimiter.reset(ip);
+  if (!(await limiter.hit(row.id)).allowed)
     return { ok: false, response: apiError(429, "rate_limited", "Limite de 120 requisições por minuto.", { "Retry-After": "60" }) };
 
   if (!row.lastUsedAt || Date.now() - row.lastUsedAt.getTime() > TOUCH_EVERY_MS) {

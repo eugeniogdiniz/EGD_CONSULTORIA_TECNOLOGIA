@@ -17,9 +17,13 @@ import { listPendingInvoices } from "@/modules/projects/queries";
 import { invoiceState } from "@/modules/projects/invoices";
 import { notifyInvoicesOverdue } from "@/modules/notifications/events";
 import { formatBrlCents, formatIsoDate } from "@/lib/format";
+import { listBackupFolders, runBackup } from "@/modules/backup/run";
+import { notifyBackupFailed } from "@/modules/notifications/events";
+import { sweepRateLimitBuckets } from "@/lib/rate-limit";
+import { db } from "@/lib/db";
 import { countOldNotifications, deleteOldNotifications, READ_RETENTION_DAYS, UNREAD_RETENTION_DAYS } from "@/modules/notifications/cleanup";
 
-export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente", "notificacoes-limpar", "solicitacoes-lembrete", "parcelas-vencidas"] as const;
+export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente", "notificacoes-limpar", "solicitacoes-lembrete", "parcelas-vencidas", "backup-diario"] as const;
 export type JobKey = (typeof JOB_KEYS)[number];
 export const isJobKey = (v: string): v is JobKey => (JOB_KEYS as readonly string[]).includes(v);
 
@@ -161,7 +165,8 @@ const notificacoesLimpar: JobDefinition = {
   recipients: async () => "ninguém (só limpa)",
   async run(ctx) {
     const r = await deleteOldNotifications(ctx.now);
-    return { text: r.deleted === 0 ? "nada a apagar" : `${plural(r.deleted, "notificação apagada", "notificações apagadas")}`, ...r };
+    const buckets = await sweepRateLimitBuckets(db, new Date(ctx.now.getTime() - 2 * 86_400_000));
+    return { text: `${r.deleted === 0 ? "nenhuma notificação a apagar" : plural(r.deleted, "notificação apagada", "notificações apagadas")} · ${plural(buckets, "janela de limite apagada", "janelas de limite apagadas")}`, ...r, buckets };
   },
   async preview(ctx) {
     const c = await countOldNotifications(ctx.now);
@@ -233,5 +238,33 @@ const parcelasVencidas: JobDefinition = {
   },
 };
 
-export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente, solicitacoesLembrete, parcelasVencidas, notificacoesLimpar];
+const fmtBytes = (n: number) => (n < 1024 * 1024 ? `${Math.round(n / 1024)} KB` : `${(n / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`);
+
+const backupDiario: JobDefinition = {
+  key: "backup-diario",
+  name: "Backup lógico diário",
+  description: "Cada tabela vira um JSON comprimido no storage (pasta backups/AAAA-MM-DD), com manifest; guarda 14 dias. Rede de segurança: o backup do Postgres no Coolify continua.",
+  schedule: { kind: "daily", hour: 3, minute: 30 },
+  recipients: async () => "storage (bucket do app)",
+  async run(ctx) {
+    try {
+      const r = await runBackup(ctx.now, ctx.today);
+      return { text: `${plural(r.tables, "tabela", "tabelas")} · ${plural(r.rows, "linha", "linhas")} · ${fmtBytes(r.bytes)}${r.deletedFolders ? ` · ${plural(r.deletedFolders, "pasta antiga apagada", "pastas antigas apagadas")}` : ""}`, ...r };
+    } catch (err) {
+      await notifyBackupFailed({ error: err instanceof Error ? err.message : String(err) });
+      throw err;
+    }
+  },
+  async preview() {
+    const folders = await listBackupFolders();
+    return {
+      kind: "table",
+      columns: ["Pasta", "Arquivos", "Tamanho"],
+      rows: folders.map((f) => [f.date, String(f.files), fmtBytes(f.bytes)]),
+      note: folders.length === 0 ? "Nenhum backup no storage ainda. Executar agora gera a pasta de hoje." : `${plural(folders.length, "pasta guardada", "pastas guardadas")}; executar agora regrava a de hoje e apaga as com mais de 14 dias.`,
+    };
+  },
+};
+
+export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente, solicitacoesLembrete, parcelasVencidas, backupDiario, notificacoesLimpar];
 export const getJob = (key: string): JobDefinition | null => JOBS.find((j) => j.key === key) ?? null;
