@@ -1,6 +1,7 @@
 import { requirePortal } from "@/modules/auth/context";
 import { AppShell } from "@/components/shell/app-shell";
 import { OrgSwitcher } from "@/components/shell/org-switcher";
+import { Bell } from "@/modules/notifications/components/bell";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,7 @@ export default async function PortalLayout({ children }: LayoutProps<"/">) {
       user={ctx.user}
       accountHref="/portal/conta"
       title="EGD"
+      bell={<Bell userId={ctx.user.id} area="portal" />}
       topRight={
         ctx.organizations.length > 1 ? (
           <OrgSwitcher current={ctx.organization} options={ctx.organizations} />

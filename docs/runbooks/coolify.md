@@ -180,3 +180,12 @@ O agendador roda **dentro do container da aplicação**: a cada minuto confere, 
 - **Prévia:** cada automação tem uma prévia que renderiza o e-mail com os dados atuais sem enviar; use antes de ligar o andamento semanal para um cliente.
 - **Logs:** `scheduler.started`, `scheduler.disabled`, `job.ok` e `job.failed` (JSON) em **Application → Logs**.
 
+
+## 16. Notificações (Fase 14)
+
+Toda ação relevante de uma parte vira uma notificação para a outra, no sino do topo e em `/admin/notificacoes` ou `/portal/notificacoes`. O e-mail passou a ser **por pessoa**: cada admin e cada cliente escolhe em **Minha conta → Notificações por e-mail** o que também recebe na caixa de entrada (padrão: tudo ligado).
+
+- `ADMIN_NOTIFY_EMAIL` continua recebendo os resumos das automações e o aviso de lead do site. Avisos de solicitação e de comentário de cliente **não** vão mais para esse endereço: vão para o e-mail de cada admin ativo, conforme a preferência.
+- Uma pessoa que não deve receber nada por e-mail desliga os tipos em Minha conta; para não receber nada no sistema, desative a conta.
+- Retenção: a automação **Limpar notificações antigas** (03:00) apaga lidas com mais de 90 dias e não lidas com mais de 180.
+- Logs: `notify.failed` (JSON) quando a gravação ou o envio falha; a action que gerou o evento não é afetada.

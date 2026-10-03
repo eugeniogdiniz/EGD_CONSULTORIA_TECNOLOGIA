@@ -48,6 +48,7 @@ test("telas do admin não geram erro nem aviso no console", async ({ page }) => 
     "/admin/automacoes",
     "/admin/automacoes/resumo-diario/previa",
     "/admin/conta",
+    "/admin/notificacoes",
   ];
   for (const url of urls) {
     await page.goto(url);
@@ -75,6 +76,7 @@ test("telas do portal não geram erro nem aviso no console", async ({ page }) =>
     "/portal/atas",
     `/portal/projetos/${p.id}/relatorio`,
     "/portal/conta",
+    "/portal/notificacoes",
   ]) {
     await page.goto(url);
     await page.waitForLoadState("networkidle");

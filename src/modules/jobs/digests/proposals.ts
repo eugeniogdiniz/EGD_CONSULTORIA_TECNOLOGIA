@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { crmCompany, crmOpportunity, crmProposal } from "@/db/schema";
 import { audit } from "@/modules/audit/log";
 import { formatBr } from "@/modules/reports/dates";
+import { notifyProposalExpired } from "@/modules/notifications/events";
 
 export type ExpirableProposal = { id: string; number: string; title: string; companyName: string; status: string; validUntil: string | null };
 
@@ -51,6 +52,7 @@ export async function expireProposals(today: string, now: Date) {
       entityId: p.id,
       metadata: { from: "sent", to: "expired", automatic: true, validUntil: p.validUntil },
     });
+    await notifyProposalExpired({ proposalId: p.id, number: p.number, title: p.title, companyName: p.companyName });
   }
   return { expired: expired.length, numbers: expired };
 }

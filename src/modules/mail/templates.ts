@@ -130,3 +130,46 @@ export function renderRequestNotification(p: {
   );
   return { subject, text, html };
 }
+
+// ── Fase 14: avisos ao cliente ───────────────────────────────────────────────
+
+/** A equipe comentou numa entrega compartilhada. */
+export function renderTeamCommentNotification(p: { projectTitle: string; deliverableTitle: string; body: string; url: string }): MailContent {
+  const subject = `A EGD comentou em ${p.deliverableTitle}`;
+  const intro = `A equipe da EGD comentou na entrega "${p.deliverableTitle}" do projeto "${p.projectTitle}":`;
+  const text = [intro, "", p.body, "", `Abrir: ${p.url}`].join("\n");
+  const html = layout(
+    subject,
+    `<p>${esc(intro)}</p>
+  <pre style="white-space:pre-wrap;font-family:inherit;border-left:3px solid #ccc;padding-left:12px">${esc(p.body)}</pre>
+  <p><a href="${esc(p.url)}">Abrir a entrega</a></p>`,
+  );
+  return { subject, text, html };
+}
+
+/** Uma entrega compartilhada foi concluída. */
+export function renderDeliverableDoneNotification(p: { projectTitle: string; deliverableTitle: string; hasFile: boolean; url: string }): MailContent {
+  const subject = `Entrega concluída: ${p.deliverableTitle}`;
+  const intro = `A entrega "${p.deliverableTitle}" do projeto "${p.projectTitle}" foi concluída.`;
+  const file = p.hasFile ? "O arquivo está disponível no portal." : "";
+  const text = [intro, file, "", `Abrir: ${p.url}`].filter((l) => l !== null).join("\n");
+  const html = layout(
+    subject,
+    `<p>${esc(intro)}${file ? ` ${esc(file)}` : ""}</p>
+  <p><a href="${esc(p.url)}">Abrir a entrega</a></p>`,
+  );
+  return { subject, text, html };
+}
+
+/** Uma ata de reunião passou a ser compartilhada. */
+export function renderMeetingSharedNotification(p: { meetingTitle: string; heldAt: string; url: string }): MailContent {
+  const subject = `Ata compartilhada: ${p.meetingTitle}`;
+  const intro = `A EGD compartilhou com você a ata "${p.meetingTitle}" (reunião de ${p.heldAt}).`;
+  const text = [intro, "", `Abrir: ${p.url}`].join("\n");
+  const html = layout(
+    subject,
+    `<p>${esc(intro)}</p>
+  <p><a href="${esc(p.url)}">Ler a ata</a></p>`,
+  );
+  return { subject, text, html };
+}

@@ -6,6 +6,7 @@ import { audit } from "@/modules/audit/log";
 import { authenticateApiKey, apiError } from "@/modules/api-keys/auth";
 import { leadSchema } from "@/modules/leads/validation";
 import { sendLeadNotification } from "@/modules/mail/send";
+import { notifyLeadCreated } from "@/modules/notifications/events";
 
 export const dynamic = "force-dynamic";
 
@@ -57,5 +58,6 @@ export async function POST(req: Request) {
     company: parsed.data.company,
     message: parsed.data.message,
   });
+  await notifyLeadCreated({ leadId: row.id, name: parsed.data.name, email: parsed.data.email, company: parsed.data.company ?? null, message: parsed.data.message });
   return Response.json({ data: { id: row.id } }, { status: 201, headers: { "Cache-Control": "no-store" } });
 }

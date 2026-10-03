@@ -10,6 +10,7 @@ export function AppShell({
   accountHref,
   title,
   topRight,
+  bell,
   children,
 }: {
   nav: NavEntry[];
@@ -18,6 +19,8 @@ export function AppShell({
   accountHref: string;
   title?: ReactNode;
   topRight?: ReactNode;
+  /** sino de notificações (Fase 14) */
+  bell?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -33,6 +36,7 @@ export function AppShell({
           </div>
           <div className="flex items-center gap-4">
             {topRight}
+            {bell}
             <UserMenu name={user.name} email={user.email} accountHref={accountHref} />
           </div>
         </header>

@@ -3,6 +3,7 @@ import { countNewLeads } from "@/modules/leads/queries";
 import { countActiveRequests } from "@/modules/requests/queries";
 import { AppShell } from "@/components/shell/app-shell";
 import type { NavEntry } from "@/components/shell/sidebar";
+import { Bell } from "@/modules/notifications/components/bell";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
     { href: "/admin/auditoria", label: "Auditoria" },
   ];
   return (
-    <AppShell nav={nav} footer="Portal administrativo" user={ctx.user} accountHref="/admin/conta" title="EGD">
+    <AppShell nav={nav} footer="Portal administrativo" user={ctx.user} accountHref="/admin/conta" title="EGD" bell={<Bell userId={ctx.user.id} area="admin" />}>
       {children}
     </AppShell>
   );

@@ -74,7 +74,7 @@ export default async function AutomacoesPage() {
           <tbody>
             {jobs.map((j) => {
               const def = getJob(j.key)!;
-              const isMail = j.key !== "propostas-expirar";
+              const isMail = j.key !== "propostas-expirar" && j.key !== "notificacoes-limpar";
               return (
                 <tr key={j.key} className="border-t border-border align-top" data-testid={`job-${j.key}`}>
                   <td className="px-4 py-3">
@@ -113,7 +113,9 @@ export default async function AutomacoesPage() {
                         description={
                           isMail
                             ? `O e-mail vai de verdade, agora, com os dados atuais, para ${j.recipients}. A execução agendada do dia continua acontecendo.`
-                            : "As propostas enviadas com validade vencida passam a \"Expirada\" agora. A execução agendada do dia continua acontecendo."
+                            : j.key === "notificacoes-limpar"
+                              ? "As notificações antigas são apagadas agora. A execução agendada do dia continua acontecendo."
+                              : "As propostas enviadas com validade vencida passam a \"Expirada\" agora. A execução agendada do dia continua acontecendo."
                         }
                         confirmLabel={isMail ? "Enviar agora" : "Executar agora"}
                         destructive={false}
