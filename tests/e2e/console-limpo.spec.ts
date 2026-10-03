@@ -53,6 +53,8 @@ test("telas do admin não geram erro nem aviso no console", async ({ page }) => 
     "/admin/solicitacoes?sla=estourado",
     "/admin/automacoes/solicitacoes-lembrete/previa",
     ...(await proposalRoutes(page)),
+    "/admin/equipe",
+    "/admin/configuracoes",
   ];
   for (const url of urls) {
     await page.goto(url);

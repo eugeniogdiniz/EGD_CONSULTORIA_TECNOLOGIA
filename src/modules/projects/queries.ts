@@ -695,6 +695,6 @@ export function listTeamMembers(_ctx: AdminContext) {
   return db
     .select({ id: users.id, name: users.name })
     .from(users)
-    .where(and(eq(users.role, "admin"), eq(users.active, true)))
+    .where(and(inArray(users.role, ["admin", "collaborator"]), eq(users.active, true)))
     .orderBy(asc(users.name));
 }

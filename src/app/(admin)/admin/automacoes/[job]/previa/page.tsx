@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { baseUrl, getJob } from "@/modules/jobs/registry";
 import { listDigestRecipients } from "@/modules/jobs/digests/weekly-client";
 import { todayInSaoPaulo } from "@/modules/reports/dates";
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps<"/admin/automacoes/
 }
 
 export default async function PreviaPage({ params, searchParams }: PageProps<"/admin/automacoes/[job]/previa">) {
-  await requireAdmin();
+  await requireOwner();
   const { job: key } = await params;
   const job = getJob(key);
   if (!job) notFound();

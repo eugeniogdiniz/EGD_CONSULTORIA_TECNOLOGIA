@@ -7,13 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/shell/field-error";
 
-export function AcceptInviteForm({ token, email, organizationName }: { token: string; email: string; organizationName: string }) {
+export function AcceptInviteForm({ token, email, organizationName, team = false }: { token: string; email: string; organizationName: string; team?: boolean }) {
   const [state, action, pending] = useActionState<AcceptState, FormData>(acceptInviteAction, null);
   const fe = state && !state.ok ? state.fieldErrors : undefined;
 
   return (
     <>
-      <h1 className="type-h3 mt-5 leading-tight">Crie sua senha para acessar o portal do {organizationName}</h1>
+      <h1 className="type-h3 mt-5 leading-tight">{team ? `Crie sua senha para entrar na ${organizationName}` : `Crie sua senha para acessar o portal do ${organizationName}`}</h1>
       <p className="mt-2 text-sm text-muted-foreground">Defina um nome de exibição e uma senha.</p>
       <form action={action} className="mt-6 grid gap-4">
         <input type="hidden" name="token" value={token} />
@@ -45,13 +45,14 @@ export function AcceptInviteForm({ token, email, organizationName }: { token: st
 }
 
 /** Usuário já existente: só vincula a organização. Nome e senha fixos são ignorados pelo domínio. */
-export function LinkExistingForm({ token, email, organizationName }: { token: string; email: string; organizationName: string }) {
+export function LinkExistingForm({ token, email, organizationName, team = false }: { token: string; email: string; organizationName: string; team?: boolean }) {
   const [state, action, pending] = useActionState<AcceptState, FormData>(acceptInviteAction, null);
   return (
     <>
-      <h1 className="type-h3 mt-5 leading-tight">Vincular sua conta ao {organizationName}</h1>
+      <h1 className="type-h3 mt-5 leading-tight">{team ? `Entrar na ${organizationName} com a sua conta` : `Vincular sua conta ao ${organizationName}`}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Você já tem conta com o e-mail <span className="type-data">{email}</span>. Confirme para acessar também esta organização.
+        Você já tem conta com o e-mail <span className="type-data">{email}</span>.{" "}
+        {team ? "Confirme para passar a fazer parte da equipe com este papel (as sessões abertas serão encerradas)." : "Confirme para acessar também esta organização."}
       </p>
       <form action={action} className="mt-6 grid gap-4">
         <input type="hidden" name="token" value={token} />
@@ -63,7 +64,7 @@ export function LinkExistingForm({ token, email, organizationName }: { token: st
           </p>
         )}
         <Button type="submit" disabled={pending} className="w-full">
-          {pending ? "Vinculando…" : `Vincular ao ${organizationName}`}
+          {pending ? "Vinculando…" : team ? "Confirmar" : `Vincular ao ${organizationName}`}
         </Button>
       </form>
       <p className="mt-6 text-[0.8125rem] text-faint">Depois de vincular, entre com a sua senha atual.</p>

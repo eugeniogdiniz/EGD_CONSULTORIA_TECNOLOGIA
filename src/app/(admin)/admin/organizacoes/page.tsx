@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listOrganizations } from "@/modules/tenancy/queries";
 import { PageHeader, EmptyState } from "@/components/shell/page-header";
 import { Status } from "@/components/site/section";
@@ -9,7 +9,7 @@ import { formatDate } from "@/lib/format";
 export const metadata = { title: "Organizações" };
 
 export default async function OrganizacoesPage() {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const orgs = await listOrganizations(ctx);
   return (
     <>

@@ -19,7 +19,7 @@ import {
 } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
-import { notifyDeliverableDone, notifyTeamComment } from "@/modules/notifications/events";
+import { notifyDeliverableAssigned, notifyDeliverableDone, notifyTeamComment } from "@/modules/notifications/events";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import { uploadFile } from "@/modules/files/actions";
@@ -576,6 +576,7 @@ export async function createDeliverable(
     entityId: row.id,
     metadata: { projectId: data.projectId },
   });
+  if (data.assigneeId) await notifyDeliverableAssigned({ deliverableId: row.id, assigneeId: data.assigneeId, actorId: ctx.user.id, actorName: ctx.user.name });
   return ok({ id: row.id });
 }
 
@@ -588,6 +589,7 @@ export async function updateDeliverable(
   const parsed = deliverableSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
   const data = parsed.data;
+  const before = await db.query.projectDeliverable.findFirst({ where: eq(projectDeliverable.id, id), columns: { assigneeId: true } });
   const [row] = await db
     .update(projectDeliverable)
     .set({
@@ -607,6 +609,8 @@ export async function updateDeliverable(
     entityType: "project_deliverable",
     entityId: id,
   });
+  if (data.assigneeId && data.assigneeId !== before?.assigneeId)
+    await notifyDeliverableAssigned({ deliverableId: id, assigneeId: data.assigneeId, actorId: ctx.user.id, actorName: ctx.user.name });
   return ok(null);
 }
 
@@ -662,6 +666,7 @@ export async function assignDeliverable(
 ): Promise<ActionResult<null>> {
   if (!isUuid(id)) return fail("Entrega não encontrada.");
   if (userId !== null && !isUuid(userId)) return fail("Usuário inválido.");
+  const before = await db.query.projectDeliverable.findFirst({ where: eq(projectDeliverable.id, id), columns: { assigneeId: true } });
   await db.update(projectDeliverable).set({ assigneeId: userId }).where(eq(projectDeliverable.id, id));
   await audit({
     actorId: ctx.user.id,
@@ -670,6 +675,7 @@ export async function assignDeliverable(
     entityId: id,
     metadata: { to_user_id: userId },
   });
+  if (userId && userId !== before?.assigneeId) await notifyDeliverableAssigned({ deliverableId: id, assigneeId: userId, actorId: ctx.user.id, actorName: ctx.user.name });
   return ok(null);
 }
 

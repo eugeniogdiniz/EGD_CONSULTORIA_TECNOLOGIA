@@ -37,9 +37,9 @@ export const invitations = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     email: text().notNull(),
-    organizationId: uuid()
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
+    // nulo = convite para a equipe da EGD (Fase 17); o papel vem em `role`
+    organizationId: uuid().references(() => organizations.id, { onDelete: "cascade" }),
+    role: text({ enum: ["admin", "collaborator"] }),
     tokenHash: text().notNull().unique(),
     expiresAt: timestamp({ withTimezone: true }).notNull(),
     acceptedAt: timestamp({ withTimezone: true }),

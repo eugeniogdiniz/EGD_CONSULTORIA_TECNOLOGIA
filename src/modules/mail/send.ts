@@ -1,7 +1,7 @@
 import { transporter } from "@/lib/mail";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
-import { renderInvitation, renderPasswordReset, renderLeadNotification, renderClientCommentNotification, renderRequestNotification, renderProposalEmail, type MailContent } from "./templates";
+import { renderInvitation, renderPasswordReset, renderLeadNotification, renderClientCommentNotification, renderRequestNotification, renderProposalEmail, renderTeamInvitation, type MailContent } from "./templates";
 
 export type MailAttachment = { filename: string; content: Buffer; contentType: string };
 
@@ -44,3 +44,6 @@ export const sendRequestNotification = (p: Parameters<typeof renderRequestNotifi
 /** Proposta comercial ao contato, com o PDF anexo (Fase 16). */
 export const sendProposalEmail = (p: Parameters<typeof renderProposalEmail>[0] & { to: string; pdf: MailAttachment }) =>
   deliver(p.to, renderProposalEmail(p), [p.pdf]);
+
+export const sendTeamInvitationEmail = (p: { to: string; role: "admin" | "collaborator"; acceptUrl: string; invitedBy: string }) =>
+  deliver(p.to, renderTeamInvitation(p));

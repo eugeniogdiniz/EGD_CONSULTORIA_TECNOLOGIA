@@ -24,6 +24,7 @@ export function LoginForm() {
   // segundo fator: depois da senha, contas com 2FA ativo informam o código do app ou um de recuperação
   const [step, setStep] = useState<"password" | "code">("password");
   const [useBackup, setUseBackup] = useState(false);
+  const [trustDevice, setTrustDevice] = useState(false);
   // marca o formulário como hidratado: antes disso um submit faria GET nativo
   const hydrated = useSyncExternalStore(
     () => () => {},
@@ -53,7 +54,7 @@ export function LoginForm() {
   }
 
   function finish(role: string | undefined) {
-    router.push(safeNextPath(next) ?? (role === "admin" ? "/admin" : "/portal"));
+    router.push(safeNextPath(next) ?? (role === "admin" || role === "collaborator" ? "/admin" : "/portal"));
     router.refresh();
   }
 
@@ -63,8 +64,8 @@ export function LoginForm() {
     setError(null);
     const code = String(new FormData(e.currentTarget).get("code") ?? "").trim();
     const { data, error } = useBackup
-      ? await authClient.twoFactor.verifyBackupCode({ code })
-      : await authClient.twoFactor.verifyTotp({ code: code.replace(/\s/g, "") });
+      ? await authClient.twoFactor.verifyBackupCode({ code, trustDevice })
+      : await authClient.twoFactor.verifyTotp({ code: code.replace(/\s/g, ""), trustDevice });
     setPending(false);
     if (error) {
       setError(error.status === 429 ? "Muitas tentativas. Aguarde um pouco." : "Código inválido ou expirado.");
@@ -99,6 +100,10 @@ export function LoginForm() {
               required
             />
           </div>
+          <label className="inline-flex items-center gap-2 text-sm">
+            <input type="checkbox" name="trustDevice" checked={trustDevice} onChange={(e) => setTrustDevice(e.target.checked)} />
+            Confiar neste dispositivo por 30 dias
+          </label>
           {error && (
             <p role="alert" className="text-sm text-danger">
               {error}

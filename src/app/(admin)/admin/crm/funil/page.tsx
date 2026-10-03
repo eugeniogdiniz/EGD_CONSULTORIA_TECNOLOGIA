@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listOpportunitiesGroupedByStage } from "@/modules/crm/queries";
 import { PageHeader } from "@/components/shell/page-header";
 import { formatBrlCents, formatIsoDate } from "@/lib/format";
@@ -28,7 +28,7 @@ const STAGE_PIP: Record<string, string> = {
 const OPEN = new Set(["new", "qualified", "meeting", "proposal"]);
 
 export default async function FunilPage({ searchParams }: PageProps<"/admin/crm/funil">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const sp = await searchParams;
   const search = typeof sp.q === "string" ? sp.q : "";
   const hideClosed = sp.closed !== "1"; // default: esconde ganhas/perdidas

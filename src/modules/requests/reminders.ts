@@ -23,6 +23,7 @@ export type ReminderCandidate = {
   reminderCount: number;
   lastReminderAt: Date | null;
   /** última mensagem não interna: quem e quando (null = só o texto inicial do cliente) */
+  /** "admin" cobre toda a equipe (colaborador incluído) */
   lastAuthorRole: "admin" | "client" | null;
   lastMessageAt: Date | null;
 };
@@ -51,7 +52,7 @@ export async function loadReminderCandidates(): Promise<ReminderCandidate[]> {
     organization_name: string;
     reminder_count: number;
     last_reminder_at: Date | null;
-    last_author_role: "admin" | "client" | null;
+    last_author_role: "admin" | "collaborator" | "client" | null;
     last_message_at: Date | null;
   }>(sql`
     select r.id, r.title, r.status::text as status, r.organization_id, o.name as organization_name,
@@ -73,7 +74,7 @@ export async function loadReminderCandidates(): Promise<ReminderCandidate[]> {
     organizationName: r.organization_name,
     reminderCount: r.reminder_count,
     lastReminderAt: r.last_reminder_at ? new Date(r.last_reminder_at) : null,
-    lastAuthorRole: r.last_author_role,
+    lastAuthorRole: r.last_author_role === null ? null : r.last_author_role === "client" ? "client" : "admin",
     lastMessageAt: r.last_message_at ? new Date(r.last_message_at) : null,
   }));
 }

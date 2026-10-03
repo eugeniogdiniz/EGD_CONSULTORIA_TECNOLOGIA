@@ -217,3 +217,26 @@ export function renderProposalEmail(p: { contactName: string; number: string; ti
   );
   return { subject, text, html };
 }
+
+// ── Fase 17: equipe ──────────────────────────────────────────────────────────
+
+export function renderTeamInvitation(p: { role: "admin" | "collaborator"; acceptUrl: string; invitedBy: string }): MailContent {
+  const roleLabel = p.role === "admin" ? "administrador" : "colaborador";
+  const subject = `Acesso ao sistema da EGD como ${roleLabel}`;
+  const text = [`${p.invitedBy} convidou você para a equipe da EGD como ${roleLabel}.`, "", `Crie sua senha em: ${p.acceptUrl}`, "", "O link vale por 7 dias."].join("\n");
+  const html = layout(
+    subject,
+    `<p><strong>${esc(p.invitedBy)}</strong> convidou você para a equipe da EGD como <strong>${esc(roleLabel)}</strong>.</p>
+  <p><a href="${esc(p.acceptUrl)}">Criar minha senha</a></p>
+  <p>O link vale por 7 dias.</p>`,
+  );
+  return { subject, text, html };
+}
+
+export function renderDeliverableAssigned(p: { actorName: string; deliverableTitle: string; projectTitle: string; dueAt: string | null; url: string }): MailContent {
+  const subject = `Entrega atribuída a você: ${p.deliverableTitle}`;
+  const intro = `${p.actorName} atribuiu a você a entrega "${p.deliverableTitle}" do projeto "${p.projectTitle}"${p.dueAt ? `, com prazo em ${p.dueAt}` : ""}.`;
+  const text = [intro, "", `Abrir: ${p.url}`].join("\n");
+  const html = layout(subject, `<p>${esc(intro)}</p>\n  <p><a href="${esc(p.url)}">Abrir a entrega</a></p>`);
+  return { subject, text, html };
+}

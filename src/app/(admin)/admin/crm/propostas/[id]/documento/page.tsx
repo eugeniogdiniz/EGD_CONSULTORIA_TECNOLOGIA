@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { getProposal } from "@/modules/crm/queries";
 import { parseStoredDocument } from "@/modules/crm/document";
 import { ProposalDocumentForm } from "@/modules/crm/components/proposal-document-form";
@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/shell/page-header";
 export const metadata = { title: "Documento da proposta" };
 
 export default async function PropostaDocumentoPage({ params }: PageProps<"/admin/crm/propostas/[id]/documento">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const { id } = await params;
   const row = await getProposal(ctx, id);
   if (!row) notFound();

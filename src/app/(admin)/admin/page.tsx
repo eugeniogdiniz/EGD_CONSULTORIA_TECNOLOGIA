@@ -4,7 +4,8 @@ import { requireAdmin } from "@/modules/auth/context";
 import { countNewLeads, listLeads } from "@/modules/leads/queries";
 import { countOrganizations } from "@/modules/tenancy/queries";
 import { isTwoFactorEnabled } from "@/modules/auth/two-factor";
-import { getAdminOverview, listDeadlines, listRecentClientComments } from "@/modules/dashboard/queries";
+import { getAdminOverview, listDeadlines, listRecentClientComments, countMyOpenDeliverables } from "@/modules/dashboard/queries";
+import { isOwner } from "@/modules/auth/context";
 import { PageHeader, Block, EmptyState } from "@/components/shell/page-header";
 import { formatBrlCents, formatDateTime, formatIsoDate } from "@/lib/format";
 
@@ -22,14 +23,16 @@ function Kpi({ href, label, value, hint, tone }: { href: string; label: string; 
 
 export default async function AdminHome() {
   const ctx = await requireAdmin();
-  const [novos, orgs, ultimos, overview, deadlines, comments, twoFactor] = await Promise.all([
-    countNewLeads(),
+  const owner = isOwner(ctx);
+  const [novos, orgs, ultimos, overview, deadlines, comments, twoFactor, mine] = await Promise.all([
+    owner ? countNewLeads() : Promise.resolve(0),
     countOrganizations(),
-    listLeads(ctx),
+    owner ? listLeads(ctx) : Promise.resolve([]),
     getAdminOverview(ctx),
     listDeadlines(ctx),
     listRecentClientComments(ctx),
     isTwoFactorEnabled(ctx.user.id),
+    countMyOpenDeliverables(ctx),
   ]);
 
   return (
@@ -46,13 +49,19 @@ export default async function AdminHome() {
       )}
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-        <Kpi href="/admin/leads" label="Leads novos" value={novos} />
-        <Kpi
-          href="/admin/crm/funil"
-          label="Funil aberto"
-          value={overview.openOpportunities}
-          hint={overview.pipelineCents ? formatBrlCents(overview.pipelineCents) : undefined}
-        />
+        {owner ? (
+          <>
+            <Kpi href="/admin/leads" label="Leads novos" value={novos} />
+            <Kpi
+              href="/admin/crm/funil"
+              label="Funil aberto"
+              value={overview.openOpportunities}
+              hint={overview.pipelineCents ? formatBrlCents(overview.pipelineCents) : undefined}
+            />
+          </>
+        ) : (
+          <Kpi href={`/admin/demandas?responsavel=${ctx.user.id}`} label="Minhas demandas" value={mine} hint="entregas abertas atribuídas a você" />
+        )}
         <Kpi
           href={overview.breachedSla > 0 ? "/admin/solicitacoes?sla=estourado" : "/admin/solicitacoes"}
           label="Solicitações abertas"
@@ -131,6 +140,7 @@ export default async function AdminHome() {
         </Block>
       </div>
 
+      {owner && (
       <Block title="Últimos leads" aside={<Link href="/admin/leads" className="text-link hover:text-signal-strong">Ver todos</Link>} padded={false}>
         {ultimos.length === 0 ? (
           <EmptyState title="Nenhum lead recebido ainda." text="Formulário do site e a API (POST /api/v1/leads) alimentam esta lista." />
@@ -149,6 +159,7 @@ export default async function AdminHome() {
           </ul>
         )}
       </Block>
+      )}
     </>
   );
 }

@@ -209,7 +209,7 @@ export async function loadDailyDigestInput(today: string): Promise<DailyDigestIn
       title: r.title,
       organizationName: r.organizationName,
       status: r.status,
-      lastAuthor: r.lastAuthorRole === "admin" ? "team" : r.lastAuthorRole === "client" ? "client" : null,
+      lastAuthor: r.lastAuthorRole === null ? null : r.lastAuthorRole === "client" ? "client" : "team",
       waitingSince: r.lastMessageAt ? new Date(r.lastMessageAt) : r.createdAt,
       firstResponseDueAt: r.firstResponseDueAt,
       firstResponseAt: r.firstResponseAt,

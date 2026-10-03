@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { getProposal, listContactsByCompany } from "@/modules/crm/queries";
 import { generateProposalPdfForm } from "@/modules/crm/form-actions";
 import { SendProposalDialog } from "@/modules/crm/components/send-proposal-dialog";
@@ -34,7 +34,7 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 export default async function PropostaDetalhePage({ params }: PageProps<"/admin/crm/propostas/[id]">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const { id } = await params;
   const row = await getProposal(ctx, id);
   if (!row) notFound();

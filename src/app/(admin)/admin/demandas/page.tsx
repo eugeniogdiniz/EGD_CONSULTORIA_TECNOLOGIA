@@ -78,7 +78,14 @@ export default async function DemandasPage({ searchParams }: PageProps<"/admin/d
       <PageHeader
         title="Demandas"
         meta="Tudo que está em aberto nos projetos, da maior para a menor prioridade."
-        actions={
+        actions={<div className="flex items-center gap-2">
+          <Link
+            href={qs({ responsavel: assignee === ctx.user.id ? "" : ctx.user.id })}
+            aria-current={assignee === ctx.user.id ? "true" : undefined}
+            className={cn("inline-flex h-[34px] items-center rounded-sm border border-input px-3 text-sm", assignee === ctx.user.id ? "bg-link-soft font-medium text-link" : "text-muted-foreground hover:bg-muted")}
+          >
+            Minhas
+          </Link>
           <div role="group" aria-label="Vista" className="inline-flex overflow-hidden rounded-sm border border-input">
             {[{ k: "", l: "Lista" }, { k: "quadro", l: "Quadro" }].map((v) => (
               <Link
@@ -90,7 +97,7 @@ export default async function DemandasPage({ searchParams }: PageProps<"/admin/d
                 {v.l}
               </Link>
             ))}
-          </div>
+          </div></div>
         }
       />
 

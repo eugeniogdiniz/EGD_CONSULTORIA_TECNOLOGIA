@@ -7,7 +7,7 @@ export type ThreadMessage = {
   body: string;
   createdAt: Date;
   authorName: string;
-  authorRole: "admin" | "client";
+  authorRole: "admin" | "collaborator" | "client";
   internal?: boolean;
 };
 
@@ -39,7 +39,7 @@ export function RequestThread({
             aria-hidden
             className={cn(
               "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-card",
-              m.authorRole === "admin" ? "bg-foreground" : "bg-link",
+              m.authorRole !== "client" ? "bg-foreground" : "bg-link",
               m.internal && "ml-2",
             )}
           >
@@ -48,7 +48,7 @@ export function RequestThread({
           <div>
             <div className="flex flex-wrap items-baseline gap-2 text-sm">
               <b className="font-medium">{m.authorName}</b>
-              {m.authorRole === "admin" && (
+              {m.authorRole !== "client" && (
                 <span className="rounded-sm border border-border bg-subtle px-1.5 text-[0.65rem] font-medium text-muted-foreground">
                   Equipe EGD
                 </span>

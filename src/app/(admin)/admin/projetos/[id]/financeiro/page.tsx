@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import {
   getProject,
   getProjectFinancials,
@@ -38,7 +38,7 @@ function formatMinutes(minutes: number): string {
 }
 
 export default async function FinanceiroPage({ params }: PageProps<"/admin/projetos/[id]/financeiro">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const { id } = await params;
   const project = await getProject(ctx, id);
   if (!project) notFound();

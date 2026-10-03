@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listLeads } from "@/modules/leads/queries";
 import { markLeadSeenForm } from "@/modules/leads/form-actions";
 import { suggestCompanyByEmailDomain } from "@/modules/crm/queries";
@@ -21,7 +21,7 @@ const FILTROS = [
 type FilterKey = (typeof FILTROS)[number]["key"];
 
 export default async function LeadsPage({ searchParams }: PageProps<"/admin/leads">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const sp = await searchParams;
   const status: FilterKey = FILTROS.find((f) => f.key === sp.status)?.key ?? "new";
   const leads = await listLeads(ctx, status === "all" ? {} : { status });

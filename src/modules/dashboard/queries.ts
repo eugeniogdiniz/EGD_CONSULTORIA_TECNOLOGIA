@@ -118,3 +118,12 @@ export async function listRecentClientComments(_ctx: AdminContext, limit = 6) {
     projectTitle: r.project_title,
   }));
 }
+
+/** Entregas abertas atribuídas à pessoa logada (KPI "Minhas demandas"). */
+export async function countMyOpenDeliverables(ctx: AdminContext): Promise<number> {
+  const [row] = await db.execute<{ n: number }>(sql`
+    select count(*)::int as n from project_deliverable d join project p on p.id = d.project_id
+    where d.assignee_id = ${ctx.user.id} and d.status <> 'done' and p.archived_at is null and p.status in ('planning', 'active', 'on_hold')
+  `);
+  return row?.n ?? 0;
+}

@@ -162,7 +162,7 @@ export async function inviteUser(
 export async function resendInvitation(ctx: AdminContext, invitationId: string): Promise<ActionResult<null>> {
   if (!isUuid(invitationId)) return fail("Convite não encontrado ou já aceito.");
   const inv = await db.query.invitations.findFirst({ where: eq(invitations.id, invitationId) });
-  if (!inv || inv.acceptedAt) return fail("Convite não encontrado ou já aceito.");
+  if (!inv || inv.acceptedAt || !inv.organizationId) return fail("Convite não encontrado ou já aceito.");
   const org = await db.query.organizations.findFirst({ where: eq(organizations.id, inv.organizationId) });
   if (!org) return fail("Organização não encontrada.");
 
@@ -189,12 +189,13 @@ export async function resendInvitation(ctx: AdminContext, invitationId: string):
 /**
  * Aceita um convite. Usuário novo: cria a conta pelo Better Auth (o hook
  * exige o token) e a sessão já vem nos cookies. Usuário existente: só cria a
- * membership; nome e senha recebidos são ignorados.
+ * membership; nome e senha recebidos são ignorados. Convite da equipe (sem
+ * organização, com papel): aplica o papel e não cria membership.
  */
 export async function acceptInvitation(
   input: { token: string; name: string; password: string },
   requestHeaders: Headers,
-): Promise<ActionResult<{ organizationId: string; existingUser: boolean }>> {
+): Promise<ActionResult<{ organizationId: string | null; existingUser: boolean; team: boolean }>> {
   const parsed = acceptInvitationSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
   const inv = await getInvitationByToken(parsed.data.token);
@@ -222,8 +223,14 @@ export async function acceptInvitation(
     }
   }
 
+  const team = inv.role === "admin" || inv.role === "collaborator";
   await db.transaction(async (tx) => {
-    await tx.insert(memberships).values({ userId, organizationId: inv.organizationId }).onConflictDoNothing();
+    if (team) {
+      // papel vem do convite; usuário existente muda de papel (auditado abaixo)
+      await tx.update(users).set({ role: inv.role as "admin" | "collaborator" }).where(eq(users.id, userId));
+    } else if (inv.organizationId) {
+      await tx.insert(memberships).values({ userId, organizationId: inv.organizationId }).onConflictDoNothing();
+    }
     await tx.update(invitations).set({ acceptedAt: new Date() }).where(eq(invitations.id, inv.id));
   });
   await audit({
@@ -232,8 +239,14 @@ export async function acceptInvitation(
     entityType: "invitation",
     entityId: inv.id,
     organizationId: inv.organizationId,
+    metadata: team ? { role: inv.role } : undefined,
   });
-  return ok({ organizationId: inv.organizationId, existingUser: Boolean(existing) });
+  if (team && existing && existing.role !== inv.role) {
+    await audit({ actorId: userId, action: "user.role_changed", entityType: "user", entityId: userId, metadata: { from: existing.role, to: inv.role, viaInvitation: inv.id } });
+    const authCtx = await auth.$context;
+    await authCtx.internalAdapter.deleteUserSessions(userId);
+  }
+  return ok({ organizationId: inv.organizationId, existingUser: Boolean(existing), team });
 }
 
 export async function setUserActive(ctx: AdminContext, userId: string, active: boolean): Promise<ActionResult<null>> {

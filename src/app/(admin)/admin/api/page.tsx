@@ -1,5 +1,5 @@
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listApiKeys } from "@/modules/api-keys/queries";
 import { revokeApiKeyForm } from "@/modules/api-keys/form-actions";
 import { ApiKeyForm } from "@/modules/api-keys/components/api-key-form";
@@ -12,7 +12,7 @@ import { env } from "@/lib/env";
 export const metadata = { title: "API" };
 
 export default async function AdminApiPage() {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const keys = await listApiKeys(ctx);
   const base = env.BETTER_AUTH_URL.replace(/\/$/, "");
 

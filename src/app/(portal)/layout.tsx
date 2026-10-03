@@ -14,7 +14,7 @@ const NAV = [
 ];
 
 export default async function PortalLayout({ children }: LayoutProps<"/">) {
-  const ctx = await requirePortal();
+  const ctx = await requirePortal({ allowWithout2fa: true });
   return (
     <AppShell
       nav={NAV}

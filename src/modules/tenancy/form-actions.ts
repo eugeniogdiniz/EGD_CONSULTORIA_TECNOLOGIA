@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import type { ActionResult } from "@/lib/action-result";
 import { createOrganization, updateOrganization, setOrganizationStatus, inviteUser, resendInvitation, setUserActive } from "./actions";
 
@@ -23,7 +23,7 @@ function orgInput(fd: FormData) {
 }
 
 export async function createOrganizationForm(_p: S<{ id: string }>, fd: FormData): Promise<S<{ id: string }>> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const r = await createOrganization(ctx, orgInput(fd));
   if (r.ok) {
     revalidatePath("/admin/organizacoes");
@@ -33,7 +33,7 @@ export async function createOrganizationForm(_p: S<{ id: string }>, fd: FormData
 }
 
 export async function updateOrganizationForm(_p: S, fd: FormData): Promise<S> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const r = await updateOrganization(ctx, id, orgInput(fd));
   revalidatePath(`/admin/organizacoes/${id}`);
@@ -42,7 +42,7 @@ export async function updateOrganizationForm(_p: S, fd: FormData): Promise<S> {
 }
 
 export async function toggleOrganizationStatusForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   await setOrganizationStatus(ctx, id, fd.get("status") === "active" ? "active" : "inactive");
   revalidatePath(`/admin/organizacoes/${id}`);
@@ -50,7 +50,7 @@ export async function toggleOrganizationStatusForm(fd: FormData): Promise<void> 
 }
 
 export async function inviteUserForm(_p: S<{ invitationId: string }>, fd: FormData): Promise<S<{ invitationId: string }>> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const organizationId = String(fd.get("organizationId") ?? "");
   const r = await inviteUser(ctx, { email: String(fd.get("email") ?? ""), organizationId });
   revalidatePath(`/admin/organizacoes/${organizationId}`);
@@ -58,13 +58,13 @@ export async function inviteUserForm(_p: S<{ invitationId: string }>, fd: FormDa
 }
 
 export async function resendInvitationForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   await resendInvitation(ctx, String(fd.get("invitationId") ?? ""));
   revalidatePath(`/admin/organizacoes/${String(fd.get("organizationId") ?? "")}`);
 }
 
 export async function setUserActiveForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   await setUserActive(ctx, String(fd.get("userId") ?? ""), fd.get("active") === "1");
   revalidatePath(`/admin/organizacoes/${String(fd.get("organizationId") ?? "")}`);
 }

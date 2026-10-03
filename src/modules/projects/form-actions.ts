@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireAdmin, requireOwner } from "@/modules/auth/context";
 import type { ActionResult } from "@/lib/action-result";
 import {
   archiveProject,
@@ -428,7 +428,7 @@ function expenseInput(fd: FormData) {
 }
 
 export async function createExpenseForm(_p: CreateState, fd: FormData): Promise<CreateState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const r = await createExpense(ctx, expenseInput(fd));
   const projectId = String(fd.get("projectId") ?? "");
   if (r.ok) revalidatePath(`/admin/projetos/${projectId}/financeiro`);
@@ -436,7 +436,7 @@ export async function createExpenseForm(_p: CreateState, fd: FormData): Promise<
 }
 
 export async function updateExpenseForm(_p: NullState, fd: FormData): Promise<NullState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const r = await updateExpense(ctx, id, expenseInput(fd));
   const projectId = String(fd.get("projectId") ?? "");
@@ -445,7 +445,7 @@ export async function updateExpenseForm(_p: NullState, fd: FormData): Promise<Nu
 }
 
 export async function deleteExpenseForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const projectId = String(fd.get("projectId") ?? "");
   await deleteExpense(ctx, id);

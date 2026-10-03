@@ -1,4 +1,4 @@
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { crmCompany, organizations, portalRequest, portalRequestAttachment, portalRequestMessage, project, projectDeliverable, users } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
@@ -308,7 +308,7 @@ export async function assignRequest(ctx: AdminContext, id: string, assigneeId: s
     const [u] = await db
       .select({ id: users.id, name: users.name, email: users.email })
       .from(users)
-      .where(and(eq(users.id, assigneeId), eq(users.role, "admin"), eq(users.active, true)))
+      .where(and(eq(users.id, assigneeId), inArray(users.role, ["admin", "collaborator"]), eq(users.active, true)))
       .limit(1);
     if (!u) return fail("Responsável inválido.", { assigneeId: ["Escolha alguém da equipe."] });
     assignee = u;

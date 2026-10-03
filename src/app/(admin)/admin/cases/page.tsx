@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listAllCases } from "@/modules/cases/queries";
 import { SIZE_LABEL } from "@/modules/cases/public";
 import { toggleCasePublishedForm } from "@/modules/cases/form-actions";
@@ -11,7 +11,7 @@ import { formatBrlCents } from "@/lib/format";
 export const metadata = { title: "Cases" };
 
 export default async function AdminCasesPage() {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const cases = await listAllCases(ctx);
   const published = cases.filter((c) => c.published).length;
 

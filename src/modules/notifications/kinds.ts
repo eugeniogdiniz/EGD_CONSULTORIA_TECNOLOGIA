@@ -20,6 +20,7 @@ export const KINDS = [
   { key: "lead.created", audience: "admin", label: "Novo lead", description: "Alguém entrou em contato pelo site ou pela API.", emailable: true },
   { key: "proposal.expired", audience: "admin", label: "Proposta expirada", description: "Uma proposta enviada passou da validade (entra também no resumo diário).", emailable: false },
   { key: "request.assigned", audience: "admin", label: "Solicitação atribuída a você", description: "Alguém da equipe definiu você como responsável por uma solicitação.", emailable: true },
+  { key: "deliverable.assigned", audience: "admin", label: "Entrega atribuída a você", description: "Alguém da equipe atribuiu uma entrega a você.", emailable: true },
   { key: "request.team_reply", audience: "client", label: "Resposta da equipe", description: "A EGD respondeu a uma solicitação da sua organização.", emailable: true },
   { key: "comment.team", audience: "client", label: "Comentário da equipe", description: "A EGD comentou numa entrega compartilhada com você.", emailable: true },
   { key: "deliverable.done", audience: "client", label: "Entrega concluída", description: "Uma entrega compartilhada com você foi concluída.", emailable: true },

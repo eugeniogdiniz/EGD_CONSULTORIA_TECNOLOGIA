@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function EntrarPage() {
   // Sessão válida não precisa da tela de login (cookie inválido/revogado cai aqui normalmente).
   const user = await getSessionUser();
-  if (user) redirect(user.role === "admin" ? "/admin" : "/portal");
+  if (user) redirect(user.role === "client" ? "/portal" : "/admin");
   return (
     <Suspense>
       <LoginForm />

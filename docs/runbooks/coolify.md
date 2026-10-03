@@ -203,3 +203,10 @@ Toda ação relevante de uma parte vira uma notificação para a outra, no sino 
 - Em `/admin/crm/propostas/<id>` o bloco **Documento** leva à página onde as seções do modelo do kit comercial são preenchidas (só em rascunho). **Gerar PDF** cria a versão seguinte (`PROP-AA-NNN-vN.pdf`), grava em Arquivos (interno) e passa a ser o anexo da proposta; **Ver PDF** mostra a prévia com o conteúdo atual sem gravar.
 - **Enviar por e-mail** manda o PDF anexado ao contato da empresa escolhido; em rascunho, a proposta vira Enviada; a interação de e-mail entra na linha do tempo da oportunidade. Exige PDF (ou arquivo anexado à mão) e contato com e-mail.
 - O PDF é gerado no servidor com `pdfkit` (sem navegador) e fontes padrão (Helvetica); o logo vem de `public/brand/logo-horizontal.png`. Não há variável de ambiente nova. Se a geração falhar, o log traz `proposal_pdf.*`.
+
+## 19. Equipe, papéis e 2FA obrigatório (Fase 17)
+
+- **Papéis:** `admin` (dono: tudo) e `collaborator` (equipe: painel, projetos, demandas, atas, solicitações, relatório semanal, templates). O colaborador recebe 404 em CRM, Organizações, Leads, Cases, Arquivos, API, Automações, Auditoria, Equipe, Configurações, Financeiro do projeto e Relatórios com custo. Clientes continuam no portal.
+- **Convidar:** `/admin/equipe` → e-mail e papel. O link vale 7 dias; quem já é cliente e aceita um convite da equipe muda de papel (sessões encerradas). Mudar papel e desativar também ficam nessa tela; o último administrador ativo não pode ser rebaixado.
+- **2FA obrigatório:** `/admin/configuracoes` → "2FA obrigatório para a equipe" e "para clientes". Com a regra ligada, quem não ativou só abre Minha conta (o administrador também alcança Configurações). Quem perder o aparelho continua sendo resolvido pelo `auth:reset-2fa` (§14).
+- **Dispositivo confiável:** na etapa do código do login há "Confiar neste dispositivo por 30 dias" (cookie assinado do Better Auth). Trocar a senha não limpa a confiança; desativar e reativar o 2FA, sim.

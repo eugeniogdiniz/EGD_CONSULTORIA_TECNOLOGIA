@@ -42,7 +42,7 @@ test("admin sem violações de acessibilidade", async ({ page }) => {
     "/admin/automacoes", "/admin/automacoes/resumo-diario/previa", "/admin/automacoes/propostas-expirar/previa",
     "/admin/notificacoes", "/admin/notificacoes?filtro=nao-lidas", "/admin/solicitacoes?sla=estourado", "/admin/solicitacoes?responsavel=eu",
     "/admin/automacoes/solicitacoes-lembrete/previa",
-    ...(await proposalRoutes(page)),
+    ...(await proposalRoutes(page)), "/admin/equipe", "/admin/configuracoes",
   ]);
 });
 

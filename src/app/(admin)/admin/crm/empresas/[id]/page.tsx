@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import {
   getCompany,
   listContactsByCompany,
@@ -42,7 +42,7 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 export default async function EmpresaDetalhePage({ params }: PageProps<"/admin/crm/empresas/[id]">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const { id } = await params;
   const company = await getCompany(ctx, id);
   if (!company) notFound();

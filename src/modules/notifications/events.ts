@@ -3,16 +3,17 @@
  * depois de gravarem. Cada um resolve destinatários, monta título e e-mail e
  * delega ao `notify()`. Nenhum lança.
  */
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { organizations } from "@/db/schema";
+import { organizations, project, projectDeliverable, users } from "@/db/schema";
 import { env } from "@/lib/env";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatIsoDate } from "@/lib/format";
 import {
   renderClientCommentNotification,
   renderDeliverableDoneNotification,
   renderLeadNotification,
   renderMeetingSharedNotification,
+  renderDeliverableAssigned,
   renderRequestAssigned,
   renderRequestNotification,
   renderRequestReminder,
@@ -21,7 +22,7 @@ import {
 } from "@/modules/mail/templates";
 import { excerpt } from "./kinds";
 import { notify, type NotifyResult } from "./notify";
-import { activeAdmins, deliverableAudience, meetingAudience, organizationMembers } from "./recipients";
+import { activeOwners, activeTeam, deliverableAudience, meetingAudience, organizationMembers } from "./recipients";
 
 const base = () => env.BETTER_AUTH_URL.replace(/\/$/, "");
 const mailExcerpt = (s: string) => (s.length > 800 ? `${s.slice(0, 800)}…` : s);
@@ -54,7 +55,7 @@ export async function notifyRequestEvent(p: {
     url: path,
     entity: { type: "portal_request", id: p.requestId },
     organizationId: p.organizationId,
-    recipients: toTeam ? await activeAdmins() : await organizationMembers(p.organizationId),
+    recipients: toTeam ? await activeTeam() : await organizationMembers(p.organizationId),
     excludeUserId: p.actorId,
     mail,
   });
@@ -80,7 +81,7 @@ export async function notifyClientComment(p: {
     url: path,
     entity: { type: "project_deliverable", id: p.deliverableId },
     organizationId: p.organizationId,
-    recipients: await activeAdmins(),
+    recipients: await activeTeam(),
     excludeUserId: p.actorId,
     mail: renderClientCommentNotification({
       authorName: p.actorName,
@@ -157,7 +158,7 @@ export async function notifyLeadCreated(p: { leadId: string; name: string; email
     body: excerpt(p.message),
     url: "/admin/leads",
     entity: { type: "lead", id: p.leadId },
-    recipients: await activeAdmins(),
+    recipients: await activeOwners(),
     mail: (r) => (r.email.toLowerCase() === teamMailbox ? null : mail),
   });
 }
@@ -170,7 +171,7 @@ export async function notifyProposalExpired(p: { proposalId: string; number: str
     body: `${p.title} · ${p.companyName}`,
     url: `/admin/crm/propostas/${p.proposalId}`,
     entity: { type: "crm_proposal", id: p.proposalId },
-    recipients: await activeAdmins(),
+    recipients: await activeOwners(),
   });
 }
 
@@ -211,5 +212,31 @@ export async function notifyRequestReminder(p: { requestId: string; title: strin
     organizationId: p.organizationId,
     recipients: await organizationMembers(p.organizationId),
     mail: renderRequestReminder({ title: p.title, organizationName: p.organizationName, idleBusinessDays: p.idleBusinessDays, url: `${base()}${path}` }),
+  });
+}
+
+/** Entrega atribuída por outra pessoa da equipe (criar, editar ou atribuir). */
+export async function notifyDeliverableAssigned(p: { deliverableId: string; assigneeId: string; actorId: string; actorName: string }): Promise<NotifyResult | null> {
+  if (p.assigneeId === p.actorId) return null;
+  const [row] = await db
+    .select({ id: projectDeliverable.id, title: projectDeliverable.title, dueAt: projectDeliverable.dueAt, projectId: project.id, projectTitle: project.title })
+    .from(projectDeliverable)
+    .innerJoin(project, eq(projectDeliverable.projectId, project.id))
+    .where(eq(projectDeliverable.id, p.deliverableId))
+    .limit(1);
+  if (!row) return null;
+  const [assignee] = await db.select({ id: users.id, email: users.email, name: users.name }).from(users).where(and(eq(users.id, p.assigneeId), eq(users.active, true))).limit(1);
+  if (!assignee) return null;
+  const path = `/admin/projetos/${row.projectId}/entregas/${row.id}`;
+  const dueAt = row.dueAt ? formatIsoDate(row.dueAt) : null;
+  return notify({
+    kind: "deliverable.assigned",
+    title: `Entrega atribuída a você: ${row.title}`,
+    body: `${row.projectTitle}${dueAt ? ` · prazo ${dueAt}` : ""}`,
+    url: path,
+    entity: { type: "project_deliverable", id: row.id },
+    recipients: [assignee],
+    excludeUserId: p.actorId,
+    mail: renderDeliverableAssigned({ actorName: p.actorName, deliverableTitle: row.title, projectTitle: row.projectTitle, dueAt, url: `${base()}${path}` }),
   });
 }

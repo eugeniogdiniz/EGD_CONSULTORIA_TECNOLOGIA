@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { loadPortfolioData } from "@/modules/reports/queries";
 import { buildPortfolio } from "@/modules/reports/build";
 import { formatBrShort, todayInSaoPaulo } from "@/modules/reports/dates";
@@ -19,7 +19,7 @@ const STATUS_DOT: Record<string, string> = { active: "bg-success", on_hold: "bg-
 const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`;
 
 export default async function PortfolioPage() {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const r = buildPortfolio(await loadPortfolioData(ctx), todayInSaoPaulo());
   const total = r.rows.length;
 

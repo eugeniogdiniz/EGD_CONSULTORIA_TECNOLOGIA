@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listJobsWithLastRun, listRuns } from "@/modules/jobs/queries";
 import { getJob, JOBS } from "@/modules/jobs/registry";
 import { describeSchedule, nextRunAt } from "@/modules/jobs/schedule";
@@ -34,7 +34,7 @@ function duration(start: Date, end: Date | null): string {
 }
 
 export default async function AutomacoesPage() {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const now = new Date();
   const [jobs, runs] = await Promise.all([listJobsWithLastRun(ctx, now), listRuns(ctx, 30)]);
   const scheduler = getSchedulerState();
