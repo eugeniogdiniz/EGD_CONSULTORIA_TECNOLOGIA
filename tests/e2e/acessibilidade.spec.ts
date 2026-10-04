@@ -39,6 +39,7 @@ test("admin sem violações de acessibilidade", async ({ page }) => {
     `/admin/projetos/${p.id}/atas`, "/admin/atas", "/admin/atas/nova",
     `/admin/projetos/${p.id}/relatorio`, "/admin/relatorios", "/admin/relatorios/semanal",
     "/admin/automacoes", "/admin/automacoes/resumo-diario/previa", "/admin/automacoes/propostas-expirar/previa",
+    "/admin/notificacoes", "/admin/notificacoes?filtro=nao-lidas",
   ]);
 });
 
@@ -51,6 +52,6 @@ test("portal sem violações de acessibilidade", async ({ page }) => {
     "/portal", "/portal/projetos", `/portal/projetos/${p.id}`, `/portal/projetos/${p.id}/gantt`,
     `/portal/projetos/${p.id}/calendario`, `/portal/projetos/${p.id}/entregas/${p.visible.id}`,
     "/portal/solicitacoes", "/portal/solicitacoes/nova", "/portal/atas", "/portal/conta",
-    `/portal/projetos/${p.id}/relatorio`,
+    `/portal/projetos/${p.id}/relatorio`, "/portal/notificacoes",
   ]);
 });

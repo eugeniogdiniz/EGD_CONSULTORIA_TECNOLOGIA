@@ -2,9 +2,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { projectDeliverableComment } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
-import { env } from "@/lib/env";
 import { audit } from "@/modules/audit/log";
-import { sendClientCommentNotification } from "@/modules/mail/send";
+import { notifyClientComment } from "@/modules/notifications/events";
 import type { PortalContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import {
@@ -57,14 +56,17 @@ export async function createClientComment(
     organizationId: ctx.organization.id,
     metadata: { commentId: row.id, isReply: data.parentId !== null },
   });
-  // o portal não tem central de avisos: a equipe recebe por e-mail (nunca lança)
-  await sendClientCommentNotification({
-    authorName: ctx.user.name,
+  // a equipe recebe no sistema e, conforme a preferência de cada admin, por e-mail (nunca lança)
+  await notifyClientComment({
+    actorId: ctx.user.id,
+    actorName: ctx.user.name,
+    organizationId: ctx.organization.id,
     organizationName: ctx.organization.name,
+    projectId: target.projectId,
     projectTitle: target.projectTitle,
+    deliverableId: data.deliverableId,
     deliverableTitle: target.title,
-    body: data.body.length > 800 ? `${data.body.slice(0, 800)}…` : data.body,
-    url: `${env.BETTER_AUTH_URL.replace(/\/$/, "")}/admin/projetos/${target.projectId}/entregas/${data.deliverableId}`,
+    body: data.body,
   });
   return ok({ id: row.id });
 }

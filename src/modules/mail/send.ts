@@ -21,6 +21,9 @@ async function deliver(to: string, m: MailContent): Promise<boolean> {
 /** Envio de um e-mail já renderizado (resumos das automações). */
 export const sendDigest = (to: string, m: MailContent) => deliver(to, m);
 
+/** Envio genérico de um e-mail já renderizado (notificações por pessoa, Fase 14). */
+export const sendMail = (to: string, m: MailContent) => deliver(to, m);
+
 export const sendInvitationEmail = (p: { to: string; organizationName: string; acceptUrl: string }) =>
   deliver(p.to, renderInvitation(p));
 

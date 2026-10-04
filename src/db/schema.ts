@@ -11,3 +11,4 @@ export * from "@/modules/files/schema";
 export * from "@/modules/api-keys/schema";
 export * from "@/modules/audit/schema";
 export * from "@/modules/jobs/schema";
+export * from "@/modules/notifications/schema";

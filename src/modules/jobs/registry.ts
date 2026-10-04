@@ -12,8 +12,9 @@ import { expireProposals, loadExpirableProposals, proposalsToExpire } from "./di
 import { buildDailyDigest, loadDailyDigestInput } from "./digests/daily";
 import { loadWeeklyTeamReport } from "./digests/weekly-team";
 import { buildClientDigest, listDigestRecipients, loadClientDigestInput } from "./digests/weekly-client";
+import { countOldNotifications, deleteOldNotifications, READ_RETENTION_DAYS, UNREAD_RETENTION_DAYS } from "@/modules/notifications/cleanup";
 
-export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente"] as const;
+export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente", "notificacoes-limpar"] as const;
 export type JobKey = (typeof JOB_KEYS)[number];
 export const isJobKey = (v: string): v is JobKey => (JOB_KEYS as readonly string[]).includes(v);
 
@@ -147,5 +148,29 @@ const semanalCliente: JobDefinition = {
   },
 };
 
-export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente];
+const notificacoesLimpar: JobDefinition = {
+  key: "notificacoes-limpar",
+  name: "Limpar notificações antigas",
+  description: `Apaga notificações lidas há mais de ${READ_RETENTION_DAYS} dias e não lidas há mais de ${UNREAD_RETENTION_DAYS}.`,
+  schedule: { kind: "daily", hour: 3, minute: 0 },
+  recipients: async () => "ninguém (só limpa)",
+  async run(ctx) {
+    const r = await deleteOldNotifications(ctx.now);
+    return { text: r.deleted === 0 ? "nada a apagar" : `${plural(r.deleted, "notificação apagada", "notificações apagadas")}`, ...r };
+  },
+  async preview(ctx) {
+    const c = await countOldNotifications(ctx.now);
+    return {
+      kind: "table",
+      columns: ["Situação", "Quantidade"],
+      rows: [
+        [`lidas há mais de ${READ_RETENTION_DAYS} dias`, String(c.read)],
+        [`não lidas há mais de ${UNREAD_RETENTION_DAYS} dias`, String(c.unread)],
+      ],
+      note: c.read + c.unread === 0 ? "Nenhuma notificação antiga. Nada seria apagado." : `${plural(c.read + c.unread, "notificação seria apagada", "notificações seriam apagadas")}.`,
+    };
+  },
+};
+
+export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente, notificacoesLimpar];
 export const getJob = (key: string): JobDefinition | null => JOBS.find((j) => j.key === key) ?? null;

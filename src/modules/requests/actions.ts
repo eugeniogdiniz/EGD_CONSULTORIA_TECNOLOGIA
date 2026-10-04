@@ -1,19 +1,16 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { env } from "@/lib/env";
 import { crmCompany, organizations, portalRequest, portalRequestMessage, project, projectDeliverable, users } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
 import type { AdminContext, PortalContext } from "@/modules/auth/context";
-import { sendRequestNotification } from "@/modules/mail/send";
+import { notifyRequestEvent } from "@/modules/notifications/events";
 import { getPortalProject } from "@/modules/portal-projects/queries";
 import { isUuid } from "@/lib/uuid";
 import { convertRequestSchema, messageSchema, requestSchema, type ConvertRequestInput, type MessageInput, type RequestInput } from "./validation";
 import { isPriority } from "@/modules/projects/priority";
 import { isRequestStatus, statusAfterReply, canClientResolve, type RequestStatus } from "./status";
 
-const base = () => env.BETTER_AUTH_URL.replace(/\/$/, "");
-const excerpt = (s: string) => (s.length > 800 ? `${s.slice(0, 800)}…` : s);
 
 // ── cliente (portal) ─────────────────────────────────────────────────────────
 
@@ -47,13 +44,15 @@ export async function createRequest(
     organizationId: ctx.organization.id,
     metadata: { projectId: data.projectId },
   });
-  await sendRequestNotification({
+  await notifyRequestEvent({
     kind: "created",
-    actorName: ctx.user.name,
+    requestId: row.id,
+    organizationId: ctx.organization.id,
     organizationName: ctx.organization.name,
     title: data.title,
-    body: excerpt(data.body),
-    url: `${base()}/admin/solicitacoes/${row.id}`,
+    body: data.body,
+    actorId: ctx.user.id,
+    actorName: ctx.user.name,
   });
   return ok({ id: row.id });
 }
@@ -96,13 +95,15 @@ export async function replyAsClient(ctx: PortalContext, input: MessageInput): Pr
     organizationId: ctx.organization.id,
     metadata: next !== req.status ? { from: req.status, to: next } : undefined,
   });
-  await sendRequestNotification({
+  await notifyRequestEvent({
     kind: "client_reply",
-    actorName: ctx.user.name,
+    requestId: req.id,
+    organizationId: ctx.organization.id,
     organizationName: ctx.organization.name,
     title: req.title,
-    body: excerpt(parsed.data.body),
-    url: `${base()}/admin/solicitacoes/${req.id}`,
+    body: parsed.data.body,
+    actorId: ctx.user.id,
+    actorName: ctx.user.name,
   });
   return ok(null);
 }
@@ -153,14 +154,15 @@ export async function replyAsTeam(ctx: AdminContext, input: MessageInput): Promi
     organizationId: req.organizationId,
     metadata: next !== req.status ? { from: req.status, to: next } : undefined,
   });
-  await sendRequestNotification({
+  await notifyRequestEvent({
     kind: "team_reply",
-    to: req.authorEmail,
-    actorName: "A equipe da EGD",
+    requestId: req.id,
+    organizationId: req.organizationId,
     organizationName: req.organizationName,
     title: req.title,
-    body: excerpt(parsed.data.body),
-    url: `${base()}/portal/solicitacoes/${req.id}`,
+    body: parsed.data.body,
+    actorId: ctx.user.id,
+    actorName: ctx.user.name,
   });
   return ok(null);
 }
@@ -242,11 +244,6 @@ export async function convertRequestToDeliverable(
     return fail("O projeto não pertence à organização de quem abriu a solicitação.", { projectId: ["Escolha um projeto desta organização."] });
   if (proj.archivedAt) return fail("O projeto está arquivado.", { projectId: ["Projeto arquivado."] });
 
-  const [author] = await db
-    .select({ name: users.name, email: users.email })
-    .from(users)
-    .where(eq(users.id, req.createdBy))
-    .limit(1);
   const [org] = await db.select({ name: organizations.name }).from(organizations).where(eq(organizations.id, req.organizationId)).limit(1);
 
   const deliverableId = await db.transaction(async (tx) => {
@@ -288,15 +285,16 @@ export async function convertRequestToDeliverable(
   // conversa: avisa o cliente onde o pedido foi registrado (e move para "em andamento")
   const body = `Registramos sua solicitação como uma entrega do projeto "${proj.title}"${data.dueAt ? `, com prazo em ${data.dueAt.split("-").reverse().join("/")}` : ""}.${data.visibleToClient ? " Você pode acompanhar o andamento na aba Projetos do portal." : ""}`;
   await addMessage(requestId, ctx.user.id, body, req.status, "team");
-  if (author && org) {
-    await sendRequestNotification({
+  if (org) {
+    await notifyRequestEvent({
       kind: "team_reply",
-      to: author.email,
-      actorName: "A equipe da EGD",
+      requestId,
+      organizationId: req.organizationId,
       organizationName: org.name,
       title: req.title,
       body,
-      url: `${base()}/portal/solicitacoes/${requestId}`,
+      actorId: ctx.user.id,
+      actorName: ctx.user.name,
     });
   }
   return ok({ deliverableId });

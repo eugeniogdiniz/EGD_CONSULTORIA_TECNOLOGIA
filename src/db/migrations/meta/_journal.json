@@ -85,6 +85,13 @@
       "when": 1790981615898,
       "tag": "0011_jobs",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791044881902,
+      "tag": "0012_notifications",
+      "breakpoints": true
     }
   ]
 }

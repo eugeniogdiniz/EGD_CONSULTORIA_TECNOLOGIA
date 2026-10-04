@@ -9,6 +9,7 @@ import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { audit } from "@/modules/audit/log";
 import { sendLeadNotification } from "@/modules/mail/send";
+import { notifyLeadCreated } from "@/modules/notifications/events";
 import { leadSchema } from "./validation";
 
 /*
@@ -63,5 +64,6 @@ export async function submitContact(_prev: ContactState, formData: FormData): Pr
     company: parsed.data.company,
     message: parsed.data.message,
   });
+  await notifyLeadCreated({ leadId: row.id, ...parsed.data, company: parsed.data.company ?? null });
   return ok(null);
 }

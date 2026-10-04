@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { crmCompany, meeting, meetingActionItem, meetingParticipant, project, projectDeliverable, users } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
+import { notifyMeetingShared } from "@/modules/notifications/events";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import { formatDate } from "@/lib/format";
@@ -174,7 +175,7 @@ export async function deleteMeeting(ctx: AdminContext, id: string): Promise<Acti
 export async function setMeetingShared(ctx: AdminContext, id: string, shared: boolean): Promise<ActionResult<null>> {
   if (!isUuid(id)) return fail("Ata não encontrada.");
   const [m] = await db
-    .select({ id: meeting.id, organizationId: crmCompany.linkedOrganizationId })
+    .select({ id: meeting.id, heldAt: meeting.heldAt, wasShared: meeting.sharedWithClient, organizationId: crmCompany.linkedOrganizationId })
     .from(meeting)
     .innerJoin(crmCompany, eq(meeting.companyId, crmCompany.id))
     .where(eq(meeting.id, id))
@@ -191,6 +192,7 @@ export async function setMeetingShared(ctx: AdminContext, id: string, shared: bo
     entityId: id,
     organizationId: m.organizationId,
   });
+  if (shared && !m.wasShared) await notifyMeetingShared({ meetingId: id, heldAt: m.heldAt, actorId: ctx.user.id });
   return ok(null);
 }
 

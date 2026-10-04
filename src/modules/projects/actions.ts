@@ -19,6 +19,7 @@ import {
 } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
+import { notifyDeliverableDone, notifyTeamComment } from "@/modules/notifications/events";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import { uploadFile } from "@/modules/files/actions";
@@ -650,6 +651,7 @@ export async function changeDeliverableStatus(
     entityId: id,
     metadata: to === "blocked" ? { from: existing.status, to, reason: blockReason } : { from: existing.status, to },
   });
+  if (to === "done") await notifyDeliverableDone({ deliverableId: id, hasFile: existing.fileId !== null, actorId: ctx.user.id });
   return ok(null);
 }
 
@@ -887,6 +889,8 @@ export async function createComment(
       entityId: data.deliverableId,
       metadata: { commentId: row.id, isReply: data.parentId !== null },
     });
+    // cliente só é avisado se a entrega estiver compartilhada (resolvido dentro do evento)
+    await notifyTeamComment({ deliverableId: data.deliverableId, body: data.body, actorId: ctx.user.id });
     return ok({ id: row.id });
   } catch (err) {
     const msg = (err as { message?: string } | undefined)?.message ?? "";
