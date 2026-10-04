@@ -16,6 +16,7 @@ import {
 } from "@/modules/projects/queries";
 import { deleteTimeEntryForm, setDeliverableVisibilityForm } from "@/modules/projects/form-actions";
 import { getDeliverableOrigin } from "@/modules/meetings/queries";
+import { listDeliverableAcceptances } from "@/modules/portal-projects/queries";
 import { PageHeader, Block } from "@/components/shell/page-header";
 import { PRIORITY_LABEL, PRIORITY_STYLE } from "@/modules/projects/priority";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,7 @@ export default async function DeliverableDetailPage({
       getDeliverableOrigin(ctx, deliverableId),
     ]);
 
+  const acceptance = (await listDeliverableAcceptances(deliverableId))[0] ?? null;
   const existingComments = comments.filter((c) => !c.deletedAt).length;
   const totalMinutes = timeEntries.reduce((s, e) => s + (e.minutes ?? 0), 0);
 
@@ -100,6 +102,15 @@ export default async function DeliverableDetailPage({
             <span className={cn("ml-1.5 inline-flex h-6 items-center rounded-sm border px-2 text-xs font-medium", PRIORITY_STYLE[d.priority])}>
               {PRIORITY_LABEL[d.priority]}
             </span>
+            {acceptance && (
+              <span
+                data-testid="aceite-cliente"
+                title={`${acceptance.userName} · ${acceptance.notes ?? ""}`}
+                className={cn("ml-1.5 inline-flex h-6 items-center rounded-sm border px-2 text-xs font-medium", acceptance.decision === "approved" ? "border-success bg-success-soft text-success" : "border-warning bg-warning-soft text-warning")}
+              >
+                {acceptance.decision === "approved" ? "Aprovada pelo cliente" : "Ajustes pedidos pelo cliente"}
+              </span>
+            )}
             <span className="text-faint"> · </span>
             <Link href={projectHref} className="text-link hover:underline">
               {project.project.title}

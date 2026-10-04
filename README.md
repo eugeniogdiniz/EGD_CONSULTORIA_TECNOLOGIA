@@ -8,6 +8,7 @@ Site público e sistema (portal do cliente e portal administrativo) da EGD, em N
 - Módulos por domínio em `src/modules/*` (auth, tenancy, leads, files, audit, mail), cada um com `schema.ts` (Drizzle), `queries.ts` e `actions.ts`. Páginas nunca acessam o banco direto.
 - Better Auth para login por e-mail e senha; cadastro só por convite; três papéis (`admin` dono, `collaborator` equipe, `client` portal) e autorização por `requireAdmin()` (equipe), `requireOwner()` (dono) e `requirePortal()`; 2FA opcional ou obrigatório por papel em Configurações (ver `docs/runbooks/coolify.md` §19).
 - Postgres 16 (Drizzle ORM), armazenamento S3-compatível (RustFS), SMTP para e-mail transacional.
+- Aceites no portal: propostas visíveis ao cliente com aceite ou recusa registrados como evidência, e aprovação ou pedido de ajustes em entregas concluídas (ver `docs/runbooks/coolify.md` §24).
 - Automações com horário ajustável e retentativa com espera, webhooks de saída assinados, chaves de API com validade e rotação, e comparação entre períodos nos relatórios (ver `docs/runbooks/coolify.md` §23).
 - Operação: erros de servidor agrupados em `/admin/erros`, backup lógico diário no storage com script de restauração, limite de taxa no banco e busca global (ver `docs/runbooks/coolify.md` §22).
 - CRM com catálogo de serviços ligado ao investimento da proposta e tela de previsão de receita e conversão (ver `docs/runbooks/coolify.md` §21).

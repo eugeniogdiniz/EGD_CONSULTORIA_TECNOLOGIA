@@ -301,3 +301,28 @@ export async function notifyApiKeyExpiring(p: { keyId: string; name: string; pre
   const url = "/admin/api";
   return notify({ kind: "api_key.expiring", title, body, url, entity: { type: "api_key", id: p.keyId }, recipients: await activeOwners(), mail: { subject: title, text: `${body}\n\nAbrir: ${base()}${url}`, html: `<p>${body.replace(/[<>&]/g, "")}</p><p><a href="${base()}${url}">Abrir API</a></p>` } });
 }
+
+/** Cliente decidiu a proposta no portal: avisa o dono. */
+export async function notifyProposalDecided(p: { proposalId: string; number: string; title: string; decision: "accepted" | "rejected"; organizationName: string; actorId: string; actorName: string; notes: string | null }): Promise<NotifyResult> {
+  const title = `${p.decision === "accepted" ? "Proposta aceita" : "Proposta recusada"} pelo cliente: ${p.number}`;
+  const body = `${p.title} · ${p.organizationName} · ${p.actorName}${p.notes ? ` · ${p.notes.slice(0, 120)}` : ""}`;
+  const url = `/admin/crm/propostas/${p.proposalId}`;
+  return notify({ kind: "proposal.decided", title, body, url, entity: { type: "crm_proposal", id: p.proposalId }, recipients: await activeOwners(), excludeUserId: p.actorId, mail: { subject: title, text: `${body}\n\nAbrir: ${base()}${url}`, html: `<p>${body.replace(/[<>&]/g, "")}</p><p><a href="${base()}${url}">Abrir a proposta</a></p>` } });
+}
+
+/** Proposta enviada a uma empresa com portal: avisa os membros da organização. */
+export async function notifyProposalSentToClient(p: { proposalId: string; number: string; title: string; organizationId: string; validUntil: string | null }): Promise<NotifyResult> {
+  const path = `/portal/propostas/${p.proposalId}`;
+  const title = `Proposta recebida: ${p.title}`;
+  const body = `${p.number}${p.validUntil ? ` · válida até ${p.validUntil}` : ""} · baixe o PDF e registre o aceite no portal`;
+  return notify({ kind: "proposal.sent", title, body, url: path, entity: { type: "crm_proposal", id: p.proposalId }, organizationId: p.organizationId, recipients: await organizationMembers(p.organizationId), mail: { subject: title, text: `${body}\n\nAbrir: ${base()}${path}`, html: `<p>${body.replace(/[<>&]/g, "")}</p><p><a href="${base()}${path}">Abrir no portal</a></p>` } });
+}
+
+/** Cliente aprovou ou pediu ajustes numa entrega: avisa a equipe. */
+export async function notifyDeliverableDecision(p: { deliverableId: string; projectId: string; title: string; projectTitle: string; decision: "approved" | "changes_requested"; actorId: string; actorName: string; organizationName: string; notes: string | null }): Promise<NotifyResult> {
+  const approved = p.decision === "approved";
+  const title = approved ? `Entrega aprovada pelo cliente: ${p.title}` : `Ajustes pedidos pelo cliente: ${p.title}`;
+  const body = `${p.projectTitle} · ${p.organizationName} · ${p.actorName}${p.notes ? ` · ${p.notes.slice(0, 120)}` : ""}`;
+  const url = `/admin/projetos/${p.projectId}/entregas/${p.deliverableId}`;
+  return notify({ kind: approved ? "deliverable.approved" : "deliverable.changes_requested", title, body, url, entity: { type: "project_deliverable", id: p.deliverableId }, recipients: await activeTeam(), excludeUserId: p.actorId, mail: { subject: title, text: `${body}\n\nAbrir: ${base()}${url}`, html: `<p>${body.replace(/[<>&]/g, "")}</p><p><a href="${base()}${url}">Abrir a entrega</a></p>` } });
+}

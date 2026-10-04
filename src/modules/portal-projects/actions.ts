@@ -1,9 +1,11 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { projectDeliverableComment } from "@/db/schema";
+import { projectDeliverable, projectDeliverableAcceptance, projectDeliverableComment } from "@/db/schema";
+import { z } from "zod";
+import { listDeliverableAcceptances } from "./queries";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
-import { notifyClientComment } from "@/modules/notifications/events";
+import { notifyClientComment, notifyDeliverableDecision } from "@/modules/notifications/events";
 import type { PortalContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import {
@@ -126,6 +128,55 @@ export async function deleteClientComment(
     entityId: c.deliverableId,
     organizationId: ctx.organization.id,
     metadata: { commentId: id },
+  });
+  return ok(null);
+}
+
+// ── Fase 22: aprovação da entrega pelo cliente ───────────────────────────────
+
+const acceptanceSchema = z.object({
+  deliverableId: z.uuid(),
+  decision: z.enum(["approved", "changes_requested"]),
+  notes: z.string().trim().max(2000, "Máximo 2000 caracteres").default(""),
+}).refine((v) => v.decision === "approved" || v.notes.length >= 5, { path: ["notes"], error: "Descreva o que precisa ser ajustado." });
+
+/** Aprova ou pede ajustes numa entrega concluída e visível. Pedir ajustes volta a entrega para a equipe com o motivo em comentário. */
+export async function decideDeliverable(ctx: PortalContext, input: { deliverableId: string; decision: string; notes: string }): Promise<ActionResult<null>> {
+  const parsed = acceptanceSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const data = parsed.data;
+  const target = await findVisibleDeliverable(ctx, data.deliverableId);
+  if (!target) return fail(NOT_FOUND);
+  const current = await db.query.projectDeliverable.findFirst({ where: eq(projectDeliverable.id, data.deliverableId), columns: { status: true } });
+  if (current?.status !== "done") return fail("Só entregas concluídas podem ser aprovadas ou devolvidas.");
+  const last = (await listDeliverableAcceptances(data.deliverableId))[0];
+  if (last?.decision === "approved" && data.decision === "approved") return fail("Esta entrega já foi aprovada.");
+
+  await db.transaction(async (tx) => {
+    await tx.insert(projectDeliverableAcceptance).values({ deliverableId: data.deliverableId, userId: ctx.user.id, decision: data.decision, notes: data.notes || null });
+    if (data.decision === "changes_requested") {
+      await tx.update(projectDeliverable).set({ status: "doing", completedAt: null }).where(eq(projectDeliverable.id, data.deliverableId));
+      await tx.insert(projectDeliverableComment).values({ deliverableId: data.deliverableId, authorId: ctx.user.id, body: `Ajustes solicitados: ${data.notes}` });
+    }
+  });
+  await audit({
+    actorId: ctx.user.id,
+    action: data.decision === "approved" ? "portal.deliverable.approved" : "portal.deliverable.changes_requested",
+    entityType: "project_deliverable",
+    entityId: data.deliverableId,
+    organizationId: ctx.organization.id,
+    metadata: data.decision === "changes_requested" ? { from: "done", to: "doing" } : undefined,
+  });
+  await notifyDeliverableDecision({
+    deliverableId: data.deliverableId,
+    projectId: target.projectId,
+    title: target.title,
+    projectTitle: target.projectTitle,
+    decision: data.decision,
+    actorId: ctx.user.id,
+    actorName: ctx.user.name,
+    organizationName: ctx.organization.name,
+    notes: data.notes || null,
   });
   return ok(null);
 }

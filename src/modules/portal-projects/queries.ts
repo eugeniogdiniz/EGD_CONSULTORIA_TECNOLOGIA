@@ -1,15 +1,6 @@
-import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import {
-  crmCompany,
-  files,
-  project,
-  projectDeliverable,
-  projectDeliverableComment,
-  projectMilestone,
-  projectPhase,
-  users,
-} from "@/db/schema";
+import { crmCompany, files, project, projectDeliverable, projectDeliverableComment, projectMilestone, projectPhase, users, projectDeliverableAcceptance } from "@/db/schema";
 import type { PortalContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import { stripInternalNotes, summarizeProject, type ProjectSummary } from "./scope";
@@ -266,4 +257,26 @@ export async function getPortalDeliverableFile(ctx: PortalContext, projectId: st
     )
     .limit(1);
   return row ?? null;
+}
+
+/** Decisões do cliente sobre a entrega, da mais recente para a mais antiga (admin e portal). */
+export function listDeliverableAcceptances(deliverableId: string) {
+  if (!isUuid(deliverableId)) return Promise.resolve([]);
+  return db
+    .select({ id: projectDeliverableAcceptance.id, decision: projectDeliverableAcceptance.decision, notes: projectDeliverableAcceptance.notes, createdAt: projectDeliverableAcceptance.createdAt, userName: users.name })
+    .from(projectDeliverableAcceptance)
+    .innerJoin(users, eq(projectDeliverableAcceptance.userId, users.id))
+    .where(eq(projectDeliverableAcceptance.deliverableId, deliverableId))
+    .orderBy(desc(projectDeliverableAcceptance.createdAt));
+}
+
+/** Última decisão do cliente por entrega concluída do projeto (para a lista do portal). */
+export async function listLatestAcceptancesByProject(projectId: string): Promise<Map<string, "approved" | "changes_requested">> {
+  if (!isUuid(projectId)) return new Map();
+  const rows = await db.execute<{ deliverable_id: string; decision: "approved" | "changes_requested" }>(sql`
+    select distinct on (a.deliverable_id) a.deliverable_id, a.decision
+    from project_deliverable_acceptance a join project_deliverable d on d.id = a.deliverable_id
+    where d.project_id = ${projectId} order by a.deliverable_id, a.created_at desc
+  `);
+  return new Map(rows.map((r) => [r.deliverable_id, r.decision]));
 }

@@ -89,6 +89,7 @@ test("telas do portal não geram erro nem aviso no console", async ({ page }) =>
     `/portal/projetos/${p.id}/relatorio`,
     "/portal/conta",
     "/portal/notificacoes",
+    "/portal/propostas",
   ]) {
     await page.goto(url);
     await page.waitForLoadState("networkidle");
