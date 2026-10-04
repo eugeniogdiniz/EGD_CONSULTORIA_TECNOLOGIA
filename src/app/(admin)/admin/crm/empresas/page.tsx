@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listCompanies } from "@/modules/crm/queries";
 import { PageHeader, EmptyState } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ const SOURCE_LABEL: Record<string, string> = {
 };
 
 export default async function EmpresasPage({ searchParams }: PageProps<"/admin/crm/empresas">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const sp = await searchParams;
   const search = typeof sp.q === "string" ? sp.q : "";
   const includeArchived = sp.archived === "1";

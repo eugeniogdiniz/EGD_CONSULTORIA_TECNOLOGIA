@@ -19,7 +19,7 @@ export type CommentRow = {
   deletedAt: Date | string | null;
   authorId: string;
   authorName: string;
-  authorRole?: "admin" | "client";
+  authorRole?: "admin" | "collaborator" | "client";
   createdAt: Date | string;
   updatedAt: Date | string;
 };
@@ -124,7 +124,7 @@ function CommentItem({
       <div>
         <div className="flex items-baseline gap-2 text-sm">
           <b className="font-medium">{comment.authorName}</b>
-          {showTeamBadge && comment.authorRole === "admin" && (
+          {showTeamBadge && comment.authorRole !== undefined && comment.authorRole !== "client" && (
             <span className="rounded-sm border border-border bg-subtle px-1.5 text-[0.65rem] font-medium text-muted-foreground">
               Equipe EGD
             </span>

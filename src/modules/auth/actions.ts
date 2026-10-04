@@ -23,7 +23,7 @@ export async function acceptInviteAction(_prev: AcceptState, fd: FormData): Prom
     await headers(),
   );
   if (!r.ok) return r;
-  redirect(r.data.existingUser ? "/entrar?convite=aceito" : "/portal");
+  redirect(r.data.existingUser ? "/entrar?convite=aceito" : r.data.team ? "/admin" : "/portal");
 }
 
 export async function signOutAction() {

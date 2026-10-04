@@ -30,9 +30,11 @@ export default async function ConvitePage({ params }: PageProps<"/convite/[token
   }
 
   const existing = await db.query.users.findFirst({ where: eq(users.email, inv.email), columns: { id: true } });
+  const team = inv.role === "admin" || inv.role === "collaborator";
+  const target = team ? `equipe da EGD (${inv.role === "admin" ? "administrador" : "colaborador"})` : (inv.organizationName ?? "portal");
   return existing ? (
-    <LinkExistingForm token={token} email={inv.email} organizationName={inv.organizationName} />
+    <LinkExistingForm token={token} email={inv.email} organizationName={target} team={team} />
   ) : (
-    <AcceptInviteForm token={token} email={inv.email} organizationName={inv.organizationName} />
+    <AcceptInviteForm token={token} email={inv.email} organizationName={target} team={team} />
   );
 }

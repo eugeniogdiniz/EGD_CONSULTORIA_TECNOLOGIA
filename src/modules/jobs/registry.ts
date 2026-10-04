@@ -12,9 +12,21 @@ import { expireProposals, loadExpirableProposals, proposalsToExpire } from "./di
 import { buildDailyDigest, loadDailyDigestInput } from "./digests/daily";
 import { loadWeeklyTeamReport } from "./digests/weekly-team";
 import { buildClientDigest, listDigestRecipients, loadClientDigestInput } from "./digests/weekly-client";
+import { loadReminderCandidates, requestsToRemind, sendReminders, MAX_REMINDERS, REMINDER_AFTER_BUSINESS_DAYS } from "@/modules/requests/reminders";
+import { listPendingInvoices } from "@/modules/projects/queries";
+import { invoiceState } from "@/modules/projects/invoices";
+import { notifyInvoicesOverdue } from "@/modules/notifications/events";
+import { formatBrlCents, formatIsoDate } from "@/lib/format";
+import { listBackupFolders, runBackup } from "@/modules/backup/run";
+import { writeDailySnapshot } from "@/modules/reports/queries";
+import { listExpiringApiKeys } from "@/modules/api-keys/actions";
+import { notifyApiKeyExpiring } from "@/modules/notifications/events";
+import { notifyBackupFailed } from "@/modules/notifications/events";
+import { sweepRateLimitBuckets } from "@/lib/rate-limit";
+import { db } from "@/lib/db";
 import { countOldNotifications, deleteOldNotifications, READ_RETENTION_DAYS, UNREAD_RETENTION_DAYS } from "@/modules/notifications/cleanup";
 
-export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente", "notificacoes-limpar"] as const;
+export const JOB_KEYS = ["propostas-expirar", "resumo-diario", "semanal-equipe", "semanal-cliente", "notificacoes-limpar", "solicitacoes-lembrete", "parcelas-vencidas", "backup-diario", "snapshot-diario", "chaves-expirando"] as const;
 export type JobKey = (typeof JOB_KEYS)[number];
 export const isJobKey = (v: string): v is JobKey => (JOB_KEYS as readonly string[]).includes(v);
 
@@ -156,7 +168,8 @@ const notificacoesLimpar: JobDefinition = {
   recipients: async () => "ninguém (só limpa)",
   async run(ctx) {
     const r = await deleteOldNotifications(ctx.now);
-    return { text: r.deleted === 0 ? "nada a apagar" : `${plural(r.deleted, "notificação apagada", "notificações apagadas")}`, ...r };
+    const buckets = await sweepRateLimitBuckets(db, new Date(ctx.now.getTime() - 2 * 86_400_000));
+    return { text: `${r.deleted === 0 ? "nenhuma notificação a apagar" : plural(r.deleted, "notificação apagada", "notificações apagadas")} · ${plural(buckets, "janela de limite apagada", "janelas de limite apagadas")}`, ...r, buckets };
   },
   async preview(ctx) {
     const c = await countOldNotifications(ctx.now);
@@ -172,5 +185,133 @@ const notificacoesLimpar: JobDefinition = {
   },
 };
 
-export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente, notificacoesLimpar];
+const solicitacoesLembrete: JobDefinition = {
+  key: "solicitacoes-lembrete",
+  name: "Lembrar clientes de solicitações paradas",
+  description: `Solicitação respondida pela equipe sem retorno do cliente há ${REMINDER_AFTER_BUSINESS_DAYS} dias úteis: lembrete por e-mail e no portal, no máximo ${MAX_REMINDERS}.`,
+  schedule: { kind: "weekdays", hour: 9, minute: 30 },
+  recipients: async () => "membros das organizações com solicitação parada",
+  async run(ctx) {
+    const r = await sendReminders(ctx.now);
+    if (r.failed > 0 && r.sent === 0 && r.reminded > 0) throw new Error(`SMTP recusou todos os ${r.failed} lembretes`);
+    return {
+      text: r.reminded === 0 ? "nenhuma solicitação parada" : `${plural(r.reminded, "lembrete enviado", "lembretes enviados")} (${plural(r.sent, "e-mail", "e-mails")})${r.failed ? ` · ${r.failed} falharam` : ""}`,
+      sent: r.sent,
+      failed: r.failed,
+      reminded: r.reminded,
+    };
+  },
+  async preview(ctx) {
+    const rows = requestsToRemind(await loadReminderCandidates(), ctx.now);
+    return {
+      kind: "table",
+      columns: ["Solicitação", "Organização", "Parada há", "Lembrete nº"],
+      rows: rows.map((r) => [r.title, r.organizationName, `${r.idleBusinessDays} dias úteis`, String(r.reminderCount + 1)]),
+      note: rows.length === 0 ? "Nenhuma solicitação aguardando o cliente há 5 dias úteis ou mais. Nada seria enviado." : `${plural(rows.length, "cliente receberia", "clientes receberiam")} lembrete agora.`,
+    };
+  },
+};
+
+const parcelasVencidas: JobDefinition = {
+  key: "parcelas-vencidas",
+  name: "Avisar parcelas vencidas",
+  description: "Um aviso por dia ao administrador com as parcelas a receber vencidas. Nada é enviado quando não há vencida.",
+  schedule: { kind: "weekdays", hour: 8, minute: 30 },
+  recipients: async () => "administradores",
+  async run(ctx) {
+    const overdue = (await listPendingInvoices()).filter((i) => invoiceState(i, ctx.today) === "overdue");
+    if (overdue.length === 0) return { text: "nenhuma parcela vencida", sent: 0 };
+    const total = overdue.reduce((s, i) => s + i.amountCents, 0);
+    const r = await notifyInvoicesOverdue({
+      count: overdue.length,
+      totalCents: total,
+      oldestDueAt: formatIsoDate(overdue[0].dueAt),
+      sample: overdue.slice(0, 8).map((i) => `${i.projectTitle} · #${i.number} ${i.description} · ${formatBrlCents(i.amountCents)} · venceu ${formatIsoDate(i.dueAt)}`),
+    });
+    return { text: `${plural(overdue.length, "parcela vencida", "parcelas vencidas")} (${formatBrlCents(total)}) · ${plural(r.emailed, "e-mail", "e-mails")}`, sent: r.emailed, failed: r.failed, overdue: overdue.length };
+  },
+  async preview(ctx) {
+    const overdue = (await listPendingInvoices()).filter((i) => invoiceState(i, ctx.today) === "overdue");
+    return {
+      kind: "table",
+      columns: ["Projeto", "Parcela", "Valor", "Venceu em"],
+      rows: overdue.map((i) => [i.projectTitle, `#${i.number} ${i.description}`, formatBrlCents(i.amountCents), formatIsoDate(i.dueAt)]),
+      note: overdue.length === 0 ? "Nenhuma parcela vencida. Nada seria enviado." : `${plural(overdue.length, "parcela vencida seria avisada", "parcelas vencidas seriam avisadas")} numa única notificação.`,
+    };
+  },
+};
+
+const fmtBytes = (n: number) => (n < 1024 * 1024 ? `${Math.round(n / 1024)} KB` : `${(n / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`);
+
+const backupDiario: JobDefinition = {
+  key: "backup-diario",
+  name: "Backup lógico diário",
+  description: "Cada tabela vira um JSON comprimido no storage (pasta backups/AAAA-MM-DD), com manifest; guarda 14 dias. Rede de segurança: o backup do Postgres no Coolify continua.",
+  schedule: { kind: "daily", hour: 3, minute: 30 },
+  recipients: async () => "storage (bucket do app)",
+  async run(ctx) {
+    try {
+      const r = await runBackup(ctx.now, ctx.today);
+      return { text: `${plural(r.tables, "tabela", "tabelas")} · ${plural(r.rows, "linha", "linhas")} · ${fmtBytes(r.bytes)}${r.deletedFolders ? ` · ${plural(r.deletedFolders, "pasta antiga apagada", "pastas antigas apagadas")}` : ""}`, ...r };
+    } catch (err) {
+      await notifyBackupFailed({ error: err instanceof Error ? err.message : String(err) });
+      throw err;
+    }
+  },
+  async preview() {
+    const folders = await listBackupFolders();
+    return {
+      kind: "table",
+      columns: ["Pasta", "Arquivos", "Tamanho"],
+      rows: folders.map((f) => [f.date, String(f.files), fmtBytes(f.bytes)]),
+      note: folders.length === 0 ? "Nenhum backup no storage ainda. Executar agora gera a pasta de hoje." : `${plural(folders.length, "pasta guardada", "pastas guardadas")}; executar agora regrava a de hoje e apaga as com mais de 14 dias.`,
+    };
+  },
+};
+
+const snapshotDiario: JobDefinition = {
+  key: "snapshot-diario",
+  name: "Foto diária dos projetos",
+  description: "Grava progresso, abertas e atrasadas de cada projeto por dia: é a base do Δ de 7 dias no portfólio.",
+  schedule: { kind: "daily", hour: 0, minute: 30 },
+  recipients: async () => "ninguém (só grava)",
+  async run(ctx) {
+    const n = await writeDailySnapshot(ctx.today);
+    return { text: n === 0 ? "nenhum projeto aberto" : `${plural(n, "projeto fotografado", "projetos fotografados")}`, projects: n };
+  },
+  async preview(ctx) {
+    return { kind: "table", columns: ["Dia", "O que seria gravado"], rows: [[formatBr(ctx.today), "um snapshot por projeto aberto (progresso, abertas, atrasadas)"]], note: "Regravar o mesmo dia só atualiza os números." };
+  },
+};
+
+const DAYS_WARN = [14, 3];
+const chavesExpirando: JobDefinition = {
+  key: "chaves-expirando",
+  name: "Avisar chaves de API expirando",
+  description: `Aviso ao administrador ${DAYS_WARN.join(" e ")} dias antes de uma chave de API expirar.`,
+  schedule: { kind: "daily", hour: 8, minute: 45 },
+  recipients: async () => "administradores",
+  async run(ctx) {
+    const keys = await listExpiringApiKeys(ctx.now, 15);
+    let sent = 0;
+    for (const k of keys) {
+      const daysLeft = Math.ceil((k.expiresAt!.getTime() - ctx.now.getTime()) / 86_400_000);
+      if (!DAYS_WARN.includes(daysLeft)) continue;
+      const r = await notifyApiKeyExpiring({ keyId: k.id, name: k.name, prefix: k.prefix, daysLeft });
+      sent += r.inApp > 0 ? 1 : 0;
+    }
+    return { text: sent === 0 ? "nenhuma chave nos marcos de aviso" : `${plural(sent, "chave avisada", "chaves avisadas")}`, sent };
+  },
+  async preview(ctx) {
+    const keys = await listExpiringApiKeys(ctx.now, 15);
+    return {
+      kind: "table",
+      columns: ["Chave", "Prefixo", "Expira em"],
+      rows: keys.map((k) => [k.name, `${k.prefix}…`, `${Math.ceil((k.expiresAt!.getTime() - ctx.now.getTime()) / 86_400_000)} dias`]),
+      note: keys.length === 0 ? "Nenhuma chave expira nos próximos 15 dias." : `Avisa só nos marcos de ${DAYS_WARN.join(" e ")} dias.`,
+    };
+  },
+};
+
+export const JOBS: readonly JobDefinition[] = [propostasExpirar, resumoDiario, semanalEquipe, semanalCliente, solicitacoesLembrete, parcelasVencidas, backupDiario, snapshotDiario, chavesExpirando, notificacoesLimpar];
 export const getJob = (key: string): JobDefinition | null => JOBS.find((j) => j.key === key) ?? null;

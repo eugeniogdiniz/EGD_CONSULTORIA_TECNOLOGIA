@@ -71,9 +71,9 @@ export function renderDailyDigest(d: DailyDigest, baseUrl: string): MailContent 
   if (d.requests.total) {
     html.push(
       sec("Solicitações aguardando a equipe", d.requests.total),
-      `${TABLE_OPEN}${d.requests.items.map((r) => tr([esc(r.organizationName), `<a href="${esc(`${baseUrl}/admin/solicitacoes/${r.id}`)}">${esc(r.title)}</a>`, `<span style="${r.businessDays >= 2 ? LATE : ""}">há ${diasUteis(r.businessDays)}</span>`])).join("")}</table>${more(d.requests)}`,
+      `${TABLE_OPEN}${d.requests.items.map((r) => tr([esc(r.organizationName), `<a href="${esc(`${baseUrl}/admin/solicitacoes/${r.id}`)}">${esc(r.title)}</a>`, `<span style="${r.businessDays >= 2 ? LATE : ""}">há ${diasUteis(r.businessDays)}</span>`, r.slaBreached ? `<span style="${LATE}">⚠ SLA</span>` : ""])).join("")}</table>${more(d.requests)}`,
     );
-    text.push(`SOLICITAÇÕES AGUARDANDO A EQUIPE (${d.requests.total})`, ...d.requests.items.map((r) => `  - ${r.organizationName} · ${r.title} · há ${diasUteis(r.businessDays)} · ${baseUrl}/admin/solicitacoes/${r.id}`), ...moreText(d.requests), "");
+    text.push(`SOLICITAÇÕES AGUARDANDO A EQUIPE (${d.requests.total})`, ...d.requests.items.map((r) => `  - ${r.organizationName} · ${r.title} · há ${diasUteis(r.businessDays)}${r.slaBreached ? " · SLA estourado" : ""} · ${baseUrl}/admin/solicitacoes/${r.id}`), ...moreText(d.requests), "");
   }
   if (d.expiring.total || d.expired.total) {
     const rows = [
@@ -95,6 +95,18 @@ export function renderDailyDigest(d: DailyDigest, baseUrl: string): MailContent 
   html.push(
     `<p style="margin-top:20px;font-size:13px">Abrir: <a href="${esc(`${baseUrl}/admin/demandas`)}">demandas</a> · <a href="${esc(`${baseUrl}/admin/solicitacoes`)}">solicitações</a> · <a href="${esc(`${baseUrl}/admin/crm/propostas`)}">propostas</a></p>`,
   );
+  if (d.overdueInvoices.total > 0 || d.dueInvoices.total > 0) {
+    const brl = (c: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(c / 100);
+    html.push(sec("Financeiro", d.overdueInvoices.total + d.dueInvoices.total));
+    if (d.overdueInvoices.total > 0) {
+      html.push(`${TABLE_OPEN}${d.overdueInvoices.items.map((i) => tr([esc(i.projectTitle), `<a href="${esc(`${baseUrl}/admin/projetos/${i.projectId}/financeiro`)}">#${i.number} ${esc(i.description)}</a>`, brl(i.amountCents), `<span style="${LATE}">vencida há ${dias(i.daysLate)}</span>`])).join("")}</table>${more(d.overdueInvoices)}`);
+      text.push(`PARCELAS VENCIDAS (${d.overdueInvoices.total})`, ...d.overdueInvoices.items.map((i) => `  - ${i.projectTitle} · #${i.number} ${i.description} · ${brl(i.amountCents)} · vencida há ${dias(i.daysLate)}`), ...moreText(d.overdueInvoices), "");
+    }
+    if (d.dueInvoices.total > 0) {
+      html.push(`<p style="font-size:13px;margin:8px 0 4px;color:#555">Vencem nos próximos 7 dias</p>${TABLE_OPEN}${d.dueInvoices.items.map((i) => tr([formatBrShort(i.dueAt), esc(i.projectTitle), `#${i.number} ${esc(i.description)}`, brl(i.amountCents)])).join("")}</table>${more(d.dueInvoices)}`);
+      text.push(`PARCELAS QUE VENCEM EM 7 DIAS (${d.dueInvoices.total})`, ...d.dueInvoices.items.map((i) => `  - ${formatBrShort(i.dueAt)} · ${i.projectTitle} · #${i.number} ${i.description} · ${brl(i.amountCents)}`), ...moreText(d.dueInvoices), "");
+    }
+  }
   text.push(`Demandas: ${baseUrl}/admin/demandas`, `Solicitações: ${baseUrl}/admin/solicitacoes`, `Propostas: ${baseUrl}/admin/crm/propostas`);
   return { subject: d.subject, text: text.join("\n"), html: layout(title, html.join("\n")) };
 }

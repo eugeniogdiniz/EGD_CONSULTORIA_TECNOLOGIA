@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listProposals } from "@/modules/crm/queries";
 import { PageHeader, EmptyState } from "@/components/shell/page-header";
 import { formatBrlCents, formatDate } from "@/lib/format";
@@ -33,7 +33,7 @@ const FILTERS = [
 ] as const;
 
 export default async function PropostasPage({ searchParams }: PageProps<"/admin/crm/propostas">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const sp = await searchParams;
   const filter = FILTERS.find((f) => f.key === sp.status)?.key ?? "all";
   const rows = await listProposals(ctx, filter === "all" ? {} : { status: filter as Exclude<typeof filter, "all"> });

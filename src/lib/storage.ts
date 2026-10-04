@@ -4,6 +4,8 @@ import {
   GetObjectCommand,
   HeadBucketCommand,
   CreateBucketCommand,
+  ListObjectsV2Command,
+  DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "@/lib/env";
@@ -41,9 +43,33 @@ export function ensureBucket(): Promise<void> {
   return bucketReady;
 }
 
-export async function putObject(key: string, body: Buffer, contentType: string): Promise<void> {
+export async function putObject(key: string, body: Buffer, contentType: string, opts: { contentEncoding?: string } = {}): Promise<void> {
   await ensureBucket();
-  await s3.send(new PutObjectCommand({ Bucket: env.S3_BUCKET, Key: key, Body: body, ContentType: contentType }));
+  await s3.send(new PutObjectCommand({ Bucket: env.S3_BUCKET, Key: key, Body: body, ContentType: contentType, ContentEncoding: opts.contentEncoding }));
+}
+
+/** Chaves (e tamanhos) sob um prefixo. Pagina até o fim. */
+export async function listObjects(prefix: string): Promise<{ key: string; size: number; lastModified: Date | null }[]> {
+  await ensureBucket();
+  const out: { key: string; size: number; lastModified: Date | null }[] = [];
+  let token: string | undefined;
+  do {
+    const r = await s3.send(new ListObjectsV2Command({ Bucket: env.S3_BUCKET, Prefix: prefix, ContinuationToken: token }));
+    for (const o of r.Contents ?? []) if (o.Key) out.push({ key: o.Key, size: o.Size ?? 0, lastModified: o.LastModified ?? null });
+    token = r.IsTruncated ? r.NextContinuationToken : undefined;
+  } while (token);
+  return out;
+}
+
+/** Apaga chaves em lotes de 1000. */
+export async function deleteObjects(keys: string[]): Promise<number> {
+  let n = 0;
+  for (let i = 0; i < keys.length; i += 1000) {
+    const chunk = keys.slice(i, i + 1000);
+    await s3.send(new DeleteObjectsCommand({ Bucket: env.S3_BUCKET, Delete: { Objects: chunk.map((Key) => ({ Key })), Quiet: true } }));
+    n += chunk.length;
+  }
+  return n;
 }
 
 /** URL assinada de download, válida por 5 minutos, com nome original no Content-Disposition. */
@@ -57,4 +83,11 @@ export function getSignedDownloadUrl(key: string, filename: string): Promise<str
     }),
     { expiresIn: 300 },
   );
+}
+
+/** Lê o objeto inteiro em memória (anexos de e-mail; arquivos pequenos). */
+export async function getObject(key: string): Promise<Buffer> {
+  const r = await s3.send(new GetObjectCommand({ Bucket: env.S3_BUCKET, Key: key }));
+  if (!r.Body) throw new Error(`objeto vazio: ${key}`);
+  return Buffer.from(await r.Body.transformToByteArray());
 }

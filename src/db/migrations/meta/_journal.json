@@ -92,6 +92,55 @@
       "when": 1791044881902,
       "tag": "0012_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791045855546,
+      "tag": "0013_requests_extras",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791047563214,
+      "tag": "0014_proposal_document",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1791052551757,
+      "tag": "0015_team",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791053786398,
+      "tag": "0016_finance",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791054843947,
+      "tag": "0017_crm_services",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791055625448,
+      "tag": "0018_operacao",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791056860951,
+      "tag": "0019_automacoes_relatorios",
+      "breakpoints": true
     }
   ]
 }

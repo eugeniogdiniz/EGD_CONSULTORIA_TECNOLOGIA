@@ -19,10 +19,18 @@ export const KINDS = [
   { key: "comment.client", audience: "admin", label: "Comentário do cliente", description: "Um cliente comentou numa entrega.", emailable: true },
   { key: "lead.created", audience: "admin", label: "Novo lead", description: "Alguém entrou em contato pelo site ou pela API.", emailable: true },
   { key: "proposal.expired", audience: "admin", label: "Proposta expirada", description: "Uma proposta enviada passou da validade (entra também no resumo diário).", emailable: false },
+  { key: "request.assigned", audience: "admin", label: "Solicitação atribuída a você", description: "Alguém da equipe definiu você como responsável por uma solicitação.", emailable: true },
+  { key: "deliverable.assigned", audience: "admin", label: "Entrega atribuída a você", description: "Alguém da equipe atribuiu uma entrega a você.", emailable: true },
+  { key: "invoice.overdue", audience: "admin", label: "Parcelas vencidas", description: "Um aviso por dia com as parcelas a receber vencidas (só para administradores).", emailable: true },
+  { key: "error.spike", audience: "admin", label: "Erro novo no servidor", description: "Uma origem de erro apareceu pela primeira vez (ou voltou depois de resolvida).", emailable: true },
+  { key: "backup.failed", audience: "admin", label: "Backup falhou", description: "O backup lógico diário não concluiu.", emailable: true },
+  { key: "webhook.disabled", audience: "admin", label: "Webhook desativado", description: "Um destino de webhook falhou 20 vezes seguidas e foi desativado.", emailable: true },
+  { key: "api_key.expiring", audience: "admin", label: "Chave de API expirando", description: "Uma chave de API expira em 14 ou em 3 dias.", emailable: true },
   { key: "request.team_reply", audience: "client", label: "Resposta da equipe", description: "A EGD respondeu a uma solicitação da sua organização.", emailable: true },
   { key: "comment.team", audience: "client", label: "Comentário da equipe", description: "A EGD comentou numa entrega compartilhada com você.", emailable: true },
   { key: "deliverable.done", audience: "client", label: "Entrega concluída", description: "Uma entrega compartilhada com você foi concluída.", emailable: true },
   { key: "meeting.shared", audience: "client", label: "Ata compartilhada", description: "A EGD compartilhou uma ata de reunião com você.", emailable: true },
+  { key: "request.reminder", audience: "client", label: "Lembrete de solicitação", description: "Uma solicitação da sua organização aguarda seu retorno há alguns dias.", emailable: true },
 ] as const satisfies readonly NotificationKind[];
 
 export type KindKey = (typeof KINDS)[number]["key"];

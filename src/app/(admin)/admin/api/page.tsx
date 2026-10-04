@@ -1,5 +1,5 @@
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listApiKeys } from "@/modules/api-keys/queries";
 import { revokeApiKeyForm } from "@/modules/api-keys/form-actions";
 import { ApiKeyForm } from "@/modules/api-keys/components/api-key-form";
@@ -8,13 +8,21 @@ import { PageHeader, Block } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/format";
 import { env } from "@/lib/env";
+import Link from "next/link";
+import { RotateKeyButton } from "@/modules/api-keys/components/rotate-key-button";
+import { listWebhooks } from "@/modules/webhooks/queries";
+import { WebhookForm, TestWebhookButton } from "@/modules/webhooks/components/webhook-form";
+import { setWebhookActiveForm } from "@/modules/webhooks/form-actions";
+import { EVENT_LABEL, type WebhookEvent } from "@/modules/webhooks/sign";
 
 export const metadata = { title: "API" };
 
 export default async function AdminApiPage() {
-  const ctx = await requireAdmin();
-  const keys = await listApiKeys(ctx);
+  const ctx = await requireOwner();
+  const [keys, webhooks] = await Promise.all([listApiKeys(ctx), listWebhooks(ctx)]);
   const base = env.BETTER_AUTH_URL.replace(/\/$/, "");
+  const now = new Date();
+  const isRevoked = (k: { revokedAt: Date | null }) => Boolean(k.revokedAt && k.revokedAt <= now);
 
   return (
     <>
@@ -24,7 +32,7 @@ export default async function AdminApiPage() {
       />
 
       <div className="flex flex-col gap-6">
-          <Block title="Chaves" aside={`${keys.filter((k) => !k.revokedAt).length} ativas`} padded={false}>
+          <Block title="Chaves" aside={`${keys.filter((k) => !isRevoked(k)).length} ativas`} padded={false}>
             {keys.length === 0 ? (
               <p className="px-5 py-6 text-sm text-muted-foreground">Nenhuma chave criada.</p>
             ) : (
@@ -36,12 +44,13 @@ export default async function AdminApiPage() {
                     <th className="h-10 px-4 font-medium">Chave</th>
                     <th className="h-10 px-4 font-medium">Escopos</th>
                     <th className="h-10 px-4 font-medium">Último uso</th>
+                    <th className="h-10 px-4 font-medium">Validade</th>
                     <th className="h-10 px-4"><span className="sr-only">Ações</span></th>
                   </tr>
                 </thead>
                 <tbody>
                   {keys.map((k) => (
-                    <tr key={k.id} className={cn("border-t border-border", k.revokedAt && "text-muted-foreground")}>
+                    <tr key={k.id} className={cn("border-t border-border align-top", isRevoked(k) && "text-muted-foreground")}>
                       <td className="px-4 py-2.5">
                         <div className="font-medium">{k.name}</div>
                         <div className="type-micro text-faint">
@@ -57,10 +66,15 @@ export default async function AdminApiPage() {
                         </div>
                       </td>
                       <td className="px-4 py-2.5 text-xs">
-                        {k.revokedAt ? `revogada em ${formatDateTime(k.revokedAt)}` : k.lastUsedAt ? formatDateTime(k.lastUsedAt) : "nunca usada"}
+                        {isRevoked(k) ? `revogada em ${formatDateTime(k.revokedAt as Date)}` : k.lastUsedAt ? formatDateTime(k.lastUsedAt) : "nunca usada"}
+                      </td>
+                      <td className="px-4 py-2.5 text-xs">
+                        {k.expiresAt ? (k.expiresAt <= now ? <span className="text-danger">expirada em {formatDateTime(k.expiresAt)}</span> : `até ${formatDateTime(k.expiresAt)}`) : "sem expiração"}
+                        {k.revokedAt && k.revokedAt > now && <span className="block text-warning">rotacionada: válida até {formatDateTime(k.revokedAt)}</span>}
                       </td>
                       <td className="px-4 py-2.5 text-right">
-                        {!k.revokedAt && (
+                        {!isRevoked(k) && <div className="mb-1 flex justify-end"><RotateKeyButton id={k.id} name={k.name} disabled={Boolean(k.rotatedToId)} /></div>}
+                        {!isRevoked(k) && (
                           <ConfirmAction
                             trigger={<Button variant="destructive" size="sm">Revogar</Button>}
                             title={`Revogar ${k.name}?`}
@@ -80,7 +94,36 @@ export default async function AdminApiPage() {
             )}
           </Block>
 
+          <Block title="Webhooks de saída" aside={`${webhooks.filter((w) => w.active).length} ativos`} padded={false}>
+            {webhooks.length === 0 ? (
+              <p className="px-5 py-6 text-sm text-muted-foreground">Nenhum webhook. Cadastre uma URL para receber leads, solicitações, propostas, entregas concluídas e parcelas pagas.</p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {webhooks.map((w) => (
+                  <li key={w.id} className="flex flex-wrap items-start justify-between gap-3 px-5 py-3 text-sm" data-testid={`webhook-${w.id}`}>
+                    <div className="min-w-0">
+                      <Link href={`/admin/api/webhooks/${w.id}`} className="font-medium text-link hover:underline">{w.name}</Link>
+                      <div className="type-data truncate text-xs text-muted-foreground">{w.url}</div>
+                      <div className="type-micro text-faint">{(w.events as WebhookEvent[]).map((e) => EVENT_LABEL[e] ?? e).join(", ")} · segredo {w.secretPrefix}{w.lastDeliveryAt ? ` · última entrega ${formatDateTime(w.lastDeliveryAt)}` : ""}{w.failureCount ? ` · ${w.failureCount} falhas seguidas` : ""}{!w.active ? " · desativado" : ""}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {w.active && <TestWebhookButton id={w.id} />}
+                      <form action={setWebhookActiveForm}>
+                        <input type="hidden" name="id" value={w.id} />
+                        <input type="hidden" name="active" value={w.active ? "0" : "1"} />
+                        <Button type="submit" size="sm" variant="ghost">{w.active ? "Desativar" : "Reativar"}</Button>
+                      </form>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Block>
+
           <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <Block title="Novo webhook">
+            <WebhookForm />
+          </Block>
           <Block title="Nova chave">
             <ApiKeyForm />
           </Block>

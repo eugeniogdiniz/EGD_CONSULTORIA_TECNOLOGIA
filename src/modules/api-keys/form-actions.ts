@@ -1,15 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import type { ActionResult } from "@/lib/action-result";
-import { createApiKey, revokeApiKey } from "./actions";
+import { createApiKey, revokeApiKey, rotateApiKey } from "./actions";
 
 export async function createApiKeyForm(
   _p: ActionResult<{ id: string; key: string }> | null,
   fd: FormData,
 ): Promise<ActionResult<{ id: string; key: string }> | null> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const r = await createApiKey(ctx, {
     name: String(fd.get("name") ?? ""),
     scopes: fd.getAll("scopes").map(String),
@@ -19,7 +19,17 @@ export async function createApiKeyForm(
 }
 
 export async function revokeApiKeyForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   await revokeApiKey(ctx, String(fd.get("id") ?? ""));
   revalidatePath("/admin/api");
+}
+
+export async function rotateApiKeyForm(
+  _p: ActionResult<{ id: string; key: string; oldRevokesAt: Date }> | null,
+  fd: FormData,
+): Promise<ActionResult<{ id: string; key: string; oldRevokesAt: Date }> | null> {
+  const ctx = await requireOwner();
+  const r = await rotateApiKey(ctx, String(fd.get("id") ?? ""));
+  if (r.ok) revalidatePath("/admin/api");
+  return r;
 }

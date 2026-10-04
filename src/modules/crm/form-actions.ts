@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import type { ActionResult } from "@/lib/action-result";
 import {
   archiveCompany,
@@ -33,7 +33,7 @@ import { convertLead } from "./actions";
 type ConvertState = ActionResult<{ companyId: string; contactId: string; opportunityId: string }> | null;
 
 export async function convertLeadForm(_p: ConvertState, fd: FormData): Promise<ConvertState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const leadId = String(fd.get("leadId") ?? "");
   const mode = String(fd.get("mode") ?? "");
   const plan: ConversionPlan =
@@ -109,7 +109,7 @@ function companyInput(fd: FormData) {
 }
 
 export async function createCompanyForm(_p: CompanyState, fd: FormData): Promise<CompanyState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const r = await createCompany(ctx, companyInput(fd));
   if (r.ok) {
     revalidatePath("/admin/crm/empresas");
@@ -118,10 +118,11 @@ export async function createCompanyForm(_p: CompanyState, fd: FormData): Promise
   return r;
 }
 
+type S<T = null> = ActionResult<T> | null;
 type NullState = ActionResult<null> | null;
 
 export async function updateCompanyForm(_p: NullState, fd: FormData): Promise<NullState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const r = await updateCompany(ctx, id, companyInput(fd));
   revalidatePath(`/admin/crm/empresas/${id}`);
@@ -130,7 +131,7 @@ export async function updateCompanyForm(_p: NullState, fd: FormData): Promise<Nu
 }
 
 export async function toggleCompanyArchivedForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const currentlyArchived = fd.get("archived") === "1";
   await (currentlyArchived ? unarchiveCompany(ctx, id) : archiveCompany(ctx, id));
@@ -139,7 +140,7 @@ export async function toggleCompanyArchivedForm(fd: FormData): Promise<void> {
 }
 
 export async function linkCompanyForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const companyId = String(fd.get("companyId") ?? "");
   const rawOrg = String(fd.get("organizationId") ?? "");
   const organizationId = rawOrg === "" ? null : rawOrg;
@@ -169,14 +170,14 @@ function contactInput(fd: FormData) {
 type ContactState = ActionResult<{ id: string }> | null;
 
 export async function createContactForm(_p: ContactState, fd: FormData): Promise<ContactState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const r = await createContact(ctx, contactInput(fd));
   if (r.ok) revalidatePath(`/admin/crm/empresas/${contactInput(fd).companyId}`);
   return r;
 }
 
 export async function updateContactForm(_p: NullState, fd: FormData): Promise<NullState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const r = await updateContact(ctx, id, contactInput(fd));
   revalidatePath(`/admin/crm/empresas/${contactInput(fd).companyId}`);
@@ -184,7 +185,7 @@ export async function updateContactForm(_p: NullState, fd: FormData): Promise<Nu
 }
 
 export async function toggleContactArchivedForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const companyId = String(fd.get("companyId") ?? "");
   const currentlyArchived = fd.get("archived") === "1";
@@ -217,7 +218,7 @@ function opportunityInput(fd: FormData) {
 type OpportunityState = ActionResult<{ id: string }> | null;
 
 export async function createOpportunityForm(_p: OpportunityState, fd: FormData): Promise<OpportunityState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const r = await createOpportunity(ctx, opportunityInput(fd));
   const companyId = opportunityInput(fd).companyId;
   if (r.ok) {
@@ -229,7 +230,7 @@ export async function createOpportunityForm(_p: OpportunityState, fd: FormData):
 }
 
 export async function updateOpportunityForm(_p: NullState, fd: FormData): Promise<NullState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const r = await updateOpportunity(ctx, id, opportunityInput(fd));
   revalidatePath(`/admin/crm/oportunidades/${id}`);
@@ -238,7 +239,7 @@ export async function updateOpportunityForm(_p: NullState, fd: FormData): Promis
 }
 
 export async function changeOpportunityStageForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const to = String(fd.get("to") ?? "new") as
     | "new"
@@ -271,7 +272,7 @@ function interactionInput(fd: FormData) {
 type InteractionState = ActionResult<{ id: string }> | null;
 
 export async function createInteractionForm(_p: InteractionState, fd: FormData): Promise<InteractionState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const r = await createInteraction(ctx, interactionInput(fd));
   const back = String(fd.get("_back") ?? "");
   if (r.ok && back) revalidatePath(back);
@@ -279,7 +280,7 @@ export async function createInteractionForm(_p: InteractionState, fd: FormData):
 }
 
 export async function updateInteractionForm(_p: NullState, fd: FormData): Promise<NullState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const r = await updateInteraction(ctx, id, interactionInput(fd));
   const back = String(fd.get("_back") ?? "");
@@ -288,7 +289,7 @@ export async function updateInteractionForm(_p: NullState, fd: FormData): Promis
 }
 
 export async function deleteInteractionForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const back = String(fd.get("_back") ?? "");
   await deleteInteraction(ctx, id);
@@ -309,7 +310,7 @@ function proposalInput(fd: FormData) {
 type ProposalState = ActionResult<{ id: string; number: string }> | null;
 
 export async function createProposalForm(_p: ProposalState, fd: FormData): Promise<ProposalState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const r = await createProposal(ctx, proposalInput(fd));
   if (r.ok) {
     revalidatePath(`/admin/crm/propostas`);
@@ -320,7 +321,7 @@ export async function createProposalForm(_p: ProposalState, fd: FormData): Promi
 }
 
 export async function updateProposalForm(_p: NullState, fd: FormData): Promise<NullState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const r = await updateProposal(ctx, id, proposalInput(fd));
   revalidatePath(`/admin/crm/propostas/${id}`);
@@ -328,7 +329,7 @@ export async function updateProposalForm(_p: NullState, fd: FormData): Promise<N
 }
 
 export async function attachProposalFileForm(_p: NullState, fd: FormData): Promise<NullState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const { attachProposalFile } = await import("./actions");
   const r = await attachProposalFile(ctx, id, fd);
@@ -336,8 +337,47 @@ export async function attachProposalFileForm(_p: NullState, fd: FormData): Promi
   return r.ok ? { ok: true, data: null } : r;
 }
 
+export async function updateProposalDocumentForm(_p: NullState, fd: FormData): Promise<NullState> {
+  const ctx = await requireOwner();
+  const id = String(fd.get("id") ?? "");
+  let doc: unknown = {};
+  try {
+    doc = JSON.parse(String(fd.get("document") ?? "{}"));
+  } catch {
+    return { ok: false, error: "Documento inválido." };
+  }
+  const { updateProposalDocument } = await import("./actions");
+  const r = await updateProposalDocument(ctx, id, doc);
+  if (r.ok) {
+    revalidatePath(`/admin/crm/propostas/${id}`);
+    revalidatePath(`/admin/crm/propostas/${id}/documento`);
+  }
+  return r;
+}
+
+export async function generateProposalPdfForm(fd: FormData): Promise<void> {
+  const ctx = await requireOwner();
+  const id = String(fd.get("id") ?? "");
+  const { generateProposalPdf } = await import("./actions");
+  await generateProposalPdf(ctx, id);
+  revalidatePath(`/admin/crm/propostas/${id}`);
+  revalidatePath(`/admin/crm/propostas/${id}/documento`);
+}
+
+export async function sendProposalByEmailForm(_p: NullState, fd: FormData): Promise<NullState> {
+  const ctx = await requireOwner();
+  const id = String(fd.get("id") ?? "");
+  const { sendProposalByEmail } = await import("./actions");
+  const r = await sendProposalByEmail(ctx, id, { contactId: String(fd.get("contactId") ?? ""), message: String(fd.get("message") ?? "") });
+  if (r.ok) {
+    revalidatePath(`/admin/crm/propostas/${id}`);
+    revalidatePath("/admin/crm/propostas");
+  }
+  return r;
+}
+
 export async function changeProposalStatusForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const to = String(fd.get("to") ?? "draft") as "draft" | "sent" | "accepted" | "rejected" | "expired";
   await changeProposalStatus(ctx, id, {
@@ -348,4 +388,39 @@ export async function changeProposalStatusForm(fd: FormData): Promise<void> {
   });
   revalidatePath(`/admin/crm/propostas/${id}`);
   revalidatePath("/admin/crm/propostas");
+}
+
+// Catálogo de serviços (Fase 19) ─────────────────────────────────────────
+
+function serviceInput(fd: FormData) {
+  return {
+    name: String(fd.get("name") ?? ""),
+    description: String(fd.get("description") ?? ""),
+    unit: String(fd.get("unit") ?? "projeto"),
+    defaultPriceCents: String(fd.get("defaultPriceCents") ?? "0"),
+    position: String(fd.get("position") ?? "0"),
+  };
+}
+
+export async function createServiceForm(_p: S<{ id: string }>, fd: FormData): Promise<S<{ id: string }>> {
+  const ctx = await requireOwner();
+  const { createService } = await import("./actions");
+  const r = await createService(ctx, serviceInput(fd));
+  if (r.ok) revalidatePath("/admin/crm/servicos");
+  return r;
+}
+
+export async function updateServiceForm(_p: NullState, fd: FormData): Promise<NullState> {
+  const ctx = await requireOwner();
+  const { updateService } = await import("./actions");
+  const r = await updateService(ctx, String(fd.get("id") ?? ""), serviceInput(fd));
+  if (r.ok) revalidatePath("/admin/crm/servicos");
+  return r;
+}
+
+export async function setServiceActiveForm(fd: FormData): Promise<void> {
+  const ctx = await requireOwner();
+  const { setServiceActive } = await import("./actions");
+  await setServiceActive(ctx, String(fd.get("id") ?? ""), fd.get("active") === "1");
+  revalidatePath("/admin/crm/servicos");
 }

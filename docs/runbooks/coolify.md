@@ -189,3 +189,51 @@ Toda ação relevante de uma parte vira uma notificação para a outra, no sino 
 - Uma pessoa que não deve receber nada por e-mail desliga os tipos em Minha conta; para não receber nada no sistema, desative a conta.
 - Retenção: a automação **Limpar notificações antigas** (03:00) apaga lidas com mais de 90 dias e não lidas com mais de 180.
 - Logs: `notify.failed` (JSON) quando a gravação ou o envio falha; a action que gerou o evento não é afetada.
+
+## 17. Solicitações: anexos, SLA, notas internas e lembretes (Fase 15)
+
+- **Anexos:** cliente e equipe anexam até 5 arquivos (50 MB no total) por mensagem; tipos aceitos: PDF, Office, imagens, CSV, TXT e ZIP. Os arquivos ficam no mesmo storage, na organização da solicitação, e aparecem em `/admin/arquivos`.
+- **Nota interna:** na resposta da equipe, a caixa "Nota interna" grava um texto que o cliente nunca vê (nem na conversa, nem na contagem, nem por e-mail). Não muda o status.
+- **SLA de primeira resposta** em horas úteis (seg–sex, 9h–18h, Brasília): urgente 2 h, alta 4 h, média 8 h, baixa 16 h. Mudar a prioridade antes da primeira resposta recalcula o prazo. A lista do admin tem a aba "SLA estourado" e o painel mostra a contagem. Solicitações anteriores à Fase 15 não têm SLA (selo ausente).
+- **Responsável:** definido na triagem; a aba "Minhas" filtra; quem é atribuído por outra pessoa recebe notificação.
+- **Lembrete ao cliente:** automação `solicitacoes-lembrete` (seg–sex 09:30) avisa por e-mail e no portal quando a última mensagem é da equipe há 5 dias úteis ou mais; no máximo 2 lembretes, com 5 dias úteis entre eles. Prévia em `/admin/automacoes`. Nada é resolvido automaticamente.
+
+## 18. Documento da proposta em PDF e envio por e-mail (Fase 16)
+
+- Em `/admin/crm/propostas/<id>` o bloco **Documento** leva à página onde as seções do modelo do kit comercial são preenchidas (só em rascunho). **Gerar PDF** cria a versão seguinte (`PROP-AA-NNN-vN.pdf`), grava em Arquivos (interno) e passa a ser o anexo da proposta; **Ver PDF** mostra a prévia com o conteúdo atual sem gravar.
+- **Enviar por e-mail** manda o PDF anexado ao contato da empresa escolhido; em rascunho, a proposta vira Enviada; a interação de e-mail entra na linha do tempo da oportunidade. Exige PDF (ou arquivo anexado à mão) e contato com e-mail.
+- O PDF é gerado no servidor com `pdfkit` (sem navegador) e fontes padrão (Helvetica); o logo vem de `public/brand/logo-horizontal.png`. Não há variável de ambiente nova. Se a geração falhar, o log traz `proposal_pdf.*`.
+
+## 19. Equipe, papéis e 2FA obrigatório (Fase 17)
+
+- **Papéis:** `admin` (dono: tudo) e `collaborator` (equipe: painel, projetos, demandas, atas, solicitações, relatório semanal, templates). O colaborador recebe 404 em CRM, Organizações, Leads, Cases, Arquivos, API, Automações, Auditoria, Equipe, Configurações, Financeiro do projeto e Relatórios com custo. Clientes continuam no portal.
+- **Convidar:** `/admin/equipe` → e-mail e papel. O link vale 7 dias; quem já é cliente e aceita um convite da equipe muda de papel (sessões encerradas). Mudar papel e desativar também ficam nessa tela; o último administrador ativo não pode ser rebaixado.
+- **2FA obrigatório:** `/admin/configuracoes` → "2FA obrigatório para a equipe" e "para clientes". Com a regra ligada, quem não ativou só abre Minha conta (o administrador também alcança Configurações). Quem perder o aparelho continua sendo resolvido pelo `auth:reset-2fa` (§14).
+- **Dispositivo confiável:** na etapa do código do login há "Confiar neste dispositivo por 30 dias" (cookie assinado do Better Auth). Trocar a senha não limpa a confiança; desativar e reativar o 2FA, sim.
+
+## 20. Financeiro: parcelas, rate por projeto, horas por pessoa, estimativas (Fase 18)
+
+- **Parcelas** em Financeiro do projeto: nova parcela (descrição, valor, vencimento), marcar paga (data), cancelar, editar enquanto pendente. "Vencida" é derivada do vencimento. O painel do dono mostra "A receber" com a contagem de vencidas; o resumo diário ganha a seção Financeiro; a automação `parcelas-vencidas` (seg–sex 08:30) manda um aviso por dia ao administrador só quando há vencida.
+- **Rate por projeto**: bloco "Rate por hora neste projeto" (vazio = rate da pessoa). Toda entrada de tempo congela o rate ao fechar: mudar rates depois não altera o custo do que já foi apontado; entradas anteriores à Fase 18 (sem rate congelado) usam o rate do projeto, senão o da pessoa.
+- **Horas por pessoa** em `/admin/relatorios/horas` (dono): período, pessoa e projeto, com CSV. Para o fechamento do mês.
+- **Estimativa** (h) no diálogo da entrega; "Estimado × apontado" no financeiro; **Burndown** na aba do projeto (equipe), por semana, com a linha ideal até o último prazo.
+
+## 21. CRM comercial: catálogo de serviços e previsão (Fase 19)
+
+- **Serviços** (`/admin/crm/servicos`): nome, preço de referência, unidade, descrição, ordem; desativar tira do seletor sem apagar o histórico. No documento da proposta, "Adicionar do catálogo" cria o item de investimento com preço × quantidade (o item fica desvinculado do serviço: mudar o preço não altera propostas antigas).
+- **Previsão** (`/admin/crm/previsao`): pipeline aberto ponderado por probabilidade fixa de estágio (novo 10 %, qualificado 25 %, reunião 50 %, proposta 70 %), esperado por mês de fechamento (vencidas no mês corrente), conversão em 90 e 365 dias com ticket e ciclo médios, motivos de perda. CSV com as quatro tabelas. O KPI "Funil aberto" do painel mostra o ponderado.
+
+## 22. Operação: erros, backup lógico, limite de taxa e busca (Fase 20)
+
+- **Erros** (`/admin/erros`, dono): erros de servidor agrupados por origem com contagem, caminho, referência (o mesmo código da tela de erro) e stack. "Resolver" tira da lista; se a origem voltar, reabre e o dono recebe a notificação `error.spike` de novo. Fora de produção, `GET /admin/erros/testar` gera um erro de propósito.
+- **Backup lógico** (`backup-diario`, 03:30): uma pasta `backups/AAAA-MM-DD/` no bucket do app com um `<tabela>.json.gz` por tabela e um `manifest.json`; guarda 14 dias; falha vira notificação `backup.failed`. **Restaurar**: num banco já migrado, `node --env-file=.env scripts/restore-backup.mjs AAAA-MM-DD [--only tabela,tabela] [--truncate]` (em produção, dentro do container). O backup do Postgres no Coolify (§8) continua sendo o principal.
+- **Limite de taxa** do formulário de contato, da API pública e das tentativas de login por e-mail agora fica no banco (`rate_limit_bucket`): vale entre containers e sobrevive a reinícios. A limpeza diária apaga janelas com mais de 2 dias.
+- **Busca global**: caixa no topo do admin → `/admin/busca?q=`. Dono busca em tudo; colaborador, só em projetos, entregas, solicitações e atas.
+
+## 23. Automações e integrações (Fase 21)
+
+- **Horário por automação**: em `/admin/automacoes`, cada linha tem um campo HH:MM (Brasília). Vazio volta ao padrão do código; "(ajustado)" marca o horário sobrescrito.
+- **Retentativa com espera**: falha de uma automação espera 5 min antes da 2ª tentativa e 15 min antes da 3ª (antes era a cada minuto).
+- **Webhooks de saída** (aba em `/admin/api`): URL (https em produção), eventos (`lead.created`, `request.created`, `proposal.sent`, `proposal.accepted`, `project.deliverable.done`, `invoice.paid`), segredo mostrado uma vez. Entrega assíncrona pelo agendador: `POST` JSON com `X-EGD-Event`, `X-EGD-Delivery`, `X-EGD-Timestamp` e `X-EGD-Signature: sha256=HMAC(segredo, timestamp.corpo)`; 5 tentativas (1, 5, 15, 60, 180 min); 20 falhas seguidas desativam o destino e avisam o administrador. "Testar" envia um `ping`; a página do webhook lista as entregas e permite reenviar.
+- **Chaves de API**: expiram em 1 ano (chaves antigas sem validade continuam sem). **Rotacionar** cria a nova com os mesmos escopos e mantém a antiga por 7 dias; aviso ao administrador 14 e 3 dias antes de expirar (`chaves-expirando`). Chave expirada responde `401 expired`.
+- **Comparação entre períodos**: o semanal mostra a variação contra a semana anterior; o portfólio, "Δ 7 dias" de atrasadas e progresso a partir da foto diária (`snapshot-diario`, 00:30). O Δ aparece "—" até existir foto de uma semana atrás.

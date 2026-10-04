@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listFiles } from "@/modules/files/queries";
 import { listOrganizations } from "@/modules/tenancy/queries";
 import { UploadForm } from "@/modules/files/components/upload-form";
@@ -8,7 +8,7 @@ import { formatBytes, formatDateTime } from "@/lib/format";
 export const metadata = { title: "Arquivos" };
 
 export default async function ArquivosPage() {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const [files, orgs] = await Promise.all([listFiles(ctx), listOrganizations(ctx)]);
   const orgName = new Map(orgs.map((o) => [o.id, o.name]));
 

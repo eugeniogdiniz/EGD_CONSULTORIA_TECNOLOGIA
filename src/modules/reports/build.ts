@@ -462,3 +462,35 @@ export function clientReportCsv(input: ClientReportInput) {
     ]),
   };
 }
+
+// ── 4. comparação entre períodos (Fase 21) ──────────────────────────────────
+
+export type ProjectSnapshot = { projectId: string; doneCount: number; openCount: number; overdueCount: number; progressPct: number };
+
+/** Linha do snapshot de hoje para cada projeto aberto do portfólio (puro). */
+export function snapshotRows(report: PortfolioReport): ProjectSnapshot[] {
+  return report.rows.map((r) => ({ projectId: r.id, doneCount: r.done, openCount: r.total - r.done, overdueCount: r.overdue, progressPct: r.percent ?? 0 }));
+}
+
+export type PortfolioDelta = { overdue: number | null; progress: number | null };
+
+/** Δ contra o snapshot de referência (7 dias atrás); null quando não há snapshot do projeto. */
+export function portfolioDelta(row: PortfolioRow, previous: ProjectSnapshot | undefined): PortfolioDelta {
+  if (!previous) return { overdue: null, progress: null };
+  return { overdue: row.overdue - previous.overdueCount, progress: (row.percent ?? 0) - previous.progressPct };
+}
+
+export type WeeklyComparison = { done: number; due: number; late: number; prevDone: number; prevDue: number; prevLate: number };
+
+/** Totais da semana e da anterior (puro: recebe os dois relatórios). */
+export function compareWeekly(current: WeeklyReport, previous: WeeklyReport): WeeklyComparison {
+  const sum = (w: WeeklyReport, k: "done" | "due" | "late") => w.projects.reduce((s, p) => s + p[k].length, 0);
+  return { done: sum(current, "done"), due: sum(current, "due"), late: sum(current, "late"), prevDone: sum(previous, "done"), prevDue: sum(previous, "due"), prevLate: sum(previous, "late") };
+}
+
+/** "▲ 2", "▼ 1" ou "=" para a variação. */
+export function deltaLabel(n: number | null): string {
+  if (n === null) return "—";
+  if (n === 0) return "=";
+  return n > 0 ? `▲ ${n}` : `▼ ${Math.abs(n)}`;
+}

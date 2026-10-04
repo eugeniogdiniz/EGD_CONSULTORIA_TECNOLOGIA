@@ -1,16 +1,25 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import {
   getProject,
   getProjectFinancials,
   listExpenses,
+  listInvoices,
   listProjectProposals,
+  listProjectRates,
   listTimeCostsByDeliverable,
 } from "@/modules/projects/queries";
+import { InvoiceFormDialog } from "@/modules/projects/components/invoice-form";
+import { ConfirmAction } from "@/components/shell/confirm-action";
+import { cancelInvoiceForm, markInvoicePaidForm, setProjectRateForm } from "@/modules/projects/form-actions";
+import { INVOICE_STATE_LABEL, INVOICE_STATE_STYLE, invoiceState, summarizeInvoices } from "@/modules/projects/invoices";
+import { formatHours } from "@/modules/projects/burndown";
+import { todayInSaoPaulo } from "@/modules/reports/dates";
 import { PageHeader, Block } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ExpenseFormDialog } from "@/modules/projects/components/expense-form";
 import { formatBrlCents, formatIsoDate } from "@/lib/format";
 
@@ -38,18 +47,23 @@ function formatMinutes(minutes: number): string {
 }
 
 export default async function FinanceiroPage({ params }: PageProps<"/admin/projetos/[id]/financeiro">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const { id } = await params;
   const project = await getProject(ctx, id);
   if (!project) notFound();
 
-  const [financials, expenses, proposals, timeCosts] = await Promise.all([
+  const [financials, expenses, proposals, timeCosts, invoices, rates] = await Promise.all([
     getProjectFinancials(ctx, id),
     listExpenses(ctx, id),
     listProjectProposals(ctx, id),
     listTimeCostsByDeliverable(ctx, id),
+    listInvoices(ctx, id),
+    listProjectRates(ctx, id),
   ]);
   if (!financials) notFound();
+  const today = todayInSaoPaulo();
+  const billing = summarizeInvoices(invoices, today);
+  const totalEstimate = timeCosts.reduce((s, r) => s + (r.estimateMinutes ?? 0), 0);
 
   const totalMinutes = timeCosts.reduce((s, r) => s + r.totalMinutes, 0);
   const totalLaborCents = timeCosts.reduce((s, r) => s + r.laborCents, 0);
@@ -102,6 +116,70 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
         />
       </div>
 
+      <Block
+        title="Faturamento"
+        aside={
+          <span className="flex flex-wrap items-center gap-3">
+            <span className="type-data text-xs text-faint">faturado {formatBrlCents(billing.invoicedCents)} · recebido {formatBrlCents(billing.paidCents)} · a receber {formatBrlCents(billing.receivableCents)}{billing.overdueCount ? ` · vencido ${formatBrlCents(billing.overdueCents)}` : ""}</span>
+            <InvoiceFormDialog projectId={id} trigger={<Button variant="secondary" size="sm" type="button">+ Nova parcela</Button>} />
+          </span>
+        }
+        padded={false}
+      >
+        {invoices.length === 0 ? (
+          <p className="p-6 text-sm text-muted-foreground">Nenhuma parcela. Cadastre as parcelas da proposta aceita para acompanhar vencimentos e recebimentos.</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-subtle text-muted-foreground">
+              <tr className="text-left">
+                <th className="h-10 px-4 font-medium">#</th>
+                <th className="h-10 px-4 font-medium">Descrição</th>
+                <th className="h-10 px-4 font-medium">Vencimento</th>
+                <th className="h-10 px-4 text-right font-medium">Valor</th>
+                <th className="h-10 px-4 font-medium">Situação</th>
+                <th className="h-10 px-4 font-medium">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoices.map((inv) => {
+                const st = invoiceState(inv, today);
+                return (
+                  <tr key={inv.id} className="border-t border-border" data-testid={`parcela-${inv.number}`}>
+                    <td className="type-data px-4 py-2">{inv.number}</td>
+                    <td className="px-4 py-2">{inv.description}{inv.notes && <span className="type-micro block text-faint">{inv.notes}</span>}</td>
+                    <td className="type-data px-4 py-2 whitespace-nowrap">{formatIsoDate(inv.dueAt)}{st === "paid" && inv.paidAt && <span className="type-micro block text-success">paga em {formatIsoDate(inv.paidAt)}</span>}</td>
+                    <td className="type-data px-4 py-2 text-right">{formatBrlCents(inv.amountCents)}</td>
+                    <td className="px-4 py-2"><span className={cn("inline-flex h-[22px] items-center rounded-sm border px-2 text-xs font-medium", INVOICE_STATE_STYLE[st])}>{INVOICE_STATE_LABEL[st]}</span></td>
+                    <td className="px-4 py-2">
+                      {inv.status === "pending" && (
+                        <div className="flex flex-wrap gap-1.5">
+                          <form action={markInvoicePaidForm} className="flex items-center gap-1">
+                            <input type="hidden" name="id" value={inv.id} />
+                            <input type="hidden" name="projectId" value={id} />
+                            <label className="sr-only" htmlFor={`paid-${inv.id}`}>Data do recebimento</label>
+                            <input id={`paid-${inv.id}`} name="paidAt" type="date" defaultValue={today} className="h-8 rounded-sm border border-input bg-card px-2 text-xs" />
+                            <Button type="submit" size="sm" variant="outline">Marcar paga</Button>
+                          </form>
+                          <InvoiceFormDialog projectId={id} invoice={{ id: inv.id, description: inv.description, amountCents: inv.amountCents, dueAt: inv.dueAt, notes: inv.notes }} trigger={<Button variant="ghost" size="sm" type="button">Editar</Button>} />
+                          <ConfirmAction
+                            trigger={<Button variant="ghost" size="sm">Cancelar</Button>}
+                            title={`Cancelar a parcela ${inv.number}?`}
+                            description="Ela sai do faturado e do a receber. O registro fica na tabela como cancelada."
+                            confirmLabel="Cancelar parcela"
+                            action={cancelInvoiceForm}
+                            fields={{ id: inv.id, projectId: id }}
+                          />
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </Block>
+
       <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-6">
           <Block
@@ -116,7 +194,8 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
                 <thead className="bg-subtle text-muted-foreground">
                   <tr className="text-left">
                     <th className="h-10 px-4 font-medium">Entrega</th>
-                    <th className="h-10 px-4 text-right font-medium">Minutos</th>
+                    <th className="h-10 px-4 text-right font-medium">Estimado</th>
+                    <th className="h-10 px-4 text-right font-medium">Apontado</th>
                     <th className="h-10 px-4 text-right font-medium">Custo</th>
                     <th className="h-10 px-4 text-right font-medium">Sem rate</th>
                   </tr>
@@ -129,7 +208,8 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
                           {r.title}
                         </Link>
                       </td>
-                      <td className="type-data px-4 py-2 text-right">{r.totalMinutes}</td>
+                      <td className="type-data px-4 py-2 text-right text-muted-foreground">{r.estimateMinutes != null ? formatHours(r.estimateMinutes) : "—"}</td>
+                      <td className={cn("type-data px-4 py-2 text-right", r.estimateMinutes != null && r.totalMinutes > r.estimateMinutes && "text-danger")}>{formatHours(r.totalMinutes)}</td>
                       <td className="type-data px-4 py-2 text-right">{formatBrlCents(r.laborCents)}</td>
                       <td className="type-data px-4 py-2 text-right">{r.entriesWithoutRate}</td>
                     </tr>
@@ -138,7 +218,8 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
                 <tfoot>
                   <tr className="border-t border-border bg-subtle text-sm font-medium">
                     <td className="px-4 py-2">Total</td>
-                    <td className="type-data px-4 py-2 text-right">{totalMinutes}</td>
+                    <td className="type-data px-4 py-2 text-right text-muted-foreground">{totalEstimate ? formatHours(totalEstimate) : "—"}</td>
+                    <td className="type-data px-4 py-2 text-right">{formatHours(totalMinutes)}</td>
                     <td className="type-data px-4 py-2 text-right">{formatBrlCents(totalLaborCents)}</td>
                     <td className="type-data px-4 py-2 text-right">{totalWithoutRate}</td>
                   </tr>
@@ -212,6 +293,29 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
                 </tfoot>
               </table>
             )}
+          </Block>
+
+          <Block title="Rate por hora neste projeto" aside={<span className="text-xs text-faint">vazio = rate da pessoa</span>} padded={false}>
+            <ul className="divide-y divide-border">
+              {rates.map((r) => (
+                <li key={r.userId} className="px-5 py-3 text-sm">
+                  <form action={setProjectRateForm} className="flex flex-wrap items-center justify-between gap-2">
+                    <input type="hidden" name="projectId" value={id} />
+                    <input type="hidden" name="userId" value={r.userId} />
+                    <span className="min-w-0">
+                      <span className="block font-medium">{r.name}</span>
+                      <span className="type-micro text-faint">rate da pessoa: {r.personalRateCents != null ? `${formatBrlCents(r.personalRateCents)}/h` : "não definido"}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <label className="sr-only" htmlFor={`rate-${r.userId}`}>Rate de {r.name} neste projeto, em centavos</label>
+                      <Input id={`rate-${r.userId}`} name="hourlyRateCents" inputMode="numeric" placeholder="cents/h" defaultValue={r.projectRateCents ?? ""} className="h-8 w-28 text-right" />
+                      <Button type="submit" size="sm" variant="outline">Salvar</Button>
+                    </span>
+                  </form>
+                </li>
+              ))}
+            </ul>
+            <p className="type-micro px-5 py-3 text-muted-foreground">Vale para as entradas fechadas daqui em diante: o custo das horas antigas não muda (rate congelado em cada entrada).</p>
           </Block>
 
           <Block title="Propostas" aside={<span className="text-xs text-faint">Da oportunidade origem</span>} padded={false}>

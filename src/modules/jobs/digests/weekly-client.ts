@@ -97,7 +97,7 @@ export async function loadClientDigestInput(organizationId: string): Promise<Cli
       deliverables: dels.filter((d) => d.projectId === p.id).map(({ projectId: _p, ...d }) => d),
       milestones: miles.filter((m) => m.projectId === p.id).map(({ projectId: _p, ...m }) => m),
     })),
-    requests: requests.map((r) => ({ id: r.id, title: r.title, status: r.status, lastAuthor: r.lastAuthorRole === "admin" ? "team" : r.lastAuthorRole === "client" ? "client" : null })),
+    requests: requests.map((r) => ({ id: r.id, title: r.title, status: r.status, lastAuthor: r.lastAuthorRole === null ? null : r.lastAuthorRole === "client" ? "client" : "team" })),
   };
 }
 

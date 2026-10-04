@@ -1,6 +1,7 @@
 import { pgTable, pgEnum, text, timestamp, boolean, bigint, integer, uuid, index } from "drizzle-orm/pg-core";
 
-export const userRole = pgEnum("user_role", ["admin", "client"]);
+/** admin = dono (tudo); collaborator = equipe (operação, sem comercial/financeiro); client = portal. */
+export const userRole = pgEnum("user_role", ["admin", "collaborator", "client"]);
 
 const timestamps = {
   createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),

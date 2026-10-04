@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { loadProjectStatus } from "@/modules/reports/queries";
 import { buildProjectStatus } from "@/modules/reports/build";
 import { formatBr, formatMinutes, todayInSaoPaulo } from "@/modules/reports/dates";
@@ -18,7 +18,7 @@ const th = "pb-2 pr-3 text-left text-[0.8125rem] font-medium whitespace-nowrap t
 const td = "py-2.5 pr-3 align-top";
 
 export default async function RelatorioProjetoPage({ params }: PageProps<"/admin/projetos/[id]/relatorio">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const { id } = await params;
   const data = await loadProjectStatus(ctx, id);
   if (!data) notFound();

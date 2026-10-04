@@ -11,13 +11,25 @@ describe("decisão de tentativa", () => {
   it("já concluída: nada", () => {
     expect(decideClaim([{ status: "ok", attempt: 1, startedAt: ago(5) }], now)).toBeNull();
   });
-  it("erro: próxima tentativa, até a terceira", () => {
-    expect(decideClaim([{ status: "error", attempt: 1, startedAt: ago(2) }], now)).toEqual({ attempt: 2 });
+  it("erro: próxima tentativa só depois do backoff (5 min, depois 15), até a terceira", () => {
+    // 1ª falha há 2 min: ainda dentro dos 5 min de espera
+    expect(decideClaim([{ status: "error", attempt: 1, startedAt: ago(2) }], now)).toBeNull();
+    expect(decideClaim([{ status: "error", attempt: 1, startedAt: ago(5) }], now)).toEqual({ attempt: 2 });
+    // 2ª falha há 10 min: espera 15
     expect(
       decideClaim(
         [
-          { status: "error", attempt: 1, startedAt: ago(3) },
-          { status: "error", attempt: 2, startedAt: ago(2) },
+          { status: "error", attempt: 1, startedAt: ago(30) },
+          { status: "error", attempt: 2, startedAt: ago(10) },
+        ],
+        now,
+      ),
+    ).toBeNull();
+    expect(
+      decideClaim(
+        [
+          { status: "error", attempt: 1, startedAt: ago(30) },
+          { status: "error", attempt: 2, startedAt: ago(15) },
         ],
         now,
       ),
@@ -25,13 +37,15 @@ describe("decisão de tentativa", () => {
     expect(
       decideClaim(
         [
-          { status: "error", attempt: 1, startedAt: ago(3) },
-          { status: "error", attempt: 2, startedAt: ago(2) },
-          { status: "error", attempt: 3, startedAt: ago(1) },
+          { status: "error", attempt: 1, startedAt: ago(60) },
+          { status: "error", attempt: 2, startedAt: ago(40) },
+          { status: "error", attempt: 3, startedAt: ago(20) },
         ],
         now,
       ),
     ).toBeNull();
+    // sem backoff (opção) mantém o comportamento antigo
+    expect(decideClaim([{ status: "error", attempt: 1, startedAt: ago(1) }], now, { backoffMinutes: [0, 0] })).toEqual({ attempt: 2 });
   });
   it("em execução recente: espera; presa há mais de 15 min: tenta de novo", () => {
     expect(decideClaim([{ status: "running", attempt: 1, startedAt: ago(5) }], now)).toBeNull();

@@ -5,6 +5,9 @@ import { sql } from "drizzle-orm";
 export const jobSetting = pgTable("job_setting", {
   job: text().primaryKey(),
   enabled: boolean().default(true).notNull(),
+  // Fase 21: horário sobrescrito (Brasília); nulos = padrão do código
+  hour: integer(),
+  minute: integer(),
   updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
   updatedBy: uuid(),
 });

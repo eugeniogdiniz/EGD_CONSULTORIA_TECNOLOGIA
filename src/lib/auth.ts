@@ -40,8 +40,9 @@ export const auth = betterAuth({
     window: 60,
     max: 100,
     customRules: {
-      // login: 60 por IP a cada 15 min (o limite de 5 por e-mail, no hook, é a defesa contra força bruta)
-      "/sign-in/email": { window: 15 * 60, max: 60 },
+      // login: 60 por IP a cada 15 min (o limite de 5 por e-mail, no hook, é a defesa contra força bruta).
+      // A suíte E2E inteira entra pelo mesmo IP: fora de produção o limite é folgado; o CI (produção) define LOGIN_IP_LIMIT.
+      "/sign-in/email": { window: 15 * 60, max: env.LOGIN_IP_LIMIT ?? (env.NODE_ENV === "production" ? 60 : 1000) },
       "/get-session": false,
     },
   },
@@ -82,7 +83,7 @@ export const auth = betterAuth({
           // depois do segundo fator, então nada é registrado nem zerado nesta etapa.
           if (u?.twoFactorEnabled && !viaSecondFactor) return;
           // login completo zera o contador de tentativas do e-mail (só falhas consecutivas contam)
-          if (u) loginByEmail.reset(u.email);
+          if (u) await loginByEmail.reset(u.email);
           await audit({
             actorId: session.userId,
             action: "auth.login",

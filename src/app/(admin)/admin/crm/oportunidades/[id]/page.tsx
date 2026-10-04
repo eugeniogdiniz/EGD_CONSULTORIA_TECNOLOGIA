@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import {
   getOpportunity,
   listContactsByCompany,
@@ -55,7 +55,7 @@ const STATUS_LABEL: Record<string, string> = {
 export default async function OportunidadeDetalhePage({
   params,
 }: PageProps<"/admin/crm/oportunidades/[id]">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const { id } = await params;
   const row = await getOpportunity(ctx, id);
   if (!row) notFound();

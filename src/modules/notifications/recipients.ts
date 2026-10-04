@@ -3,19 +3,31 @@
  * organização ativa, resolvidos pela cadeia item → projeto/ata → empresa →
  * organização vinculada (o mesmo escopo do portal).
  */
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { crmCompany, meeting, memberships, organizations, project, projectDeliverable, users } from "@/db/schema";
 import type { Recipient } from "./kinds";
 
 const person = { id: users.id, email: users.email, name: users.name };
 
-export function activeAdmins(): Promise<Recipient[]> {
+/** Equipe inteira (dono e colaboradores): avisos operacionais. */
+export function activeTeam(): Promise<Recipient[]> {
+  return db
+    .select(person)
+    .from(users)
+    .where(and(inArray(users.role, ["admin", "collaborator"]), eq(users.active, true)));
+}
+
+/** Só o dono: leads, propostas e o que é comercial. */
+export function activeOwners(): Promise<Recipient[]> {
   return db
     .select(person)
     .from(users)
     .where(and(eq(users.role, "admin"), eq(users.active, true)));
 }
+
+/** @deprecated nome da Fase 14; equivale a `activeOwners()`. */
+export const activeAdmins = activeOwners;
 
 export function organizationMembers(organizationId: string): Promise<Recipient[]> {
   return db

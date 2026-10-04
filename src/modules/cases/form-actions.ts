@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath, updateTag } from "next/cache";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import type { ActionResult } from "@/lib/action-result";
 import { createCase, deleteCase, setCasePublished, updateCase } from "./actions";
 import { SITE_CASES_TAG } from "./site";
@@ -36,7 +36,7 @@ function input(fd: FormData) {
 }
 
 export async function createCaseForm(_p: CreateState, fd: FormData): Promise<CreateState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const r = await createCase(ctx, input(fd));
   if (r.ok) {
     revalidatePublic();
@@ -46,7 +46,7 @@ export async function createCaseForm(_p: CreateState, fd: FormData): Promise<Cre
 }
 
 export async function updateCaseForm(_p: NullState, fd: FormData): Promise<NullState> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const r = await updateCase(ctx, id, input(fd));
   if (r.ok) {
@@ -57,13 +57,13 @@ export async function updateCaseForm(_p: NullState, fd: FormData): Promise<NullS
 }
 
 export async function toggleCasePublishedForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   await setCasePublished(ctx, String(fd.get("id") ?? ""), fd.get("published") === "1");
   revalidatePublic();
 }
 
 export async function deleteCaseForm(fd: FormData): Promise<void> {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   await deleteCase(ctx, String(fd.get("id") ?? ""));
   revalidatePublic();
   redirect("/admin/cases");

@@ -9,6 +9,7 @@ import { crmCompany, crmOpportunity, crmProposal, organizations, portalRequest, 
 import { compareBacklog, isOverdue, type Priority } from "@/modules/projects/priority";
 import { addDays, dateInSaoPaulo, daysBetween, formatBrShort } from "@/modules/reports/dates";
 import { isoWeekday } from "../schedule";
+import { listPendingInvoices } from "@/modules/projects/queries";
 
 export type DailyDeliverable = {
   id: string;
@@ -31,6 +32,9 @@ export type DailyRequest = {
   lastAuthor: "team" | "client" | null;
   /** quando a solicitação passou a esperar (última mensagem ou criação) */
   waitingSince: Date;
+  /** SLA de primeira resposta (Fase 15); ausente nas solicitações antigas */
+  firstResponseDueAt?: Date | null;
+  firstResponseAt?: Date | null;
 };
 export type DailyProposal = {
   id: string;
@@ -41,11 +45,14 @@ export type DailyProposal = {
   validUntil: string | null;
   decidedAt: Date | null;
 };
+export type DailyInvoice = { id: string; projectId: string; projectTitle: string; number: number; description: string; amountCents: number; dueAt: string };
 export type DailyDigestInput = {
   deliverables: DailyDeliverable[];
   milestones: DailyMilestone[];
   requests: DailyRequest[];
   proposals: DailyProposal[];
+  /** parcelas pendentes (Fase 18); opcional para os testes antigos */
+  invoices?: DailyInvoice[];
 };
 
 export type DigestLine = { projectTitle: string; title: string; priority: Priority | null; assigneeName: string | null; dueAt: string; daysLate: number; kind: "deliverable" | "milestone" };
@@ -99,7 +106,13 @@ export function buildDailyDigest(input: DailyDigestInput, today: string) {
 
   const requests = input.requests
     .filter((r) => r.status !== "resolved" && r.lastAuthor !== "team")
-    .map((r) => ({ id: r.id, title: r.title, organizationName: r.organizationName, businessDays: businessDaysBetween(dateInSaoPaulo(r.waitingSince), today) }))
+    .map((r) => ({
+      id: r.id,
+      title: r.title,
+      organizationName: r.organizationName,
+      businessDays: businessDaysBetween(dateInSaoPaulo(r.waitingSince), today),
+      slaBreached: Boolean(r.firstResponseDueAt && !r.firstResponseAt && dateInSaoPaulo(r.firstResponseDueAt) <= today && r.firstResponseDueAt.getTime() < new Date(`${today}T23:59:59-03:00`).getTime()),
+    }))
     .sort((a, b) => b.businessDays - a.businessDays || a.title.localeCompare(b.title, "pt-BR"));
 
   const expiring = input.proposals
@@ -114,6 +127,10 @@ export function buildDailyDigest(input: DailyDigestInput, today: string) {
 
   const urgentCount = open.filter((d) => d.priority === "urgent").length;
 
+  const pendingInvoices = input.invoices ?? [];
+  const overdueInvoices = pendingInvoices.filter((i) => i.dueAt < today).map((i) => ({ ...i, daysLate: daysBetween(i.dueAt, today) })).sort((a, b) => a.dueAt.localeCompare(b.dueAt));
+  const dueInvoices = pendingInvoices.filter((i) => i.dueAt >= today && i.dueAt <= horizon).sort((a, b) => a.dueAt.localeCompare(b.dueAt));
+
   const sections = {
     late: section([...late, ...lateMilestones.map((m) => ({ ...m, daysLate: daysBetween(m.dueAt, today) }))]),
     dueToday: section([...dueToday, ...todayMilestones]),
@@ -121,6 +138,8 @@ export function buildDailyDigest(input: DailyDigestInput, today: string) {
     requests: section(requests),
     expiring: section(expiring),
     expired: section(expired),
+    overdueInvoices: section(overdueInvoices),
+    dueInvoices: section(dueInvoices),
   };
   const isEmpty = Object.values(sections).every((s) => s.total === 0) && urgentCount === 0;
   const parts = [
@@ -139,7 +158,7 @@ const ACTIVE = ["planning", "active", "on_hold"] as const;
 export async function loadDailyDigestInput(today: string): Promise<DailyDigestInput> {
   const horizon = addDays(today, 7);
   const since = addDays(today, -7);
-  const [deliverables, milestones, requests, proposals] = await Promise.all([
+  const [deliverables, milestones, requests, proposals, invoices] = await Promise.all([
     db
       .select({
         id: projectDeliverable.id,
@@ -168,9 +187,11 @@ export async function loadDailyDigestInput(today: string): Promise<DailyDigestIn
         title: portalRequest.title,
         organizationName: organizations.name,
         status: portalRequest.status,
-        lastAuthorRole: sql<string | null>`(select u.role::text from portal_request_message m join users u on u.id = m.author_id where m.request_id = portal_request.id order by m.created_at desc limit 1)`,
-        lastMessageAt: sql<Date | null>`(select m.created_at from portal_request_message m where m.request_id = portal_request.id order by m.created_at desc limit 1)`,
+        lastAuthorRole: sql<string | null>`(select u.role::text from portal_request_message m join users u on u.id = m.author_id where m.request_id = portal_request.id and m.internal = false order by m.created_at desc limit 1)`,
+        lastMessageAt: sql<Date | null>`(select m.created_at from portal_request_message m where m.request_id = portal_request.id and m.internal = false order by m.created_at desc limit 1)`,
         createdAt: portalRequest.createdAt,
+        firstResponseDueAt: portalRequest.firstResponseDueAt,
+        firstResponseAt: portalRequest.firstResponseAt,
       })
       .from(portalRequest)
       .innerJoin(organizations, eq(portalRequest.organizationId, organizations.id))
@@ -189,6 +210,7 @@ export async function loadDailyDigestInput(today: string): Promise<DailyDigestIn
       .innerJoin(crmOpportunity, eq(crmProposal.opportunityId, crmOpportunity.id))
       .innerJoin(crmCompany, eq(crmOpportunity.companyId, crmCompany.id))
       .where(or(eq(crmProposal.status, "sent"), and(eq(crmProposal.status, "expired"), gte(crmProposal.decidedAt, new Date(`${since}T00:00:00-03:00`))))),
+    listPendingInvoices(),
   ]);
   return {
     deliverables,
@@ -198,9 +220,12 @@ export async function loadDailyDigestInput(today: string): Promise<DailyDigestIn
       title: r.title,
       organizationName: r.organizationName,
       status: r.status,
-      lastAuthor: r.lastAuthorRole === "admin" ? "team" : r.lastAuthorRole === "client" ? "client" : null,
+      lastAuthor: r.lastAuthorRole === null ? null : r.lastAuthorRole === "client" ? "client" : "team",
       waitingSince: r.lastMessageAt ? new Date(r.lastMessageAt) : r.createdAt,
+      firstResponseDueAt: r.firstResponseDueAt,
+      firstResponseAt: r.firstResponseAt,
     })),
     proposals,
+    invoices: invoices.map((i) => ({ id: i.id, projectId: i.projectId, projectTitle: i.projectTitle, number: i.number, description: i.description, amountCents: i.amountCents, dueAt: i.dueAt })),
   };
 }

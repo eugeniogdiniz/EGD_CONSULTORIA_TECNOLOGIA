@@ -173,3 +173,70 @@ export function renderMeetingSharedNotification(p: { meetingTitle: string; heldA
   );
   return { subject, text, html };
 }
+
+// ── Fase 15: solicitações ────────────────────────────────────────────────────
+
+/** Lembrete ao cliente: a equipe respondeu e aguarda retorno. */
+export function renderRequestReminder(p: { title: string; organizationName: string; idleBusinessDays: number; url: string }): MailContent {
+  const subject = `Aguardamos seu retorno: ${p.title}`;
+  const intro = `A solicitação "${p.title}" (${p.organizationName}) foi respondida pela equipe da EGD e aguarda seu retorno há ${p.idleBusinessDays} dias úteis.`;
+  const hint = "Se já estiver resolvida, marque como resolvida no portal; se precisar de mais alguma coisa, responda por lá.";
+  const text = [intro, "", hint, "", `Abrir: ${p.url}`].join("\n");
+  const html = layout(
+    subject,
+    `<p>${esc(intro)}</p>
+  <p>${esc(hint)}</p>
+  <p><a href="${esc(p.url)}">Abrir a solicitação</a></p>`,
+  );
+  return { subject, text, html };
+}
+
+/** Aviso ao admin que virou responsável por uma solicitação. */
+export function renderRequestAssigned(p: { title: string; organizationName: string; actorName: string; url: string }): MailContent {
+  const subject = `Solicitação atribuída a você: ${p.title}`;
+  const intro = `${p.actorName} definiu você como responsável pela solicitação "${p.title}" (${p.organizationName}).`;
+  const text = [intro, "", `Abrir: ${p.url}`].join("\n");
+  const html = layout(subject, `<p>${esc(intro)}</p>\n  <p><a href="${esc(p.url)}">Abrir a solicitação</a></p>`);
+  return { subject, text, html };
+}
+
+// ── Fase 16: proposta comercial ──────────────────────────────────────────────
+
+/** E-mail da proposta ao contato. `message` é o texto escrito pela equipe (texto puro). */
+export function renderProposalEmail(p: { contactName: string; number: string; title: string; validUntil: string | null; message: string; senderName: string }): MailContent {
+  const subject = `Proposta ${p.number} · ${p.title}`;
+  const validity = p.validUntil ? `A proposta é válida até ${p.validUntil}.` : "";
+  const text = [`Olá, ${p.contactName}.`, "", p.message, "", validity, "", `${p.senderName}`, "EGD Consultoria & Tecnologia"].filter((l, i, a) => !(l === "" && a[i - 1] === "")).join("\n");
+  const html = layout(
+    subject,
+    `<p>Olá, ${esc(p.contactName)}.</p>
+  <pre style="white-space:pre-wrap;font-family:inherit">${esc(p.message)}</pre>
+  ${validity ? `<p>${esc(validity)}</p>` : ""}
+  <p>O documento segue em anexo (PDF).</p>
+  <p>${esc(p.senderName)}<br>EGD Consultoria &amp; Tecnologia</p>`,
+  );
+  return { subject, text, html };
+}
+
+// ── Fase 17: equipe ──────────────────────────────────────────────────────────
+
+export function renderTeamInvitation(p: { role: "admin" | "collaborator"; acceptUrl: string; invitedBy: string }): MailContent {
+  const roleLabel = p.role === "admin" ? "administrador" : "colaborador";
+  const subject = `Acesso ao sistema da EGD como ${roleLabel}`;
+  const text = [`${p.invitedBy} convidou você para a equipe da EGD como ${roleLabel}.`, "", `Crie sua senha em: ${p.acceptUrl}`, "", "O link vale por 7 dias."].join("\n");
+  const html = layout(
+    subject,
+    `<p><strong>${esc(p.invitedBy)}</strong> convidou você para a equipe da EGD como <strong>${esc(roleLabel)}</strong>.</p>
+  <p><a href="${esc(p.acceptUrl)}">Criar minha senha</a></p>
+  <p>O link vale por 7 dias.</p>`,
+  );
+  return { subject, text, html };
+}
+
+export function renderDeliverableAssigned(p: { actorName: string; deliverableTitle: string; projectTitle: string; dueAt: string | null; url: string }): MailContent {
+  const subject = `Entrega atribuída a você: ${p.deliverableTitle}`;
+  const intro = `${p.actorName} atribuiu a você a entrega "${p.deliverableTitle}" do projeto "${p.projectTitle}"${p.dueAt ? `, com prazo em ${p.dueAt}` : ""}.`;
+  const text = [intro, "", `Abrir: ${p.url}`].join("\n");
+  const html = layout(subject, `<p>${esc(intro)}</p>\n  <p><a href="${esc(p.url)}">Abrir a entrega</a></p>`);
+  return { subject, text, html };
+}

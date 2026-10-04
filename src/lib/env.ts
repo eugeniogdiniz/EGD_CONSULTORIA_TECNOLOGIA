@@ -21,6 +21,10 @@ const schema = z.object({
   S3_SECRET_KEY: z.string().min(1),
   /** Agendador das automações: "1" liga, "0" desliga. Sem valor: ligado só em produção. */
   JOBS_ENABLED: z.enum(["0", "1"]).optional(),
+  /** Logins por IP a cada 15 min no Better Auth (padrão 60). O CI sobe para a suíte E2E inteira, que entra pelo mesmo IP. */
+  LOGIN_IP_LIMIT: z.coerce.number().int().positive().optional(),
+  /** "1" no servidor da suíte E2E (CI roda em modo produção): libera rotas e regras só de teste. */
+  E2E: z.enum(["0", "1"]).optional(),
   SEED_ADMIN_EMAIL: z.email().optional(),
   SEED_ADMIN_PASSWORD: z.string().min(10).optional(),
 });

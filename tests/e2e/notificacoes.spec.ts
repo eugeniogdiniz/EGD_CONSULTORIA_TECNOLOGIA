@@ -50,7 +50,9 @@ test("solicitação vira notificação para o admin; resposta vira notificação
   await admin.goto(`/admin/solicitacoes/${requestId}`);
   await admin.getByPlaceholder(/responder ao cliente/i).fill("Segue o relatório em anexo na entrega.");
   await admin.getByRole("button", { name: /^responder$/i }).click();
-  await expect(admin.getByText("Segue o relatório em anexo na entrega.")).toBeVisible({ timeout: 10_000 });
+  // o formulário só limpa quando a action terminou (mensagem gravada e notificação criada)
+  await expect(admin.getByPlaceholder(/responder ao cliente/i)).toHaveValue("", { timeout: 10_000 });
+  await expect(admin.getByRole("listitem").filter({ hasText: "Segue o relatório em anexo na entrega." })).toBeVisible({ timeout: 10_000 });
 
   await client.goto("/portal");
   await expect(client.getByTestId("sino-contador")).toBeVisible();

@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { createOrganizationForm } from "@/modules/tenancy/form-actions";
 import { OrganizationForm } from "@/modules/tenancy/components/organization-form";
 import { PageHeader, Block } from "@/components/shell/page-header";
@@ -6,7 +6,7 @@ import { PageHeader, Block } from "@/components/shell/page-header";
 export const metadata = { title: "Nova organização" };
 
 export default async function NovaOrganizacaoPage() {
-  await requireAdmin();
+  await requireOwner();
   return (
     <>
       <PageHeader title="Nova organização" />

@@ -14,7 +14,12 @@ export const apiKey = pgTable(
       .notNull()
       .references(() => users.id),
     lastUsedAt: timestamp({ withTimezone: true }),
+    /** Fase 21: validade; nulo = sem expiração (chaves antigas) */
+    expiresAt: timestamp({ withTimezone: true }),
+    /** revogação pode ser agendada (rotação mantém a antiga por 7 dias) */
     revokedAt: timestamp({ withTimezone: true }),
+    /** chave que substituiu esta numa rotação */
+    rotatedToId: uuid(),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [index("api_key_created_idx").on(t.createdAt)],

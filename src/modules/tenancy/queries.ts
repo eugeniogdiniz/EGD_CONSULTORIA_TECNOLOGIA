@@ -41,9 +41,11 @@ export async function getInvitationByToken(raw: string) {
       email: invitations.email,
       organizationId: invitations.organizationId,
       organizationName: organizations.name,
+      /** convite da equipe da EGD (Fase 17): sem organização, com papel */
+      role: invitations.role,
     })
     .from(invitations)
-    .innerJoin(organizations, eq(invitations.organizationId, organizations.id))
+    .leftJoin(organizations, eq(invitations.organizationId, organizations.id))
     .where(
       and(
         eq(invitations.tokenHash, hashToken(raw)),

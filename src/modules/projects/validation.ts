@@ -90,6 +90,13 @@ export const deliverableSchema = z.object({
   assigneeId: optionalUuid,
   dueAt: isoDateOptional,
   priority: z.enum(PRIORITIES).default("medium"),
+  /** horas decimais digitadas ("1,5"); vazio = sem estimativa */
+  estimateHours: z
+    .string()
+    .optional()
+    .transform((v) => (v ?? "").trim().replace(",", "."))
+    .refine((v) => v === "" || (Number.isFinite(Number(v)) && Number(v) >= 0 && Number(v) <= 10000), "Estimativa inválida")
+    .transform((v) => (v === "" ? null : Math.round(Number(v) * 60))),
 });
 export type DeliverableInput = z.input<typeof deliverableSchema>;
 
@@ -198,3 +205,27 @@ export const updateAccountRateSchema = z.object({
     .transform((v) => (v === undefined ? null : v)),
 });
 export type UpdateAccountRateInput = z.input<typeof updateAccountRateSchema>;
+
+export const invoiceSchema = z.object({
+  projectId: z.uuid(),
+  description: z.string().trim().min(2, "Mínimo 2 caracteres").max(200, "Máximo 200 caracteres"),
+  amountCents: z.coerce.number().int("Somente valor inteiro em centavos.").min(0, "Valor não pode ser negativo."),
+  dueAt: isoDateRequired,
+  notes: optionalText(2000),
+});
+export type InvoiceInput = z.input<typeof invoiceSchema>;
+
+export const markPaidSchema = z.object({ paidAt: isoDateRequired });
+
+export const projectRateSchema = z.object({
+  projectId: z.uuid(),
+  userId: z.uuid(),
+  /** vazio remove o rate do projeto (volta ao da pessoa) */
+  hourlyRateCents: z
+    .string()
+    .optional()
+    .transform((v) => (v ?? "").trim())
+    .refine((v) => v === "" || /^\d+$/.test(v), "Informe o valor em centavos")
+    .transform((v) => (v === "" ? null : Number(v))),
+});
+export type ProjectRateInput = z.input<typeof projectRateSchema>;

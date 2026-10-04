@@ -28,6 +28,7 @@ type Deliverable = {
   assigneeId: string | null;
   dueAt: string | null;
   priority: "urgent" | "high" | "medium" | "low";
+  estimateMinutes?: number | null;
 };
 
 const STATUSES = [
@@ -129,6 +130,11 @@ function Fields({
           <Label htmlFor="d-due">Prazo <span className="font-normal text-faint">opcional</span></Label>
           <Input id="d-due" name="dueAt" type="date" defaultValue={deliverable?.dueAt ?? ""} />
         </div>
+      </div>
+      <div className="grid gap-1.5 sm:max-w-[50%]">
+        <Label htmlFor="d-estimate">Estimativa (h) <span className="font-normal text-faint">opcional</span></Label>
+        <Input id="d-estimate" name="estimateHours" inputMode="decimal" placeholder="ex.: 4 ou 1,5" defaultValue={deliverable?.estimateMinutes != null ? String(deliverable.estimateMinutes / 60).replace(".", ",") : ""} aria-invalid={fe?.estimateHours ? true : undefined} />
+        <FieldError errors={fe?.estimateHours} />
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="d-desc">Descrição <span className="font-normal text-faint">opcional</span></Label>

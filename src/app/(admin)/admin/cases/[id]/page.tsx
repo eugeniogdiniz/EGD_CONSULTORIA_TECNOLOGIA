@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { getCase } from "@/modules/cases/queries";
 import { deleteCaseForm, updateCaseForm } from "@/modules/cases/form-actions";
 import { CaseForm } from "@/modules/cases/components/case-form";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 export const metadata = { title: "Case" };
 
 export default async function CaseDetalhePage({ params }: PageProps<"/admin/cases/[id]">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const { id } = await params;
   const c = await getCase(ctx, id);
   if (!c) notFound();

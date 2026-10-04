@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listAudit } from "@/modules/audit/queries";
 import { PageHeader, EmptyState } from "@/components/shell/page-header";
 import { formatDateTime } from "@/lib/format";
@@ -6,7 +6,7 @@ import { formatDateTime } from "@/lib/format";
 export const metadata = { title: "Auditoria" };
 
 export default async function AuditoriaPage() {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const rows = await listAudit(ctx, { limit: 200 });
   return (
     <>

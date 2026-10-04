@@ -6,15 +6,26 @@ import {
   crmInteraction,
   crmOpportunity,
   crmProposal,
+  files,
   leads,
   organizations,
+  crmService,
 } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import { slugify } from "@/modules/tenancy/slug";
-import { uploadFile } from "@/modules/files/actions";
+import { storeFile, uploadFile } from "@/modules/files/actions";
+import { getObject } from "@/lib/storage";
+import { sendProposalEmail } from "@/modules/mail/send";
+import { formatIsoDate } from "@/lib/format";
+import { parseStoredDocument, proposalDocumentSchema } from "./document";
+import { serviceSchema, type ServiceInput } from "./validation";
+import { renderProposalPdf } from "./proposal-pdf";
+import { BRAND } from "./brand";
+import { enqueueWebhook } from "@/modules/webhooks/queue";
+import { z } from "zod";
 import { nextProposalNumber } from "./proposal-number";
 import {
   changeProposalStatusSchema,
@@ -1016,5 +1027,175 @@ export async function changeProposalStatus(
     entityId: id,
     metadata: { from: existing.status, to },
   });
+  if (to === "sent" || to === "accepted") {
+    await enqueueWebhook(to === "sent" ? "proposal.sent" : "proposal.accepted", { id, number: existing.number, title: existing.title, valueCents: existing.valueCents, opportunityId: existing.opportunityId, validUntil: patch.validUntil });
+  }
+  return ok(null);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Documento da proposta: conteúdo, PDF e envio por e-mail (Fase 16)
+// ────────────────────────────────────────────────────────────────────────────
+
+/** Só em rascunho: o conteúdo enviado ao cliente não muda por baixo do PDF. */
+export async function updateProposalDocument(ctx: AdminContext, id: string, input: unknown): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Proposta não encontrada.");
+  const existing = await db.query.crmProposal.findFirst({ where: eq(crmProposal.id, id), columns: { id: true, status: true } });
+  if (!existing) return fail("Proposta não encontrada.");
+  if (existing.status !== "draft") return fail("O documento só pode ser editado enquanto a proposta é rascunho.");
+  const parsed = proposalDocumentSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  await db.update(crmProposal).set({ document: parsed.data }).where(eq(crmProposal.id, id));
+  await audit({ actorId: ctx.user.id, action: "crm.proposal.document_updated", entityType: "crm_proposal", entityId: id });
+  return ok(null);
+}
+
+async function loadProposalForDocument(id: string) {
+  if (!isUuid(id)) return null;
+  const [row] = await db
+    .select({ proposal: crmProposal, opportunity: crmOpportunity, company: crmCompany })
+    .from(crmProposal)
+    .innerJoin(crmOpportunity, eq(crmProposal.opportunityId, crmOpportunity.id))
+    .innerJoin(crmCompany, eq(crmOpportunity.companyId, crmCompany.id))
+    .where(eq(crmProposal.id, id))
+    .limit(1);
+  return row ?? null;
+}
+
+/** Monta a entrada do renderizador a partir da proposta gravada. `contactId` sobrescreve o contato gravado. */
+export async function buildProposalPdfInput(id: string, opts: { version?: number; contactId?: string | null; signerName: string; now?: Date } ) {
+  const row = await loadProposalForDocument(id);
+  if (!row) return null;
+  const contactId = opts.contactId === undefined ? row.proposal.contactId : opts.contactId;
+  const contact = contactId
+    ? await db.query.crmContact.findFirst({ where: and(eq(crmContact.id, contactId), eq(crmContact.companyId, row.company.id)), columns: { name: true, title: true, email: true } })
+    : null;
+  return {
+    row,
+    input: {
+      number: row.proposal.number,
+      version: opts.version ?? Math.max(1, row.proposal.documentVersion),
+      title: row.proposal.title,
+      valueCents: row.proposal.valueCents,
+      issuedOn: formatIsoDate(opts.now ?? new Date()),
+      validUntil: row.proposal.validUntil ? formatIsoDate(row.proposal.validUntil) : null,
+      companyName: row.company.name,
+      contactName: contact?.name ?? null,
+      contactRole: contact?.title ?? null,
+      document: parseStoredDocument(row.proposal.document),
+      signer: { name: opts.signerName, role: BRAND.signerRole },
+      brand: { email: BRAND.email, phone: BRAND.phone, site: BRAND.site },
+    },
+  };
+}
+
+/** Gera o PDF da versão seguinte, grava em `files` (interno) e passa a ser o anexo da proposta. */
+export async function generateProposalPdf(ctx: AdminContext, id: string, now = new Date()): Promise<ActionResult<{ fileId: string; version: number }>> {
+  const built = await buildProposalPdfInput(id, { signerName: ctx.user.name, now, version: undefined });
+  if (!built) return fail("Proposta não encontrada.");
+  const { row } = built;
+  if (row.proposal.status !== "draft" && row.proposal.status !== "sent")
+    return fail("Proposta decidida: o documento não pode ser gerado de novo.");
+  const version = row.proposal.documentVersion + 1;
+  const pdf = await renderProposalPdf({ ...built.input, version });
+  const filename = `${row.proposal.number}-v${version}.pdf`;
+  const stored = await storeFile(ctx, new File([new Uint8Array(pdf)], filename, { type: "application/pdf" }), null);
+  if (!stored.ok) return stored;
+  await db.update(crmProposal).set({ fileId: stored.data.id, documentVersion: version }).where(eq(crmProposal.id, id));
+  await audit({ actorId: ctx.user.id, action: "crm.proposal.pdf_generated", entityType: "crm_proposal", entityId: id, metadata: { version, fileId: stored.data.id, bytes: pdf.length } });
+  return ok({ fileId: stored.data.id, version });
+}
+
+export const sendProposalSchema = z.object({
+  contactId: z.uuid("Escolha o contato."),
+  message: z.string().trim().min(5, "Escreva uma mensagem.").max(4000, "Máximo 4000 caracteres"),
+});
+export type SendProposalInput = z.input<typeof sendProposalSchema>;
+
+/**
+ * Envia o PDF anexado ao contato da empresa. Em rascunho, a proposta passa a
+ * Enviada (mesma regra de `changeProposalStatus`); registra a interação de
+ * e-mail na linha do tempo e guarda contato e data do envio.
+ */
+export async function sendProposalByEmail(ctx: AdminContext, id: string, input: SendProposalInput, now = new Date()): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Proposta não encontrada.");
+  const parsed = sendProposalSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const row = await loadProposalForDocument(id);
+  if (!row) return fail("Proposta não encontrada.");
+  if (row.proposal.status !== "draft" && row.proposal.status !== "sent") return fail("Proposta decidida: não pode ser reenviada.");
+  if (!row.proposal.fileId) return fail("Gere o PDF (ou anexe o arquivo) antes de enviar.", { contactId: ["Sem PDF"] });
+  const file = await db.query.files.findFirst({ where: eq(files.id, row.proposal.fileId) });
+  if (!file) return fail("O arquivo da proposta não foi encontrado.");
+  const contact = await db.query.crmContact.findFirst({
+    where: and(eq(crmContact.id, parsed.data.contactId), eq(crmContact.companyId, row.company.id), isNull(crmContact.archivedAt)),
+    columns: { id: true, name: true, email: true },
+  });
+  if (!contact) return fail("Contato não encontrado nesta empresa.", { contactId: ["Escolha um contato da empresa."] });
+  if (!contact.email) return fail("Este contato não tem e-mail.", { contactId: ["Contato sem e-mail."] });
+
+  const pdf = await getObject(file.bucketKey);
+  const sent = await sendProposalEmail({
+    to: contact.email,
+    contactName: contact.name,
+    number: row.proposal.number,
+    title: row.proposal.title,
+    validUntil: row.proposal.validUntil ? formatIsoDate(row.proposal.validUntil) : null,
+    message: parsed.data.message,
+    senderName: ctx.user.name,
+    pdf: { filename: file.originalName, content: pdf, contentType: "application/pdf" },
+  });
+  if (!sent) return fail("Não foi possível enviar o e-mail agora. Tente de novo em instantes.");
+
+  if (row.proposal.status === "draft") {
+    const r = await changeProposalStatus(ctx, id, { to: "sent" });
+    if (!r.ok) return r;
+  }
+  await db.update(crmProposal).set({ emailedAt: now, contactId: contact.id }).where(eq(crmProposal.id, id));
+  const [interaction] = await db
+    .insert(crmInteraction)
+    .values({
+      type: "email",
+      at: now,
+      byUserId: ctx.user.id,
+      summary: `Proposta ${row.proposal.number} enviada por e-mail para ${contact.name}`,
+      body: parsed.data.message,
+      companyId: row.company.id,
+      contactId: contact.id,
+      opportunityId: row.opportunity.id,
+    })
+    .returning({ id: crmInteraction.id });
+  await audit({ actorId: ctx.user.id, action: "crm.interaction.created", entityType: "crm_interaction", entityId: interaction.id, metadata: { type: "email", companyId: row.company.id, contactId: contact.id, opportunityId: row.opportunity.id, proposalId: id } });
+  await audit({ actorId: ctx.user.id, action: "crm.proposal.emailed", entityType: "crm_proposal", entityId: id, metadata: { contactId: contact.id, version: row.proposal.documentVersion, fileId: file.id } });
+  return ok(null);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Catálogo de serviços (Fase 19)
+// ────────────────────────────────────────────────────────────────────────────
+
+export async function createService(ctx: AdminContext, input: ServiceInput): Promise<ActionResult<{ id: string }>> {
+  const parsed = serviceSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const [row] = await db.insert(crmService).values(parsed.data).returning({ id: crmService.id });
+  await audit({ actorId: ctx.user.id, action: "crm.service.created", entityType: "crm_service", entityId: row.id, metadata: { name: parsed.data.name, defaultPriceCents: parsed.data.defaultPriceCents } });
+  return ok({ id: row.id });
+}
+
+export async function updateService(ctx: AdminContext, id: string, input: ServiceInput): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Serviço não encontrado.");
+  const parsed = serviceSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const [row] = await db.update(crmService).set(parsed.data).where(eq(crmService.id, id)).returning({ id: crmService.id });
+  if (!row) return fail("Serviço não encontrado.");
+  await audit({ actorId: ctx.user.id, action: "crm.service.updated", entityType: "crm_service", entityId: id, metadata: { name: parsed.data.name, defaultPriceCents: parsed.data.defaultPriceCents } });
+  return ok(null);
+}
+
+export async function setServiceActive(ctx: AdminContext, id: string, active: boolean): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Serviço não encontrado.");
+  const [row] = await db.update(crmService).set({ active }).where(eq(crmService.id, id)).returning({ id: crmService.id });
+  if (!row) return fail("Serviço não encontrado.");
+  await audit({ actorId: ctx.user.id, action: active ? "crm.service.unarchived" : "crm.service.archived", entityType: "crm_service", entityId: id });
   return ok(null);
 }

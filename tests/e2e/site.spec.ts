@@ -19,7 +19,8 @@ test("formulário de contato valida e envia", async ({ page }) => {
   // limite da spec: 3 envios por IP por hora. Em CI o servidor é novo; localmente reexecuções na mesma hora pulam.
   const sucesso = page.getByText(/mensagem recebida/i);
   const limite = page.getByText(/várias mensagens deste endereço/i);
-  await expect(sucesso.or(limite)).toBeVisible();
+  // a action manda e-mail à equipe e notifica cada admin: em dev pode passar de 5 s
+  await expect(sucesso.or(limite)).toBeVisible({ timeout: 15_000 });
   test.skip(await limite.isVisible(), "limite de 3 envios por hora atingido nesta máquina");
   await expect(sucesso).toBeVisible();
 });

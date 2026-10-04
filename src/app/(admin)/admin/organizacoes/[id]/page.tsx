@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { listCompaniesByOrganization } from "@/modules/crm/queries";
 import { getOrganization, listOrganizationMembers, listPendingInvitations } from "@/modules/tenancy/queries";
 import { updateOrganizationForm, toggleOrganizationStatusForm, resendInvitationForm, setUserActiveForm } from "@/modules/tenancy/form-actions";
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { formatDate, daysUntil } from "@/lib/format";
 
 export default async function OrganizacaoPage({ params }: PageProps<"/admin/organizacoes/[id]">) {
-  const ctx = await requireAdmin();
+  const ctx = await requireOwner();
   const { id } = await params;
   const org = await getOrganization(ctx, id);
   if (!org) notFound();

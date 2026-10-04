@@ -144,6 +144,8 @@ export const projectDeliverable = pgTable(
     position: integer().default(0).notNull(),
     assigneeId: uuid().references(() => users.id, { onDelete: "set null" }),
     dueAt: date(),
+    // Fase 18: estimativa em minutos (opcional); alimenta "estimado × apontado" e o burndown
+    estimateMinutes: integer(),
     completedAt: timestamp({ withTimezone: true }),
     fileId: uuid().references(() => files.id, { onDelete: "set null" }),
     // reservado para a Fase 4 (portal do cliente); não usado na Fase 3

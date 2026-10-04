@@ -6,10 +6,11 @@ import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { leads } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
-import { createRateLimiter } from "@/lib/rate-limit";
+import { createPgRateLimiter } from "@/lib/rate-limit";
 import { audit } from "@/modules/audit/log";
 import { sendLeadNotification } from "@/modules/mail/send";
 import { notifyLeadCreated } from "@/modules/notifications/events";
+import { enqueueWebhook } from "@/modules/webhooks/queue";
 import { leadSchema } from "./validation";
 
 /*
@@ -20,7 +21,7 @@ import { leadSchema } from "./validation";
 
 export type ContactState = ActionResult<null> | null;
 
-const contactLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 3 });
+const contactLimiter = createPgRateLimiter(db, { scope: "contato", windowMs: 60 * 60_000, max: 3 });
 
 async function clientIpHash(): Promise<string> {
   const h = await headers();
@@ -43,7 +44,7 @@ export async function submitContact(_prev: ContactState, formData: FormData): Pr
   if (!parsed.success) return fromZod(parsed.error);
 
   const ipHash = await clientIpHash();
-  if (!contactLimiter.hit(ipHash).allowed) {
+  if (!(await contactLimiter.hit(ipHash)).allowed) {
     return fail("Recebemos várias mensagens deste endereço. Tente novamente em uma hora.");
   }
 
@@ -65,5 +66,6 @@ export async function submitContact(_prev: ContactState, formData: FormData): Pr
     message: parsed.data.message,
   });
   await notifyLeadCreated({ leadId: row.id, ...parsed.data, company: parsed.data.company ?? null });
+  await enqueueWebhook("lead.created", { id: row.id, name: parsed.data.name, email: parsed.data.email, company: parsed.data.company ?? null, message: parsed.data.message, source: "site" });
   return ok(null);
 }

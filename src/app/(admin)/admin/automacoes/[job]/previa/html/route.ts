@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/modules/auth/context";
+import { requireOwner } from "@/modules/auth/context";
 import { baseUrl, getJob } from "@/modules/jobs/registry";
 import { todayInSaoPaulo } from "@/modules/reports/dates";
 
@@ -8,7 +8,7 @@ import { todayInSaoPaulo } from "@/modules/reports/dates";
  * emoldurar a página.
  */
 export async function GET(req: Request, { params }: RouteContext<"/admin/automacoes/[job]/previa/html">) {
-  await requireAdmin();
+  await requireOwner();
   const { job: key } = await params;
   const job = getJob(key);
   if (!job) return new Response("Não encontrada", { status: 404 });

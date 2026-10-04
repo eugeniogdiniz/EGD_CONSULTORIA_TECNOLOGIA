@@ -8,6 +8,7 @@ import {
   crmProposal,
   files,
   users,
+  crmService,
 } from "@/db/schema";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
@@ -398,4 +399,35 @@ export async function listCompaniesByOrganization(_ctx: AdminContext, organizati
     order by c.name asc
   `);
   return rows.map((r) => ({ id: r.id, name: r.name, projectCount: r.project_count }));
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Catálogo e previsão (Fase 19)
+// ────────────────────────────────────────────────────────────────────────────
+
+export function listServices(_ctx: AdminContext, opts: { activeOnly?: boolean } = {}) {
+  return db
+    .select()
+    .from(crmService)
+    .where(opts.activeOnly ? eq(crmService.active, true) : undefined)
+    .orderBy(desc(crmService.active), asc(crmService.position), asc(crmService.name));
+}
+
+/** O que a previsão precisa de cada oportunidade (todas, inclusive ganhas e perdidas). */
+export function loadForecastInput(_ctx: AdminContext) {
+  return db
+    .select({
+      id: crmOpportunity.id,
+      title: crmOpportunity.title,
+      companyName: crmCompany.name,
+      stage: crmOpportunity.stage,
+      valueCents: crmOpportunity.valueCents,
+      expectedCloseAt: crmOpportunity.expectedCloseAt,
+      createdAt: crmOpportunity.createdAt,
+      wonAt: crmOpportunity.wonAt,
+      lostAt: crmOpportunity.lostAt,
+      lostReason: crmOpportunity.lostReason,
+    })
+    .from(crmOpportunity)
+    .innerJoin(crmCompany, eq(crmOpportunity.companyId, crmCompany.id));
 }

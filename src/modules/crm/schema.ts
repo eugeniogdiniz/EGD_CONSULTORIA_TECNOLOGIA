@@ -1,17 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-  bigint,
-  char,
-  check,
-  date,
-  index,
-  pgEnum,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { bigint, char, check, date, index, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid, jsonb, integer, boolean } from "drizzle-orm/pg-core";
 import { users } from "@/modules/auth/schema";
 import { files } from "@/modules/files/schema";
 import { organizations } from "@/modules/tenancy/schema";
@@ -216,6 +204,11 @@ export const crmProposal = pgTable(
     decidedAt: timestamp({ withTimezone: true }),
     decisionNotes: text(),
     fileId: uuid().references(() => files.id, { onDelete: "set null" }),
+    // Fase 16: documento da proposta (seções do modelo do kit), versão do PDF gerado, contato e envio
+    document: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
+    documentVersion: integer().default(0).notNull(),
+    contactId: uuid().references(() => crmContact.id, { onDelete: "set null" }),
+    emailedAt: timestamp({ withTimezone: true }),
     ownerId: uuid()
       .notNull()
       .references(() => users.id),
@@ -229,4 +222,24 @@ export const crmProposal = pgTable(
     index("crm_proposal_opportunity_idx").on(t.opportunityId),
     index("crm_proposal_status_idx").on(t.status),
   ],
+);
+
+/** Catálogo de serviços da EGD (Fase 19): preço de referência para montar o investimento da proposta. */
+export const crmService = pgTable(
+  "crm_service",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    name: text().notNull(),
+    description: text(),
+    unit: text().default("projeto").notNull(),
+    defaultPriceCents: bigint({ mode: "number" }).notNull(),
+    active: boolean().default(true).notNull(),
+    position: integer().default(0).notNull(),
+    createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp({ withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (t) => [index("crm_service_active_position_idx").on(t.active, t.position)],
 );
