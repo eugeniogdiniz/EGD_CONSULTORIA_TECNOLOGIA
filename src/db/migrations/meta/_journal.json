@@ -134,6 +134,13 @@
       "when": 1791055625448,
       "tag": "0018_operacao",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791056860951,
+      "tag": "0019_automacoes_relatorios",
+      "breakpoints": true
     }
   ]
 }

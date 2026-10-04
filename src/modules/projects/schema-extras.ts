@@ -191,6 +191,23 @@ export const projectRate = pgTable(
   (t) => [primaryKey({ columns: [t.projectId, t.userId] })],
 );
 
+// Snapshot diário por projeto (Fase 21): base da comparação "Δ 7 dias" do portfólio
+
+export const projectDailySnapshot = pgTable(
+  "project_daily_snapshot",
+  {
+    projectId: uuid()
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    day: date().notNull(),
+    doneCount: integer().default(0).notNull(),
+    openCount: integer().default(0).notNull(),
+    overdueCount: integer().default(0).notNull(),
+    progressPct: integer().default(0).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.projectId, t.day] })],
+);
+
 // Templates de projeto ──────────────────────────────────────────────────────
 
 export const projectTemplate = pgTable("project_template", {

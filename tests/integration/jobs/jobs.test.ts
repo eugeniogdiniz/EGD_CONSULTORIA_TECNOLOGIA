@@ -135,13 +135,17 @@ describe("livro-razão", () => {
     const job = stubJob(async () => {
       throw new Error("SMTP caiu");
     });
+    const min = (n: number) => new Date(NOW.getTime() + n * 60_000);
     expect((await claimAndRun(job, NOW))?.status).toBe("error");
-    expect((await claimAndRun(job, NOW))?.status).toBe("error");
-    const manual = await runManually(job, admin.user.id, NOW);
+    // backoff (Fase 21): a 2ª tentativa só depois de 5 min; a 3ª, 15 min depois da 2ª
+    expect(await claimAndRun(job, min(2))).toBeNull();
+    expect((await claimAndRun(job, min(5)))?.status).toBe("error");
+    const manual = await runManually(job, admin.user.id, min(6));
     expect(manual.status).toBe("error");
     expect(manual.error).toContain("SMTP caiu");
-    expect((await claimAndRun(job, NOW))?.status).toBe("error");
-    expect(await claimAndRun(job, NOW)).toBeNull(); // esgotou as 3 tentativas
+    expect(await claimAndRun(job, min(10))).toBeNull();
+    expect((await claimAndRun(job, min(20)))?.status).toBe("error");
+    expect(await claimAndRun(job, min(60))).toBeNull(); // esgotou as 3 tentativas
     const rows = await db.select({ attempt: jobRun.attempt, trigger: jobRun.trigger }).from(jobRun).orderBy(jobRun.startedAt);
     expect(rows.filter((r) => r.trigger === "schedule").map((r) => r.attempt)).toEqual([1, 2, 3]);
     expect(rows.filter((r) => r.trigger === "manual")).toHaveLength(1);

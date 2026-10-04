@@ -35,8 +35,8 @@ async function execute(runId: string, job: JobDefinition, now: Date): Promise<Ru
  * que fazer (já executou, está em execução, esgotou tentativas ou outro
  * processo reivindicou antes).
  */
-export async function claimAndRun(job: JobDefinition, now: Date): Promise<RunOutcome | null> {
-  const key = periodKey(job.schedule, now);
+export async function claimAndRun(job: JobDefinition, now: Date, schedule = job.schedule): Promise<RunOutcome | null> {
+  const key = periodKey(schedule, now);
   const runs = await db
     .select({ status: jobRun.status, attempt: jobRun.attempt, startedAt: jobRun.startedAt })
     .from(jobRun)

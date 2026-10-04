@@ -3,11 +3,22 @@ import { db } from "@/lib/db";
 import { jobRun, jobSetting, users } from "@/db/schema";
 import type { AdminContext } from "@/modules/auth/context";
 import { JOBS, JOB_KEYS, type JobKey } from "./registry";
+import { applyOverride, type Schedule } from "./schedule";
 
 /** Automações desligadas na tela (sem linha = ligada). */
 export async function listDisabledJobKeys(): Promise<Set<JobKey>> {
   const rows = await db.select({ job: jobSetting.job, enabled: jobSetting.enabled }).from(jobSetting).where(eq(jobSetting.enabled, false));
   return new Set(rows.map((r) => r.job).filter((k): k is JobKey => (JOB_KEYS as readonly string[]).includes(k)));
+}
+
+export type JobOverride = { enabled: boolean; hour: number | null; minute: number | null };
+
+/** Interruptor e horário por automação (sem linha = ligada, horário padrão). */
+export async function listJobSettings(): Promise<Map<JobKey, JobOverride>> {
+  const rows = await db.select({ job: jobSetting.job, enabled: jobSetting.enabled, hour: jobSetting.hour, minute: jobSetting.minute }).from(jobSetting);
+  const map = new Map<JobKey, JobOverride>();
+  for (const r of rows) if ((JOB_KEYS as readonly string[]).includes(r.job)) map.set(r.job as JobKey, { enabled: r.enabled, hour: r.hour, minute: r.minute });
+  return map;
 }
 
 const STALE_MS = 15 * 60_000;
@@ -17,13 +28,16 @@ export type JobRow = {
   name: string;
   description: string;
   enabled: boolean;
+  /** agenda efetiva (com o horário sobrescrito, se houver) */
+  schedule: Schedule;
+  overridden: boolean;
   recipients: string;
   lastRun: { id: string; status: "running" | "ok" | "error"; startedAt: Date; finishedAt: Date | null; text: string; error: string | null } | null;
   running: boolean;
 };
 
 export async function listJobsWithLastRun(_ctx: AdminContext, now = new Date()): Promise<JobRow[]> {
-  const disabled = await listDisabledJobKeys();
+  const settings = await listJobSettings();
   const latest = await db
     .selectDistinctOn([jobRun.job], {
       id: jobRun.id,
@@ -49,7 +63,9 @@ export async function listJobsWithLastRun(_ctx: AdminContext, now = new Date()):
         key: j.key,
         name: j.name,
         description: j.description,
-        enabled: !disabled.has(j.key),
+        enabled: settings.get(j.key)?.enabled ?? true,
+        schedule: applyOverride(j.schedule, settings.get(j.key)),
+        overridden: settings.get(j.key)?.hour != null,
         recipients: await j.recipients(),
         lastRun: last
           ? { id: last.id, status: last.status, startedAt: last.startedAt, finishedAt: last.finishedAt, text: String(last.summary.text ?? ""), error: last.error }

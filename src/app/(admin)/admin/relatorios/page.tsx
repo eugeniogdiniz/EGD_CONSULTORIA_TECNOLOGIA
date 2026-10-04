@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { requireOwner } from "@/modules/auth/context";
-import { loadPortfolioData } from "@/modules/reports/queries";
-import { buildPortfolio } from "@/modules/reports/build";
-import { formatBrShort, todayInSaoPaulo } from "@/modules/reports/dates";
+import { loadPortfolioData, loadSnapshotsUpTo } from "@/modules/reports/queries";
+import { buildPortfolio, deltaLabel, portfolioDelta } from "@/modules/reports/build";
+import { addDays, formatBrShort, todayInSaoPaulo } from "@/modules/reports/dates";
 import { PROJECT_STATUS_ADMIN_LABEL } from "@/modules/reports/labels";
 import { EmptyLine, ReportSection, ReportSheet } from "@/modules/reports/components/report-sheet";
 import { MiniBar } from "@/modules/reports/components/report-parts";
@@ -20,8 +20,11 @@ const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um :
 
 export default async function PortfolioPage() {
   const ctx = await requireOwner();
-  const r = buildPortfolio(await loadPortfolioData(ctx), todayInSaoPaulo());
+  const today = todayInSaoPaulo();
+  const [data, snapshots] = await Promise.all([loadPortfolioData(ctx), loadSnapshotsUpTo(addDays(today, -7))]);
+  const r = buildPortfolio(data, today);
   const total = r.rows.length;
+  const delta = (id: string) => portfolioDelta(r.rows.find((x) => x.id === id)!, snapshots.get(id));
 
   return (
     <>
@@ -55,7 +58,7 @@ export default async function PortfolioPage() {
                   <thead className="border-b border-strong">
                     <tr>
                       <th className={th}>Projeto</th><th className={th}>Status</th><th className={th}>Progresso</th><th className={th}>Próximo marco</th>
-                      <th className={cn(th, "text-right")}>Atrasadas</th><th className={cn(th, "text-right")}>Bloqueadas</th><th className={cn(th, "text-right")}>Horas</th><th className={th}>Orçamento consumido</th>
+                      <th className={cn(th, "text-right")}>Atrasadas</th><th className={cn(th, "text-right")}>Δ 7 dias</th><th className={cn(th, "text-right")}>Bloqueadas</th><th className={cn(th, "text-right")}>Horas</th><th className={th}>Orçamento consumido</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -83,6 +86,18 @@ export default async function PortfolioPage() {
                           )}
                         </td>
                         <td className={cn(td, "text-right tabular-nums", p.overdue > 0 && "font-semibold text-danger")}>{p.overdue}</td>
+                        <td className={cn(td, "text-right font-mono text-[0.8125rem] whitespace-nowrap")} data-testid="delta">
+                          {(() => {
+                            const d = delta(p.id);
+                            if (d.overdue === null) return <span className="text-faint" title="sem foto de 7 dias atrás">—</span>;
+                            return (
+                              <>
+                                <span className={cn(d.overdue > 0 && "text-danger", d.overdue < 0 && "text-success")}>{deltaLabel(d.overdue)} atras.</span>
+                                <span className={cn("block", (d.progress ?? 0) > 0 && "text-success")}>{deltaLabel(d.progress)} pp</span>
+                              </>
+                            );
+                          })()}
+                        </td>
                         <td className={cn(td, "text-right tabular-nums")}>{p.blocked}</td>
                         <td className={cn(td, "text-right tabular-nums")}>{csvDecimal(p.minutes / 60, 1)}</td>
                         <td className={cn(td, "whitespace-nowrap")}>
@@ -102,6 +117,7 @@ export default async function PortfolioPage() {
               </div>
               <p className="mt-2.5 text-[0.8125rem] text-faint">
                 Orçamento consumido = (custo de horas + despesas) ÷ orçamento. Acima de 90% fica em vermelho; de 70% a 90%, em amarelo.
+                Δ 7 dias compara atrasadas e progresso (pontos percentuais) com a foto diária de uma semana atrás.
               </p>
             </>
           )}

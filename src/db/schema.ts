@@ -15,3 +15,4 @@ export * from "@/modules/notifications/schema";
 export * from "@/modules/settings/schema";
 export * from "@/modules/errors/schema";
 export * from "@/modules/rate-limit/schema";
+export * from "@/modules/webhooks/schema";

@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { requireOwner } from "@/modules/auth/context";
 import { listJobsWithLastRun, listRuns } from "@/modules/jobs/queries";
-import { getJob, JOBS } from "@/modules/jobs/registry";
+import { getJob } from "@/modules/jobs/registry";
 import { describeSchedule, nextRunAt } from "@/modules/jobs/schedule";
 import { getSchedulerState, jobsEnabled } from "@/modules/jobs/scheduler";
-import { triggerJobForm } from "@/modules/jobs/form-actions";
+import { setJobScheduleForm, triggerJobForm } from "@/modules/jobs/form-actions";
 import { JobSwitch } from "@/modules/jobs/components/job-switch";
 import { PageHeader, Block, EmptyState } from "@/components/shell/page-header";
 import { ConfirmAction } from "@/components/shell/confirm-action";
@@ -39,7 +39,7 @@ export default async function AutomacoesPage() {
   const [jobs, runs] = await Promise.all([listJobsWithLastRun(ctx, now), listRuns(ctx, 30)]);
   const scheduler = getSchedulerState();
   const enabledHere = jobsEnabled();
-  const next = JOBS.filter((j) => jobs.find((r) => r.key === j.key)?.enabled)
+  const next = jobs.filter((j) => j.enabled)
     .map((j) => ({ name: j.name, ...nextRunAt(j.schedule, now) }))
     .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`))[0];
 
@@ -73,15 +73,22 @@ export default async function AutomacoesPage() {
           </thead>
           <tbody>
             {jobs.map((j) => {
-              const def = getJob(j.key)!;
-              const isMail = j.key !== "propostas-expirar" && j.key !== "notificacoes-limpar" && j.key !== "backup-diario";
+              const isMail = !["propostas-expirar", "notificacoes-limpar", "backup-diario", "snapshot-diario"].includes(j.key);
               return (
                 <tr key={j.key} className="border-t border-border align-top" data-testid={`job-${j.key}`}>
                   <td className="px-4 py-3">
                     <div className="font-medium">{j.name}</div>
                     <div className="type-micro mt-0.5 max-w-[22rem] text-faint">{j.description}</div>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">{describeSchedule(def.schedule)}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div>{describeSchedule(j.schedule)}{j.overridden && <span className="type-micro ml-1 text-faint">(ajustado)</span>}</div>
+                    <form action={setJobScheduleForm} className="mt-1 flex items-center gap-1">
+                      <input type="hidden" name="job" value={j.key} />
+                      <label className="sr-only" htmlFor={`time-${j.key}`}>Horário de {j.name}</label>
+                      <input id={`time-${j.key}`} name="time" type="time" defaultValue={`${String(j.schedule.hour).padStart(2, "0")}:${String(j.schedule.minute).padStart(2, "0")}`} className="h-7 rounded-sm border border-input bg-card px-1 text-xs" />
+                      <Button type="submit" size="sm" variant="ghost" className="h-7 px-2 text-xs">Salvar</Button>
+                    </form>
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{j.recipients.includes("@") ? <span className="type-data">{j.recipients}</span> : j.recipients}</td>
                   <td className="px-4 py-3">
                     <JobSwitch job={j.key} enabled={j.enabled} name={j.name} />

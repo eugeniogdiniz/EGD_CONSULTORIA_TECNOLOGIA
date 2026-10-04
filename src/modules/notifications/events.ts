@@ -287,3 +287,17 @@ export async function notifyBackupFailed(p: { error: string }): Promise<NotifyRe
     mail: { subject: title, text: `${p.error}\n\nAbrir: ${base()}${url}`, html: `<p>${p.error.replace(/[<>&]/g, "").slice(0, 600)}</p><p><a href="${base()}${url}">Abrir automações</a></p>` },
   });
 }
+
+export async function notifyWebhookDisabled(p: { endpointId: string; url: string; failures: number }): Promise<NotifyResult> {
+  const title = "Webhook desativado após falhas seguidas";
+  const body = `${p.url} · ${p.failures} falhas`;
+  const url = `/admin/api/webhooks/${p.endpointId}`;
+  return notify({ kind: "webhook.disabled", title, body, url, entity: { type: "webhook_endpoint", id: p.endpointId }, recipients: await activeOwners(), mail: { subject: title, text: `${body}\n\nAbrir: ${base()}${url}`, html: `<p>${body.replace(/[<>&]/g, "")}</p><p><a href="${base()}${url}">Abrir webhook</a></p>` } });
+}
+
+export async function notifyApiKeyExpiring(p: { keyId: string; name: string; prefix: string; daysLeft: number }): Promise<NotifyResult> {
+  const title = `Chave de API "${p.name}" expira em ${p.daysLeft} dia${p.daysLeft === 1 ? "" : "s"}`;
+  const body = `${p.prefix}… · rotacione em API para não interromper a integração.`;
+  const url = "/admin/api";
+  return notify({ kind: "api_key.expiring", title, body, url, entity: { type: "api_key", id: p.keyId }, recipients: await activeOwners(), mail: { subject: title, text: `${body}\n\nAbrir: ${base()}${url}`, html: `<p>${body.replace(/[<>&]/g, "")}</p><p><a href="${base()}${url}">Abrir API</a></p>` } });
+}
