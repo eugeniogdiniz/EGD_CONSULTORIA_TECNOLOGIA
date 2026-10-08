@@ -61,6 +61,7 @@ export default async function PreviaPage({ params, searchParams }: PageProps<"/a
           {preview.rows.length === 0 ? (
             <p className="px-5 py-6 text-sm text-muted-foreground">{preview.note}</p>
           ) : (
+            <div tabIndex={0} role="region" aria-label="Prévia, role horizontalmente se necessário" className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-subtle text-left text-muted-foreground">
@@ -83,6 +84,7 @@ export default async function PreviaPage({ params, searchParams }: PageProps<"/a
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </Block>
       ) : (

@@ -39,6 +39,7 @@ export default async function PrevisaoPage() {
       </div>
       <div className="grid gap-6 xl:grid-cols-2">
         <Block title="Pipeline por estágio" aside="probabilidade fixa por estágio" padded={false}>
+          <div tabIndex={0} role="region" aria-label="Pipeline por estágio, role horizontalmente se necessário" className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-subtle text-left text-muted-foreground"><tr><th className={th}>Estágio</th><th className={`${th} text-right`}>Qtd.</th><th className={`${th} text-right`}>Valor</th><th className={`${th} text-right`}>Prob.</th><th className={`${th} text-right`}>Ponderado</th></tr></thead>
             <tbody>
@@ -48,8 +49,10 @@ export default async function PrevisaoPage() {
             </tbody>
             <tfoot><tr className="border-t border-border bg-subtle font-medium"><td className={td}>Total</td><td className={`${td} type-data text-right`}>{f.openCount}</td><td className={`${td} type-data text-right`}>{formatBrlCents(f.openCents)}</td><td /><td className={`${td} type-data text-right`}>{formatBrlCents(f.weightedCents)}</td></tr></tfoot>
           </table>
+          </div>
         </Block>
         <Block title="Esperado por mês de fechamento" aside="próximos 6 meses · vencidas no mês corrente" padded={false}>
+          <div tabIndex={0} role="region" aria-label="Esperado por mês de fechamento, role horizontalmente se necessário" className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-subtle text-left text-muted-foreground"><tr><th className={th}>Mês</th><th className={`${th} text-right`}>Qtd.</th><th className={`${th} text-right`}>Valor</th><th className={`${th} text-right`}>Ponderado</th></tr></thead>
             <tbody>
@@ -59,8 +62,10 @@ export default async function PrevisaoPage() {
               <tr className="border-t border-border text-muted-foreground"><td className={td}>Sem data prevista</td><td className={`${td} type-data text-right`}>{f.noDate.count}</td><td className={td} /><td className={`${td} type-data text-right`}>{formatBrlCents(f.noDate.weightedCents)}</td></tr>
             </tbody>
           </table>
+          </div>
         </Block>
         <Block title="Conversão" aside="ganhas ÷ (ganhas + perdidas)" padded={false}>
+          <div tabIndex={0} role="region" aria-label="Conversão, role horizontalmente se necessário" className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-subtle text-left text-muted-foreground"><tr><th className={th}>Janela</th><th className={`${th} text-right`}>Ganhas</th><th className={`${th} text-right`}>Perdidas</th><th className={`${th} text-right`}>Taxa</th><th className={`${th} text-right`}>Ticket médio</th><th className={`${th} text-right`}>Ciclo médio</th></tr></thead>
             <tbody>
@@ -69,6 +74,7 @@ export default async function PrevisaoPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </Block>
         <Block title="Motivos de perda" aside="mais comuns" padded={false}>
           {f.lostReasons.length === 0 ? (

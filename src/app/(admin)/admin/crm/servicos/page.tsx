@@ -23,6 +23,7 @@ export default async function ServicosPage() {
         {services.length === 0 ? (
           <EmptyState title="Nenhum serviço cadastrado." text="Cadastre o que a EGD vende (diagnóstico, desenvolvimento por hora, sustentação mensal…) para montar propostas mais rápido." />
         ) : (
+          <div tabIndex={0} role="region" aria-label="Serviços, role horizontalmente se necessário" className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-subtle text-muted-foreground">
               <tr className="text-left">
@@ -57,6 +58,7 @@ export default async function ServicosPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </Block>
     </>

@@ -27,7 +27,7 @@ test("relatórios do admin: status, portfólio, semanal e CSVs", async ({ page }
   await page.emulateMedia({ media: "screen" });
 
   // ── portfólio ─────────────────────────────────────────────────────────────
-  await page.getByRole("link", { name: "Relatórios", exact: true }).click();
+  await page.getByRole("link", { name: "Portfólio", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/relatorios$/);
   await expect(page.getByRole("link", { name: fx.projectA.title })).toBeVisible();
   const portfolio = await page.request.get("/admin/relatorios/csv");
@@ -35,7 +35,7 @@ test("relatórios do admin: status, portfólio, semanal e CSVs", async ({ page }
   expect(await portfolio.text()).toContain(fx.projectA.title);
 
   // ── semanal: navegar e voltar para a semana atual ─────────────────────────
-  await page.getByRole("link", { name: "Semanal" }).click();
+  await page.getByRole("navigation", { name: "Relatórios" }).getByRole("link", { name: "Semanal" }).click();
   const rotulo = page.getByTestId("semana-rotulo");
   const atual = (await rotulo.textContent()) ?? "";
   await page.getByRole("link", { name: /semana anterior/i }).click();

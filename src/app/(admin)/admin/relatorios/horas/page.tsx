@@ -68,6 +68,7 @@ export default async function HorasPage({ searchParams }: PageProps<"/admin/rela
         {r.people.length === 0 ? (
           <EmptyState title="Nenhuma hora no período." text="Só entram entradas fechadas (timer parado ou apontamento manual)." />
         ) : (
+          <div tabIndex={0} role="region" aria-label="Horas por pessoa e projeto, role horizontalmente se necessário" className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-subtle text-muted-foreground">
               <tr className="text-left">
@@ -98,6 +99,7 @@ export default async function HorasPage({ searchParams }: PageProps<"/admin/rela
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </Block>
     </>

@@ -1,5 +1,5 @@
 import { alias } from "drizzle-orm/pg-core";
-import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, lte, ne, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   crmCompany,
@@ -437,10 +437,14 @@ export async function listExpenses(_ctx: AdminContext, projectId: string) {
   return db
     .select({
       id: projectExpense.id,
+      supplier: projectExpense.supplier,
       description: projectExpense.description,
       amountCents: projectExpense.amountCents,
       kind: projectExpense.kind,
       dateAt: projectExpense.dateAt,
+      dueAt: projectExpense.dueAt,
+      status: projectExpense.status,
+      paidAt: projectExpense.paidAt,
       notes: projectExpense.notes,
       createdBy: projectExpense.createdBy,
       createdByName: users.name,
@@ -449,7 +453,7 @@ export async function listExpenses(_ctx: AdminContext, projectId: string) {
     .from(projectExpense)
     .innerJoin(users, eq(projectExpense.createdBy, users.id))
     .where(eq(projectExpense.projectId, projectId))
-    .orderBy(desc(projectExpense.dateAt));
+    .orderBy(asc(projectExpense.dueAt), desc(projectExpense.createdAt));
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -481,10 +485,11 @@ export async function getProjectFinancials(_ctx: AdminContext, projectId: string
     .leftJoin(projectRate, and(eq(projectRate.projectId, projectDeliverable.projectId), eq(projectRate.userId, projectTimeEntry.userId)))
     .where(eq(projectDeliverable.projectId, projectId));
 
+  // canceladas não são custo
   const expenses = await db
     .select({ amountCents: projectExpense.amountCents })
     .from(projectExpense)
-    .where(eq(projectExpense.projectId, projectId));
+    .where(and(eq(projectExpense.projectId, projectId), ne(projectExpense.status, "cancelled")));
 
   const proposals = projectRow.opportunityId
     ? await db
@@ -815,4 +820,86 @@ export function listDeliverablesForBurndown(_ctx: AdminContext, projectId: strin
     .select({ estimateMinutes: projectDeliverable.estimateMinutes, completedAt: projectDeliverable.completedAt, dueAt: projectDeliverable.dueAt, status: projectDeliverable.status })
     .from(projectDeliverable)
     .where(eq(projectDeliverable.projectId, projectId));
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Financeiro consolidado: contas a receber e a pagar de todos os projetos
+// ────────────────────────────────────────────────────────────────────────────
+
+export type LedgerState = "all" | "open" | "overdue" | "paid" | "cancelled";
+export type LedgerFilters = { state: LedgerState; from: string | null; to: string | null; projectId: string | null; today: string };
+
+function ledgerWhere(
+  t: { status: typeof projectInvoice.status | typeof projectExpense.status; dueAt: typeof projectInvoice.dueAt | typeof projectExpense.dueAt; projectId: typeof projectInvoice.projectId | typeof projectExpense.projectId },
+  f: LedgerFilters,
+) {
+  const conds = [];
+  if (f.state === "open") conds.push(eq(t.status, "pending"));
+  if (f.state === "overdue") conds.push(and(eq(t.status, "pending"), sql`${t.dueAt} < ${f.today}`));
+  if (f.state === "paid") conds.push(eq(t.status, "paid"));
+  if (f.state === "cancelled") conds.push(eq(t.status, "cancelled"));
+  if (f.from) conds.push(gte(t.dueAt, f.from));
+  if (f.to) conds.push(lte(t.dueAt, f.to));
+  if (f.projectId && isUuid(f.projectId)) conds.push(eq(t.projectId, f.projectId));
+  return conds.length ? and(...conds) : undefined;
+}
+
+/** Parcelas de todos os projetos (contas a receber), com projeto e cliente. */
+export function listAllInvoices(_ctx: AdminContext, f: LedgerFilters) {
+  return db
+    .select({
+      id: projectInvoice.id,
+      projectId: projectInvoice.projectId,
+      projectTitle: project.title,
+      companyName: crmCompany.name,
+      number: projectInvoice.number,
+      description: projectInvoice.description,
+      amountCents: projectInvoice.amountCents,
+      dueAt: projectInvoice.dueAt,
+      status: projectInvoice.status,
+      paidAt: projectInvoice.paidAt,
+      notes: projectInvoice.notes,
+    })
+    .from(projectInvoice)
+    .innerJoin(project, eq(projectInvoice.projectId, project.id))
+    .innerJoin(crmCompany, eq(project.companyId, crmCompany.id))
+    .where(ledgerWhere(projectInvoice, f))
+    .orderBy(asc(projectInvoice.dueAt), asc(project.title), asc(projectInvoice.number));
+}
+
+/** Contas a pagar (despesas de projeto e custos gerais), com projeto quando houver. */
+export function listAllExpenses(_ctx: AdminContext, f: LedgerFilters & { general?: boolean }) {
+  const base = ledgerWhere(projectExpense, f);
+  const where = f.general ? and(base, isNull(projectExpense.projectId)) : base;
+  return db
+    .select({
+      id: projectExpense.id,
+      projectId: projectExpense.projectId,
+      projectTitle: project.title,
+      companyName: crmCompany.name,
+      supplier: projectExpense.supplier,
+      description: projectExpense.description,
+      amountCents: projectExpense.amountCents,
+      kind: projectExpense.kind,
+      dateAt: projectExpense.dateAt,
+      dueAt: projectExpense.dueAt,
+      status: projectExpense.status,
+      paidAt: projectExpense.paidAt,
+      notes: projectExpense.notes,
+    })
+    .from(projectExpense)
+    .leftJoin(project, eq(projectExpense.projectId, project.id))
+    .leftJoin(crmCompany, eq(project.companyId, crmCompany.id))
+    .where(where)
+    .orderBy(asc(projectExpense.dueAt), desc(projectExpense.createdAt));
+}
+
+/** Projetos não arquivados para selects de filtro e de cadastro. */
+export function listProjectOptions(_ctx: AdminContext) {
+  return db
+    .select({ id: project.id, title: project.title, companyName: crmCompany.name, status: project.status })
+    .from(project)
+    .innerJoin(crmCompany, eq(project.companyId, crmCompany.id))
+    .where(isNull(project.archivedAt))
+    .orderBy(asc(project.title));
 }

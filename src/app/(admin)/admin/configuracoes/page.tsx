@@ -38,7 +38,7 @@ export default async function ConfiguracoesPage() {
                     role="switch"
                     aria-checked={enabled}
                     aria-label={`${SETTINGS[key].label}: ${enabled ? "ligado" : "desligado"}`}
-                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 ${enabled ? "bg-success" : "bg-border-strong"}`}
+                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 ${enabled ? "bg-success" : "bg-faint"}`}
                   >
                     <span className={`inline-block size-4 rounded-full bg-card shadow transition-transform ${enabled ? "translate-x-[18px]" : "translate-x-0.5"}`} />
                   </button>
@@ -47,7 +47,7 @@ export default async function ConfiguracoesPage() {
             );
           })}
         </ul>
-        <p className="type-micro mt-4 text-muted-foreground">
+        <p className="type-micro mt-4 max-w-[90ch] text-muted-foreground">
           Quem ficar sem o segundo fator com a exigência ligada só consegue abrir Minha conta até ativar (o administrador também alcança esta tela, para desligar a regra). Se alguém perder o aparelho e os códigos, o reset é pelo script <code className="type-data">auth:reset-2fa</code> (runbook §14).
         </p>
       </Block>

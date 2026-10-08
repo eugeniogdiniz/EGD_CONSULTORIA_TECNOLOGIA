@@ -86,8 +86,8 @@ beforeAll(async () => {
   await timeEntry(visibleId, 90);
   await timeEntry(hiddenId, 30);
   await db.insert(projectExpense).values([
-    { projectId: projA, description: "Viagem", amountCents: 10_000, dateAt: "2026-09-10", createdBy: admin.user.id },
-    { projectId: projA, description: "Cabo", amountCents: 5_000, dateAt: "2026-09-11", createdBy: admin.user.id },
+    { projectId: projA, description: "Viagem", amountCents: 10_000, dateAt: "2026-09-10", dueAt: "2026-09-10", status: "paid", paidAt: "2026-09-10", createdBy: admin.user.id },
+    { projectId: projA, description: "Cabo", amountCents: 5_000, dateAt: "2026-09-11", dueAt: "2026-09-11", status: "paid", paidAt: "2026-09-11", createdBy: admin.user.id },
   ]);
 
   const shared = await createMeeting(admin, { title: "Revisão compartilhada", heldAt: "2026-09-24T10:00", projectId: projA, decisions: "Priorizar o failover." });

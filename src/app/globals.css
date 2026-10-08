@@ -199,6 +199,14 @@
   .carimbo-k { font-size: 0.8125rem; line-height: 1.4; font-weight: 500; color: var(--tinta-400); }
   .carimbo-v { margin-top: 2px; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.35; }
 
+  /* Tabelas dos portais (design system §7): cabeçalho em uma linha, algarismos
+     tabulares e rolagem contida. `position: relative` no wrapper faz o `sr-only`
+     dos cabeçalhos de ações ficar dentro da rolagem em vez de alargar a página. */
+  .theme-app .overflow-x-auto { position: relative; }
+  .theme-app table { font-variant-numeric: tabular-nums; }
+  .theme-app thead th { white-space: nowrap; }
+  .theme-app th.num, .theme-app td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
   /* Status: ponto + texto */
   .status { @apply inline-flex items-center gap-2 text-sm font-medium text-muted-foreground; }
   .status::before { content: ""; width: 8px; height: 8px; border-radius: 9999px; background: var(--tinta-400); flex: none; }

@@ -9,6 +9,7 @@ export function ReportTabs() {
   const tabs = [
     { href: "/admin/relatorios", label: "Portfólio", active: pathname === "/admin/relatorios" },
     { href: "/admin/relatorios/semanal", label: "Semanal", active: pathname.startsWith("/admin/relatorios/semanal") },
+    { href: "/admin/relatorios/horas", label: "Horas", active: pathname.startsWith("/admin/relatorios/horas") },
   ];
   return (
     <nav aria-label="Relatórios" className="flex gap-1 border-b border-border print:hidden">

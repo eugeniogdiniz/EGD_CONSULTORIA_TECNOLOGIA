@@ -61,6 +61,7 @@ export default async function OrganizacaoPage({ params }: PageProps<"/admin/orga
             {members.length === 0 ? (
               <EmptyState title="Nenhum usuário." text="Convide o primeiro pelo e-mail." />
             ) : (
+              <div tabIndex={0} role="region" aria-label="Usuários, role horizontalmente se necessário" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-subtle text-left text-muted-foreground">
@@ -90,6 +91,7 @@ export default async function OrganizacaoPage({ params }: PageProps<"/admin/orga
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </Block>
 
@@ -97,6 +99,7 @@ export default async function OrganizacaoPage({ params }: PageProps<"/admin/orga
             {invites.length === 0 ? (
               <p className="px-5 py-6 text-sm text-muted-foreground">Nenhum convite aguardando aceite.</p>
             ) : (
+              <div tabIndex={0} role="region" aria-label="Convites pendentes, role horizontalmente se necessário" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-subtle text-left text-muted-foreground">
@@ -130,6 +133,7 @@ export default async function OrganizacaoPage({ params }: PageProps<"/admin/orga
                   })}
                 </tbody>
               </table>
+              </div>
             )}
           </Block>
         </div>

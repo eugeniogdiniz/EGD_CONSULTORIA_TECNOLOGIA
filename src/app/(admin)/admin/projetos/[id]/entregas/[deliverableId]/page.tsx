@@ -196,7 +196,7 @@ export default async function DeliverableDetailPage({
               {timeEntries.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Sem entradas de tempo ainda.</p>
               ) : (
-                <div className="overflow-hidden rounded-md border border-border">
+                <div tabIndex={0} role="region" aria-label="Horas apontadas, role horizontalmente se necessário" className="overflow-x-auto rounded-md border border-border">
                   <table className="w-full text-sm">
                     <thead className="bg-subtle text-muted-foreground">
                       <tr className="text-left">
