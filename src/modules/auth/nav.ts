@@ -13,15 +13,13 @@ export function navFor(role: "admin" | "collaborator", badges: { leads: number; 
     nav.push({
       label: "Comercial",
       storageKey: "comercial",
+      // Contatos vivem dentro da empresa (e na busca); Previsão é relatório; o catálogo de serviços é configuração.
       items: [
         { href: "/admin/leads", label: "Leads", badge: badges.leads },
-        { href: "/admin/crm/empresas", label: "Empresas" },
-        { href: "/admin/crm/contatos", label: "Contatos" },
         { href: "/admin/crm/funil", label: "Funil" },
+        { href: "/admin/crm/empresas", label: "Empresas" },
         { href: "/admin/crm/propostas", label: "Propostas" },
         { href: "/admin/crm/contratos", label: "Contratos" },
-        { href: "/admin/crm/servicos", label: "Serviços" },
-        { href: "/admin/crm/previsao", label: "Previsão" },
       ],
     });
   }
@@ -61,6 +59,7 @@ export function navFor(role: "admin" | "collaborator", badges: { leads: number; 
         items: [
           { href: "/admin/relatorios", label: "Portfólio" },
           { href: "/admin/relatorios/semanal", label: "Semanal" },
+          { href: "/admin/crm/previsao", label: "Previsão" },
         ],
       },
       { label: "Site", storageKey: "site", items: [{ href: "/admin/cases", label: "Cases" }] },
@@ -69,6 +68,7 @@ export function navFor(role: "admin" | "collaborator", badges: { leads: number; 
         storageKey: "sistema",
         items: [
           { href: "/admin/equipe", label: "Equipe" },
+          { href: "/admin/crm/servicos", label: "Catálogo de serviços" },
           { href: "/admin/api", label: "API" },
           { href: "/admin/automacoes", label: "Automações" },
           { href: "/admin/auditoria", label: "Auditoria" },

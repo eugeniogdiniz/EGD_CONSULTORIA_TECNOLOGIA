@@ -20,6 +20,14 @@ describe("navFor", () => {
     expect(flat("admin").find((i) => i.href === "/admin/leads")).toMatchObject({ badge: 2 });
     expect(flat("admin").find((i) => i.href === "/admin/solicitacoes")).toMatchObject({ badge: 3 });
   });
+  it("Comercial enxuto: Contatos fora do menu, Previsão em Relatórios e o catálogo em Sistema", () => {
+    const nav = navFor("admin", { leads: 0, requests: 0 });
+    const group = (label: string) => nav.find((e) => "items" in e && e.label === label) as { items: { href: string }[] };
+    expect(group("Comercial").items.map((i) => i.href)).toEqual(["/admin/leads", "/admin/crm/funil", "/admin/crm/empresas", "/admin/crm/propostas", "/admin/crm/contratos"]);
+    expect(group("Relatórios").items.map((i) => i.href)).toContain("/admin/crm/previsao");
+    expect(group("Sistema").items.map((i) => i.href)).toContain("/admin/crm/servicos");
+    expect(hrefs("admin")).not.toContain("/admin/crm/contatos");
+  });
   it("nenhum href aparece duas vezes", () => {
     const h = hrefs("admin");
     expect(new Set(h).size).toBe(h.length);
