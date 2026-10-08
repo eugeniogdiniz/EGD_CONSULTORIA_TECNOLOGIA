@@ -13,7 +13,8 @@ import {
 } from "@/modules/projects/queries";
 import { InvoiceFormDialog } from "@/modules/projects/components/invoice-form";
 import { ConfirmAction } from "@/components/shell/confirm-action";
-import { cancelInvoiceForm, markInvoicePaidForm, setProjectRateForm } from "@/modules/projects/form-actions";
+import { cancelExpenseForm, cancelInvoiceForm, markExpensePaidForm, markInvoicePaidForm, setProjectRateForm } from "@/modules/projects/form-actions";
+import { EXPENSE_KIND_LABEL, EXPENSE_STATE_LABEL, EXPENSE_STATE_STYLE, expenseState } from "@/modules/projects/payables";
 import { INVOICE_STATE_LABEL, INVOICE_STATE_STYLE, invoiceState, summarizeInvoices } from "@/modules/projects/invoices";
 import { formatHours } from "@/modules/projects/burndown";
 import { todayInSaoPaulo } from "@/modules/reports/dates";
@@ -24,13 +25,6 @@ import { ExpenseFormDialog } from "@/modules/projects/components/expense-form";
 import { formatBrlCents, formatIsoDate } from "@/lib/format";
 
 export const metadata = { title: "Financeiro" };
-
-const EXPENSE_KIND_LABEL: Record<string, string> = {
-  travel: "Viagem",
-  service: "Serviço",
-  equipment: "Equipamento",
-  other: "Outros",
-};
 
 const PROPOSAL_STATUS: Record<string, { label: string; klass: string }> = {
   draft: { label: "rascunho", klass: "bg-subtle text-muted-foreground" },
@@ -68,7 +62,7 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
   const totalMinutes = timeCosts.reduce((s, r) => s + r.totalMinutes, 0);
   const totalLaborCents = timeCosts.reduce((s, r) => s + r.laborCents, 0);
   const totalWithoutRate = timeCosts.reduce((s, r) => s + r.entriesWithoutRate, 0);
-  const totalExpenseCents = expenses.reduce((s, r) => s + r.amountCents, 0);
+  const totalExpenseCents = expenses.reduce((s, r) => s + (r.status === "cancelled" ? 0 : r.amountCents), 0);
 
   const budgetVsCostPct = financials.budgetCents && financials.budgetCents > 0
     ? Math.min(100, Math.round((financials.costCents / financials.budgetCents) * 100))
@@ -129,6 +123,7 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
         {invoices.length === 0 ? (
           <p className="p-6 text-sm text-muted-foreground">Nenhuma parcela. Cadastre as parcelas da proposta aceita para acompanhar vencimentos e recebimentos.</p>
         ) : (
+          <div tabIndex={0} role="region" aria-label="Faturamento, role horizontalmente se necessário" className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-subtle text-muted-foreground">
               <tr className="text-left">
@@ -177,6 +172,7 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
               })}
             </tbody>
           </table>
+          </div>
         )}
       </Block>
 
@@ -190,6 +186,7 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
             {timeCosts.length === 0 ? (
               <p className="p-6 text-sm text-muted-foreground">Nenhuma entrada fechada ainda.</p>
             ) : (
+              <div tabIndex={0} role="region" aria-label="Horas por entrega, role horizontalmente se necessário" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-subtle text-muted-foreground">
                   <tr className="text-left">
@@ -225,6 +222,7 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
                   </tr>
                 </tfoot>
               </table>
+              </div>
             )}
           </Block>
 
@@ -241,57 +239,79 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
             {expenses.length === 0 ? (
               <p className="p-6 text-sm text-muted-foreground">Nenhuma despesa ainda.</p>
             ) : (
+              <div tabIndex={0} role="region" aria-label="Despesas, role horizontalmente se necessário" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-subtle text-muted-foreground">
                   <tr className="text-left">
                     <th className="h-10 px-4 font-medium">Descrição</th>
                     <th className="h-10 px-4 font-medium">Tipo</th>
-                    <th className="h-10 px-4 font-medium">Data</th>
-                    <th className="h-10 px-4 font-medium">Autor</th>
+                    <th className="h-10 px-4 font-medium">Vencimento</th>
                     <th className="h-10 px-4 text-right font-medium">Valor</th>
-                    <th className="h-10 px-4 font-medium"></th>
+                    <th className="h-10 px-4 font-medium">Situação</th>
+                    <th className="h-10 px-4 font-medium">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {expenses.map((e) => (
-                    <tr key={e.id} className="border-t border-border">
-                      <td className="px-4 py-2">
-                        <div className="font-medium">{e.description}</div>
-                        {e.notes && <div className="type-micro text-faint">{e.notes}</div>}
-                      </td>
-                      <td className="px-4 py-2">
-                        <span className="inline-flex items-center rounded-sm border border-border bg-subtle px-1.5 py-0.5 text-[0.7rem] text-muted-foreground">
-                          {EXPENSE_KIND_LABEL[e.kind]}
-                        </span>
-                      </td>
-                      <td className="type-data px-4 py-2 text-muted-foreground">{formatIsoDate(e.dateAt)}</td>
-                      <td className="px-4 py-2 text-muted-foreground">{e.createdByName}</td>
-                      <td className="type-data px-4 py-2 text-right">{formatBrlCents(e.amountCents)}</td>
-                      <td className="px-4 py-2 text-right">
-                        <ExpenseFormDialog
-                          projectId={id}
-                          expense={{
-                            id: e.id,
-                            description: e.description,
-                            amountCents: e.amountCents,
-                            kind: e.kind,
-                            dateAt: e.dateAt,
-                            notes: e.notes,
-                          }}
-                          trigger={<button type="button" className="text-xs text-link hover:underline">Editar</button>}
-                        />
-                      </td>
-                    </tr>
-                  ))}
+                  {expenses.map((e) => {
+                    const st = expenseState(e, today);
+                    return (
+                      <tr key={e.id} className="border-t border-border">
+                        <td className="px-4 py-2">
+                          <div className="font-medium">{e.description}</div>
+                          {(e.supplier || e.notes) && <div className="type-micro text-faint">{[e.supplier, e.notes].filter(Boolean).join(" · ")}</div>}
+                        </td>
+                        <td className="px-4 py-2">
+                          <span className="inline-flex items-center rounded-sm border border-border bg-subtle px-1.5 py-0.5 text-[0.7rem] whitespace-nowrap text-muted-foreground">
+                            {EXPENSE_KIND_LABEL[e.kind]}
+                          </span>
+                        </td>
+                        <td className="type-data px-4 py-2 whitespace-nowrap text-muted-foreground">
+                          {formatIsoDate(e.dueAt)}
+                          {st === "paid" && e.paidAt && <span className="type-micro block text-success">paga em {formatIsoDate(e.paidAt)}</span>}
+                        </td>
+                        <td className="type-data px-4 py-2 text-right">{formatBrlCents(e.amountCents)}</td>
+                        <td className="px-4 py-2"><span className={cn("inline-flex h-[22px] items-center rounded-sm border px-2 text-xs font-medium", EXPENSE_STATE_STYLE[st])}>{EXPENSE_STATE_LABEL[st]}</span></td>
+                        <td className="px-4 py-2">
+                          <div className="flex flex-wrap gap-1.5">
+                            {e.status === "pending" && (
+                              <form action={markExpensePaidForm} className="flex items-center gap-1">
+                                <input type="hidden" name="id" value={e.id} />
+                                <input type="hidden" name="projectId" value={id} />
+                                <label className="sr-only" htmlFor={`epaid-${e.id}`}>Data do pagamento</label>
+                                <input id={`epaid-${e.id}`} name="paidAt" type="date" defaultValue={today} className="h-8 rounded-sm border border-input bg-card px-2 text-xs" />
+                                <Button type="submit" size="sm" variant="outline">Marcar paga</Button>
+                              </form>
+                            )}
+                            <ExpenseFormDialog
+                              projectId={id}
+                              expense={{ id: e.id, projectId: id, supplier: e.supplier, description: e.description, amountCents: e.amountCents, kind: e.kind, dueAt: e.dueAt, dateAt: e.dateAt, notes: e.notes }}
+                              trigger={<Button variant="ghost" size="sm" type="button">Editar</Button>}
+                            />
+                            {e.status === "pending" && (
+                              <ConfirmAction
+                                trigger={<Button variant="ghost" size="sm">Cancelar</Button>}
+                                title={`Cancelar "${e.description}"?`}
+                                description="Ela sai do custo e do a pagar. O registro fica na tabela como cancelada."
+                                confirmLabel="Cancelar conta"
+                                action={cancelExpenseForm}
+                                fields={{ id: e.id, projectId: id }}
+                              />
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
                 <tfoot>
                   <tr className="border-t border-border bg-subtle text-sm font-medium">
-                    <td className="px-4 py-2" colSpan={4}>Total</td>
+                    <td className="px-4 py-2" colSpan={3}>Total (sem canceladas)</td>
                     <td className="type-data px-4 py-2 text-right">{formatBrlCents(totalExpenseCents)}</td>
-                    <td></td>
+                    <td colSpan={2}></td>
                   </tr>
                 </tfoot>
               </table>
+              </div>
             )}
           </Block>
 
@@ -322,6 +342,7 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
             {proposals.length === 0 ? (
               <p className="p-6 text-sm text-muted-foreground">Nenhuma proposta vinculada.</p>
             ) : (
+              <div tabIndex={0} role="region" aria-label="Propostas, role horizontalmente se necessário" className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-subtle text-muted-foreground">
                   <tr className="text-left">
@@ -353,6 +374,7 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
                   })}
                 </tbody>
               </table>
+              </div>
             )}
           </Block>
         </div>

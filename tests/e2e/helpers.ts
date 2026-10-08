@@ -53,3 +53,9 @@ export async function waitForMailWithSubject(fragment: string): Promise<string> 
   }
   throw new Error(`e-mail com assunto contendo "${fragment}" não chegou no Mailpit`);
 }
+
+/** Abre um grupo do menu lateral (Comercial, Operação, Financeiro…) se ainda estiver fechado: os grupos nascem recolhidos. */
+export async function openMenuGroup(page: Page, name: string | RegExp) {
+  const button = page.getByRole("navigation", { name: "Menu" }).getByRole("button", { name });
+  if ((await button.getAttribute("aria-expanded")) !== "true") await button.click();
+}

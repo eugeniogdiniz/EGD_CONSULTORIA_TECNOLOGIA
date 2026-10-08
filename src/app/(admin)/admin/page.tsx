@@ -71,7 +71,7 @@ export default async function AdminHome() {
         />
         {owner ? (
           <Kpi
-            href="/admin/projetos"
+            href="/admin/financeiro/receber"
             label="A receber"
             value={formatBrlCents(overview.receivableCents)}
             hint={overview.overdueInvoices > 0 ? `${overview.overdueInvoices} vencida${overview.overdueInvoices === 1 ? "" : "s"} · ${formatBrlCents(overview.overdueCents)}` : `${overview.activeProjects} projetos ativos`}

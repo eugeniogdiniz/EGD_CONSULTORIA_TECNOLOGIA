@@ -7,10 +7,13 @@ import { EmptyLine, ReportSection, ReportSheet } from "@/modules/reports/compone
 import { ReportToolbar } from "@/modules/reports/components/report-toolbar";
 import { issuedAt } from "@/modules/reports/components/report-bits";
 import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/shell/page-header";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 export const metadata = { title: "Relatórios · Semanal" };
 
 const nav = buttonVariants({ variant: "secondary", size: "sm" });
+const arrow = buttonVariants({ variant: "outline", size: "icon-sm" });
 
 function Column({ title, items, empty }: { title: string; items: WeeklyItem[]; empty: string }) {
   return (
@@ -53,14 +56,15 @@ export default async function SemanalPage({ searchParams }: PageProps<"/admin/re
 
   return (
     <>
+      <PageHeader title="Relatório semanal" meta="Concluído, vencendo e atrasado por projeto, semana a semana; compara com a semana anterior." />
       <ReportToolbar csvHref={`/admin/relatorios/semanal/csv?semana=${monday}`}>
         <nav aria-label="Semana" className="flex flex-wrap items-center gap-2">
-          <Link className={nav} aria-label="Semana anterior" href={`/admin/relatorios/semanal?semana=${addDays(monday, -7)}`}>
-            ←
+          <Link className={arrow} aria-label="Semana anterior" href={`/admin/relatorios/semanal?semana=${addDays(monday, -7)}`}>
+            <ChevronLeftIcon aria-hidden="true" />
           </Link>
           <span data-testid="semana-rotulo" className="px-2 font-mono text-sm">{periodo}</span>
-          <Link className={nav} aria-label="Próxima semana" href={`/admin/relatorios/semanal?semana=${addDays(monday, 7)}`}>
-            →
+          <Link className={arrow} aria-label="Próxima semana" href={`/admin/relatorios/semanal?semana=${addDays(monday, 7)}`}>
+            <ChevronRightIcon aria-hidden="true" />
           </Link>
           {!semanaAtual && (
             <Link className={nav} href="/admin/relatorios/semanal">

@@ -89,7 +89,7 @@ export default async function PropostasPage({ searchParams }: PageProps<"/admin/
                     <Link href={`/admin/crm/empresas/${p.companyId}`} className="text-link hover:underline">
                       {p.companyName}
                     </Link>
-                    <div className="type-micro text-muted-foreground">{p.opportunityTitle}</div>
+                    <Link href={`/admin/crm/oportunidades/${p.opportunityId}`} className="type-micro block text-muted-foreground hover:text-link">{p.opportunityTitle}</Link>
                   </td>
                   <td className="px-4 py-3">
                     <span

@@ -168,15 +168,27 @@ export const manualTimeSchema = z
   });
 export type ManualTimeInput = z.input<typeof manualTimeSchema>;
 
+const EXPENSE_KINDS = ["travel", "service", "equipment", "software", "tax", "payroll", "other"] as const;
+
+/** Conta a pagar: projeto opcional (vazio = custo geral da EGD); competência vazia = vencimento. */
 export const expenseSchema = z.object({
-  projectId: z.uuid(),
+  projectId: z
+    .union([z.uuid(), z.literal("").transform(() => null), z.null(), z.undefined().transform(() => null)])
+    .transform((v) => v ?? null),
+  supplier: optionalText(200),
   description: z.string().trim().min(2, "Mínimo 2 caracteres").max(200, "Máximo 200 caracteres"),
   amountCents: z.coerce
     .number()
     .int("Somente valor inteiro em centavos.")
     .min(0, "Valor não pode ser negativo."),
-  kind: z.enum(["travel", "service", "equipment", "other"]).default("other"),
-  dateAt: isoDateRequired,
+  kind: z.enum(EXPENSE_KINDS).default("other"),
+  dueAt: isoDateRequired,
+  dateAt: z
+    .string()
+    .optional()
+    .transform((v) => (v ?? "").trim())
+    .refine((v) => v === "" || isIsoDate(v), "Data inválida (AAAA-MM-DD)")
+    .transform((v) => (v === "" ? null : v)),
   notes: optionalText(2000),
 });
 export type ExpenseInput = z.input<typeof expenseSchema>;

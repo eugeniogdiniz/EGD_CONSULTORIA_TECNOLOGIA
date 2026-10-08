@@ -29,9 +29,14 @@ export default async function EmpresasPage({ searchParams }: PageProps<"/admin/c
         title="Empresas"
         meta="Cadastro comercial da EGD. Empresas arquivadas mantêm oportunidades abertas visíveis no funil."
         actions={
-          <Button variant="secondary" size="sm" render={<Link href="/admin/crm/empresas/nova" />}>
-            Nova empresa
-          </Button>
+          <>
+            <Button variant="ghost" size="sm" render={<Link href="/admin/crm/contatos" />}>
+              Todos os contatos
+            </Button>
+            <Button variant="secondary" size="sm" render={<Link href="/admin/crm/empresas/nova" />}>
+              Nova empresa
+            </Button>
+          </>
         }
       />
 

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { SidebarNav, type NavEntry } from "./sidebar";
 import { UserMenu, MobileNav } from "./user-menu";
 
-/** Layout dos portais: sidebar 240 px em papel, topbar 56 px, conteúdo em branco. */
+/** Layout dos portais: sidebar 240 px em papel, topbar 56 px, conteúdo em branco ocupando toda a largura restante. */
 export function AppShell({
   nav,
   footer,
@@ -40,7 +40,7 @@ export function AppShell({
             <UserMenu name={user.name} email={user.email} accountHref={accountHref} />
           </div>
         </header>
-        <main className="flex max-w-[1240px] flex-1 flex-col gap-6 p-5 md:p-8 print:max-w-none print:p-0">{children}</main>
+        <main className="flex w-full min-w-0 flex-1 flex-col gap-6 p-5 md:p-8 print:p-0">{children}</main>
       </div>
     </div>
   );

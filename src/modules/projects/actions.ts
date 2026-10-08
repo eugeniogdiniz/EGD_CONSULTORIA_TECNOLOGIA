@@ -1158,20 +1158,21 @@ export async function createExpense(
   if (!parsed.success) return fromZod(parsed.error);
   const data = parsed.data;
 
-  const proj = await db.query.project.findFirst({
-    where: eq(project.id, data.projectId),
-    columns: { id: true },
-  });
-  if (!proj) return fail("Projeto não encontrado.");
+  if (data.projectId) {
+    const proj = await db.query.project.findFirst({ where: eq(project.id, data.projectId), columns: { id: true } });
+    if (!proj) return fail("Projeto não encontrado.");
+  }
 
   const [row] = await db
     .insert(projectExpense)
     .values({
       projectId: data.projectId,
+      supplier: data.supplier,
       description: data.description,
       amountCents: data.amountCents,
       kind: data.kind,
-      dateAt: data.dateAt,
+      dueAt: data.dueAt,
+      dateAt: data.dateAt ?? data.dueAt,
       notes: data.notes,
       createdBy: ctx.user.id,
     })
@@ -1182,7 +1183,7 @@ export async function createExpense(
     action: "project.expense.created",
     entityType: "project_expense",
     entityId: row.id,
-    metadata: { projectId: data.projectId, amountCents: data.amountCents },
+    metadata: { projectId: data.projectId, amountCents: data.amountCents, dueAt: data.dueAt },
   });
   return ok({ id: row.id });
 }
@@ -1197,16 +1198,24 @@ export async function updateExpense(
   if (!parsed.success) return fromZod(parsed.error);
   const data = parsed.data;
 
+  if (data.projectId) {
+    const proj = await db.query.project.findFirst({ where: eq(project.id, data.projectId), columns: { id: true } });
+    if (!proj) return fail("Projeto não encontrado.");
+  }
+
   const [row] = await db
     .update(projectExpense)
     .set({
+      projectId: data.projectId,
+      supplier: data.supplier,
       description: data.description,
       amountCents: data.amountCents,
       kind: data.kind,
-      dateAt: data.dateAt,
+      dueAt: data.dueAt,
+      dateAt: data.dateAt ?? data.dueAt,
       notes: data.notes,
     })
-    .where(and(eq(projectExpense.id, id), eq(projectExpense.projectId, data.projectId)))
+    .where(eq(projectExpense.id, id))
     .returning({ id: projectExpense.id });
   if (!row) return fail("Despesa não encontrada.");
 
@@ -1215,8 +1224,36 @@ export async function updateExpense(
     action: "project.expense.updated",
     entityType: "project_expense",
     entityId: id,
-    metadata: { projectId: data.projectId, amountCents: data.amountCents },
+    metadata: { projectId: data.projectId, amountCents: data.amountCents, dueAt: data.dueAt },
   });
+  return ok(null);
+}
+
+/** Marca a conta como paga na data informada. Só pendente muda. */
+export async function markExpensePaid(ctx: AdminContext, id: string, paidAt: string): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Conta não encontrada.");
+  const parsed = markPaidSchema.safeParse({ paidAt });
+  if (!parsed.success) return fromZod(parsed.error);
+  const [row] = await db
+    .update(projectExpense)
+    .set({ status: "paid", paidAt: parsed.data.paidAt })
+    .where(and(eq(projectExpense.id, id), eq(projectExpense.status, "pending")))
+    .returning({ id: projectExpense.id, amountCents: projectExpense.amountCents, projectId: projectExpense.projectId });
+  if (!row) return fail("Conta não encontrada ou já decidida.");
+  await audit({ actorId: ctx.user.id, action: "project.expense.paid", entityType: "project_expense", entityId: id, metadata: { paidAt: parsed.data.paidAt, amountCents: row.amountCents, projectId: row.projectId } });
+  return ok(null);
+}
+
+/** Cancela uma conta pendente: sai do total e do a pagar, fica na tabela como cancelada. */
+export async function cancelExpense(ctx: AdminContext, id: string): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Conta não encontrada.");
+  const [row] = await db
+    .update(projectExpense)
+    .set({ status: "cancelled" })
+    .where(and(eq(projectExpense.id, id), eq(projectExpense.status, "pending")))
+    .returning({ id: projectExpense.id, projectId: projectExpense.projectId });
+  if (!row) return fail("Conta não encontrada ou já decidida.");
+  await audit({ actorId: ctx.user.id, action: "project.expense.cancelled", entityType: "project_expense", entityId: id, metadata: { projectId: row.projectId } });
   return ok(null);
 }
 

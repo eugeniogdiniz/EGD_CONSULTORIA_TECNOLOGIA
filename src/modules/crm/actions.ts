@@ -1,3 +1,4 @@
+import { stageAfterProposal, LOST_BY_PROPOSAL_REASON, type ProposalEvent } from "./stage-rules";
 import { and, eq, isNull, ne, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
@@ -548,6 +549,32 @@ export async function changeOpportunityStage(
   return ok(null);
 }
 
+/**
+ * O que acontece com a proposta puxa a oportunidade no funil (regra pura em
+ * `stage-rules.ts`). Usado pelo admin (mudar status, enviar) e pelo portal
+ * (aceite/recusa do cliente), por isso recebe só o id de quem agiu.
+ */
+export async function syncOpportunityStageFromProposal(actorId: string, opportunityId: string, event: ProposalEvent): Promise<void> {
+  const existing = await db.query.crmOpportunity.findFirst({ where: eq(crmOpportunity.id, opportunityId), columns: { id: true, stage: true } });
+  if (!existing) return;
+  const to = stageAfterProposal(existing.stage, event);
+  if (!to) return;
+  const patch: { stage: typeof to; wonAt: Date | null; lostAt: Date | null; lostReason: string | null } = { stage: to, wonAt: null, lostAt: null, lostReason: null };
+  if (to === "won") patch.wonAt = new Date();
+  if (to === "lost") {
+    patch.lostAt = new Date();
+    patch.lostReason = LOST_BY_PROPOSAL_REASON;
+  }
+  await db.update(crmOpportunity).set(patch).where(eq(crmOpportunity.id, opportunityId));
+  await audit({
+    actorId,
+    action: to === "won" ? "crm.opportunity.won" : to === "lost" ? "crm.opportunity.lost" : "crm.opportunity.stage_changed",
+    entityType: "crm_opportunity",
+    entityId: opportunityId,
+    metadata: { from: existing.stage, to, viaProposal: event, ...(to === "lost" ? { reason: LOST_BY_PROPOSAL_REASON } : {}) },
+  });
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Interação
 // ────────────────────────────────────────────────────────────────────────────
@@ -1037,6 +1064,9 @@ export async function changeProposalStatus(
     entityId: id,
     metadata: { from: existing.status, to },
   });
+  if (to === "sent" || to === "accepted" || to === "rejected") {
+    await syncOpportunityStageFromProposal(ctx.user.id, existing.opportunityId, to);
+  }
   if (to === "sent" || to === "accepted") {
     await enqueueWebhook(to === "sent" ? "proposal.sent" : "proposal.accepted", { id, number: existing.number, title: existing.title, valueCents: existing.valueCents, opportunityId: existing.opportunityId, validUntil: patch.validUntil });
   }

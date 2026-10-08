@@ -49,6 +49,8 @@ import {
   updatePhase,
   updateProject,
   updateTemplate,
+  markExpensePaid,
+  cancelExpense,
 } from "./actions";
 
 type NullState = ActionResult<null> | null;
@@ -425,19 +427,27 @@ export async function deleteTimeEntryForm(fd: FormData): Promise<void> {
 function expenseInput(fd: FormData) {
   return {
     projectId: String(fd.get("projectId") ?? ""),
+    supplier: String(fd.get("supplier") ?? ""),
     description: String(fd.get("description") ?? ""),
     amountCents: String(fd.get("amountCents") ?? ""),
-    kind: String(fd.get("kind") ?? "other") as "travel" | "service" | "equipment" | "other",
+    kind: String(fd.get("kind") ?? "other") as "travel" | "service" | "equipment" | "software" | "tax" | "payroll" | "other",
+    dueAt: String(fd.get("dueAt") ?? ""),
     dateAt: String(fd.get("dateAt") ?? ""),
     notes: String(fd.get("notes") ?? ""),
   };
 }
 
+/** Uma conta a pagar aparece no financeiro do projeto (se tiver) e na tela consolidada. */
+function revalidateExpense(projectId: string) {
+  if (projectId) revalidatePath(`/admin/projetos/${projectId}/financeiro`);
+  revalidatePath("/admin/financeiro/pagar");
+  revalidatePath("/admin");
+}
+
 export async function createExpenseForm(_p: CreateState, fd: FormData): Promise<CreateState> {
   const ctx = await requireOwner();
   const r = await createExpense(ctx, expenseInput(fd));
-  const projectId = String(fd.get("projectId") ?? "");
-  if (r.ok) revalidatePath(`/admin/projetos/${projectId}/financeiro`);
+  if (r.ok) revalidateExpense(String(fd.get("projectId") ?? ""));
   return r;
 }
 
@@ -445,17 +455,27 @@ export async function updateExpenseForm(_p: NullState, fd: FormData): Promise<Nu
   const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
   const r = await updateExpense(ctx, id, expenseInput(fd));
-  const projectId = String(fd.get("projectId") ?? "");
-  if (r.ok) revalidatePath(`/admin/projetos/${projectId}/financeiro`);
+  if (r.ok) revalidateExpense(String(fd.get("projectId") ?? ""));
   return r;
 }
 
 export async function deleteExpenseForm(fd: FormData): Promise<void> {
   const ctx = await requireOwner();
   const id = String(fd.get("id") ?? "");
-  const projectId = String(fd.get("projectId") ?? "");
   await deleteExpense(ctx, id);
-  revalidatePath(`/admin/projetos/${projectId}/financeiro`);
+  revalidateExpense(String(fd.get("projectId") ?? ""));
+}
+
+export async function markExpensePaidForm(fd: FormData): Promise<void> {
+  const ctx = await requireOwner();
+  await markExpensePaid(ctx, String(fd.get("id") ?? ""), String(fd.get("paidAt") ?? ""));
+  revalidateExpense(String(fd.get("projectId") ?? ""));
+}
+
+export async function cancelExpenseForm(fd: FormData): Promise<void> {
+  const ctx = await requireOwner();
+  await cancelExpense(ctx, String(fd.get("id") ?? ""));
+  revalidateExpense(String(fd.get("projectId") ?? ""));
 }
 
 // Fase 3.5 — Template ─────────────────────────────────────────────────────
@@ -538,6 +558,7 @@ export async function markInvoicePaidForm(fd: FormData): Promise<void> {
   const ctx = await requireOwner();
   await markInvoicePaid(ctx, String(fd.get("id") ?? ""), String(fd.get("paidAt") ?? ""));
   revalidatePath(`/admin/projetos/${String(fd.get("projectId") ?? "")}/financeiro`);
+  revalidatePath("/admin/financeiro/receber");
   revalidatePath("/admin");
 }
 
@@ -545,6 +566,7 @@ export async function cancelInvoiceForm(fd: FormData): Promise<void> {
   const ctx = await requireOwner();
   await cancelInvoice(ctx, String(fd.get("id") ?? ""));
   revalidatePath(`/admin/projetos/${String(fd.get("projectId") ?? "")}/financeiro`);
+  revalidatePath("/admin/financeiro/receber");
   revalidatePath("/admin");
 }
 

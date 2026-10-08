@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { loginAs, ADMIN } from "./helpers";
+import { loginAs, ADMIN, openMenuGroup } from "./helpers";
 import { createTwoOrgsWithClientsAndFiles } from "./fixtures";
 
 test("financeiro: parcelas, rate do projeto, estimativa, burndown e relatório de horas", async ({ page }) => {
@@ -51,4 +51,78 @@ test("financeiro: parcelas, rate do projeto, estimativa, burndown e relatório d
   expect(res.status()).toBe(200);
   expect(res.headers()["content-type"]).toContain("text/csv");
   expect(await res.text()).toContain("Pessoa;Projeto;Horas");
+});
+
+test("financeiro consolidado: contas a receber e a pagar de todos os projetos e custos gerais", async ({ page }) => {
+  test.setTimeout(120_000);
+  const fx = createTwoOrgsWithClientsAndFiles();
+  const p = fx.projectA;
+  // o banco de E2E persiste entre execuções: descrições únicas evitam linhas duplicadas
+  const tag = Date.now().toString(36);
+  const geralDesc = `Licença anual do editor ${tag}`;
+  const viagemDesc = `Passagem aérea ${tag}`;
+  const parcelaDesc = `Parcela única ${tag}`;
+  await loginAs(page, ADMIN.email, ADMIN.password);
+
+  // ── menu por área: Financeiro agrupa receber, pagar e horas ─────────────
+  await page.goto("/admin");
+  const menu = page.getByRole("navigation", { name: "Menu" });
+  await expect(menu.getByRole("link", { name: "Contas a pagar" })).toHaveCount(0); // grupo nasce fechado
+  await openMenuGroup(page, "Financeiro");
+  await menu.getByRole("link", { name: "Contas a pagar" }).click();
+  await expect(page).toHaveURL(/\/admin\/financeiro\/pagar$/);
+
+  // ── conta geral (sem projeto): cria, vence no futuro, pendente; marca paga ─
+  await page.getByRole("button", { name: /nova conta a pagar/i }).click();
+  const dlg = page.getByRole("dialog");
+  await dlg.getByLabel(/descrição/i).fill(geralDesc);
+  await dlg.getByLabel(/fornecedor/i).fill("Editor Ltda.");
+  await dlg.getByLabel(/valor/i).fill("1.200,00");
+  await dlg.getByLabel(/vencimento/i).fill("2030-03-10");
+  await dlg.getByLabel(/^tipo$/i).selectOption("software");
+  await dlg.getByRole("button", { name: /^criar$/i }).click();
+  await expect(dlg).toBeHidden({ timeout: 10_000 });
+  const geral = page.locator("tr", { hasText: geralDesc });
+  await expect(geral).toContainText("Custo geral");
+  await expect(geral).toContainText("Pendente");
+  await expect(geral).toContainText("Software");
+  await expect(page.getByText(/R\$\s1\.200,00/).first()).toBeVisible();
+  await geral.getByRole("button", { name: /marcar paga/i }).click();
+  await expect(page.locator("tr", { hasText: geralDesc })).toHaveCount(0, { timeout: 10_000 }); // filtro padrão: em aberto
+  await page.goto("/admin/financeiro/pagar?situacao=paid");
+  await expect(page.locator("tr", { hasText: geralDesc })).toContainText("Paga");
+
+  // ── despesa do projeto aparece na consolidada com o projeto; "só gerais" esconde ─
+  await page.goto(`/admin/projetos/${p.id}/financeiro`);
+  await page.getByRole("button", { name: /nova despesa/i }).first().click();
+  const dd = page.getByRole("dialog");
+  await dd.getByLabel(/descrição/i).fill(viagemDesc);
+  await dd.getByLabel(/valor/i).fill("800,00");
+  await dd.getByLabel(/vencimento/i).fill("2030-04-01");
+  await dd.getByRole("button", { name: /^criar$/i }).click();
+  await expect(dd).toBeHidden({ timeout: 10_000 });
+  await expect(page.locator("tr", { hasText: viagemDesc })).toContainText("Pendente");
+  await page.goto("/admin/financeiro/pagar");
+  const viagem = page.locator("tr", { hasText: viagemDesc });
+  await expect(viagem).toContainText(p.title);
+  await page.goto("/admin/financeiro/pagar?gerais=1");
+  await expect(page.locator("tr", { hasText: viagemDesc })).toHaveCount(0);
+
+  // ── contas a receber: parcela do projeto listada com projeto e cliente ────
+  await page.goto(`/admin/projetos/${p.id}/financeiro`);
+  await page.getByRole("button", { name: /nova parcela/i }).click();
+  const pd = page.getByRole("dialog");
+  await pd.getByLabel(/descrição/i).fill(parcelaDesc);
+  await pd.getByLabel(/valor/i).fill("2.000,00");
+  await pd.getByLabel(/vencimento/i).fill("2030-05-05");
+  await pd.getByRole("button", { name: /criar parcela/i }).click();
+  await expect(page.getByTestId("parcela-1")).toContainText(parcelaDesc, { timeout: 10_000 });
+  await page.goto("/admin/financeiro/receber");
+  const parcela = page.locator("tr", { hasText: parcelaDesc });
+  await expect(parcela).toContainText(p.title);
+  await expect(parcela).toContainText("Pendente");
+  await parcela.getByRole("button", { name: /marcar recebida/i }).click();
+  await expect(page.locator("tr", { hasText: parcelaDesc })).toHaveCount(0, { timeout: 10_000 });
+  await page.goto("/admin/financeiro/receber?situacao=paid");
+  await expect(page.locator("tr", { hasText: parcelaDesc })).toContainText("Paga");
 });

@@ -22,8 +22,14 @@ export const projectExpenseKind = pgEnum("project_expense_kind", [
   "travel",
   "service",
   "equipment",
+  "software",
+  "tax",
+  "payroll",
   "other",
 ]);
+
+/** Situação de uma conta a pagar. "Vencida" é derivada (pending e due_at < hoje). */
+export const projectExpenseStatus = pgEnum("project_expense_status", ["pending", "paid", "cancelled"]);
 
 export const projectTimeSource = pgEnum("project_time_source", ["timer", "manual"]);
 
@@ -110,19 +116,25 @@ export const projectTimeEntry = pgTable(
   ],
 );
 
-// Despesas do projeto ───────────────────────────────────────────────────────
+// Contas a pagar (despesas de projeto e custos gerais) ──────────────────────
 
+/**
+ * Conta a pagar. Com `projectId` entra no custo do projeto; sem, é custo geral
+ * da EGD (ferramentas, impostos, pró-labore). `dateAt` é a competência.
+ */
 export const projectExpense = pgTable(
   "project_expense",
   {
     id: uuid().primaryKey().defaultRandom(),
-    projectId: uuid()
-      .notNull()
-      .references(() => project.id, { onDelete: "cascade" }),
+    projectId: uuid().references(() => project.id, { onDelete: "cascade" }),
+    supplier: text(),
     description: text().notNull(),
     amountCents: bigint({ mode: "number" }).notNull(),
     kind: projectExpenseKind().default("other").notNull(),
     dateAt: date().notNull(),
+    dueAt: date().notNull(),
+    status: projectExpenseStatus().default("pending").notNull(),
+    paidAt: date(),
     notes: text(),
     createdBy: uuid()
       .notNull()
@@ -135,6 +147,7 @@ export const projectExpense = pgTable(
   },
   (t) => [
     index("expense_project_date_idx").on(t.projectId, t.dateAt.desc()),
+    index("expense_status_due_idx").on(t.status, t.dueAt),
     check("expense_amount_positive", sql`${t.amountCents} >= 0`),
   ],
 );

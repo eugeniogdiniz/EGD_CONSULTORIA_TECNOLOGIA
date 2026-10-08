@@ -155,17 +155,26 @@ describe("manualTimeSchema", () => {
 });
 
 describe("expenseSchema", () => {
-  it("aceita despesa mínima", () => {
+  it("aceita despesa mínima (vencimento obrigatório; competência e projeto opcionais)", () => {
     const r = expenseSchema.safeParse({
       projectId: uuid,
       description: "Viagem",
       amountCents: 5000,
-      dateAt: "2026-10-01",
+      dueAt: "2026-10-01",
     });
     expect(r.success).toBe(true);
     if (r.success) {
       expect(r.data.kind).toBe("other");
+      expect(r.data.dateAt).toBeNull();
+      expect(r.data.supplier).toBeNull();
     }
+  });
+  it("conta geral: projeto vazio vira null; sem vencimento recusa", () => {
+    const geral = expenseSchema.safeParse({ projectId: "", description: "Imposto DAS", amountCents: 12000, kind: "tax", dueAt: "2026-10-20", supplier: "Receita Federal" });
+    expect(geral.success).toBe(true);
+    if (geral.success) expect(geral.data.projectId).toBeNull();
+    const semVenc = expenseSchema.safeParse({ projectId: uuid, description: "Viagem", amountCents: 5000, dateAt: "2026-10-01" });
+    expect(semVenc.success).toBe(false);
   });
   it("recusa amount negativo", () => {
     expect(

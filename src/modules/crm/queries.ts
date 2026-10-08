@@ -174,12 +174,28 @@ export function listOpportunities(
 
 export type OpportunityCard = Awaited<ReturnType<typeof listOpportunities>>[number];
 
+/** Proposta mais recente da oportunidade, mostrada no card do funil. */
+export type LatestProposal = { id: string; number: string; status: "draft" | "sent" | "accepted" | "rejected" | "expired"; valueCents: number | null };
+export type FunnelCard = OpportunityCard & { proposal: LatestProposal | null };
+
 export type FunnelColumn = {
   stage: "new" | "qualified" | "meeting" | "proposal" | "won" | "lost";
-  opportunities: OpportunityCard[];
+  opportunities: FunnelCard[];
   count: number;
   totalValueCents: number;
 };
+
+async function latestProposalByOpportunity(ids: string[]): Promise<Map<string, LatestProposal>> {
+  const out = new Map<string, LatestProposal>();
+  if (ids.length === 0) return out;
+  const rows = await db
+    .select({ id: crmProposal.id, number: crmProposal.number, status: crmProposal.status, valueCents: crmProposal.valueCents, opportunityId: crmProposal.opportunityId })
+    .from(crmProposal)
+    .where(inArray(crmProposal.opportunityId, ids))
+    .orderBy(desc(crmProposal.updatedAt));
+  for (const r of rows) if (!out.has(r.opportunityId)) out.set(r.opportunityId, { id: r.id, number: r.number, status: r.status, valueCents: r.valueCents });
+  return out;
+}
 
 const STAGE_ORDER = ["new", "qualified", "meeting", "proposal", "won", "lost"] as const;
 
@@ -192,9 +208,10 @@ export async function listOpportunitiesGroupedByStage(
     search: opts.search,
     includeClosed: opts.includeClosed ?? true, // kanban mostra tudo, UI colapsa
   });
-  const grouped = new Map<string, OpportunityCard[]>();
+  const latest = await latestProposalByOpportunity(rows.map((r) => r.id));
+  const grouped = new Map<string, FunnelCard[]>();
   for (const stage of STAGE_ORDER) grouped.set(stage, []);
-  for (const row of rows) grouped.get(row.stage)!.push(row);
+  for (const row of rows) grouped.get(row.stage)!.push({ ...row, proposal: latest.get(row.id) ?? null });
   return STAGE_ORDER.map((stage) => {
     const opportunities = grouped.get(stage)!;
     return {

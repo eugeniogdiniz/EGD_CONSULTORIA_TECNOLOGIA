@@ -7,28 +7,25 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FieldError } from "@/components/shell/field-error";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import {
-  createExpenseForm,
-  deleteExpenseForm,
-  updateExpenseForm,
-} from "@/modules/projects/form-actions";
+import { createExpenseForm, deleteExpenseForm, updateExpenseForm } from "@/modules/projects/form-actions";
+import { EXPENSE_KIND_OPTIONS, type ExpenseKind } from "@/modules/projects/payables";
 import type { ActionResult } from "@/lib/action-result";
 
 type Expense = {
   id: string;
+  projectId: string | null;
+  supplier: string | null;
   description: string;
   amountCents: number;
-  kind: "travel" | "service" | "equipment" | "other";
+  kind: ExpenseKind;
+  dueAt: string;
   dateAt: string;
   notes: string | null;
 };
 
-const KIND_OPTIONS = [
-  { value: "travel", label: "Viagem" },
-  { value: "service", label: "Serviço" },
-  { value: "equipment", label: "Equipamento" },
-  { value: "other", label: "Outros" },
-] as const;
+export type ProjectOption = { id: string; title: string; companyName?: string };
+
+const selectClass = "h-10 rounded-sm border border-input bg-card px-3 text-sm [.theme-app_&]:h-9";
 
 function centsToReais(cents: number | null): string {
   if (cents == null) return "";
@@ -44,28 +41,36 @@ function reaisInputToCents(raw: string): string {
   return String(Math.round(parsed * 100));
 }
 
+/**
+ * Conta a pagar. Dentro de um projeto (`projectId`) o projeto fica fixo e o
+ * diálogo se chama "despesa"; na tela consolidada (`projects`) o projeto é
+ * opcional (vazio = custo geral da EGD).
+ */
 export function ExpenseFormDialog({
   projectId,
+  projects,
   expense,
   trigger,
 }: {
-  projectId: string;
+  projectId?: string;
+  projects?: ProjectOption[];
   expense?: Expense;
   trigger: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const isEdit = Boolean(expense);
+  const noun = projectId ? "despesa" : "conta a pagar";
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger as React.ReactElement} />
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Editar despesa" : "Nova despesa"}</DialogTitle>
+          <DialogTitle>{isEdit ? `Editar ${noun}` : `Nova ${noun}`}</DialogTitle>
         </DialogHeader>
         {isEdit ? (
-          <EditForm projectId={projectId} expense={expense!} onDone={() => setOpen(false)} />
+          <EditForm projectId={projectId} projects={projects} expense={expense!} onDone={() => setOpen(false)} />
         ) : (
-          <CreateForm projectId={projectId} onDone={() => setOpen(false)} />
+          <CreateForm projectId={projectId} projects={projects} onDone={() => setOpen(false)} />
         )}
       </DialogContent>
     </Dialog>
@@ -74,12 +79,14 @@ export function ExpenseFormDialog({
 
 function Fields({
   projectId,
+  projects,
   expense,
   fe,
   reais,
   setReais,
 }: {
-  projectId: string;
+  projectId?: string;
+  projects?: ProjectOption[];
   expense?: Expense;
   fe: Record<string, string[]> | undefined;
   reais: string;
@@ -87,14 +94,34 @@ function Fields({
 }) {
   return (
     <>
-      <input type="hidden" name="projectId" value={projectId} />
       {expense && <input type="hidden" name="id" value={expense.id} />}
-      <div className="grid gap-1.5">
-        <Label htmlFor="e-desc">Descrição</Label>
-        <Input id="e-desc" name="description" defaultValue={expense?.description} required aria-invalid={fe?.description ? true : undefined} />
-        <FieldError errors={fe?.description} />
-      </div>
+      {projectId ? (
+        <input type="hidden" name="projectId" value={projectId} />
+      ) : (
+        <div className="grid gap-1.5">
+          <Label htmlFor="e-project">Projeto <span className="font-normal text-faint">vazio = custo geral da EGD</span></Label>
+          <select id="e-project" name="projectId" defaultValue={expense?.projectId ?? ""} className={selectClass}>
+            <option value="">Sem projeto (custo geral)</option>
+            {(projects ?? []).map((p) => (
+              <option key={p.id} value={p.id}>{p.title}{p.companyName ? ` · ${p.companyName}` : ""}</option>
+            ))}
+          </select>
+          <FieldError errors={fe?.projectId} />
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-1.5">
+          <Label htmlFor="e-desc">Descrição</Label>
+          <Input id="e-desc" name="description" defaultValue={expense?.description} required aria-invalid={fe?.description ? true : undefined} />
+          <FieldError errors={fe?.description} />
+        </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor="e-supplier">Fornecedor <span className="font-normal text-faint">opcional</span></Label>
+          <Input id="e-supplier" name="supplier" defaultValue={expense?.supplier ?? ""} maxLength={200} aria-invalid={fe?.supplier ? true : undefined} />
+          <FieldError errors={fe?.supplier} />
+        </div>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
         <div className="grid gap-1.5">
           <Label htmlFor="e-amount">Valor (R$)</Label>
           <Input
@@ -108,20 +135,20 @@ function Fields({
           <FieldError errors={fe?.amountCents} />
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="e-date">Data</Label>
-          <Input id="e-date" name="dateAt" type="date" defaultValue={expense?.dateAt ?? ""} required aria-invalid={fe?.dateAt ? true : undefined} />
+          <Label htmlFor="e-due">Vencimento</Label>
+          <Input id="e-due" name="dueAt" type="date" defaultValue={expense?.dueAt ?? ""} required aria-invalid={fe?.dueAt ? true : undefined} />
+          <FieldError errors={fe?.dueAt} />
+        </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor="e-date">Competência <span className="font-normal text-faint">opcional</span></Label>
+          <Input id="e-date" name="dateAt" type="date" defaultValue={expense?.dateAt ?? ""} aria-invalid={fe?.dateAt ? true : undefined} />
           <FieldError errors={fe?.dateAt} />
         </div>
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="e-kind">Tipo</Label>
-        <select
-          id="e-kind"
-          name="kind"
-          defaultValue={expense?.kind ?? "other"}
-          className="h-10 rounded-sm border border-input bg-card px-3 text-sm"
-        >
-          {KIND_OPTIONS.map((k) => (
+        <select id="e-kind" name="kind" defaultValue={expense?.kind ?? "other"} className={selectClass}>
+          {EXPENSE_KIND_OPTIONS.map((k) => (
             <option key={k.value} value={k.value}>{k.label}</option>
           ))}
         </select>
@@ -134,7 +161,7 @@ function Fields({
   );
 }
 
-function CreateForm({ projectId, onDone }: { projectId: string; onDone: () => void }) {
+function CreateForm({ projectId, projects, onDone }: { projectId?: string; projects?: ProjectOption[]; onDone: () => void }) {
   const [reais, setReais] = useState("");
   const [state, formAction, pending] = useActionState<ActionResult<{ id: string }> | null, FormData>(
     async (prev, fd) => {
@@ -148,7 +175,7 @@ function CreateForm({ projectId, onDone }: { projectId: string; onDone: () => vo
   const fe = state && !state.ok ? state.fieldErrors : undefined;
   return (
     <form action={formAction} className="grid gap-4">
-      <Fields projectId={projectId} fe={fe} reais={reais} setReais={setReais} />
+      <Fields projectId={projectId} projects={projects} fe={fe} reais={reais} setReais={setReais} />
       {state && !state.ok && !fe && <p role="alert" className="text-sm text-danger">{state.error}</p>}
       <DialogFooter>
         <DialogClose render={<Button variant="outline" size="sm" type="button" />}>Cancelar</DialogClose>
@@ -158,7 +185,7 @@ function CreateForm({ projectId, onDone }: { projectId: string; onDone: () => vo
   );
 }
 
-function EditForm({ projectId, expense, onDone }: { projectId: string; expense: Expense; onDone: () => void }) {
+function EditForm({ projectId, projects, expense, onDone }: { projectId?: string; projects?: ProjectOption[]; expense: Expense; onDone: () => void }) {
   const [reais, setReais] = useState(centsToReais(expense.amountCents));
   const [state, formAction, pending] = useActionState<ActionResult<null> | null, FormData>(
     async (prev, fd) => {
@@ -172,12 +199,12 @@ function EditForm({ projectId, expense, onDone }: { projectId: string; expense: 
   const fe = state && !state.ok ? state.fieldErrors : undefined;
   return (
     <form action={formAction} className="grid gap-4">
-      <Fields projectId={projectId} expense={expense} fe={fe} reais={reais} setReais={setReais} />
+      <Fields projectId={projectId} projects={projects} expense={expense} fe={fe} reais={reais} setReais={setReais} />
       {state && !state.ok && !fe && <p role="alert" className="text-sm text-danger">{state.error}</p>}
       <DialogFooter>
         <form action={deleteExpenseForm} className="mr-auto">
           <input type="hidden" name="id" value={expense.id} />
-          <input type="hidden" name="projectId" value={projectId} />
+          <input type="hidden" name="projectId" value={projectId ?? expense.projectId ?? ""} />
           <Button type="submit" size="sm" variant="destructive">Excluir</Button>
         </form>
         <DialogClose render={<Button variant="outline" size="sm" type="button" />}>Fechar</DialogClose>

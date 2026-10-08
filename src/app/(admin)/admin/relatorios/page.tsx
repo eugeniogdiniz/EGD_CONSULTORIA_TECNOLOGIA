@@ -10,6 +10,7 @@ import { ReportToolbar } from "@/modules/reports/components/report-toolbar";
 import { issuedAt } from "@/modules/reports/components/report-bits";
 import { csvDecimal } from "@/modules/reports/csv";
 import { cn } from "cn";
+import { PageHeader } from "@/components/shell/page-header";
 
 export const metadata = { title: "Relatórios · Portfólio" };
 
@@ -28,7 +29,8 @@ export default async function PortfolioPage() {
 
   return (
     <>
-      <ReportToolbar csvHref="/admin/relatorios/csv" note={'Projetos em planejamento, ativos e pausados. O relatório de cada projeto fica na aba "Relatório" dele.'} />
+      <PageHeader title="Portfólio de projetos" meta={'Projetos em planejamento, ativos e pausados. O relatório de cada projeto fica na aba "Relatório" dele.'} />
+      <ReportToolbar csvHref="/admin/relatorios/csv" note="Imprime em A4; o CSV traz os mesmos números." />
       <ReportSheet
         kind="PORTFÓLIO DE PROJETOS"
         title={total === 1 ? "1 projeto em andamento" : `${total} projetos em andamento`}

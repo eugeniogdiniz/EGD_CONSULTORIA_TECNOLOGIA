@@ -38,59 +38,78 @@ function writeGroupState(key: string, state: "open" | "closed") {
   }
 }
 
-/** Regras da spec §6.1 — determina se o grupo deve estar aberto agora. */
+/**
+ * Grupo aberto: o grupo da tela atual fica aberto (mostra onde a pessoa está,
+ * ignora o storage); os demais nascem fechados e só abrem quando a pessoa
+ * clica; a escolha fica guardada.
+ */
 export function shouldGroupBeOpen(
   pathname: string,
   hrefs: string[],
   stored: "open" | "closed" | null,
+  /** item ativo do menu inteiro (`activeHref`); sem ele, cai no prefixo da rota */
+  active?: string | null,
 ): boolean {
-  // Sub-item ativo sempre força aberto, ignora storage.
-  if (hrefs.some((h) => pathname === h || pathname.startsWith(`${h}/`))) return true;
+  const hasActive = active === undefined ? hrefs.some((h) => pathname === h || pathname.startsWith(`${h}/`)) : active !== null && hrefs.includes(active);
+  if (hasActive) return true;
   if (stored === null) return false;
   return stored === "open";
 }
 
-function isLinkActive(pathname: string, href: string, isFirst: boolean): boolean {
-  return isFirst ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+/**
+ * Um único item ativo por vez: entre os hrefs que casam com a rota (exato ou
+ * como prefixo de pasta), vence o mais específico. A raiz (`/admin`) só casa
+ * exato, senão ficaria ativa em toda página. Pura: testada em unidade.
+ */
+export function activeHref(pathname: string, hrefs: string[], root?: string): string | null {
+  return hrefs
+    .filter((h) => (h === root ? pathname === h : pathname === h || pathname.startsWith(`${h}/`)))
+    .reduce<string | null>((longest, h) => (longest == null || h.length > longest.length ? h : longest), null);
 }
 
-function SidebarLink({ item, active }: { item: NavLink; active: boolean }) {
+function SidebarLink({ item, active, nested }: { item: NavLink; active: boolean; nested?: boolean }) {
   return (
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
         "relative flex h-9 items-center rounded-sm px-3 text-sm font-medium text-muted-foreground hover:bg-card/60 hover:text-foreground",
+        nested && "pl-6",
         active &&
           "bg-link-soft text-link before:absolute before:top-2 before:bottom-2 before:left-0 before:w-0.5 before:bg-link hover:bg-link-soft hover:text-link",
       )}
     >
       {item.label}
-      {item.badge ? (
-        <span className="ml-auto inline-flex h-5 items-center rounded-sm bg-signal-soft px-1.5 text-[0.75rem] font-medium text-signal-strong">
-          {item.badge}
-        </span>
-      ) : null}
+      {item.badge ? <Badge n={item.badge} /> : null}
     </Link>
   );
 }
 
-function SidebarGroup({ group }: { group: NavGroup }) {
+function Badge({ n }: { n: number }) {
+  return (
+    <span className="ml-auto inline-flex h-5 items-center rounded-sm bg-signal-soft px-1.5 text-[0.75rem] font-medium text-signal-strong">
+      {n}
+    </span>
+  );
+}
+
+function SidebarGroup({ group, active }: { group: NavGroup; active: string | null }) {
   const pathname = usePathname();
   const hrefs = useMemo(() => group.items.map((i) => i.href), [group.items]);
 
-  // Server render "closed" pra evitar hydration mismatch com localStorage; useEffect ajusta.
+  // Server render usa o default (fechado) pra evitar hydration mismatch com localStorage; useEffect ajusta.
   const [stored, setStored] = useState<"open" | "closed" | null>(null);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- hidratação do localStorage é lida uma vez no mount, padrão SSR-safe.
     setStored(readGroupState(group.storageKey));
   }, [group.storageKey]);
 
-  const open = shouldGroupBeOpen(pathname, hrefs, stored);
+  const open = shouldGroupBeOpen(pathname, hrefs, stored, active);
   const groupId = `nav-group-${group.storageKey}`;
+  const badgeTotal = group.items.reduce((s, i) => s + (i.badge ?? 0), 0);
 
   return (
-    <div>
+    <div className="pt-2 first:pt-0">
       <button
         type="button"
         onClick={() => {
@@ -100,25 +119,24 @@ function SidebarGroup({ group }: { group: NavGroup }) {
         }}
         aria-expanded={open}
         aria-controls={groupId}
-        className="flex h-9 w-full items-center gap-2 rounded-sm px-3 text-left font-mono text-[0.8125rem] text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className="flex h-8 w-full items-center gap-2 rounded-sm px-3 text-left text-[0.75rem] font-medium tracking-wide text-faint uppercase hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         <span className="flex-1 truncate">{group.label}</span>
+        {!open && badgeTotal > 0 ? <Badge n={badgeTotal} /> : null}
         <svg
           width="12"
           height="12"
           viewBox="0 0 12 12"
-          className={cn("shrink-0 text-faint transition-transform duration-150", open && "rotate-90")}
+          className={cn("shrink-0 transition-transform duration-150", open && "rotate-90")}
           aria-hidden="true"
         >
           <path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
       {open ? (
-        <div id={groupId} className="grid gap-1 pt-1">
+        <div id={groupId} className="grid gap-0.5 pt-0.5">
           {group.items.map((item) => (
-            <div key={item.href} className="pl-3">
-              <SidebarLink item={item} active={isLinkActive(pathname, item.href, false)} />
-            </div>
+            <SidebarLink key={item.href} item={item} active={item.href === active} nested />
           ))}
         </div>
       ) : null}
@@ -128,14 +146,9 @@ function SidebarGroup({ group }: { group: NavGroup }) {
 
 export function SidebarNav({ nav, footer }: { nav: NavEntry[]; footer: string }) {
   const pathname = usePathname();
-  const firstLinkHref = nav.find((e): e is NavLink => !isGroup(e))?.href;
-
-  // Quando dois itens flat competem pelo mesmo pathname (ex.: /admin/projetos e
-  // /admin/projetos/templates), o mais específico ganha.
-  const flatHrefs = nav.filter((e): e is NavLink => !isGroup(e)).map((e) => e.href);
-  const winningHref = flatHrefs
-    .filter((h) => pathname === h || pathname.startsWith(`${h}/`))
-    .reduce<string | null>((longest, h) => (longest == null || h.length > longest.length ? h : longest), null);
+  const root = nav.find((e): e is NavLink => !isGroup(e))?.href;
+  const allHrefs = nav.flatMap((e) => (isGroup(e) ? e.items.map((i) => i.href) : [e.href]));
+  const active = activeHref(pathname, allHrefs, root);
 
   return (
     <>
@@ -143,15 +156,13 @@ export function SidebarNav({ nav, footer }: { nav: NavEntry[]; footer: string })
         <Logo />
       </div>
       <nav aria-label="Menu" className="grid gap-1">
-        {nav.map((entry, index) => {
-          if (isGroup(entry)) return <SidebarGroup key={`g-${entry.storageKey}`} group={entry} />;
-          const isFirst = entry.href === firstLinkHref && index === 0;
-          const active =
-            winningHref !== null
-              ? entry.href === winningHref
-              : isLinkActive(pathname, entry.href, isFirst);
-          return <SidebarLink key={entry.href} item={entry} active={active} />;
-        })}
+        {nav.map((entry) =>
+          isGroup(entry) ? (
+            <SidebarGroup key={`g-${entry.storageKey}`} group={entry} active={active} />
+          ) : (
+            <SidebarLink key={entry.href} item={entry} active={entry.href === active} />
+          ),
+        )}
       </nav>
       <div className="mt-auto px-3 py-3 text-[0.8125rem] text-faint">{footer}</div>
     </>
