@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { isOwner, requireAdmin } from "@/modules/auth/context";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { files } from "@/db/schema";
+import { getDownloadUrl } from "@/modules/files/actions";
+import { AcceptanceTermForm } from "@/modules/contracts/components/acceptance-term-form";
 import {
   getCurrentUserRateCents,
   getDeliverable,
@@ -85,6 +90,13 @@ export default async function DeliverableDetailPage({
     ]);
 
   const acceptance = (await listDeliverableAcceptances(deliverableId))[0] ?? null;
+  // Fase 23: termo de aceite gerado (arquivo interno) e seu link assinado, só para o dono
+  const acceptanceFile = d.acceptanceFileId ? await db.query.files.findFirst({ where: eq(files.id, d.acceptanceFileId) }) : null;
+  let acceptanceUrl: string | null = null;
+  if (acceptanceFile && isOwner(ctx)) {
+    const r = await getDownloadUrl(ctx, acceptanceFile.id);
+    if (r.ok) acceptanceUrl = r.data.url;
+  }
   const existingComments = comments.filter((c) => !c.deletedAt).length;
   const totalMinutes = timeEntries.reduce((s, e) => s + (e.minutes ?? 0), 0);
 
@@ -300,6 +312,25 @@ export default async function DeliverableDetailPage({
               </div>
             </form>
           </Block>
+
+          {isOwner(ctx) && acceptance?.decision === "approved" && (
+            <Block title="Termo de aceite" aside={acceptanceFile ? "gerado" : "entrega aprovada"}>
+              <div className="grid gap-3">
+                <p className="text-sm text-muted-foreground">
+                  Aprovada por {acceptance.userName} em {formatDateTime(acceptance.createdAt)}. O termo do kit sai em PDF com essa evidência e fica anexado à entrega.
+                </p>
+                {acceptanceFile && (
+                  <div className="flex items-center justify-between gap-3 rounded-sm border border-border bg-subtle p-3 text-sm" data-testid="termo-arquivo">
+                    <span className="truncate">{acceptanceFile.originalName}</span>
+                    {acceptanceUrl && (
+                      <Button variant="secondary" size="sm" render={<a href={acceptanceUrl} download={acceptanceFile.originalName} />}>Baixar</Button>
+                    )}
+                  </div>
+                )}
+                <AcceptanceTermForm deliverableId={d.id} projectId={id} hasFile={Boolean(acceptanceFile)} />
+              </div>
+            </Block>
+          )}
 
           <Block title="Dados">
             <dl className="grid grid-cols-[110px_1fr] gap-y-2 text-sm">

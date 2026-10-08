@@ -1,6 +1,7 @@
 export * from "@/modules/auth/schema";
 export * from "@/modules/tenancy/schema";
 export * from "@/modules/crm/schema";
+export * from "@/modules/contracts/schema";
 export * from "@/modules/projects/schema";
 export * from "@/modules/projects/schema-extras";
 export * from "@/modules/cases/schema";

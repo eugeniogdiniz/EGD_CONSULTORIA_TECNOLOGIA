@@ -16,6 +16,7 @@ export function navFor(role: "admin" | "collaborator", badges: { leads: number; 
         { href: "/admin/crm/contatos", label: "Contatos" },
         { href: "/admin/crm/funil", label: "Funil" },
         { href: "/admin/crm/propostas", label: "Propostas" },
+        { href: "/admin/crm/contratos", label: "Contratos" },
       ],
     });
     nav.push({ href: "/admin/organizacoes", label: "Organizações" }, { href: "/admin/equipe", label: "Equipe" });

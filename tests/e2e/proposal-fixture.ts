@@ -11,3 +11,10 @@ export async function proposalRoutes(page: Page): Promise<string[]> {
   const m = html.match(/\/admin\/crm\/propostas\/([0-9a-f-]{36})/);
   return m ? [`/admin/crm/propostas/${m[1]}`, `/admin/crm/propostas/${m[1]}/documento`] : [];
 }
+
+/** Primeiro contrato listado no admin (o spec de contratos cria um); sem nenhum, lista vazia. */
+export async function contractRoutes(page: Page): Promise<string[]> {
+  const res = await page.request.get("/admin/crm/contratos");
+  const m = (await res.text()).match(/\/admin\/crm\/contratos\/([0-9a-f-]{36})/);
+  return m ? [`/admin/crm/contratos/${m[1]}`] : [];
+}

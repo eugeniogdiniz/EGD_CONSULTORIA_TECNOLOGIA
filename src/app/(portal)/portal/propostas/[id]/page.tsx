@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { cn } from "cn";
 import { requirePortal } from "@/modules/auth/context";
 import { getPortalProposal } from "@/modules/portal-proposals/queries";
+import { getPortalContract } from "@/modules/contracts/queries";
 import { canDecide, PORTAL_PROPOSAL_STATUS_LABEL } from "@/modules/portal-proposals/rules";
 import { ProposalDecisionForm } from "@/modules/portal-proposals/components/decision-form";
 import { PageHeader, Block } from "@/components/shell/page-header";
@@ -23,6 +24,7 @@ export default async function PortalPropostaPage({ params }: PageProps<"/portal/
   const { id } = await params;
   const p = await getPortalProposal(ctx, id);
   if (!p) notFound();
+  const contract = p.status === "accepted" ? await getPortalContract(ctx, p.id) : null;
   const label = PORTAL_PROPOSAL_STATUS_LABEL[p.status as keyof typeof PORTAL_PROPOSAL_STATUS_LABEL];
   return (
     <>
@@ -56,6 +58,21 @@ export default async function PortalPropostaPage({ params }: PageProps<"/portal/
               <p className="text-sm text-muted-foreground">Sem arquivo.</p>
             )}
           </Block>
+          {contract && (
+            <Block title="Contrato" aside={contract.status === "signed" ? "assinado" : "emitido"}>
+              <div className="flex items-center gap-3.5 rounded-md border border-border bg-card p-3" data-testid="contrato-portal">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium">{contract.fileName}</div>
+                  <div className="type-micro text-muted-foreground">
+                    contrato {contract.number} · v{contract.documentVersion}{contract.fileSize != null && ` · ${formatBytes(contract.fileSize)}`}{contract.issuedAt && ` · emitido em ${formatDate(contract.issuedAt)}`}
+                  </div>
+                </div>
+                <form method="post" action={`/portal/propostas/${p.id}/contrato`}>
+                  <Button type="submit" variant="outline" size="sm">Baixar contrato</Button>
+                </form>
+              </div>
+            </Block>
+          )}
           {p.decision ? (
             <Block title={p.decision === "accepted" ? "Aceite registrado" : "Recusa registrada"}>
               <p className="text-sm">

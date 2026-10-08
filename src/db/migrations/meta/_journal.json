@@ -148,6 +148,13 @@
       "when": 1791083242887,
       "tag": "0020_aceites",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791085652080,
+      "tag": "0021_contratos",
+      "breakpoints": true
     }
   ]
 }

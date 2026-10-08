@@ -148,6 +148,8 @@ export const projectDeliverable = pgTable(
     estimateMinutes: integer(),
     completedAt: timestamp({ withTimezone: true }),
     fileId: uuid().references(() => files.id, { onDelete: "set null" }),
+    // Fase 23: termo de aceite em PDF gerado após a aprovação do cliente
+    acceptanceFileId: uuid().references(() => files.id, { onDelete: "set null" }),
     // reservado para a Fase 4 (portal do cliente); não usado na Fase 3
     visibleToClient: boolean().default(false).notNull(),
     ownerId: uuid()
