@@ -39,7 +39,8 @@ export default defineConfig({
   webServer: external
     ? undefined
     : {
-        command: `npx next dev -p ${PORT}`,
+        // teto de memória: o `next dev` compila todas as rotas e já passou de 11 GB (OOM derrubou a máquina)
+        command: `systemd-run --user --scope -p MemoryMax=6G -p MemorySwapMax=1G npx next dev -p ${PORT}`,
         url: `${baseURL}/api/health`,
         reuseExistingServer: false,
         timeout: 120_000,
