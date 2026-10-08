@@ -1,6 +1,8 @@
 import { requireOwner } from "@/modules/auth/context";
-import { listSettings, SETTINGS, type SettingKey } from "@/modules/settings/queries";
-import { setSettingForm } from "@/modules/settings/form-actions";
+import { BOOLEAN_SETTINGS, LEGAL_SETTINGS, listSettings, SETTINGS, type SettingKey } from "@/modules/settings/queries";
+import { setLegalSettingsForm, setSettingForm } from "@/modules/settings/form-actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { countWithoutTwoFactor } from "@/modules/team/queries";
 import { PageHeader, Block } from "@/components/shell/page-header";
 
@@ -10,7 +12,7 @@ export default async function ConfiguracoesPage() {
   // o dono alcança esta tela mesmo sem 2FA: é aqui que ele desliga a exigência, se precisar
   await requireOwner({ allowWithout2fa: true });
   const [values, pending] = await Promise.all([listSettings(), countWithoutTwoFactor()]);
-  const hint: Record<SettingKey, string> = {
+  const hint: Partial<Record<SettingKey, string>> = {
     "security.require_2fa_team": `${pending.team} pessoa${pending.team === 1 ? "" : "s"} da equipe ainda sem 2FA (inclui você, se for o caso).`,
     "security.require_2fa_client": `${pending.client} usuário${pending.client === 1 ? "" : "s"} do portal ainda sem 2FA.`,
   };
@@ -19,8 +21,8 @@ export default async function ConfiguracoesPage() {
       <PageHeader title="Configurações" meta="Regras do sistema que valem para todo mundo. Só o administrador altera." />
       <Block title="Segurança">
         <ul className="divide-y divide-border">
-          {(Object.keys(SETTINGS) as SettingKey[]).map((key) => {
-            const enabled = values[key];
+          {BOOLEAN_SETTINGS.map((key) => {
+            const enabled = Boolean(values[key]);
             return (
               <li key={key} className="flex items-center justify-between gap-4 py-3" data-testid={`setting-${key}`}>
                 <div>
@@ -48,6 +50,20 @@ export default async function ConfiguracoesPage() {
         <p className="type-micro mt-4 text-muted-foreground">
           Quem ficar sem o segundo fator com a exigência ligada só consegue abrir Minha conta até ativar (o administrador também alcança esta tela, para desligar a regra). Se alguém perder o aparelho e os códigos, o reset é pelo script <code className="type-data">auth:reset-2fa</code> (runbook §14).
         </p>
+      </Block>
+      <Block title="Dados da empresa" aside="entram no contrato e no termo de aceite">
+        <form action={setLegalSettingsForm} className="grid gap-4 md:grid-cols-2" data-testid="dados-empresa">
+          {LEGAL_SETTINGS.map((key) => (
+            <div key={key} className={`grid gap-1.5 ${key === "legal.endereco" ? "md:col-span-2" : ""}`}>
+              <label htmlFor={`legal-${key}`} className="text-sm font-medium">{SETTINGS[key].label}</label>
+              <Input id={`legal-${key}`} name={key} defaultValue={String(values[key] ?? "")} maxLength={300} />
+              <span className="type-micro text-faint">{SETTINGS[key].description}</span>
+            </div>
+          ))}
+          <div className="md:col-span-2">
+            <Button type="submit" size="sm">Salvar dados da empresa</Button>
+          </div>
+        </form>
       </Block>
     </>
   );

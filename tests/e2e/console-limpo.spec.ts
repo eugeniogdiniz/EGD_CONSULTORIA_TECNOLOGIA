@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { loginAs, ADMIN } from "./helpers";
 import { createTwoOrgsWithClientsAndFiles } from "./fixtures";
-import { proposalRoutes } from "./proposal-fixture";
+import { contractRoutes, proposalRoutes } from "./proposal-fixture";
 
 /**
  * O Next mostra o selo "Issues" quando o console tem erro ou aviso. Aqui viram falha de teste:
@@ -52,7 +52,7 @@ test("telas do admin não geram erro nem aviso no console", async ({ page }) => 
     "/admin/notificacoes",
     "/admin/solicitacoes?sla=estourado",
     "/admin/automacoes/solicitacoes-lembrete/previa",
-    ...(await proposalRoutes(page)),
+    ...(await proposalRoutes(page)), "/admin/crm/contratos", ...(await contractRoutes(page)),
     "/admin/equipe",
     "/admin/configuracoes",
     `/admin/projetos/${p.id}/burndown`,

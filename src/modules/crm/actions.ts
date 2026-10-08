@@ -107,6 +107,10 @@ export async function createCompany(
       size: data.size,
       source: data.source,
       notes: data.notes,
+      legalName: data.legalName,
+      address: data.address,
+      representativeName: data.representativeName,
+      representativeRole: data.representativeRole,
       ownerId: ctx.user.id,
     })
     .returning({ id: crmCompany.id });
@@ -151,6 +155,10 @@ export async function updateCompany(
       size: data.size,
       source: data.source,
       notes: data.notes,
+      legalName: data.legalName,
+      address: data.address,
+      representativeName: data.representativeName,
+      representativeRole: data.representativeRole,
     })
     .where(eq(crmCompany.id, id));
 

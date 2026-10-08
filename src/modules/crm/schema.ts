@@ -53,6 +53,11 @@ export const crmCompany = pgTable(
     website: text(),
     industry: text(),
     size: text(),
+    // Fase 23: dados para contrato
+    legalName: text(),
+    address: text(),
+    representativeName: text(),
+    representativeRole: text(),
     source: crmCompanySource().default("outbound").notNull(),
     ownerId: uuid()
       .notNull()

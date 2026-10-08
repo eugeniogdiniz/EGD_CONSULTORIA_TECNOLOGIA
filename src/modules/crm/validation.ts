@@ -68,6 +68,10 @@ export const companySchema = z.object({
   size: optionalText(60),
   source: z.enum(["site_contact", "referral", "event", "outbound", "other"]).default("outbound"),
   notes: optionalText(4000),
+  legalName: optionalText(200),
+  address: optionalText(300),
+  representativeName: optionalText(160),
+  representativeRole: optionalText(120),
 });
 export type CompanyInput = z.input<typeof companySchema>;
 

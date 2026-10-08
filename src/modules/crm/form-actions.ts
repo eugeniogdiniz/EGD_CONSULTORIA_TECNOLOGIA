@@ -98,6 +98,10 @@ function companyInput(fd: FormData) {
     website: String(fd.get("website") ?? ""),
     industry: String(fd.get("industry") ?? ""),
     size: String(fd.get("size") ?? ""),
+    legalName: String(fd.get("legalName") ?? ""),
+    address: String(fd.get("address") ?? ""),
+    representativeName: String(fd.get("representativeName") ?? ""),
+    representativeRole: String(fd.get("representativeRole") ?? ""),
     source: (["site_contact", "referral", "event", "outbound", "other"].includes(source) ? source : "outbound") as
       | "site_contact"
       | "referral"

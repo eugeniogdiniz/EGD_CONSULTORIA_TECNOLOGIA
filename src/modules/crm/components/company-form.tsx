@@ -31,6 +31,10 @@ export function CompanyForm<T>({
     size: string | null;
     source: "site_contact" | "referral" | "event" | "outbound" | "other";
     notes: string | null;
+    legalName?: string | null;
+    address?: string | null;
+    representativeName?: string | null;
+    representativeRole?: string | null;
   };
   submitLabel?: string;
 }) {
@@ -91,6 +95,27 @@ export function CompanyForm<T>({
           ))}
         </select>
       </div>
+      <fieldset className="grid gap-4 rounded-md border border-border p-4">
+        <legend className="px-1 text-sm font-medium">Dados para contrato <span className="font-normal text-faint">opcional</span></legend>
+        <div className="grid gap-1.5">
+          <Label htmlFor="legalName">Razão social</Label>
+          <Input id="legalName" name="legalName" defaultValue={initial?.legalName ?? ""} />
+        </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor="address">Endereço da sede</Label>
+          <Input id="address" name="address" defaultValue={initial?.address ?? ""} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-1.5">
+            <Label htmlFor="representativeName">Representante legal</Label>
+            <Input id="representativeName" name="representativeName" defaultValue={initial?.representativeName ?? ""} />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="representativeRole">Cargo do representante</Label>
+            <Input id="representativeRole" name="representativeRole" defaultValue={initial?.representativeRole ?? ""} />
+          </div>
+        </div>
+      </fieldset>
       <div className="grid gap-1.5">
         <Label htmlFor="notes">
           Notas <span className="font-normal text-faint">opcional</span>

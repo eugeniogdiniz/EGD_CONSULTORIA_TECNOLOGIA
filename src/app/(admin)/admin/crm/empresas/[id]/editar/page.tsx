@@ -20,7 +20,7 @@ export default async function EditarEmpresaPage({ params }: PageProps<"/admin/cr
         <CompanyForm
           action={updateCompanyForm}
           initial={{
-            id: company.id,
+            legalName: company.legalName, address: company.address, representativeName: company.representativeName, representativeRole: company.representativeRole, id: company.id,
             name: company.name,
             cnpj: company.cnpj,
             website: company.website,

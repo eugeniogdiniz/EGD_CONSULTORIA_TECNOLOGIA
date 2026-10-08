@@ -8,6 +8,8 @@ import { SendProposalDialog } from "@/modules/crm/components/send-proposal-dialo
 import { ConfirmAction } from "@/components/shell/confirm-action";
 import { DEFAULT_PROPOSAL_MESSAGE } from "@/modules/crm/brand";
 import { getProposalDecision } from "@/modules/portal-proposals/queries";
+import { getContractByProposal, CONTRACT_STATUS_LABEL } from "@/modules/contracts/queries";
+import { createContractForm } from "@/modules/contracts/form-actions";
 import { formatDateTime } from "@/lib/format";
 import { getDownloadUrl } from "@/modules/files/actions";
 import {
@@ -46,6 +48,7 @@ export default async function PropostaDetalhePage({ params }: PageProps<"/admin/
   const file = row.file;
 
   const decision = await getProposalDecision(ctx, p.id);
+  const contract = p.status === "accepted" ? await getContractByProposal(ctx, p.id) : null;
   const contacts = (await listContactsByCompany(ctx, company.id)).filter((c) => c.email).map((c) => ({ id: c.id, name: c.name, email: c.email as string }));
   const canSend = (p.status === "draft" || p.status === "sent") && Boolean(file) && contacts.length > 0;
   const sendDisabledReason = !file ? "Gere o PDF ou anexe o arquivo antes de enviar." : contacts.length === 0 ? "A empresa não tem contato com e-mail." : p.status !== "draft" && p.status !== "sent" ? "Proposta decidida." : null;
@@ -159,6 +162,34 @@ export default async function PropostaDetalhePage({ params }: PageProps<"/admin/
             <dt className="text-muted-foreground">Origem</dt><dd className="type-data text-xs">{decision.ipHash ? `ip ${decision.ipHash.slice(0, 12)}…` : "ip —"} · {decision.userAgent ?? "—"}</dd>
             {decision.notes && <><dt className="text-muted-foreground">Observações</dt><dd className="whitespace-pre-wrap">{decision.notes}</dd></>}
           </dl>
+        </Block>
+      )}
+
+      {p.status === "accepted" && (
+        <Block title="Contrato" aside={contract ? CONTRACT_STATUS_LABEL[contract.contract.status] : "a partir do aceite"}>
+          <div className="flex flex-wrap items-center gap-3" data-testid="bloco-contrato">
+            {contract ? (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  <span className="type-data text-foreground">{contract.contract.number}</span>
+                  {contract.contract.documentVersion > 0 ? ` · PDF v${contract.contract.documentVersion}` : " · sem PDF"}
+                  {contract.contract.issuedAt ? ` · emitido em ${formatDate(contract.contract.issuedAt)}` : ""}
+                  {contract.contract.signedAt ? ` · assinado em ${formatDate(contract.contract.signedAt)}` : ""}
+                </p>
+                <Button variant="secondary" size="sm" render={<Link href={`/admin/crm/contratos/${contract.contract.id}`} />}>
+                  Abrir contrato
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">Gera o contrato de prestação de serviços pré-preenchido com o documento da proposta, o contato e as parcelas do projeto. Você revisa antes de emitir.</p>
+                <form action={createContractForm}>
+                  <input type="hidden" name="proposalId" value={p.id} />
+                  <Button type="submit" size="sm">Criar contrato</Button>
+                </form>
+              </>
+            )}
+          </div>
         </Block>
       )}
 
