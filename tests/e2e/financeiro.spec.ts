@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { loginAs, ADMIN } from "./helpers";
+import { loginAs, ADMIN, openMenuGroup } from "./helpers";
 import { createTwoOrgsWithClientsAndFiles } from "./fixtures";
 
 test("financeiro: parcelas, rate do projeto, estimativa, burndown e relatório de horas", async ({ page }) => {
@@ -67,7 +67,8 @@ test("financeiro consolidado: contas a receber e a pagar de todos os projetos e 
   // ── menu por área: Financeiro agrupa receber, pagar e horas ─────────────
   await page.goto("/admin");
   const menu = page.getByRole("navigation", { name: "Menu" });
-  await expect(menu.getByRole("button", { name: /financeiro/i })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "Contas a pagar" })).toHaveCount(0); // grupo nasce fechado
+  await openMenuGroup(page, "Financeiro");
   await menu.getByRole("link", { name: "Contas a pagar" }).click();
   await expect(page).toHaveURL(/\/admin\/financeiro\/pagar$/);
 

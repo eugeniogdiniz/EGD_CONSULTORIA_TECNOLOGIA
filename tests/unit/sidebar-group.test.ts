@@ -10,8 +10,8 @@ describe("shouldGroupBeOpen", () => {
   it("sub-item ativo por prefixo (rota filha) força aberto", () => {
     expect(shouldGroupBeOpen("/admin/crm/empresas/abc-123", hrefs, "closed")).toBe(true);
   });
-  it("sem sub-item ativo e sem storage: aberto (o menu inteiro é de grupos)", () => {
-    expect(shouldGroupBeOpen("/admin", hrefs, null)).toBe(true);
+  it("sem sub-item ativo e sem storage: fechado (só abre quando a pessoa pede)", () => {
+    expect(shouldGroupBeOpen("/admin", hrefs, null)).toBe(false);
   });
   it("storage 'open' abre quando não há sub-item ativo", () => {
     expect(shouldGroupBeOpen("/admin", hrefs, "open")).toBe(true);
@@ -42,5 +42,17 @@ describe("activeHref", () => {
   });
   it("rota fora do menu não ativa nada", () => {
     expect(activeHref("/admin/busca", all, "/admin")).toBeNull();
+  });
+});
+
+describe("shouldGroupBeOpen com o item ativo do menu", () => {
+  const relatorios = ["/admin/relatorios", "/admin/relatorios/semanal"];
+  it("Horas (/admin/relatorios/horas) é do grupo Financeiro: Relatórios não abre só porque é prefixo", () => {
+    expect(shouldGroupBeOpen("/admin/relatorios/horas", relatorios, null, "/admin/relatorios/horas")).toBe(false);
+    expect(shouldGroupBeOpen("/admin/relatorios/semanal", relatorios, "closed", "/admin/relatorios/semanal")).toBe(true);
+  });
+  it("sem item ativo em lugar nenhum, vale o storage", () => {
+    expect(shouldGroupBeOpen("/admin/busca", relatorios, null, null)).toBe(false);
+    expect(shouldGroupBeOpen("/admin/busca", relatorios, "open", null)).toBe(true);
   });
 });

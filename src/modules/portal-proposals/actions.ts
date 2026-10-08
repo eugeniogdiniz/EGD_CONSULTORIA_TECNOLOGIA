@@ -8,6 +8,7 @@ import { audit } from "@/modules/audit/log";
 import type { PortalContext } from "@/modules/auth/context";
 import { notifyProposalDecided } from "@/modules/notifications/events";
 import { enqueueWebhook } from "@/modules/webhooks/queue";
+import { syncOpportunityStageFromProposal } from "@/modules/crm/actions";
 import { getPortalProposal } from "./queries";
 import { canDecide, decisionSchema, type DecisionInput } from "./rules";
 
@@ -64,6 +65,7 @@ export async function decideProposal(ctx: PortalContext, proposalId: string, inp
   });
   await audit({ actorId: ctx.user.id, action: d.decision === "accepted" ? "crm.proposal.accepted" : "crm.proposal.rejected", entityType: "crm_proposal", entityId: proposalId, metadata: { from: "sent", to: d.decision, byClient: true } });
   await notifyProposalDecided({ proposalId, number: p.number, title: p.title, decision: d.decision, organizationName: ctx.organization.name, actorId: ctx.user.id, actorName: ctx.user.name, notes: d.notes || null });
+  await syncOpportunityStageFromProposal(ctx.user.id, decided.opportunityId, d.decision);
   if (d.decision === "accepted") await enqueueWebhook("proposal.accepted", { id: proposalId, number: p.number, title: p.title, valueCents: p.valueCents, byClient: true });
   return ok(null);
 }

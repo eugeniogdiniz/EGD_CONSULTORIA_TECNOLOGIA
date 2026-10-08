@@ -15,7 +15,7 @@ describe("navFor", () => {
   });
   it("dono vê tudo em grupos por área, com os selos de leads e solicitações", () => {
     const h = hrefs("admin");
-    for (const ok of ["/admin/crm/propostas", "/admin/equipe", "/admin/configuracoes", "/admin/relatorios", "/admin/auditoria", "/admin/financeiro/receber", "/admin/financeiro/pagar", "/admin/relatorios/horas"]) expect(h).toContain(ok);
+    for (const ok of ["/admin/crm/propostas", "/admin/crm/servicos", "/admin/crm/previsao", "/admin/equipe", "/admin/configuracoes", "/admin/relatorios", "/admin/auditoria", "/admin/financeiro/receber", "/admin/financeiro/pagar", "/admin/relatorios/horas"]) expect(h).toContain(ok);
     expect(groups("admin")).toEqual(["Comercial", "Operação", "Financeiro", "Clientes", "Relatórios", "Site", "Sistema"]);
     expect(flat("admin").find((i) => i.href === "/admin/leads")).toMatchObject({ badge: 2 });
     expect(flat("admin").find((i) => i.href === "/admin/solicitacoes")).toMatchObject({ badge: 3 });

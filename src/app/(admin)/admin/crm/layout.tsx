@@ -1,15 +1,10 @@
 import type { ReactNode } from "react";
 import { requireOwner } from "@/modules/auth/context";
-import { CrmTabs } from "./_components/tabs";
 
 export const metadata = { title: "CRM" };
 
+/** A navegação do comercial é o grupo Comercial do menu lateral; aqui só a trava de dono. */
 export default async function CrmLayout({ children }: { children: ReactNode }) {
   await requireOwner();
-  return (
-    <div className="flex flex-col gap-6">
-      <CrmTabs />
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 }

@@ -39,17 +39,20 @@ function writeGroupState(key: string, state: "open" | "closed") {
 }
 
 /**
- * Grupo aberto: sub-item ativo força aberto (ignora o storage); sem preferência
- * guardada o grupo nasce aberto (o menu inteiro é feito de grupos, fechado por
- * padrão esconderia tudo); depois vale o que a pessoa escolheu.
+ * Grupo aberto: o grupo da tela atual fica aberto (mostra onde a pessoa está,
+ * ignora o storage); os demais nascem fechados e só abrem quando a pessoa
+ * clica; a escolha fica guardada.
  */
 export function shouldGroupBeOpen(
   pathname: string,
   hrefs: string[],
   stored: "open" | "closed" | null,
+  /** item ativo do menu inteiro (`activeHref`); sem ele, cai no prefixo da rota */
+  active?: string | null,
 ): boolean {
-  if (hrefs.some((h) => pathname === h || pathname.startsWith(`${h}/`))) return true;
-  if (stored === null) return true;
+  const hasActive = active === undefined ? hrefs.some((h) => pathname === h || pathname.startsWith(`${h}/`)) : active !== null && hrefs.includes(active);
+  if (hasActive) return true;
+  if (stored === null) return false;
   return stored === "open";
 }
 
@@ -94,14 +97,14 @@ function SidebarGroup({ group, active }: { group: NavGroup; active: string | nul
   const pathname = usePathname();
   const hrefs = useMemo(() => group.items.map((i) => i.href), [group.items]);
 
-  // Server render usa o default (aberto) pra evitar hydration mismatch com localStorage; useEffect ajusta.
+  // Server render usa o default (fechado) pra evitar hydration mismatch com localStorage; useEffect ajusta.
   const [stored, setStored] = useState<"open" | "closed" | null>(null);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- hidratação do localStorage é lida uma vez no mount, padrão SSR-safe.
     setStored(readGroupState(group.storageKey));
   }, [group.storageKey]);
 
-  const open = shouldGroupBeOpen(pathname, hrefs, stored);
+  const open = shouldGroupBeOpen(pathname, hrefs, stored, active);
   const groupId = `nav-group-${group.storageKey}`;
   const badgeTotal = group.items.reduce((s, i) => s + (i.badge ?? 0), 0);
 

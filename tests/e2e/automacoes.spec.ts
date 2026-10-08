@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { loginAs, waitForMailWithSubject, ADMIN } from "./helpers";
+import { loginAs, waitForMailWithSubject, ADMIN, openMenuGroup } from "./helpers";
 import { createTwoOrgsWithClientsAndFiles } from "./fixtures";
 
 test("admin vê, liga/desliga, pré-visualiza e envia uma automação", async ({ page }) => {
@@ -7,6 +7,7 @@ test("admin vê, liga/desliga, pré-visualiza e envia uma automação", async ({
   createTwoOrgsWithClientsAndFiles();
   await loginAs(page, ADMIN.email, ADMIN.password);
 
+  await openMenuGroup(page, "Sistema");
   await page.getByRole("link", { name: "Automações", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/automacoes$/);
   await expect(page.getByRole("heading", { level: 1, name: "Automações" })).toBeVisible();

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { auditLog, crmProposal, files } from "@/db/schema";
+import { auditLog, crmOpportunity, crmProposal, files } from "@/db/schema";
 import {
   changeProposalStatus,
   createCompany,
@@ -200,5 +200,60 @@ describe("changeProposalStatus", () => {
     const row = await db.query.crmProposal.findFirst({ where: eq(crmProposal.id, p.data.id) });
     expect(row).not.toBeNull();
     expect(row?.fileId).toBeNull();
+  });
+});
+
+describe("proposta puxa o funil (stage-rules)", () => {
+  async function freshOpportunity() {
+    const c = await createCompany(ctx, { name: `Empresa funil ${Date.now()}` });
+    if (!c.ok) throw new Error("setup company");
+    const o = await createOpportunity(ctx, { companyId: c.data.id, title: "Oportunidade do funil" });
+    if (!o.ok) throw new Error("setup opportunity");
+    return o.data.id;
+  }
+  async function sentProposal(oppId: string) {
+    const p = await createProposal(ctx, { opportunityId: oppId, title: "Puxa funil", valueCents: 100_000 });
+    if (!p.ok) throw new Error("setup proposal");
+    const [f] = await db
+      .insert(files)
+      .values({ bucketKey: `test/${p.data.id}-funil.pdf`, originalName: "prop.pdf", mimeType: "application/pdf", sizeBytes: 100, uploadedBy: ctx.user.id })
+      .returning({ id: files.id });
+    await db.update(crmProposal).set({ fileId: f.id }).where(eq(crmProposal.id, p.data.id));
+    const r = await changeProposalStatus(ctx, p.data.id, { to: "sent" });
+    if (!r.ok) throw new Error("setup sent");
+    return p.data.id;
+  }
+  const stageOf = async (id: string) => (await db.query.crmOpportunity.findFirst({ where: eq(crmOpportunity.id, id) }))!;
+
+  it("enviar leva a oportunidade nova para Proposta; aceitar leva para Ganho com wonAt", async () => {
+    const oppId = await freshOpportunity();
+    expect((await stageOf(oppId)).stage).toBe("new");
+    const propId = await sentProposal(oppId);
+    expect((await stageOf(oppId)).stage).toBe("proposal");
+    const r = await changeProposalStatus(ctx, propId, { to: "accepted" });
+    expect(r.ok).toBe(true);
+    const won = await stageOf(oppId);
+    expect(won.stage).toBe("won");
+    expect(won.wonAt).not.toBeNull();
+    const trail = await db.query.auditLog.findMany({ where: eq(auditLog.entityId, oppId) });
+    expect(trail.map((a) => a.action)).toEqual(expect.arrayContaining(["crm.opportunity.stage_changed", "crm.opportunity.won"]));
+  });
+
+  it("recusar leva para Perdido com o motivo padrão; uma ganha não volta", async () => {
+    const oppId = await freshOpportunity();
+    const propId = await sentProposal(oppId);
+    const r = await changeProposalStatus(ctx, propId, { to: "rejected", decisionNotes: "Preço" });
+    expect(r.ok).toBe(true);
+    const lost = await stageOf(oppId);
+    expect(lost.stage).toBe("lost");
+    expect(lost.lostReason).toMatch(/recusada/i);
+
+    const oppWon = await freshOpportunity();
+    const p2 = await sentProposal(oppWon);
+    await changeProposalStatus(ctx, p2, { to: "accepted" });
+    const p3 = await createProposal(ctx, { opportunityId: oppWon, title: "Segunda", valueCents: 1 });
+    if (!p3.ok) throw new Error("setup p3");
+    await changeProposalStatus(ctx, p3.data.id, { to: "rejected" });
+    expect((await stageOf(oppWon)).stage).toBe("won");
   });
 });

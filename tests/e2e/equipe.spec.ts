@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { loginAs, latestMailpitLink, ADMIN } from "./helpers";
+import { loginAs, latestMailpitLink, ADMIN, openMenuGroup } from "./helpers";
 import { createTwoOrgsWithClientsAndFiles } from "./fixtures";
 
 test.describe.serial("equipe", () => {
@@ -11,6 +11,7 @@ test.describe.serial("equipe", () => {
     test.setTimeout(90_000);
     const fx = createTwoOrgsWithClientsAndFiles();
     await loginAs(page, ADMIN.email, ADMIN.password);
+    await openMenuGroup(page, "Sistema");
     await page.getByRole("link", { name: "Equipe", exact: true }).click();
     await expect(page).toHaveURL(/\/admin\/equipe$/);
     await page.getByLabel(/^e-mail$/i).fill(colabEmail);
@@ -30,7 +31,9 @@ test.describe.serial("equipe", () => {
 
     // menu sem CRM/Equipe/Auditoria; URLs do dono respondem 404
     const menu = page.getByRole("navigation", { name: "Menu" });
+    await openMenuGroup(page, "Operação");
     await expect(menu.getByRole("link", { name: "Demandas" })).toBeVisible();
+    await expect(menu.getByRole("button", { name: /comercial|financeiro|sistema/i })).toHaveCount(0);
     await expect(menu.getByText("CRM")).toHaveCount(0);
     await expect(menu.getByRole("link", { name: "Auditoria" })).toHaveCount(0);
     for (const url of ["/admin/crm/empresas", "/admin/auditoria", "/admin/relatorios", `/admin/projetos/${fx.projectA.id}/financeiro`, "/admin/equipe", "/admin/configuracoes"]) {

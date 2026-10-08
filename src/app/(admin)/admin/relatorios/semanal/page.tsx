@@ -7,6 +7,7 @@ import { EmptyLine, ReportSection, ReportSheet } from "@/modules/reports/compone
 import { ReportToolbar } from "@/modules/reports/components/report-toolbar";
 import { issuedAt } from "@/modules/reports/components/report-bits";
 import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/shell/page-header";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 export const metadata = { title: "Relatórios · Semanal" };
@@ -55,6 +56,7 @@ export default async function SemanalPage({ searchParams }: PageProps<"/admin/re
 
   return (
     <>
+      <PageHeader title="Relatório semanal" meta="Concluído, vencendo e atrasado por projeto, semana a semana; compara com a semana anterior." />
       <ReportToolbar csvHref={`/admin/relatorios/semanal/csv?semana=${monday}`}>
         <nav aria-label="Semana" className="flex flex-wrap items-center gap-2">
           <Link className={arrow} aria-label="Semana anterior" href={`/admin/relatorios/semanal?semana=${addDays(monday, -7)}`}>

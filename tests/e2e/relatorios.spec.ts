@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { loginAs, ADMIN } from "./helpers";
+import { loginAs, ADMIN, openMenuGroup } from "./helpers";
 import { createTwoOrgsWithClientsAndFiles } from "./fixtures";
 
 test("relatórios do admin: status, portfólio, semanal e CSVs", async ({ page }) => {
@@ -27,6 +27,7 @@ test("relatórios do admin: status, portfólio, semanal e CSVs", async ({ page }
   await page.emulateMedia({ media: "screen" });
 
   // ── portfólio ─────────────────────────────────────────────────────────────
+  await openMenuGroup(page, "Relatórios");
   await page.getByRole("link", { name: "Portfólio", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/relatorios$/);
   await expect(page.getByRole("link", { name: fx.projectA.title })).toBeVisible();
@@ -35,7 +36,8 @@ test("relatórios do admin: status, portfólio, semanal e CSVs", async ({ page }
   expect(await portfolio.text()).toContain(fx.projectA.title);
 
   // ── semanal: navegar e voltar para a semana atual ─────────────────────────
-  await page.getByRole("navigation", { name: "Relatórios" }).getByRole("link", { name: "Semanal" }).click();
+  await openMenuGroup(page, "Relatórios");
+  await page.getByRole("navigation", { name: "Menu" }).getByRole("link", { name: "Semanal" }).click();
   const rotulo = page.getByTestId("semana-rotulo");
   const atual = (await rotulo.textContent()) ?? "";
   await page.getByRole("link", { name: /semana anterior/i }).click();
