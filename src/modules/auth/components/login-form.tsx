@@ -8,6 +8,7 @@ import { safeNextPath } from "@/modules/auth/safe-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loginErrorMessage } from "@/modules/auth/login-error";
 
 export function LoginForm() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export function LoginForm() {
     });
     setPending(false);
     if (error) {
-      setError(error.status === 429 ? (error.message ?? "Muitas tentativas. Aguarde 15 minutos.") : "E-mail ou senha incorretos.");
+      setError(loginErrorMessage(error));
       return;
     }
     if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) {

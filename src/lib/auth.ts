@@ -11,11 +11,15 @@ import { audit } from "@/modules/audit/log";
 import { loginByEmail } from "@/modules/auth/login-limiter";
 import { eq } from "drizzle-orm";
 import { users } from "@/db/schema";
+import { wwwVariant } from "@/lib/www-variant";
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
-  trustedOrigins: (env.BETTER_AUTH_TRUSTED_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+  trustedOrigins: [
+    ...(env.BETTER_AUTH_TRUSTED_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+    ...wwwVariant(env.BETTER_AUTH_URL),
+  ],
   database: drizzleAdapter(db, { provider: "pg", schema, usePlural: true }),
   advanced: {
     database: { generateId: "uuid" },
