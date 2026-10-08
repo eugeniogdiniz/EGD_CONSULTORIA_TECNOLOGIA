@@ -26,11 +26,15 @@ export const KINDS = [
   { key: "backup.failed", audience: "admin", label: "Backup falhou", description: "O backup lógico diário não concluiu.", emailable: true },
   { key: "webhook.disabled", audience: "admin", label: "Webhook desativado", description: "Um destino de webhook falhou 20 vezes seguidas e foi desativado.", emailable: true },
   { key: "api_key.expiring", audience: "admin", label: "Chave de API expirando", description: "Uma chave de API expira em 14 ou em 3 dias.", emailable: true },
+  { key: "proposal.decided", audience: "admin", label: "Proposta aceita ou recusada", description: "Um cliente decidiu uma proposta pelo portal.", emailable: true },
+  { key: "deliverable.approved", audience: "admin", label: "Entrega aprovada pelo cliente", description: "Um cliente aprovou uma entrega concluída.", emailable: true },
+  { key: "deliverable.changes_requested", audience: "admin", label: "Ajustes pedidos pelo cliente", description: "Um cliente pediu ajustes numa entrega concluída; ela voltou para a equipe.", emailable: true },
   { key: "request.team_reply", audience: "client", label: "Resposta da equipe", description: "A EGD respondeu a uma solicitação da sua organização.", emailable: true },
   { key: "comment.team", audience: "client", label: "Comentário da equipe", description: "A EGD comentou numa entrega compartilhada com você.", emailable: true },
   { key: "deliverable.done", audience: "client", label: "Entrega concluída", description: "Uma entrega compartilhada com você foi concluída.", emailable: true },
   { key: "meeting.shared", audience: "client", label: "Ata compartilhada", description: "A EGD compartilhou uma ata de reunião com você.", emailable: true },
   { key: "request.reminder", audience: "client", label: "Lembrete de solicitação", description: "Uma solicitação da sua organização aguarda seu retorno há alguns dias.", emailable: true },
+  { key: "proposal.sent", audience: "client", label: "Proposta recebida", description: "A EGD enviou uma proposta para a sua organização; você pode aceitá-la no portal.", emailable: true },
 ] as const satisfies readonly NotificationKind[];
 
 export type KindKey = (typeof KINDS)[number]["key"];

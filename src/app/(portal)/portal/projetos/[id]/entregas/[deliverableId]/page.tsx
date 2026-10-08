@@ -5,8 +5,12 @@ import { requirePortal } from "@/modules/auth/context";
 import {
   getPortalDeliverable,
   getPortalProject,
+  listDeliverableAcceptances,
   listPortalComments,
 } from "@/modules/portal-projects/queries";
+import { AcceptanceForm } from "@/modules/portal-projects/components/acceptance-form";
+import { acceptanceState } from "@/modules/portal-proposals/rules";
+import { formatDateTime } from "@/lib/format";
 import { portalStatusLabel, STATUS_STYLE } from "@/modules/portal-projects/scope";
 import {
   createClientCommentForm,
@@ -31,7 +35,8 @@ export default async function PortalEntregaPage({
   ]);
   if (!project || !d) notFound();
 
-  const comments = await listPortalComments(ctx, deliverableId);
+  const [comments, acceptances] = await Promise.all([listPortalComments(ctx, deliverableId), listDeliverableAcceptances(deliverableId)]);
+  const last = acceptanceState(acceptances);
   const visibleComments = comments.filter((c) => !c.deletedAt).length;
   const chip = "inline-flex h-[22px] items-center rounded-sm border px-2 text-xs font-medium whitespace-nowrap";
 
@@ -97,6 +102,26 @@ export default async function PortalEntregaPage({
                 O download abre um link temporário e fica registrado no histórico da EGD.
               </p>
             </Block>
+          )}
+
+          {d.status === "done" && (
+            <Block title="Sua aprovação" aside={last?.decision === "approved" ? "aprovada" : undefined}>
+              {last?.decision === "approved" ? (
+                <p className="text-sm" data-testid="aprovada">
+                  Entrega aprovada por <strong>{last.userName}</strong> em {formatDateTime(last.createdAt)}.{last.notes && <span className="mt-1 block whitespace-pre-wrap text-muted-foreground">{last.notes}</span>}
+                </p>
+              ) : (
+                <>
+                  <p className="mb-3 text-sm text-muted-foreground">A equipe marcou esta entrega como concluída. Confira o arquivo e registre sua aprovação, ou peça ajustes e ela volta para a equipe.</p>
+                  <AcceptanceForm projectId={id} deliverableId={deliverableId} />
+                </>
+              )}
+            </Block>
+          )}
+          {d.status !== "done" && last?.decision === "changes_requested" && (
+            <div className="rounded-r-md border-l-[3px] border-warning bg-warning-soft px-4 py-3 text-sm" data-testid="ajustes-pedidos">
+              <strong>Ajustes solicitados</strong> por {last.userName} em {formatDateTime(last.createdAt)}. A equipe está trabalhando neles.
+            </div>
           )}
 
           <Block title={`Comentários (${visibleComments})`}>

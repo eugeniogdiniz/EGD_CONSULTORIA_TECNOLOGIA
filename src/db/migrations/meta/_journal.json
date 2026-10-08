@@ -141,6 +141,13 @@
       "when": 1791056860951,
       "tag": "0019_automacoes_relatorios",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791083242887,
+      "tag": "0020_aceites",
+      "breakpoints": true
     }
   ]
 }

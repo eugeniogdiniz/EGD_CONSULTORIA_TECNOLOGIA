@@ -55,6 +55,6 @@ test("portal sem violações de acessibilidade", async ({ page }) => {
     "/portal", "/portal/projetos", `/portal/projetos/${p.id}`, `/portal/projetos/${p.id}/gantt`,
     `/portal/projetos/${p.id}/calendario`, `/portal/projetos/${p.id}/entregas/${p.visible.id}`,
     "/portal/solicitacoes", "/portal/solicitacoes/nova", "/portal/atas", "/portal/conta",
-    `/portal/projetos/${p.id}/relatorio`, "/portal/notificacoes",
+    `/portal/projetos/${p.id}/relatorio`, "/portal/notificacoes", "/portal/propostas",
   ]);
 });

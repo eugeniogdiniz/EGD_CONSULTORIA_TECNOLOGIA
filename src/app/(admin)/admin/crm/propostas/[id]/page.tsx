@@ -7,6 +7,8 @@ import { generateProposalPdfForm } from "@/modules/crm/form-actions";
 import { SendProposalDialog } from "@/modules/crm/components/send-proposal-dialog";
 import { ConfirmAction } from "@/components/shell/confirm-action";
 import { DEFAULT_PROPOSAL_MESSAGE } from "@/modules/crm/brand";
+import { getProposalDecision } from "@/modules/portal-proposals/queries";
+import { formatDateTime } from "@/lib/format";
 import { getDownloadUrl } from "@/modules/files/actions";
 import {
   attachProposalFileForm,
@@ -43,6 +45,7 @@ export default async function PropostaDetalhePage({ params }: PageProps<"/admin/
   const company = row.company;
   const file = row.file;
 
+  const decision = await getProposalDecision(ctx, p.id);
   const contacts = (await listContactsByCompany(ctx, company.id)).filter((c) => c.email).map((c) => ({ id: c.id, name: c.name, email: c.email as string }));
   const canSend = (p.status === "draft" || p.status === "sent") && Boolean(file) && contacts.length > 0;
   const sendDisabledReason = !file ? "Gere o PDF ou anexe o arquivo antes de enviar." : contacts.length === 0 ? "A empresa não tem contato com e-mail." : p.status !== "draft" && p.status !== "sent" ? "Proposta decidida." : null;
@@ -145,6 +148,19 @@ export default async function PropostaDetalhePage({ params }: PageProps<"/admin/
           </div>
         </div>
       </Block>
+
+      {decision && (
+        <Block title={decision.decision === "accepted" ? "Aceite do cliente" : "Recusa do cliente"} aside="registrado no portal">
+          <dl className="grid grid-cols-[160px_1fr] gap-y-1.5 text-sm" data-testid="evidencia-aceite">
+            <dt className="text-muted-foreground">Nome informado</dt><dd>{decision.name}</dd>
+            <dt className="text-muted-foreground">Usuário</dt><dd>{decision.userName} <span className="type-data text-muted-foreground">({decision.userEmail})</span></dd>
+            <dt className="text-muted-foreground">Quando</dt><dd className="type-data">{formatDateTime(decision.decidedAt)}</dd>
+            <dt className="text-muted-foreground">Arquivo</dt><dd>{decision.fileName ?? "—"}{decision.documentVersion ? ` · v${decision.documentVersion}` : ""}</dd>
+            <dt className="text-muted-foreground">Origem</dt><dd className="type-data text-xs">{decision.ipHash ? `ip ${decision.ipHash.slice(0, 12)}…` : "ip —"} · {decision.userAgent ?? "—"}</dd>
+            {decision.notes && <><dt className="text-muted-foreground">Observações</dt><dd className="whitespace-pre-wrap">{decision.notes}</dd></>}
+          </dl>
+        </Block>
+      )}
 
       <div className="grid gap-6 md:grid-cols-[1.4fr_1fr]">
         <Block title="Dados">

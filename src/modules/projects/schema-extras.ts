@@ -208,6 +208,25 @@ export const projectDailySnapshot = pgTable(
   (t) => [primaryKey({ columns: [t.projectId, t.day] })],
 );
 
+// Aprovação da entrega pelo cliente (Fase 22): histórico; a última decisão manda
+
+export const projectDeliverableAcceptance = pgTable(
+  "project_deliverable_acceptance",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    deliverableId: uuid()
+      .notNull()
+      .references(() => projectDeliverable.id, { onDelete: "cascade" }),
+    userId: uuid()
+      .notNull()
+      .references(() => users.id),
+    decision: text({ enum: ["approved", "changes_requested"] }).notNull(),
+    notes: text(),
+    createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("deliverable_acceptance_idx").on(t.deliverableId, t.createdAt.desc())],
+);
+
 // Templates de projeto ──────────────────────────────────────────────────────
 
 export const projectTemplate = pgTable("project_template", {

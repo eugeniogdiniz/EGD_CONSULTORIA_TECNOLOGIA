@@ -7,6 +7,7 @@ import {
   listPortalDeliverables,
   listPortalMilestones,
   listPortalPhases,
+  listLatestAcceptancesByProject,
 } from "@/modules/portal-projects/queries";
 import {
   milestoneState,
@@ -45,6 +46,8 @@ export default async function PortalProjetoPage({ params }: PageProps<"/portal/p
 
   const today = new Date().toISOString().slice(0, 10);
   const summary = summarizeProject(deliverables, milestones, today);
+  const acceptances = await listLatestAcceptancesByProject(id);
+  const concluded = deliverables.filter((d) => d.status === "done").sort((a, b) => (b.completedAt?.getTime() ?? 0) - (a.completedAt?.getTime() ?? 0));
   const phaseName = new Map(phases.map((p) => [p.id, p.name]));
   const upcoming = deliverables
     .filter((d) => d.status !== "done")
@@ -192,6 +195,31 @@ export default async function PortalProjetoPage({ params }: PageProps<"/portal/p
                     </Link>
                   </li>
                 ))}
+              </ul>
+            )}
+          </Block>
+
+          <Block title="Concluídas" aside={concluded.length ? `${concluded.filter((d) => acceptances.get(d.id) === "approved").length} de ${concluded.length} aprovadas por você` : undefined}>
+            {concluded.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhuma entrega concluída ainda.</p>
+            ) : (
+              <ul data-testid="concluidas">
+                {concluded.map((d) => {
+                  const a = acceptances.get(d.id);
+                  return (
+                    <li key={d.id} className="border-t border-border first:border-t-0">
+                      <Link href={`/portal/projetos/${id}/entregas/${d.id}`} className="grid grid-cols-[1fr_auto] items-center gap-x-2.5 gap-y-1.5 py-2.5 text-sm hover:text-link">
+                        <span>
+                          <span className="block font-medium">{d.title}</span>
+                          <span className="type-micro block text-muted-foreground">{d.completedAt ? `concluída em ${formatIsoDate(d.completedAt.toISOString().slice(0, 10))}` : "concluída"}</span>
+                        </span>
+                        <span className={cn(chip, a === "approved" ? STATUS_STYLE.done : "border-signal-strong bg-signal-soft text-signal-strong")}>
+                          {a === "approved" ? "Aprovada" : "Aguardando sua aprovação"}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </Block>

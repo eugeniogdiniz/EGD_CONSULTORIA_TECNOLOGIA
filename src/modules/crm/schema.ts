@@ -243,3 +243,21 @@ export const crmService = pgTable(
   },
   (t) => [index("crm_service_active_position_idx").on(t.active, t.position)],
 );
+
+/** Decisão do cliente sobre a proposta no portal (Fase 22): uma por proposta, com evidência. */
+export const crmProposalDecision = pgTable("crm_proposal_decision", {
+  proposalId: uuid()
+    .primaryKey()
+    .references(() => crmProposal.id, { onDelete: "cascade" }),
+  userId: uuid()
+    .notNull()
+    .references(() => users.id),
+  decision: text({ enum: ["accepted", "rejected"] }).notNull(),
+  name: text().notNull(),
+  notes: text(),
+  ipHash: text(),
+  userAgent: text(),
+  fileId: uuid().references(() => files.id, { onDelete: "set null" }),
+  documentVersion: integer().default(0).notNull(),
+  decidedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+});

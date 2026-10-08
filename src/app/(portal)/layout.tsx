@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 const NAV = [
   { href: "/portal", label: "Início" },
   { href: "/portal/projetos", label: "Projetos" },
+  { href: "/portal/propostas", label: "Propostas" },
   { href: "/portal/atas", label: "Atas" },
   { href: "/portal/solicitacoes", label: "Solicitações" },
   { href: "/portal/conta", label: "Minha conta" },
