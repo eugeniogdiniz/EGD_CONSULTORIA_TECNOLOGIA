@@ -3,17 +3,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUR } from "@/components/legacy/ui";
 import { SVC, PRODUCTS } from "@/content/legacy-home";
-import { organizationJsonLd, pageMeta } from "@/content/seo";
+import { faqJsonLd, organizationJsonLd, pageMeta, webPageJsonLd, websiteJsonLd } from "@/content/seo";
+import { FAQ } from "@/content/faq";
+import { JsonLd } from "@/components/site/json-ld";
+import { Faq } from "@/components/site/faq";
 import { getSiteCases } from "@/modules/cases/site";
 import { SHOW_CASES } from "@/content/site";
 import { BrandFilm } from "@/components/site/brand-film";
 import { OperationFlow } from "@/components/site/operation-flow";
 
-export const metadata: Metadata = pageMeta({
-  title: { absolute: "EGD — Tecnologia que conecta projeto e operação" },
-  description: "Consultoria, dados e sistemas para conectar pessoas e transformar a operação. Da primeira conversa ao software em produção.",
-  path: "/",
-});
+const META = {
+  title: "EGD — Tecnologia que conecta projeto e operação",
+  description: "Consultoria de tecnologia em São Paulo: sistemas de gestão, apps de campo, automação de relatórios, dados e IA para consórcios de engenharia, habitação e energia.",
+};
+export const metadata: Metadata = pageMeta({ title: { absolute: META.title }, description: META.description, path: "/" });
 
 // Lê os totais dos cases publicados; o admin revalida ao salvar.
 export const dynamic = "force-dynamic";
@@ -23,8 +26,7 @@ export default async function HomePage() {
   const TOTAIS = SHOW_CASES ? (await getSiteCases()).totals : null;
   return (
     <>
-      {/* "<" escapado: o JSON vai dentro de uma tag <script> */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()).replace(/</g, "\\u003c") }} />
+      <JsonLd data={[organizationJsonLd(), websiteJsonLd(), webPageJsonLd({ path: "/", title: META.title, description: META.description }), faqJsonLd(FAQ.home)]} />
       <section className="brand-hero container">
         <div className="brand-kicker"><span className="brand-dot" /> Consultoria &amp; tecnologia <span>São Paulo · Brasil</span></div>
         <div className="brand-hero-heading">
@@ -50,7 +52,7 @@ export default async function HomePage() {
       </section>
 
       <section className="brand-section container">
-        <div className="brand-section-heading"><span className="brand-label">O que fazemos</span><div><h2>Complexidade na operação.<br />Clareza na solução.</h2><p>Um parceiro para conectar o que hoje está separado: processos, informação e tecnologia.</p></div></div>
+        <div className="brand-section-heading"><span className="brand-label">O que fazemos</span><div><h2>Complexidade na operação.<br />Clareza na solução.</h2><p>A EGD Consultoria em Tecnologia é uma consultoria de São Paulo que desenvolve sistemas de gestão, aplicativos de campo e automações de relatórios para consórcios de engenharia, habitação e energia, com atendimento remoto em todo o Brasil. Um parceiro para conectar o que hoje está separado: processos, informação e tecnologia.</p></div></div>
         <div className="brand-services">
           {SVC.map((service) => <Link href={`/servicos#${service.id}`} key={service.id} className="brand-service"><h3>{service.title}</h3><p>{service.desc}</p><ArrowUR size={22} /></Link>)}
         </div>
@@ -74,6 +76,7 @@ export default async function HomePage() {
         <div><span className="brand-label">Nossa visão em movimento</span><h2>Tecnologia que aproxima<br />projeto e operação.</h2><p>Uma apresentação visual da EGD: entender, conectar e entregar.</p></div>
         <BrandFilm />
       </section>
+      <Faq items={FAQ.home} title="O que costumam perguntar sobre a EGD." />
       <section className="brand-cta container"><span className="brand-label">Vamos conversar</span><h2>Qual desafio vamos<br />transformar em entrega?</h2><Link className="btn btn-primary" href="/contato">Conte o seu projeto <ArrowUR size={20} /></Link><span className="brand-cta-note">Uma boa solução começa com uma boa conversa.</span></section>
     </>
   );

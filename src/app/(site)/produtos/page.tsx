@@ -1,20 +1,25 @@
 import type { Metadata } from "next";
 import { SHOW_CASES } from "@/content/site";
-import { pageMeta } from "@/content/seo";
+import { breadcrumbJsonLd, faqJsonLd, pageMeta, productsJsonLd, webPageJsonLd } from "@/content/seo";
+import { FAQ } from "@/content/faq";
+import { JsonLd } from "@/components/site/json-ld";
+import { Faq } from "@/components/site/faq";
 import Link from "next/link";
 import { Arrow } from "@/components/legacy/ui";
 import { Visual } from "@/components/legacy/product-visual";
 import { PRODUCTS_FULL } from "@/content/legacy-pages";
 
-export const metadata: Metadata = pageMeta({
+const META = {
   title: "Produtos: contratos, RH, vistorias e central de chamados",
-  description: "Produtos verticais prontos para a sua operação: gestão de contratos, RH, vistorias de obras e central de chamados.",
+  description: "Produtos prontos para a sua operação, implantados em semanas: gestão de contratos, gestão de RH, app de vistorias e fiscalização de obras e central de chamados.",
   path: "/produtos",
-});
+};
+export const metadata: Metadata = pageMeta(META);
 
 export default function ProdutosPage() {
   return (
     <>
+      <JsonLd data={[webPageJsonLd({ kind: "CollectionPage", ...META }), breadcrumbJsonLd([{ name: "Produtos", path: META.path }]), productsJsonLd(), faqJsonLd(FAQ.produtos)]} />
       <section className="page-head">
         <div className="grid-bg"></div>
         <div className="container">
@@ -56,6 +61,7 @@ export default function ProdutosPage() {
         ))}
       </div>
 
+      <Faq items={FAQ.produtos} title="Perguntas frequentes sobre os produtos." />
       <section className="cta-final">
         <div className="container">
           <div className="cta-card reveal">

@@ -61,6 +61,18 @@ Ver `docs/runbooks/coolify.md`. A imagem é construída pelo `Dockerfile`; o `do
 
 O site estático anterior (HTML + React via CDN, publicado no GitHub Pages) foi removido do repositório ao fim da Fase 1; ele continua no histórico do git até o commit `90cfda2`. Desative o GitHub Pages em Settings → Pages quando o domínio apontar para o VPS.
 
+## Buscadores e assistentes de IA (SEO, GEO, AEO)
+
+Tudo nasce do mesmo conteúdo das páginas, então não desatualiza sozinho:
+
+- `src/content/seo.ts`: metadados por página e dados estruturados schema.org (Organization com fundador e catálogo, WebSite, WebPage, BreadcrumbList, Service, SoftwareApplication, FAQPage). Injetados pelas páginas com `<JsonLd>`.
+- `src/content/faq.ts`: perguntas frequentes de cada página, visíveis na tela (`<Faq>`) e no JSON-LD com o mesmo texto. Resposta primeiro, uma ou duas frases: é o trecho que o Google e as IAs citam.
+- `/llms.txt` e `/llms-full.txt` (`src/content/llms.ts`): resumo em Markdown para assistentes de IA, no formato llmstxt.org.
+- `src/app/robots.ts`: robôs de IA (GPTBot, ClaudeBot, PerplexityBot, Google-Extended etc.) liberados de forma explícita; áreas privadas fechadas para todos.
+- Testes: `tests/unit/seo.test.ts` e `tests/e2e/seo.spec.ts`.
+
+Fora do código, quem administra o domínio precisa cadastrar o site no Google Search Console e no Bing Webmaster Tools (enviando o sitemap) e criar o Perfil da Empresa no Google (Google Business Profile) com o mesmo nome, e-mail e cidade do site.
+
 ## Identidade visual e materiais da marca
 
 Rebranding: [manual da marca](docs/brand/manual-da-marca.md), [análise e entrega](docs/brand/analise-e-entrega.md) e [prompts das imagens](docs/brand/prompts-imagens.md). Kit em `public/brand/`; manual visual disponível em `/brand/manual-da-marca.html` e `/brand/manual-da-marca.pdf`.

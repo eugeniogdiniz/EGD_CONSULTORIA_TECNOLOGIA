@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { pageMeta } from "@/content/seo";
+import { breadcrumbJsonLd, faqJsonLd, pageMeta, webPageJsonLd } from "@/content/seo";
+import { FAQ } from "@/content/faq";
+import { JsonLd } from "@/components/site/json-ld";
+import { Faq } from "@/components/site/faq";
 import Link from "next/link";
 import Image from "next/image";
 import { getSiteCases } from "@/modules/cases/site";
@@ -8,11 +11,12 @@ import { Arrow } from "@/components/legacy/ui";
 import { PRINCIPLES, TIMELINE, SECTORS } from "@/content/legacy-pages";
 import { BrandFilm } from "@/components/site/brand-film";
 
-export const metadata: Metadata = pageMeta({
+const META = {
   title: "Sobre a EGD: engenharia que entrega código em produção",
   description: "A EGD nasceu dentro de consórcios de engenharia e habitação, resolvendo controle de documentos, vistorias e relatórios. Hoje também com dados, painéis e IA.",
   path: "/sobre",
-});
+};
+export const metadata: Metadata = pageMeta(META);
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +24,7 @@ export default async function SobrePage() {
   const TOTAIS = SHOW_CASES ? (await getSiteCases()).totals : null;
   return (
     <>
+      <JsonLd data={[webPageJsonLd({ kind: "AboutPage", ...META }), breadcrumbJsonLd([{ name: "Sobre", path: META.path }]), faqJsonLd(FAQ.sobre)]} />
       <section className="page-head">
         <div className="grid-bg"></div>
         <div className="container">
@@ -112,6 +117,7 @@ export default async function SobrePage() {
         <BrandFilm variant="signature" />
       </section>
 
+      <Faq items={FAQ.sobre} title="Perguntas frequentes sobre a EGD." />
       <section className="cta-final">
         <div className="container">
           <div className="cta-card reveal">

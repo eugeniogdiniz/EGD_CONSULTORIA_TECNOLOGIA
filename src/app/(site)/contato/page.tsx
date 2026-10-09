@@ -1,18 +1,23 @@
 import type { Metadata } from "next";
-import { pageMeta } from "@/content/seo";
+import { breadcrumbJsonLd, faqJsonLd, pageMeta, webPageJsonLd } from "@/content/seo";
+import { FAQ } from "@/content/faq";
+import { JsonLd } from "@/components/site/json-ld";
+import { Faq } from "@/components/site/faq";
 import Link from "next/link";
 import { ContactForm } from "@/components/legacy/contact-form";
 import { SITE } from "@/content/site";
 
-export const metadata: Metadata = pageMeta({
+const META = {
   title: "Fale com a EGD",
   description: "Conte o seu desafio e respondemos em até 48h úteis. Atendimento de segunda a sexta, das 9h às 18h (horário de Brasília), com trabalho remoto em todo o Brasil.",
   path: "/contato",
-});
+};
+export const metadata: Metadata = pageMeta(META);
 
 export default function ContatoPage() {
   return (
     <>
+      <JsonLd data={[webPageJsonLd({ kind: "ContactPage", ...META }), breadcrumbJsonLd([{ name: "Contato", path: META.path }]), faqJsonLd(FAQ.contato)]} />
       <section className="page-head">
         <div className="grid-bg"></div>
         <div className="container">
@@ -72,6 +77,7 @@ export default function ContatoPage() {
           </div>
         </div>
       </section>
+      <Faq items={FAQ.contato} title="Antes de escrever." label="Perguntas frequentes" />
     </>
   );
 }
