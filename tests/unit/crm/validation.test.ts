@@ -122,3 +122,15 @@ describe("changeProposalStatusSchema", () => {
     expect(changeProposalStatusSchema.safeParse({ to: "sent", sentAt: "27/09/2026" }).success).toBe(false);
   });
 });
+
+describe("campos de uma linha normalizam espaço em branco", () => {
+  it("título da proposta colado com tabulação vira texto com espaços simples", () => {
+    const r = proposalSchema.safeParse({ opportunityId: "6f1c0b3a-2a7e-4c2b-9d0e-1a2b3c4d5e6f", title: "Implantação\tdo\tERP   Omie\n e Automação", valueCents: 100 });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.title).toBe("Implantação do ERP Omie e Automação");
+  });
+  it("nome da empresa idem; mínimo continua valendo depois da limpeza", () => {
+    expect(companySchema.parse({ name: "Acme\tLtda" }).name).toBe("Acme Ltda");
+    expect(companySchema.safeParse({ name: "A\t" }).success).toBe(false);
+  });
+});

@@ -60,8 +60,16 @@ const optionalUuid = z
 
 const currency = z.enum(CURRENCY).default("BRL");
 
+/** Campo de uma linha: tabulação e quebras (texto colado de planilha ou Word) viram um espaço. */
+const singleLine = (max: number) =>
+  z
+    .string()
+    .trim()
+    .transform((v) => v.replace(/\s+/g, " "))
+    .pipe(z.string().min(2, "Mínimo 2 caracteres").max(max, `Máximo ${max} caracteres`));
+
 export const companySchema = z.object({
-  name: z.string().trim().min(2, "Mínimo 2 caracteres").max(160, "Máximo 160 caracteres"),
+  name: singleLine(160),
   cnpj,
   website: optionalUrl,
   industry: optionalText(120),
@@ -77,7 +85,7 @@ export type CompanyInput = z.input<typeof companySchema>;
 
 export const contactSchema = z.object({
   companyId: z.uuid(),
-  name: z.string().trim().min(2, "Mínimo 2 caracteres").max(160, "Máximo 160 caracteres"),
+  name: singleLine(160),
   email: optionalEmail,
   phone: optionalText(60),
   role: z.enum(["primary", "technical", "financial", "other"]).default("primary"),
@@ -89,7 +97,7 @@ export type ContactInput = z.input<typeof contactSchema>;
 export const opportunitySchema = z.object({
   companyId: z.uuid(),
   primaryContactId: optionalUuid,
-  title: z.string().trim().min(2, "Mínimo 2 caracteres").max(200, "Máximo 200 caracteres"),
+  title: singleLine(200),
   stage: z.enum(["new", "qualified", "meeting", "proposal", "won", "lost"]).default("new"),
   valueCents: valueCentsOptional,
   currency,
@@ -131,7 +139,7 @@ export type InteractionInput = z.input<typeof interactionSchema>;
 
 export const proposalSchema = z.object({
   opportunityId: z.uuid(),
-  title: z.string().trim().min(2, "Mínimo 2 caracteres").max(200, "Máximo 200 caracteres"),
+  title: singleLine(200),
   valueCents: valueCentsRequired,
   currency,
   validUntil: isoDate,
@@ -147,7 +155,7 @@ export const changeProposalStatusSchema = z.object({
 export type ChangeProposalStatusInput = z.input<typeof changeProposalStatusSchema>;
 
 export const serviceSchema = z.object({
-  name: z.string().trim().min(2, "Mínimo 2 caracteres").max(120, "Máximo 120 caracteres"),
+  name: singleLine(120),
   description: optionalText(1000),
   unit: z.string().trim().min(1, "Informe a unidade").max(20, "Máximo 20 caracteres").default("projeto"),
   defaultPriceCents: z.coerce.number().int("Somente centavos inteiros").min(0, "Preço não pode ser negativo"),

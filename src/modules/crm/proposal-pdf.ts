@@ -48,11 +48,19 @@ type Fonts = { head: string; body: string; bodyBold: string };
 const FONTS: Fonts = { head: "Helvetica-Bold", body: "Helvetica", bodyBold: "Helvetica-Bold" };
 
 const REPLACE: Record<string, string> = { "→": "›", "←": "‹", "↔": "‹›", "✓": "v", "✔": "v", "≥": ">=", "≤": "<=", "≠": "!=", "…": "...", "\u00a0": " " };
-/** As fontes padrão só têm WinAnsi: troca o que tem equivalente e descarta o resto (emoji, símbolos). */
+/**
+ * As fontes padrão só têm WinAnsi: troca o que tem equivalente e descarta o
+ * resto (emoji, símbolos). Tabulações e outros caracteres de controle (texto
+ * colado de planilha ou Word) viram espaço: o pdfkit codifica o \t errado e o
+ * título sai embaralhado. Quebras de linha ficam (parágrafos dos textos).
+ */
 export function toWinAnsi(s: string): string {
   return s
     .normalize("NFC")
+    .replace(/\r\n?/g, "\n")
+    .replace(/[\t\v\f\u0000-\u0008\u000e-\u001f\u007f-\u009f]/g, " ")
     .replace(/[→←↔✓✔≥≤≠…\u00a0]/g, (c) => REPLACE[c] ?? "")
+    .replace(/ {2,}/g, " ")
     .replace(/[^\u0000-\u00ff\u0152\u0153\u0160\u0161\u0178\u017d\u017e\u0192\u02c6\u02dc\u2013\u2014\u2018-\u201a\u201c-\u201e\u2020-\u2022\u2026\u2030\u2039\u203a\u20ac\u2122]/g, "");
 }
 
