@@ -29,7 +29,7 @@ test.describe.serial("crm", () => {
     await page.getByRole("button", { name: /nova oportunidade/i }).click();
     const oppDialog = page.getByRole("dialog");
     await oppDialog.getByLabel(/^título$/i).fill(oportunidadeTitulo);
-    await oppDialog.getByLabel(/valor/i).fill("5500000");
+    await oppDialog.getByLabel(/valor/i).fill("55.000,00");
     await oppDialog.getByRole("button", { name: /^criar$/i }).click();
 
     // Depois de criar, redireciona para o detalhe da oportunidade

@@ -27,9 +27,9 @@ test("financeiro: parcelas, rate do projeto, estimativa, burndown e relatório d
 
   // ── rate do projeto ─────────────────────────────────────────────────────
   const rateInput = page.getByLabel(/rate de .* neste projeto/i).first();
-  await rateInput.fill("25000");
+  await rateInput.fill("250,00");
   await rateInput.locator("xpath=ancestor::form").getByRole("button", { name: /^salvar$/i }).click();
-  await expect(page.getByLabel(/rate de .* neste projeto/i).first()).toHaveValue("25000", { timeout: 10_000 });
+  await expect(page.getByLabel(/rate de .* neste projeto/i).first()).toHaveValue("250,00", { timeout: 10_000 });
 
   // ── estimativa na entrega e burndown ────────────────────────────────────
   await page.goto(`/admin/projetos/${p.id}/entregas/${p.visible.id}`);

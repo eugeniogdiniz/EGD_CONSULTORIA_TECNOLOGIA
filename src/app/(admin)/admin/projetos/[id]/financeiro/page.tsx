@@ -20,9 +20,9 @@ import { formatHours } from "@/modules/projects/burndown";
 import { todayInSaoPaulo } from "@/modules/reports/dates";
 import { PageHeader, Block } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ExpenseFormDialog } from "@/modules/projects/components/expense-form";
 import { formatBrlCents, formatIsoDate } from "@/lib/format";
+import { MoneyInput } from "@/components/shell/money-input";
 
 export const metadata = { title: "Financeiro" };
 
@@ -327,8 +327,8 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
                       <span className="type-micro text-faint">rate da pessoa: {r.personalRateCents != null ? `${formatBrlCents(r.personalRateCents)}/h` : "não definido"}</span>
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <label className="sr-only" htmlFor={`rate-${r.userId}`}>Rate de {r.name} neste projeto, em centavos</label>
-                      <Input id={`rate-${r.userId}`} name="hourlyRateCents" inputMode="numeric" placeholder="cents/h" defaultValue={r.projectRateCents ?? ""} className="h-8 w-28 text-right" />
+                      <label className="sr-only" htmlFor={`rate-${r.userId}`}>Rate de {r.name} neste projeto, em reais por hora</label>
+                      <MoneyInput id={`rate-${r.userId}`} name="hourlyRateCents" defaultCents={r.projectRateCents} placeholder="por hora" className="w-36" />
                       <Button type="submit" size="sm" variant="outline">Salvar</Button>
                     </span>
                   </form>

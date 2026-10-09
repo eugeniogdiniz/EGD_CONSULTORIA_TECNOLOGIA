@@ -17,7 +17,7 @@ test("proposta enviada aparece no portal e o cliente aceita; aprovação e ajust
   await admin.getByRole("button", { name: /nova proposta/i }).click();
   const dlg = admin.getByRole("dialog");
   await dlg.getByLabel(/^título$/i).fill(`Proposta portal ${stamp}`);
-  await dlg.getByLabel(/valor/i).fill("123400");
+  await dlg.getByLabel(/valor/i).fill("1.234,00");
   await dlg.getByRole("button", { name: /criar rascunho/i }).click();
   await expect(admin).toHaveURL(/\/admin\/crm\/propostas\/[0-9a-f-]+$/);
   const proposalUrl = admin.url();

@@ -27,7 +27,7 @@ test("dados da empresa, contrato da proposta aceita emitido e baixado no portal,
   await admin.getByRole("button", { name: /nova proposta/i }).click();
   const dlg = admin.getByRole("dialog");
   await dlg.getByLabel(/^título$/i).fill(`Proposta contrato ${stamp}`);
-  await dlg.getByLabel(/valor/i).fill("250000");
+  await dlg.getByLabel(/valor/i).fill("2.500,00");
   await dlg.getByRole("button", { name: /criar rascunho/i }).click();
   await expect(admin).toHaveURL(/\/admin\/crm\/propostas\/[0-9a-f-]+$/);
   const proposalUrl = admin.url();

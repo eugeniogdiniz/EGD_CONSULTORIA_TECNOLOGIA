@@ -17,6 +17,7 @@ import {
 import { convertLeadForm } from "@/modules/crm/form-actions";
 import { buildDefaultOpportunityTitle } from "@/modules/crm/convert-lead";
 import type { ActionResult } from "@/lib/action-result";
+import { MoneyInput } from "@/components/shell/money-input";
 
 type Suggestion = { id: string; name: string; cnpj: string | null } | null;
 
@@ -162,8 +163,8 @@ export function ConvertLeadDialog({
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
-                <Label htmlFor="cl-ovalue">Valor <span className="font-normal text-faint">em cents, opcional</span></Label>
-                <Input id="cl-ovalue" name="opportunityValueCents" type="number" min={0} />
+                <Label htmlFor="cl-ovalue">Valor <span className="font-normal text-faint">opcional</span></Label>
+                <MoneyInput id="cl-ovalue" name="opportunityValueCents" />
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="cl-onext">Próximo passo <span className="font-normal text-faint">opcional</span></Label>

@@ -30,7 +30,7 @@ test("proposta: escrever o documento, gerar o PDF e enviar por e-mail ao contato
   await page.getByRole("button", { name: /nova proposta/i }).click();
   const pDialog = page.getByRole("dialog");
   await pDialog.getByLabel(/^título$/i).fill(proposta);
-  await pDialog.getByLabel(/valor/i).fill("4850000");
+  await pDialog.getByLabel(/valor/i).fill("48.500,00");
   await pDialog.getByRole("button", { name: /criar rascunho/i }).click();
   await expect(page).toHaveURL(/\/admin\/crm\/propostas\/[0-9a-f-]+$/);
   const proposalUrl = page.url();
