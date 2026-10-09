@@ -37,6 +37,14 @@ test("proposta: escrever o documento, gerar o PDF e enviar por e-mail ao contato
   await expect(page.getByRole("heading", { name: "Documento" })).toBeVisible();
   await expect(page.getByText("nenhum PDF gerado")).toBeVisible();
 
+  // anexo manual: o PDF do cliente sobe pelo formulário e vira o arquivo da proposta
+  await expect(page.getByText(/rascunho sem anexo/i)).toBeVisible();
+  const anexo = page.getByTestId("anexar-proposta");
+  await anexo.locator('input[type="file"]').setInputFiles({ name: `proposta-cliente-${stamp}.pdf`, mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n%teste\n") });
+  await anexo.getByRole("button", { name: /enviar arquivo/i }).click();
+  await expect(page.getByText(`proposta-cliente-${stamp}.pdf`)).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/rascunho sem anexo/i)).toHaveCount(0);
+
   // documento
   await page.getByRole("button", { name: "Editar documento" }).click(); // Button+Link = role=button
   await expect(page).toHaveURL(/\/documento$/);
