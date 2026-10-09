@@ -65,7 +65,9 @@ export default async function ContratoPage({ params }: PageProps<"/admin/crm/con
         <div className="grid gap-3">
           <p className="text-sm text-muted-foreground">
             {c.status === "signed"
-              ? `Assinado em ${c.signedAt ? formatDate(c.signedAt) : "—"}. A versão ${c.documentVersion} é o contrato final.`
+              ? c.signedFileId
+                ? `Assinado em ${c.signedAt ? formatDate(c.signedAt) : "—"}, com o PDF assinado anexado abaixo: ele é o contrato final. Os campos continuam editáveis para registrar aqui o que consta no documento assinado (partes, prazos, parcelas e pagamento).`
+                : `Assinado em ${c.signedAt ? formatDate(c.signedAt) : "—"}. A versão ${c.documentVersion} é o contrato final.`
               : c.status === "issued"
                 ? `Emitido em ${c.issuedAt ? formatDate(c.issuedAt) : "—"}: o cliente baixa a versão ${c.documentVersion} no portal, em Propostas. Para corrigir algo, volte para rascunho.`
                 : "Revise os campos abaixo, gere versões de PDF quantas vezes precisar e emita quando estiver pronto. Emitir gera a versão final, bloqueia a edição e libera o download para o cliente no portal."}
@@ -137,7 +139,7 @@ export default async function ContratoPage({ params }: PageProps<"/admin/crm/con
         contractId={c.id}
         initial={input.document}
         valueCents={p.valueCents}
-        readOnly={!draft}
+        readOnly={!draft && !c.signedFileId}
         missing={missing}
         pdfHref={`/admin/crm/contratos/${c.id}/pdf`}
         proposalHref={`/admin/crm/propostas/${p.id}`}

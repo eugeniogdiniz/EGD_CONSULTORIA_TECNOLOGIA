@@ -76,9 +76,10 @@ export async function createContractFromProposal(ctx: AdminContext, proposalId: 
 
 export async function updateContractDocument(ctx: AdminContext, id: string, raw: unknown): Promise<ActionResult<null>> {
   if (!isUuid(id)) return fail("Contrato não encontrado.");
-  const c = await db.query.crmContract.findFirst({ where: eq(crmContract.id, id), columns: { status: true, document: true } });
+  const c = await db.query.crmContract.findFirst({ where: eq(crmContract.id, id), columns: { status: true, document: true, signedFileId: true } });
   if (!c) return fail("Contrato não encontrado.");
-  if (c.status !== "draft") return fail("Contrato emitido: volte para rascunho para editar.");
+  // com o PDF assinado fora do sistema anexado, o documento daqui é só a transcrição: continua editável
+  if (c.status !== "draft" && !c.signedFileId) return fail("Contrato emitido: volte para rascunho para editar.");
   // campos ausentes mantêm o valor gravado (o formulário manda tudo; a API pode mandar parte)
   const merged = { ...parseStoredContractDocument(c.document), ...(raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {}) };
   const parsed = contractDocumentSchema.safeParse(merged);
