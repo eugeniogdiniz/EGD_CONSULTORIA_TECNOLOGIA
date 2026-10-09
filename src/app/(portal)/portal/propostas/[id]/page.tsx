@@ -64,7 +64,7 @@ export default async function PortalPropostaPage({ params }: PageProps<"/portal/
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">{contract.fileName}</div>
                   <div className="type-micro text-muted-foreground">
-                    contrato {contract.number} · v{contract.documentVersion}{contract.fileSize != null && ` · ${formatBytes(contract.fileSize)}`}{contract.issuedAt && ` · emitido em ${formatDate(contract.issuedAt)}`}
+                    contrato {contract.number} · {contract.signedCopy ? "cópia assinada" : `v${contract.documentVersion}`}{contract.fileSize != null && ` · ${formatBytes(contract.fileSize)}`}{contract.issuedAt && ` · emitido em ${formatDate(contract.issuedAt)}`}
                   </div>
                 </div>
                 <form method="post" action={`/portal/propostas/${p.id}/contrato`}>

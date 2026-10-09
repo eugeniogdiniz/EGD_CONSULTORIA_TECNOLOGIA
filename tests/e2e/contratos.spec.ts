@@ -104,6 +104,18 @@ test("dados da empresa, contrato da proposta aceita emitido e baixado no portal,
   await admin.goto(proposalUrl);
   await expect(admin.getByTestId("bloco-contrato")).toContainText("assinado em");
 
+  // ── contrato assinado fora do sistema: sobe o PDF e o cliente passa a baixar essa cópia ─
+  await admin.goto(contractUrl);
+  const assinado = admin.getByTestId("contrato-assinado");
+  await assinado.locator('input[type="file"]').setInputFiles({ name: `contrato-assinado-${stamp}.pdf`, mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n%assinado\n") });
+  await assinado.getByLabel(/data da assinatura/i).fill("2030-02-02");
+  await assinado.getByRole("button", { name: /anexar contrato assinado/i }).click();
+  await expect(admin.getByTestId("contrato-assinado-arquivo")).toContainText(`contrato-assinado-${stamp}.pdf`, { timeout: 15_000 });
+  await expect(admin.getByTestId("status-contrato")).toHaveText("Assinado");
+  await client.goto(`/portal/propostas/${proposalId}`);
+  await expect(client.getByTestId("contrato-portal")).toContainText(`contrato-assinado-${stamp}.pdf`);
+  await expect(client.getByTestId("contrato-portal")).toContainText("cópia assinada");
+
   // ── cliente aprova a entrega concluída; dono gera o termo de aceite ───────
   const p = fx.projectA;
   await client.goto(`/portal/projetos/${p.id}`);

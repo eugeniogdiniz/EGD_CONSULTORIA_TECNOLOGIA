@@ -70,6 +70,15 @@ export async function markContractSignedForm(_p: NullState, fd: FormData): Promi
   return r;
 }
 
+export async function attachSignedContractForm(_p: NullState, fd: FormData): Promise<NullState> {
+  const ctx = await requireOwner();
+  const id = String(fd.get("id") ?? "");
+  const { attachSignedContract } = await import("./actions");
+  const r = await attachSignedContract(ctx, id, fd);
+  if (r.ok) revalidate(id, String(fd.get("proposalId") ?? "") || undefined);
+  return r.ok ? { ok: true, data: null } : r;
+}
+
 export async function generateAcceptanceTermForm(_p: NullState, fd: FormData): Promise<NullState> {
   const ctx = await requireOwner();
   const deliverableId = String(fd.get("deliverableId") ?? "");
