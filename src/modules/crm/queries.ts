@@ -160,6 +160,8 @@ export function listOpportunities(
       nextStep: crmOpportunity.nextStep,
       nextStepAt: crmOpportunity.nextStepAt,
       ownerId: crmOpportunity.ownerId,
+      wonAt: crmOpportunity.wonAt,
+      lostAt: crmOpportunity.lostAt,
       companyId: crmCompany.id,
       companyName: crmCompany.name,
       companyArchivedAt: crmCompany.archivedAt,
