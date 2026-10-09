@@ -12,10 +12,8 @@ import { getContractByProposal, CONTRACT_STATUS_LABEL } from "@/modules/contract
 import { createContractForm } from "@/modules/contracts/form-actions";
 import { formatDateTime } from "@/lib/format";
 import { getDownloadUrl } from "@/modules/files/actions";
-import {
-  attachProposalFileForm,
-  changeProposalStatusForm,
-} from "@/modules/crm/form-actions";
+import { changeProposalStatusForm } from "@/modules/crm/form-actions";
+import { AttachProposalFileForm } from "@/modules/crm/components/attach-proposal-file-form";
 import { PageHeader, Block } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { ProposalFormDialog } from "@/modules/crm/components/proposal-form";
@@ -238,10 +236,10 @@ export default async function PropostaDetalhePage({ params }: PageProps<"/admin/
                   <span className="text-xs text-danger">Sem acesso</span>
                 )}
               </div>
-              {p.status === "draft" && <AttachForm proposalId={p.id} replace />}
+              {p.status === "draft" && <AttachProposalFileForm proposalId={p.id} replace />}
             </div>
           ) : (
-            <AttachForm proposalId={p.id} />
+            <AttachProposalFileForm proposalId={p.id} />
           )}
         </Block>
       </div>
@@ -294,24 +292,5 @@ export default async function PropostaDetalhePage({ params }: PageProps<"/admin/
         </Block>
       )}
     </>
-  );
-}
-
-function AttachForm({ proposalId, replace = false }: { proposalId: string; replace?: boolean }) {
-  return (
-    <form action={attachProposalFileForm as unknown as (fd: FormData) => Promise<void>} className="grid gap-2" encType="multipart/form-data">
-      <input type="hidden" name="id" value={proposalId} />
-      <label
-        htmlFor={`p-file-${proposalId}`}
-        className="cursor-pointer rounded-sm border border-dashed border-strong bg-subtle p-4 text-center text-sm text-muted-foreground hover:bg-muted"
-      >
-        {replace ? "Substituir arquivo…" : "Selecionar arquivo…"}
-        <div className="type-micro text-faint">PDF, DOCX ou XLSX até 50 MB</div>
-      </label>
-      <input id={`p-file-${proposalId}`} name="file" type="file" accept=".pdf,.docx,.xlsx,application/pdf" className="sr-only" />
-      <div>
-        <Button type="submit" size="sm">Enviar arquivo</Button>
-      </div>
-    </form>
   );
 }
