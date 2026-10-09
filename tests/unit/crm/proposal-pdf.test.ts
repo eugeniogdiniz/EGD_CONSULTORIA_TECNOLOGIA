@@ -62,3 +62,9 @@ describe("renderProposalPdf", () => {
 it("toWinAnsi troca setas e remove emoji, preservando acentos e travessões", () => {
   expect(toWinAnsi("ERP → portal ✓ 🚀 — ok à é ç")).toBe("ERP › portal v  — ok à é ç");
 });
+
+it("toWinAnsi troca tabulação e controle por espaço e mantém quebras de linha", () => {
+  expect(toWinAnsi("Implantação\tdo\tERP\tOmie")).toBe("Implantação do ERP Omie");
+  expect(toWinAnsi("linha 1\r\nlinha 2\rlinha 3")).toBe("linha 1\nlinha 2\nlinha 3");
+  expect(toWinAnsi("a  \t  b\u0007c")).toBe("a b c");
+});
