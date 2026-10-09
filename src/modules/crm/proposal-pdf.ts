@@ -92,6 +92,10 @@ export async function renderProposalPdf(raw: ProposalPdfInput): Promise<Buffer> 
   const fonts = FONTS;
   const logo = loadLogo();
   const header = () => {
+    // o cabeçalho também roda no meio de um texto que quebrou de página: guarda a fonte do texto para ele continuar igual
+    const prev = doc as unknown as { _font?: { name: string }; _fontSize: number };
+    const prevFont = prev._font?.name;
+    const prevSize = prev._fontSize;
     const y = 40;
     if (logo) doc.image(logo, PAGE.m, y - 2, { height: 24 });
     doc.font(fonts.head).fontSize(8).fillColor(C.ink400).text(`PROPOSTA COMERCIAL · ${input.number} · V${input.version}`, PAGE.m, y + 6, { width: CONTENT_W, align: "right", characterSpacing: 0.6 });
@@ -99,6 +103,7 @@ export async function renderProposalPdf(raw: ProposalPdfInput): Promise<Buffer> 
     // o texto do cabeçalho move o cursor: devolve ao topo da área de conteúdo
     doc.x = PAGE.m;
     doc.y = doc.page.margins.top;
+    if (prevFont) doc.font(prevFont).fontSize(prevSize);
   };
   header();
   doc.on("pageAdded", header);

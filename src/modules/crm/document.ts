@@ -66,7 +66,7 @@ export function documentSections(doc: ProposalDocument, p: { valueFormatted: str
   if (doc.objective) push({ kind: "text", title: "Objetivo", body: doc.objective });
   const approach = doc.approach.filter((a) => a.stage || a.description);
   if (approach.length) push({ kind: "table", title: "Abordagem", columns: ["Etapa", "O que será feito"], rows: approach.map((a) => [a.stage, a.description]) });
-  const deliverables = doc.deliverables.filter((d) => d.title);
+  const deliverables = doc.deliverables.filter((d) => d.title || d.acceptance || d.due);
   if (deliverables.length) push({ kind: "table", title: "Entregas previstas", columns: ["Entregável", "Critério de aceite", "Prazo"], rows: deliverables.map((d) => [d.title, d.acceptance, d.due]) });
   if (doc.assumptions) push({ kind: "text", title: "Premissas", body: doc.assumptions });
   if (doc.scopeLimits) push({ kind: "text", title: "Limites do escopo", body: doc.scopeLimits });
