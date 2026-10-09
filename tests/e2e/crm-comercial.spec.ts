@@ -38,7 +38,7 @@ test("catálogo de serviços alimenta o investimento da proposta; previsão abre
   await cat.getByRole("button", { name: /adicionar item/i }).click();
   const items = page.getByLabel("Item / marco");
   await expect(items.last()).toHaveValue(new RegExp(`Diagnóstico ${stamp} \\(2 horas\\)`));
-  await expect(page.getByLabel("Valor (cents)").last()).toHaveValue("200000");
+  await expect(page.getByLabel("Valor", { exact: true }).last()).toHaveValue("2.000,00");
   await page.getByRole("button", { name: "Salvar documento" }).click();
   await expect(page.getByRole("status")).toContainText("Documento salvo", { timeout: 10_000 });
 
