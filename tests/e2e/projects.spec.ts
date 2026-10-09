@@ -21,7 +21,7 @@ test.describe.serial("projects", () => {
     await page.getByRole("button", { name: /nova oportunidade/i }).click();
     const oppDialog = page.getByRole("dialog");
     await oppDialog.getByLabel(/^título$/i).fill(oppTitulo);
-    await oppDialog.getByLabel(/valor/i).fill("5500000");
+    await oppDialog.getByLabel(/valor/i).fill("55.000,00");
     await oppDialog.getByRole("button", { name: /^criar$/i }).click();
     await expect(page.getByRole("heading", { level: 1, name: oppTitulo })).toBeVisible();
 

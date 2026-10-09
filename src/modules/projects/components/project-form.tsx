@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FieldError } from "@/components/shell/field-error";
 import type { ActionResult } from "@/lib/action-result";
+import { MoneyInput } from "@/components/shell/money-input";
 
 export function ProjectForm({
   action,
@@ -35,8 +36,8 @@ export function ProjectForm({
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="grid gap-1.5">
-          <Label htmlFor="budget">Orçamento <span className="font-normal text-faint">cents BRL</span></Label>
-          <Input id="budget" name="budgetCents" type="number" min={0} defaultValue={initial.budgetCents ?? ""} />
+          <Label htmlFor="budget">Orçamento <span className="font-normal text-faint">opcional</span></Label>
+          <MoneyInput id="budget" name="budgetCents" defaultCents={initial.budgetCents} />
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="startedAt">Iniciado em</Label>

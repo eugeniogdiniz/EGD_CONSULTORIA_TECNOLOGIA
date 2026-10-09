@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { createProposalForm, updateProposalForm } from "@/modules/crm/form-actions";
 import type { ActionResult } from "@/lib/action-result";
+import { MoneyInput } from "@/components/shell/money-input";
 
 type Proposal = {
   id: string;
@@ -64,17 +65,8 @@ function Fields({ opportunityId, proposal, fe }: { opportunityId: string; propos
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5">
-          <Label htmlFor="p-value">Valor <span className="font-normal text-faint">em cents (BRL)</span></Label>
-          <Input
-            id="p-value"
-            name="valueCents"
-            type="number"
-            min={1}
-            step={1}
-            defaultValue={proposal?.valueCents ?? ""}
-            required
-            aria-invalid={fe?.valueCents ? true : undefined}
-          />
+          <Label htmlFor="p-value">Valor</Label>
+          <MoneyInput id="p-value" name="valueCents" defaultCents={proposal?.valueCents} required aria-invalid={fe?.valueCents ? true : undefined} />
           <FieldError errors={fe?.valueCents} />
         </div>
         <div className="grid gap-1.5">

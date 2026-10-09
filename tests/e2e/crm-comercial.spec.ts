@@ -25,7 +25,7 @@ test("catálogo de serviços alimenta o investimento da proposta; previsão abre
   await page.getByRole("dialog").getByRole("button", { name: /^criar$/i }).click();
   await page.getByRole("button", { name: /nova proposta/i }).click();
   await page.getByRole("dialog").getByLabel(/^título$/i).fill(`Proposta ${stamp}`);
-  await page.getByRole("dialog").getByLabel(/valor/i).fill("200000");
+  await page.getByRole("dialog").getByLabel(/valor/i).fill("2.000,00");
   await page.getByRole("dialog").getByRole("button", { name: /criar rascunho/i }).click();
   await expect(page).toHaveURL(/\/admin\/crm\/propostas\/[0-9a-f-]+$/);
 

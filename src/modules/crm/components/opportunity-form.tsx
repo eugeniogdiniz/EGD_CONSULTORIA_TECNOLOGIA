@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { createOpportunityForm, updateOpportunityForm } from "@/modules/crm/form-actions";
 import type { ActionResult } from "@/lib/action-result";
+import { MoneyInput } from "@/components/shell/money-input";
 
 type Contact = { id: string; name: string };
 type Opportunity = {
@@ -82,16 +83,8 @@ function Fields({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5">
-          <Label htmlFor="o-value">Valor <span className="font-normal text-faint">em cents (BRL)</span></Label>
-          <Input
-            id="o-value"
-            name="valueCents"
-            type="number"
-            min={0}
-            step={1}
-            defaultValue={opportunity?.valueCents ?? ""}
-            aria-invalid={fe?.valueCents ? true : undefined}
-          />
+          <Label htmlFor="o-value">Valor <span className="font-normal text-faint">opcional</span></Label>
+          <MoneyInput id="o-value" name="valueCents" defaultCents={opportunity?.valueCents} aria-invalid={fe?.valueCents ? true : undefined} />
           <FieldError errors={fe?.valueCents} />
         </div>
         <div className="grid gap-1.5">
