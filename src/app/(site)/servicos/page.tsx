@@ -1,19 +1,24 @@
 import type { Metadata } from "next";
-import { pageMeta } from "@/content/seo";
+import { breadcrumbJsonLd, faqJsonLd, pageMeta, servicesJsonLd, webPageJsonLd } from "@/content/seo";
+import { FAQ } from "@/content/faq";
+import { JsonLd } from "@/components/site/json-ld";
+import { Faq } from "@/components/site/faq";
 import Link from "next/link";
 import Image from "next/image";
 import { Arrow, Icon } from "@/components/legacy/ui";
 import { SERVICES } from "@/content/legacy-pages";
 
-export const metadata: Metadata = pageMeta({
+const META = {
   title: "Serviços de desenvolvimento, automação, dados e IA",
   description: "Desenvolvimento de sistemas, automação de processos, dados e painéis, agentes de IA, governança de dados e gestão de projetos para consórcios de engenharia, habitação e energia.",
   path: "/servicos",
-});
+};
+export const metadata: Metadata = pageMeta(META);
 
 export default function ServicosPage() {
   return (
     <>
+      <JsonLd data={[webPageJsonLd({ kind: "CollectionPage", ...META }), breadcrumbJsonLd([{ name: "Serviços", path: META.path }]), servicesJsonLd(), faqJsonLd(FAQ.servicos)]} />
       <section className="page-head">
         <div className="grid-bg"></div>
         <div className="container">
@@ -77,6 +82,7 @@ export default function ServicosPage() {
         </div>
       </section>
 
+      <Faq items={FAQ.servicos} title="Perguntas frequentes sobre os serviços." />
       <section className="cta-final">
         <div className="container">
           <div className="cta-card reveal">

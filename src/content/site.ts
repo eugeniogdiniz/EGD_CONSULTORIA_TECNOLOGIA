@@ -20,7 +20,17 @@ export const SITE = {
   hours: "Segunda a sexta, 9h às 18h",
   hoursNote: "Horário de Brasília.",
   whereNote: "Trabalho remoto em todo o Brasil; presencial quando o projeto pede.",
-  responseTime: "Respondemos em até um dia útil.",
+  responseTime: "Respondemos em até 48 horas úteis.",
+  foundingYear: "2018",
+  /** Quem responde pela EGD: entra nos dados estruturados (schema.org) e no llms.txt. */
+  founder: {
+    name: "Eugênio G. Diniz",
+    jobTitle: "Consultor em Tecnologia",
+    linkedin: "https://www.linkedin.com/in/eugeniodiniz/",
+    github: "https://github.com/eugeniogdiniz",
+  },
+  /** Setores em que a EGD atua, na ordem em que aparecem no site. */
+  sectors: ["Consórcios de engenharia", "Habitação", "Energia", "Infraestrutura"],
 } as const;
 
 export type NavLink = { href: string; label: string };

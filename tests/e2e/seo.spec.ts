@@ -37,14 +37,63 @@ test("SEO: títulos e descrições são diferentes entre as páginas (sem duplic
   expect(seen.desc.size).toBe(PAGES.length);
 });
 
-test("SEO: a home publica JSON-LD de Organization válido", async ({ page }) => {
+async function jsonLd(page: import("@playwright/test").Page) {
+  const raws = await page.locator('script[type="application/ld+json"]').allTextContents();
+  for (const raw of raws) expect(raw).not.toContain("<");
+  return raws.map((raw) => JSON.parse(raw) as Record<string, unknown>);
+}
+
+test("SEO: a home publica JSON-LD de Organization, WebSite, WebPage e FAQPage válidos", async ({ page }) => {
   await page.goto("/");
-  const raw = await page.locator('script[type="application/ld+json"]').first().textContent();
-  expect(raw).not.toContain("<");
-  const data = JSON.parse(raw ?? "{}");
-  expect(data["@type"]).toBe("Organization");
-  expect(data.url).toBe(SITE_URL);
-  expect(data.email).toMatch(/@egdsystem\.com\.br$/);
+  const types = (await jsonLd(page)).map((d) => d["@type"]);
+  expect(types).toEqual(["Organization", "WebSite", "WebPage", "FAQPage"]);
+  const org = (await jsonLd(page))[0] as { url: string; email: string; founder: { name: string }; sameAs: string[] };
+  expect(org.url).toBe(SITE_URL);
+  expect(org.email).toMatch(/@egdsystem\.com\.br$/);
+  expect(org.founder.name).toBeTruthy();
+  expect(org.sameAs.length).toBeGreaterThan(0);
+});
+
+test("SEO: páginas internas publicam trilha (BreadcrumbList) e perguntas frequentes (FAQPage) visíveis", async ({ page }) => {
+  const expected: Record<string, string[]> = {
+    "/servicos": ["CollectionPage", "BreadcrumbList", "ItemList", "FAQPage"],
+    "/produtos": ["CollectionPage", "BreadcrumbList", "ItemList", "FAQPage"],
+    "/sobre": ["AboutPage", "BreadcrumbList", "FAQPage"],
+    "/contato": ["ContactPage", "BreadcrumbList", "FAQPage"],
+  };
+  for (const [path, types] of Object.entries(expected)) {
+    await page.goto(path);
+    const data = await jsonLd(page);
+    expect(data.map((d) => d["@type"]), path).toEqual(types);
+    const faq = data.find((d) => d["@type"] === "FAQPage") as { mainEntity: { name: string; acceptedAnswer: { text: string } }[] };
+    // o mesmo texto do JSON-LD aparece na tela (o Google penaliza FAQ só no código)
+    for (const q of faq.mainEntity) {
+      await expect(page.getByRole("heading", { level: 3, name: q.name }), `${path}: ${q.name}`).toBeVisible();
+      await expect(page.getByText(q.acceptedAnswer.text, { exact: true })).toBeVisible();
+    }
+    const crumbs = data.find((d) => d["@type"] === "BreadcrumbList") as { itemListElement: { item: string }[] };
+    expect(crumbs.itemListElement[0].item).toBe(`${SITE_URL}/`);
+    expect(crumbs.itemListElement[1].item).toBe(`${SITE_URL}${path}`);
+  }
+});
+
+test("SEO: llms.txt e llms-full.txt respondem em texto puro com o resumo da EGD", async ({ request }) => {
+  for (const path of ["/llms.txt", "/llms-full.txt"]) {
+    const res = await request.get(path);
+    expect(res.status(), path).toBe(200);
+    expect(res.headers()["content-type"]).toContain("text/plain");
+    const body = await res.text();
+    expect(body.startsWith("# EGD Consultoria em Tecnologia")).toBe(true);
+    expect(body).toContain(`${SITE_URL}/servicos`);
+    expect(body).not.toContain("/admin");
+  }
+});
+
+test("SEO: a home diz em uma frase o que a EGD é e onde atende (texto citável por buscadores e IAs)", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText(/A EGD Consultoria em Tecnologia é uma consultoria de São Paulo/)).toBeVisible();
+  // as diretivas de trecho vão na tag própria do Googlebot (o Next separa `robots` de `googleBot`)
+  expect(await page.locator('meta[name="googlebot"]').first().getAttribute("content")).toContain("max-snippet:-1");
 });
 
 test("SEO: páginas de acesso saem do índice (noindex)", async ({ page }) => {
@@ -63,4 +112,6 @@ test("SEO: sitemap lista as páginas públicas (sem /cases) sem lastmod e robots
   const robots = await (await request.get("/robots.txt")).text();
   expect(robots).toContain(`Sitemap: ${SITE_URL}/sitemap.xml`);
   for (const blocked of ["/admin", "/portal", "/api"]) expect(robots).toContain(`Disallow: ${blocked}`);
+  for (const bot of ["GPTBot", "ClaudeBot", "PerplexityBot", "Google-Extended"]) expect(robots).toContain(`User-Agent: ${bot}`);
+  expect(robots).toContain("Allow: /llms.txt");
 });
