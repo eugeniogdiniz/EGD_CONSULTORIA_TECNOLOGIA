@@ -162,6 +162,13 @@
       "when": 1791500426696,
       "tag": "0022_financeiro",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791514136193,
+      "tag": "0023_contrato_assinado",
+      "breakpoints": true
     }
   ]
 }

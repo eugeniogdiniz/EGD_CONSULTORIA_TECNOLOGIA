@@ -1,4 +1,5 @@
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/lib/db";
 import { crmCompany, crmContact, crmContract, crmOpportunity, crmProposal, crmProposalDecision, files, project, projectDeliverable, projectDeliverableAcceptance, projectInvoice, users } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
@@ -17,6 +18,9 @@ import { acceptanceBlocks, type AcceptanceRenderInput } from "./acceptance-templ
 import { nextContractNumber } from "./number";
 
 const brand = { email: BRAND.email, phone: BRAND.phone, site: BRAND.site };
+
+/** arquivo do contrato assinado fora do sistema (segundo join na tabela de arquivos) */
+const signedFiles = alias(files, "signed_files");
 
 async function loadProposal(proposalId: string) {
   const [row] = await db
@@ -88,12 +92,13 @@ export async function updateContractDocument(ctx: AdminContext, id: string, raw:
 export async function buildContractRenderInput(id: string, opts: { version?: number; now?: Date } = {}) {
   if (!isUuid(id)) return null;
   const [row] = await db
-    .select({ contract: crmContract, proposal: crmProposal, opportunity: crmOpportunity, company: crmCompany, file: files, decidedAt: crmProposalDecision.decidedAt })
+    .select({ contract: crmContract, proposal: crmProposal, opportunity: crmOpportunity, company: crmCompany, file: files, signedFile: signedFiles, decidedAt: crmProposalDecision.decidedAt })
     .from(crmContract)
     .innerJoin(crmProposal, eq(crmContract.proposalId, crmProposal.id))
     .innerJoin(crmOpportunity, eq(crmProposal.opportunityId, crmOpportunity.id))
     .innerJoin(crmCompany, eq(crmOpportunity.companyId, crmCompany.id))
     .leftJoin(files, eq(crmContract.fileId, files.id))
+    .leftJoin(signedFiles, eq(crmContract.signedFileId, signedFiles.id))
     .leftJoin(crmProposalDecision, eq(crmProposalDecision.proposalId, crmProposal.id))
     .where(eq(crmContract.id, id))
     .limit(1);
@@ -185,6 +190,31 @@ export async function markContractSigned(ctx: AdminContext, id: string, signedAt
   await db.update(crmContract).set({ status: "signed", signedAt: new Date(`${signedAt}T12:00:00Z`) }).where(eq(crmContract.id, id));
   await audit({ actorId: ctx.user.id, action: "crm.contract.signed", entityType: "crm_contract", entityId: id, metadata: { signedAt } });
   return ok(null);
+}
+
+/**
+ * Contrato assinado fora do sistema (impresso e digitalizado, ou assinatura
+ * eletrônica): sobe o PDF, registra a data e marca como assinado. Serve em
+ * qualquer status; o arquivo assinado passa a ser o documento final e o que o
+ * cliente baixa no portal. Um rascunho sem emissão ganha `issuedAt` agora.
+ */
+export async function attachSignedContract(ctx: AdminContext, id: string, formData: FormData, now = new Date()): Promise<ActionResult<{ fileId: string }>> {
+  if (!isUuid(id)) return fail("Contrato não encontrado.");
+  const signedAt = String(formData.get("signedAt") ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(signedAt) || Number.isNaN(Date.parse(signedAt))) return fail("Informe a data da assinatura.", { signedAt: ["Data inválida"] });
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return fail("Selecione o PDF do contrato assinado.", { file: ["Obrigatório"] });
+  if (file.type && file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) return fail("O contrato assinado precisa ser um PDF.", { file: ["Só PDF"] });
+  const c = await db.query.crmContract.findFirst({ where: eq(crmContract.id, id), columns: { id: true, status: true, issuedAt: true, signedFileId: true } });
+  if (!c) return fail("Contrato não encontrado.");
+  const stored = await storeFile(ctx, file, null);
+  if (!stored.ok) return stored;
+  await db
+    .update(crmContract)
+    .set({ signedFileId: stored.data.id, signedAt: new Date(`${signedAt}T12:00:00Z`), status: "signed", issuedAt: c.issuedAt ?? now })
+    .where(eq(crmContract.id, id));
+  await audit({ actorId: ctx.user.id, action: "crm.contract.signed", entityType: "crm_contract", entityId: id, metadata: { signedAt, fileId: stored.data.id, replaced: c.signedFileId, from: c.status } });
+  return ok({ fileId: stored.data.id });
 }
 
 // ── Termo de aceite da entrega aprovada ─────────────────────────────────────

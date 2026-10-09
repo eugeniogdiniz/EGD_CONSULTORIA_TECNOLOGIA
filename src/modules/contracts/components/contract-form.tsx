@@ -12,6 +12,7 @@ import type { ActionResult } from "@/lib/action-result";
 import { formatBrlCents } from "@/lib/format";
 import { installmentsTotal, type ContractDocument } from "@/modules/contracts/document";
 import { updateContractDocumentForm } from "@/modules/contracts/form-actions";
+import { MoneyCell } from "@/components/shell/money-input";
 
 type Doc = ContractDocument;
 type TextKey = { [K in keyof Doc]: Doc[K] extends string ? K : never }[keyof Doc];
@@ -113,7 +114,7 @@ export function ContractForm({ contractId, initial, valueCents, readOnly, missin
         <div className="grid gap-3">
           <Rows
             rows={doc.installments.map((i) => ({ milestone: i.milestone, amountCents: String(i.amountCents || ""), condition: i.condition }))}
-            columns={[{ key: "milestone", label: "Marco / parcela" }, { key: "amountCents", label: "Valor (cents)", width: "w-40", type: "number" }, { key: "condition", label: "Faturamento / vencimento", width: "w-56" }]}
+            columns={[{ key: "milestone", label: "Marco / parcela" }, { key: "amountCents", label: "Valor", width: "w-44", type: "money" }, { key: "condition", label: "Faturamento / vencimento", width: "w-56" }]}
             onChange={(rows) => set("installments", rows.map((r) => ({ milestone: r.milestone, amountCents: Number(r.amountCents || 0), condition: r.condition })))}
             readOnly={ro}
             empty={{ milestone: "", amountCents: "", condition: "" }}
@@ -175,7 +176,7 @@ export function ContractForm({ contractId, initial, valueCents, readOnly, missin
   );
 }
 
-type Col<T> = { key: keyof T & string; label: string; width?: string; type?: "number" };
+type Col<T> = { key: keyof T & string; label: string; width?: string; type?: "number" | "money" };
 
 function Rows<T extends Record<string, string>>({ rows, columns, onChange, readOnly, empty, addLabel, prefix }: { rows: T[]; columns: Col<T>[]; onChange: (rows: T[]) => void; readOnly: boolean; empty: T; addLabel: string; prefix: string }) {
   const update = (i: number, k: keyof T, v: string) => onChange(rows.map((r, idx) => (idx === i ? { ...r, [k]: v } : r)));
@@ -187,7 +188,11 @@ function Rows<T extends Record<string, string>>({ rows, columns, onChange, readO
           {columns.map((c) => (
             <div key={c.key} className={`grid min-w-0 flex-1 gap-1 ${c.width ?? ""}`}>
               <Label htmlFor={`${prefix}-${c.key}-${i}`} className="type-micro text-muted-foreground">{c.label}</Label>
-              <Input id={`${prefix}-${c.key}-${i}`} type={c.type ?? "text"} min={c.type === "number" ? 0 : undefined} value={r[c.key]} onChange={(e) => update(i, c.key, e.target.value)} readOnly={readOnly} />
+              {c.type === "money" ? (
+                <MoneyCell id={`${prefix}-${c.key}-${i}`} cents={r[c.key]} onChange={(v) => update(i, c.key, v)} readOnly={readOnly} />
+              ) : (
+                <Input id={`${prefix}-${c.key}-${i}`} type={c.type ?? "text"} min={c.type === "number" ? 0 : undefined} value={r[c.key]} onChange={(e) => update(i, c.key, e.target.value)} readOnly={readOnly} />
+              )}
             </div>
           ))}
           {!readOnly && (

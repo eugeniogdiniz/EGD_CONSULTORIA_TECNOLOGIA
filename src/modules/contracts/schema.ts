@@ -23,6 +23,8 @@ export const crmContract = pgTable(
     document: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
     documentVersion: integer().default(0).notNull(),
     fileId: uuid().references(() => files.id, { onDelete: "set null" }),
+    /** contrato assinado fora do sistema (PDF digitalizado ou assinado eletronicamente); quando existe, é o documento final */
+    signedFileId: uuid().references(() => files.id, { onDelete: "set null" }),
     issuedAt: timestamp({ withTimezone: true }),
     signedAt: timestamp({ withTimezone: true }),
     createdBy: uuid()

@@ -55,3 +55,35 @@ export function MoneyInput({
     </div>
   );
 }
+
+/**
+ * Célula de dinheiro em tabelas editáveis: o estado da tabela guarda centavos
+ * (string, "" = vazio); a pessoa vê e digita reais. Enquanto edita mostra o
+ * texto cru; ao sair, formata.
+ */
+export function MoneyCell({ id, cents, onChange, readOnly, ariaLabel }: { id: string; cents: string; onChange: (cents: string) => void; readOnly?: boolean; ariaLabel?: string }) {
+  const [text, setText] = useState<string | null>(null);
+  const shown = text ?? centsToReais(cents === "" ? null : Number(cents));
+  return (
+    <div className="relative">
+      <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-faint">R$</span>
+      <Input
+        id={id}
+        inputMode="decimal"
+        autoComplete="off"
+        value={shown}
+        readOnly={readOnly}
+        aria-label={ariaLabel}
+        onFocus={() => setText(shown)}
+        onChange={(e) => {
+          setText(e.target.value);
+          const c = reaisToCents(e.target.value);
+          if (c === null) onChange("");
+          else if (!Number.isNaN(c)) onChange(String(c));
+        }}
+        onBlur={() => setText(null)}
+        className="pl-9 tabular-nums"
+      />
+    </div>
+  );
+}

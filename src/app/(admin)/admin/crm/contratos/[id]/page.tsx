@@ -4,6 +4,7 @@ import { cn } from "cn";
 import { requireOwner } from "@/modules/auth/context";
 import { buildContractRenderInput } from "@/modules/contracts/actions";
 import { CONTRACT_STATUS_LABEL } from "@/modules/contracts/queries";
+import { AttachSignedContractForm } from "@/modules/contracts/components/attach-signed-form";
 import { generateContractPdfForm, issueContractForm, reopenContractForm } from "@/modules/contracts/form-actions";
 import { ContractForm } from "@/modules/contracts/components/contract-form";
 import { SignContractForm } from "@/modules/contracts/components/sign-form";
@@ -11,7 +12,7 @@ import { ConfirmAction } from "@/components/shell/confirm-action";
 import { PageHeader, Block } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { getDownloadUrl } from "@/modules/files/actions";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatBytes } from "@/lib/format";
 
 export const metadata = { title: "Contrato" };
 
@@ -34,6 +35,11 @@ export default async function ContratoPage({ params }: PageProps<"/admin/crm/con
   if (c.fileId) {
     const r = await getDownloadUrl(ctx, c.fileId);
     if (r.ok) downloadUrl = r.data.url;
+  }
+  let signedUrl: string | null = null;
+  if (c.signedFileId) {
+    const r = await getDownloadUrl(ctx, c.signedFileId);
+    if (r.ok) signedUrl = r.data.url;
   }
   return (
     <>
@@ -101,6 +107,29 @@ export default async function ContratoPage({ params }: PageProps<"/admin/crm/con
             )}
           </div>
           {c.status === "issued" && <SignContractForm contractId={c.id} proposalId={p.id} />}
+        </div>
+      </Block>
+
+      <Block title="Contrato assinado" aside={row.signedFile ? `assinado em ${c.signedAt ? formatDate(c.signedAt) : "—"}` : "PDF assinado fora do sistema"}>
+        <div className="grid gap-4">
+          {row.signedFile ? (
+            <div className="flex items-center gap-3.5 rounded-md border border-border bg-card p-3" data-testid="contrato-assinado-arquivo">
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium">{row.signedFile.originalName}</div>
+                <div className="type-micro text-muted-foreground">{formatBytes(row.signedFile.sizeBytes)} · anexado em {formatDate(row.signedFile.createdAt)} · é o documento que o cliente baixa no portal</div>
+              </div>
+              {signedUrl ? (
+                <Button variant="secondary" size="sm" render={<a href={signedUrl} download={row.signedFile.originalName} />}>
+                  Baixar assinado
+                </Button>
+              ) : (
+                <span className="text-xs text-danger">Sem acesso</span>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Se o contrato foi assinado no papel ou por assinatura eletrônica, anexe o PDF aqui: ele vira o documento final e o cliente passa a baixar esta versão no portal.</p>
+          )}
+          <AttachSignedContractForm contractId={c.id} proposalId={p.id} replace={Boolean(row.signedFile)} />
         </div>
       </Block>
 
