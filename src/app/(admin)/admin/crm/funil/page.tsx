@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cn } from "cn";
 import { requireOwner } from "@/modules/auth/context";
 import { listOpportunitiesGroupedByStage } from "@/modules/crm/queries";
+import { RECENT_CLOSED_DAYS, splitRecentClosed } from "@/modules/crm/funnel";
 import { PageHeader } from "@/components/shell/page-header";
 import { formatBrlCents, formatIsoDate } from "@/lib/format";
 
@@ -40,7 +41,8 @@ export default async function FunilPage({ searchParams }: PageProps<"/admin/crm/
   const ctx = await requireOwner();
   const sp = await searchParams;
   const search = typeof sp.q === "string" ? sp.q : "";
-  const hideClosed = sp.closed !== "1"; // default: esconde ganhas/perdidas
+  const showAllClosed = sp.closed === "1"; // padrão: Ganho/Perdido só com o que fechou nos últimos dias
+  const now = new Date();
 
   const columns = await listOpportunitiesGroupedByStage(ctx, {
     search: search || undefined,
@@ -53,7 +55,7 @@ export default async function FunilPage({ searchParams }: PageProps<"/admin/crm/
     <>
       <PageHeader
         title="Funil"
-        meta="Cada coluna é um estágio. Marcar como ganha/perdida acontece no detalhe da oportunidade."
+        meta={`Cada coluna é um estágio. Proposta enviada, aceita ou recusada move a oportunidade sozinha; Ganho e Perdido mostram os últimos ${RECENT_CLOSED_DAYS} dias.`}
       />
 
       <form className="flex flex-wrap items-center gap-3" action="/admin/crm/funil">
@@ -69,8 +71,8 @@ export default async function FunilPage({ searchParams }: PageProps<"/admin/crm/
           />
         </div>
         <label className="inline-flex h-10 items-center gap-2 text-sm text-muted-foreground">
-          <input type="checkbox" name="closed" value="1" defaultChecked={!hideClosed} />
-          Mostrar ganhas e perdidas
+          <input type="checkbox" name="closed" value="1" defaultChecked={showAllClosed} />
+          Mostrar todas as ganhas e perdidas
         </label>
         <button type="submit" className="h-10 rounded-sm border border-input px-3 text-sm hover:bg-muted">Filtrar</button>
       </form>
@@ -78,7 +80,7 @@ export default async function FunilPage({ searchParams }: PageProps<"/admin/crm/
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 overflow-x-auto">
         {columns.map((col) => {
           const isClosed = col.stage === "won" || col.stage === "lost";
-          const collapsed = isClosed && hideClosed;
+          const { recent, older } = isClosed && !showAllClosed ? splitRecentClosed(col.opportunities, now) : { recent: col.opportunities, older: [] };
           return (
             <section
               key={col.stage}
@@ -96,16 +98,14 @@ export default async function FunilPage({ searchParams }: PageProps<"/admin/crm/
                   {col.count}
                 </span>
               </header>
-              {collapsed ? (
-                <div className="p-3 text-xs text-faint italic">Coluna colapsada.</div>
-              ) : (
+              {(
                 <div className="grid gap-2 p-2">
-                  {col.opportunities.length === 0 ? (
+                  {recent.length === 0 ? (
                     <div className="rounded border border-dashed border-border p-4 text-center text-xs text-faint">
-                      Vazio.
+                      {isClosed && !showAllClosed ? `Nada nos últimos ${RECENT_CLOSED_DAYS} dias.` : "Vazio."}
                     </div>
                   ) : (
-                    col.opportunities.map((o) => (
+                    recent.map((o) => (
                       <div key={o.id} className="rounded border border-border bg-card hover:border-strong">
                         <Link href={`/admin/crm/oportunidades/${o.id}`} className="block p-3">
                           <div className="text-sm font-medium leading-snug">{o.title}</div>
@@ -145,6 +145,14 @@ export default async function FunilPage({ searchParams }: PageProps<"/admin/crm/
                         )}
                       </div>
                     ))
+                  )}
+                  {older.length > 0 && (
+                    <Link
+                      href={`/admin/crm/funil?closed=1${search ? `&q=${encodeURIComponent(search)}` : ""}`}
+                      className="rounded border border-dashed border-border p-2 text-center text-xs text-muted-foreground hover:text-link"
+                    >
+                      {older.length} mais antiga{older.length === 1 ? "" : "s"} · mostrar todas
+                    </Link>
                   )}
                 </div>
               )}
