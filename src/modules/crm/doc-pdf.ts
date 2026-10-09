@@ -69,12 +69,17 @@ export async function renderDocPdf(raw: DocPdfInput): Promise<Buffer> {
   });
   const logo = loadLogo();
   const header = () => {
+    // o cabeçalho também roda no meio de um texto que quebrou de página: guarda a fonte do texto para ele continuar igual
+    const prev = doc as unknown as { _font?: { name: string }; _fontSize: number };
+    const prevFont = prev._font?.name;
+    const prevSize = prev._fontSize;
     const y = 40;
     if (logo) doc.image(logo, PAGE.m, y - 2, { height: 24 });
     doc.font(F.head).fontSize(8).fillColor(C.ink400).text(input.headerLabel.toUpperCase(), PAGE.m, y + 6, { width: CONTENT_W, align: "right", characterSpacing: 0.6 });
     doc.moveTo(PAGE.m, y + 34).lineTo(PAGE.w - PAGE.m, y + 34).lineWidth(0.6).strokeColor(C.rule).stroke();
     doc.x = PAGE.m;
     doc.y = doc.page.margins.top;
+    if (prevFont) doc.font(prevFont).fontSize(prevSize);
   };
   header();
   doc.on("pageAdded", header);

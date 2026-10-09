@@ -47,6 +47,21 @@ describe("renderProposalPdf", () => {
     expect(pages(pdf)).toBeGreaterThanOrEqual(3);
   });
 
+  it("texto que quebra de página continua na fonte do corpo, não na do cabeçalho", async () => {
+    const long = "Parágrafo com bastante texto para forçar a quebra de página. ".repeat(120);
+    const doc = { ...emptyDocument(), context: long };
+    const pdf = await renderProposalPdf({ ...base, document: doc });
+    expect(pages(pdf)).toBeGreaterThanOrEqual(2);
+    // a fonte e o tamanho são definidos no fluxo como "/F<n> <tam> Tf": o cabeçalho usa 8 e o texto do corpo 10.5
+    const { inflateSync } = await import("node:zlib");
+    const streams = [...pdf.toString("latin1").matchAll(/stream\r?\n([\s\S]*?)\r?\nendstream/g)].map((m) => {
+      try { return inflateSync(Buffer.from(m[1], "latin1")).toString("latin1"); } catch { return ""; }
+    });
+    const page2 = streams.filter((s) => s.includes(" Tf"))[1];
+    const sizes = [...page2.matchAll(/ ([\d.]+) Tf/g)].map((m) => Number(m[1]));
+    expect(sizes).toContain(10.5);
+  });
+
   it("sem o logo no disco continua gerando", async () => {
     const cwd = process.cwd();
     process.chdir("/tmp");

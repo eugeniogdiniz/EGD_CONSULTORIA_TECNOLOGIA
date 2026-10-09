@@ -35,4 +35,11 @@ describe("documentSections", () => {
     expect(inv.kind === "table" && inv.rows.at(-1)).toEqual(["Total", "R$ 1.000,00", "—"]);
     expect(s[2].kind === "text" && s[2].body).toContain("SP, 03/10/2026.");
   });
+
+  it("mantém a entrega preenchida mesmo sem título", () => {
+    const d = { ...emptyDocument(), deliverables: [{ title: "", acceptance: "Homologado pelo cliente", due: "Semana 4" }] };
+    const s = documentSections(d, { valueFormatted: "R$ 1,00", place: "SP", dateFormatted: "03/10/2026" });
+    const ent = s.find((x) => x.title === "Entregas previstas");
+    expect(ent?.kind === "table" && ent.rows).toEqual([["", "Homologado pelo cliente", "Semana 4"]]);
+  });
 });

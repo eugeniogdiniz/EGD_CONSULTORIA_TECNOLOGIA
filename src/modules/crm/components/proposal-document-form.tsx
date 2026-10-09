@@ -27,12 +27,29 @@ const TEXT_SECTIONS: { key: keyof Pick<Doc, "context" | "objective" | "assumptio
   { key: "continuity", label: "Continuidade", hint: "Garantia, suporte e custos posteriores.", rows: 3 },
 ];
 
+const SECTION_LABELS: Record<string, string> = {
+  subtitle: "Subtítulo",
+  projectName: "Nome do projeto",
+  place: "Local da assinatura",
+  approach: "Abordagem",
+  deliverables: "Entregas previstas",
+  investment: "Investimento",
+  ...Object.fromEntries(TEXT_SECTIONS.map((s) => [s.key, s.label])),
+};
+
 /** Formulário do documento em seções, na ordem do modelo. Listas editáveis; o estado vai num campo oculto em JSON. */
 export type CatalogService = { id: string; name: string; unit: string; defaultPriceCents: number };
 
 export function ProposalDocumentForm({ proposalId, initial, valueCents, readOnly, pdfHref, services = [] }: { proposalId: string; initial: Doc; valueCents: number; readOnly: boolean; pdfHref: string; services?: CatalogService[] }) {
   const [doc, setDoc] = useState<Doc>(initial);
-  const [state, formAction, pending] = useActionState<ActionResult<null> | null, FormData>(updateProposalDocumentForm, null);
+  // o PDF é gerado do que está gravado: guarda o último conteúdo salvo para avisar quando a tela está à frente dele
+  const [savedJson, setSavedJson] = useState(() => JSON.stringify(initial));
+  const [state, formAction, pending] = useActionState<ActionResult<null> | null, FormData>(async (prev, fd) => {
+    const r = await updateProposalDocumentForm(prev, fd);
+    if (r?.ok) setSavedJson(String(fd.get("document")));
+    return r;
+  }, null);
+  const dirty = !readOnly && JSON.stringify(doc) !== savedJson;
   const fe = state && !state.ok ? state.fieldErrors : undefined;
   const mismatch = useMemo(() => investmentMismatch(doc, valueCents), [doc, valueCents]);
   const set = <K extends keyof Doc>(k: K, v: Doc[K]) => setDoc((d) => ({ ...d, [k]: v }));
@@ -54,9 +71,9 @@ export function ProposalDocumentForm({ proposalId, initial, valueCents, readOnly
 
       <Block title="Capa">
         <div className="grid gap-4 md:grid-cols-2">
-          <Field id="subtitle" label="Subtítulo" value={doc.subtitle} onChange={(v) => set("subtitle", v)} readOnly={ro} />
-          <Field id="projectName" label="Nome do projeto" value={doc.projectName} onChange={(v) => set("projectName", v)} readOnly={ro} hint="Vazio: usa o título da proposta." />
-          <Field id="place" label="Local da assinatura" value={doc.place} onChange={(v) => set("place", v)} readOnly={ro} />
+          <Field id="subtitle" label="Subtítulo" value={doc.subtitle} onChange={(v) => set("subtitle", v)} readOnly={ro} errors={fe?.subtitle} />
+          <Field id="projectName" label="Nome do projeto" value={doc.projectName} onChange={(v) => set("projectName", v)} readOnly={ro} hint="Vazio: usa o título da proposta." errors={fe?.projectName} />
+          <Field id="place" label="Local da assinatura" value={doc.place} onChange={(v) => set("place", v)} readOnly={ro} errors={fe?.place} />
         </div>
       </Block>
 
@@ -73,6 +90,7 @@ export function ProposalDocumentForm({ proposalId, initial, valueCents, readOnly
           empty={{ stage: "", description: "" }}
           addLabel="Adicionar etapa"
         />
+        <FieldError errors={fe?.approach} />
       </Block>
 
       <Block title="Entregas previstas">
@@ -84,6 +102,7 @@ export function ProposalDocumentForm({ proposalId, initial, valueCents, readOnly
           empty={{ title: "", acceptance: "", due: "" }}
           addLabel="Adicionar entrega"
         />
+        <FieldError errors={fe?.deliverables} />
       </Block>
 
       {TEXT_SECTIONS.slice(2, 6).map((s) => (
@@ -100,6 +119,7 @@ export function ProposalDocumentForm({ proposalId, initial, valueCents, readOnly
             empty={{ item: "", amountCents: "", condition: "" }}
             addLabel="Adicionar item"
           />
+          <FieldError errors={fe?.investment} />
           {!ro && services.length > 0 && (
             <div className="flex flex-wrap items-end gap-2 rounded-sm border border-dashed border-border bg-subtle/50 p-3" data-testid="catalogo">
               <div className="grid min-w-0 flex-1 gap-1">
@@ -128,8 +148,13 @@ export function ProposalDocumentForm({ proposalId, initial, valueCents, readOnly
 
       <TextSection s={TEXT_SECTIONS[7]} value={doc.continuity} onChange={(v) => set("continuity", v)} readOnly={ro} />
 
-      {state && !state.ok && !fe && <p role="alert" className="text-sm text-danger">{state.error}</p>}
-      {state?.ok && <p role="status" className="text-sm text-success">Documento salvo.</p>}
+      {state && !state.ok && (
+        <p role="alert" className="text-sm text-danger">
+          {fe ? `Documento não salvo. Verifique: ${Object.keys(fe).map((k) => SECTION_LABELS[k] ?? k).join(", ")}.` : state.error}
+        </p>
+      )}
+      {state?.ok && !dirty && <p role="status" className="text-sm text-success">Documento salvo.</p>}
+      {dirty && <p role="status" className="text-sm text-muted-foreground">Há alterações não salvas: salve o documento antes de ver o PDF, que mostra a última versão salva.</p>}
       <div className="flex flex-wrap items-center gap-2">
         {!ro && (
           <Button type="submit" disabled={pending}>
@@ -148,12 +173,13 @@ export function ProposalDocumentForm({ proposalId, initial, valueCents, readOnly
   );
 }
 
-function Field({ id, label, value, onChange, readOnly, hint }: { id: string; label: string; value: string; onChange: (v: string) => void; readOnly: boolean; hint?: string }) {
+function Field({ id, label, value, onChange, readOnly, hint, errors }: { id: string; label: string; value: string; onChange: (v: string) => void; readOnly: boolean; hint?: string; errors?: string[] }) {
   return (
     <div className="grid gap-1.5">
       <Label htmlFor={`doc-${id}`}>{label}</Label>
       <Input id={`doc-${id}`} value={value} onChange={(e) => onChange(e.target.value)} readOnly={readOnly} />
       {hint && <span className="type-micro text-faint">{hint}</span>}
+      <FieldError errors={errors} />
     </div>
   );
 }
