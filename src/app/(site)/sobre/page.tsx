@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getSiteCases } from "@/modules/cases/site";
 import { SHOW_CASES } from "@/content/site";
-import { Arrow } from "@/components/legacy/ui";
+import { Arrow, ArrowUR } from "@/components/legacy/ui";
 import { PRINCIPLES, TIMELINE, SECTORS } from "@/content/legacy-pages";
 import { BrandFilm } from "@/components/site/brand-film";
 
@@ -75,9 +75,9 @@ export default async function SobrePage() {
         <div className="container">
           <div className="about-grid">
             <div className="reveal">
-              <span className="eyebrow">LINHA DO TEMPO</span>
+              <span className="eyebrow">TRAJETÓRIA</span>
               <h2 style={{ marginTop: 18 }}>Da primeira automação<br />ao stack moderno.</h2>
-              <p className="lead" style={{ marginTop: 22 }}>Crescemos no ritmo dos clientes. Cada vertical surgiu para resolver um problema real — não como aposta de mercado.</p>
+              <p className="lead" style={{ marginTop: 22 }}>Crescemos no ritmo dos contratos que atendemos. Cada frente surgiu para resolver um problema real de campo, de contrato ou de decisão — não como aposta de mercado.</p>
             </div>
             <div className="timeline reveal">
               {TIMELINE.map((t, i) => (
@@ -98,16 +98,20 @@ export default async function SobrePage() {
       <section className="section" style={{ borderTop: "1px solid var(--line)" }}>
         <div className="container">
           <div className="section-head reveal">
-            <span className="eyebrow">SETORES ATENDIDOS</span>
-            <h2>Verticais onde já entregamos.</h2>
+            <span className="eyebrow">PARA QUEM</span>
+            <h2>Públicos e setores onde entregamos.</h2>
           </div>
           <div className="brand-sectors">
-            {SECTORS.map((s, i) => (
-              <div key={i} style={{ background: "var(--bg)", padding: "32px 28px" }}>
-                <div style={{ fontFamily: "var(--display)", fontSize: 22, fontWeight: 500, marginBottom: 6 }}>{s.n}</div>
-                <div style={{ fontFamily: "var(--mono)", fontSize: 12.5, color: "var(--fg-mute)" }}>{s.d}</div>
-              </div>
-            ))}
+            {SECTORS.map((s, i) => {
+              const inner = (
+                <>
+                  <div style={{ fontFamily: "var(--display)", fontSize: 22, fontWeight: 500, marginBottom: 6 }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>{s.n}{s.href && <ArrowUR size={14} />}</span></div>
+                  <div style={{ fontFamily: "var(--mono)", fontSize: 12.5, color: "var(--fg-mute)" }}>{s.d}</div>
+                </>
+              );
+              const style = { background: "var(--bg)", padding: "32px 28px", display: "block", color: "inherit" } as const;
+              return s.href ? <Link key={i} href={s.href} style={style}>{inner}</Link> : <div key={i} style={style}>{inner}</div>;
+            })}
           </div>
         </div>
       </section>

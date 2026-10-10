@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 const SITE_URL = "https://egdsystem.com.br";
 // /cases está oculto por enquanto (SHOW_CASES = false em src/content/site.ts).
-const PAGES = ["/", "/servicos", "/produtos", "/consorcios", "/artigos", "/sobre", "/contato", "/produtos/vistorias", "/servicos/auto", "/servicos/bpo", "/artigos/rdo-relatorio-diario-de-obra"];
+const PAGES = ["/", "/servicos", "/produtos", "/consorcios", "/para", "/para/construtoras", "/para/empresas-de-engenharia", "/artigos", "/sobre", "/contato", "/produtos/vistorias", "/servicos/auto", "/servicos/bpo", "/artigos/rdo-relatorio-diario-de-obra"];
 
 for (const path of PAGES) {
   test(`SEO ${path}: título, descrição, canonical, Open Graph e um único h1`, async ({ page }) => {
@@ -61,6 +61,7 @@ test("SEO: páginas internas publicam trilha (BreadcrumbList) e perguntas freque
     "/sobre": ["AboutPage", "BreadcrumbList", "FAQPage"],
     "/contato": ["ContactPage", "BreadcrumbList", "FAQPage"],
     "/consorcios": ["WebPage", "BreadcrumbList", "FAQPage"],
+    "/para/construtoras": ["WebPage", "BreadcrumbList", "FAQPage"],
     "/produtos/vistorias": ["WebPage", "BreadcrumbList", "SoftwareApplication", "FAQPage"],
     "/servicos/auto": ["WebPage", "BreadcrumbList", "Service", "FAQPage"],
     "/servicos/bpo": ["WebPage", "BreadcrumbList", "Service", "FAQPage"],
@@ -102,7 +103,7 @@ test("SEO: artigo publica Article com autor e data, e o modelo em planilha baixa
 
 test("SEO: sitemap inclui páginas próprias de produto, serviço, consórcios e artigos (artigos com lastmod)", async ({ request }) => {
   const sitemap = await (await request.get("/sitemap.xml")).text();
-  for (const p of ["/consorcios", "/artigos", "/produtos/vistorias", "/servicos/auto", "/artigos/rdo-relatorio-diario-de-obra"]) expect(sitemap).toContain(`<loc>${SITE_URL}${p}</loc>`);
+  for (const p of ["/consorcios", "/para/incorporadoras", "/artigos", "/produtos/vistorias", "/servicos/auto", "/artigos/rdo-relatorio-diario-de-obra"]) expect(sitemap).toContain(`<loc>${SITE_URL}${p}</loc>`);
   expect(sitemap).toContain("<lastmod>2026-");
 });
 

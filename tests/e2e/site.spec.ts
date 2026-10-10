@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-for (const path of ["/", "/servicos", "/produtos", "/consorcios", "/artigos", "/sobre", "/contato", "/produtos/contratos", "/servicos/ia", "/artigos/checklist-de-vistoria-de-obra"]) {
+for (const path of ["/", "/servicos", "/produtos", "/consorcios", "/para", "/para/incorporadoras", "/artigos", "/sobre", "/contato", "/produtos/contratos", "/servicos/ia", "/artigos/checklist-de-vistoria-de-obra"]) {
   test(`página ${path} responde e tem h1`, async ({ page }) => {
     const res = await page.goto(path);
     expect(res?.status()).toBe(200);
@@ -26,7 +26,7 @@ test("formulário de contato valida e envia", async ({ page }) => {
 });
 
 test("produto, serviço e artigo inexistentes devolvem 404", async ({ page }) => {
-  for (const path of ["/produtos/nao-existe", "/servicos/nao-existe", "/artigos/nao-existe"]) {
+  for (const path of ["/produtos/nao-existe", "/servicos/nao-existe", "/artigos/nao-existe", "/para/nao-existe"]) {
     const res = await page.goto(path);
     expect(res?.status(), path).toBe(404);
   }
