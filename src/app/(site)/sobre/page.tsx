@@ -105,7 +105,7 @@ export default async function SobrePage() {
             {SECTORS.map((s, i) => {
               const inner = (
                 <>
-                  <div style={{ fontFamily: "var(--display)", fontSize: 22, fontWeight: 500, marginBottom: 6 }}>{s.n}{s.href && <ArrowUR size={14} />}</div>
+                  <div style={{ fontFamily: "var(--display)", fontSize: 22, fontWeight: 500, marginBottom: 6 }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>{s.n}{s.href && <ArrowUR size={14} />}</span></div>
                   <div style={{ fontFamily: "var(--mono)", fontSize: 12.5, color: "var(--fg-mute)" }}>{s.d}</div>
                 </>
               );
