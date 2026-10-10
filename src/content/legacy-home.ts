@@ -7,6 +7,8 @@ export const SVC = [
   { id: "ia", title: "Agentes de IA", desc: "Copilotos sob medida e agentes autônomos integrados aos seus sistemas.", tags: ["Bedrock", "Azure OpenAI", "RAG", "LLMs"], icon: "M9 12a3 3 0 1 1 6 0 3 3 0 1 1-6 0z M5 8V6a2 2 0 0 1 2-2h2 M19 8V6a2 2 0 0 0-2-2h-2 M5 16v2a2 2 0 0 0 2 2h2 M19 16v2a2 2 0 0 1-2 2h-2 M2 12h2 M20 12h2 M12 2v2 M12 20v2" },
   { id: "gov", title: "Governança de Dados", desc: "Catálogo, qualidade, linhagem e políticas de acesso confiáveis e auditáveis.", tags: ["Catálogo", "LGPD", "Iceberg", "Linhagem"], icon: "M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z M9 12l2 2 4-4" },
   { id: "agile", title: "Consultoria em Projetos Ágeis", desc: "Discovery, descoberta de produto e gestão de squads com cadência clara.", tags: ["Scrum", "Kanban", "OKRs", "Discovery"], icon: "M3 12h4l2-6 4 12 2-6h4" },
+  { id: "consultoria", title: "Consultoria Especializada", desc: "Diagnóstico, arquitetura e acompanhamento técnico por especialistas sêniores.", tags: ["Diagnóstico", "Arquitetura", "Segurança", "Mentoria"], icon: "M9 18h6 M10 21h4 M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1.1 2.1h4.8c.1-.9.5-1.6 1.1-2.1A6 6 0 0 0 12 3z" },
+  { id: "bpo", title: "BPO de Suporte N1, N2 e N3", desc: "Suporte terceirizado em três níveis, com SLA, indicadores e base de conhecimento.", tags: ["N1", "N2", "N3", "SLA"], icon: "M4 14v-2a8 8 0 0 1 16 0v2 M4 13h3v6H4z M17 13h3v6h-3z M12 22h3a3 3 0 0 0 3-3" },
 ];
 
 export const PRODUCTS = [

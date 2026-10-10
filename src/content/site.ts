@@ -56,6 +56,8 @@ export const FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
       { href: "/servicos/ia", label: "Agentes de IA" },
       { href: "/servicos/gov", label: "Governança de dados" },
       { href: "/servicos/agile", label: "Gestão de projetos" },
+      { href: "/servicos/consultoria", label: "Consultoria especializada" },
+      { href: "/servicos/bpo", label: "BPO de suporte N1, N2 e N3" },
     ],
   },
   {

@@ -90,6 +90,30 @@ export const SERVICE_DETAILS: ServiceDetail[] = [
       { q: "Como a EGD prioriza o backlog?", a: "Com WSJF ou RICE: valor, urgência e risco divididos pelo esforço, aplicados em sessão com quem decide. O resultado é uma ordem que a diretoria entende e que muda quando os dados mudam." },
     ],
   },
+  {
+    id: "consultoria",
+    metaTitle: "Consultoria especializada em tecnologia e arquitetura",
+    metaDescription: "Especialistas sêniores para diagnóstico técnico, arquitetura de soluções, seleção isenta de fornecedores, revisão de segurança e LGPD e mentoria. Diagnóstico em 1 a 2 semanas.",
+    definition: "A consultoria especializada da EGD coloca um especialista sênior ao lado da sua decisão: diagnóstico do que trava a operação, arquitetura da solução, escolha isenta de tecnologia e fornecedores, revisão de segurança e acompanhamento até o sistema entrar em operação.",
+    problems: ["Decisão de compra ou de arquitetura sem ninguém de confiança para avaliar", "Fornecedor entregando e ninguém da empresa consegue conferir", "Equipe interna que precisa de direção técnica, não de mais um sistema"],
+    faq: [
+      { q: "O que a consultoria especializada da EGD entrega?", a: "Um diagnóstico escrito em 1 a 2 semanas, com o que está travando, o que vale mudar e em que ordem, e depois o acompanhamento que a empresa quiser: arquitetura, seleção de fornecedor, revisão do que foi construído ou mentoria da equipe." },
+      { q: "A EGD é isenta na escolha de tecnologia e fornecedores?", a: "Sim. A EGD não revende licença nem recebe comissão de fornecedor. A recomendação é por aderência ao contexto do cliente, com critérios escritos e, quando vale, uma prova de conceito antes da compra." },
+      { q: "Consultoria especializada serve para quem já tem equipe de TI?", a: "Sim, é o caso mais comum. A equipe interna segue dona da operação; o especialista da EGD entra para decidir arquitetura, revisar segurança e LGPD, destravar um projeto parado ou capacitar o time em uma tecnologia nova." },
+    ],
+  },
+  {
+    id: "bpo",
+    metaTitle: "BPO de suporte N1, N2 e N3: suporte técnico terceirizado com SLA",
+    metaDescription: "Suporte técnico terceirizado em três níveis: N1 atendimento, N2 resolução técnica, N3 sustentação de sistemas, com SLA e indicadores. Operação em 2 a 4 semanas.",
+    definition: "O BPO de suporte da EGD assume o atendimento técnico da empresa em três níveis: N1 recebe e resolve o básico, N2 resolve incidentes de sistemas, acessos e dados, e N3 corrige a causa raiz e evolui o sistema, tudo com SLA, base de conhecimento e indicadores mensais.",
+    problems: ["Pedidos de suporte chegando por WhatsApp e e-mail sem fila, prazo ou histórico", "Desenvolvedores interrompidos o dia todo por chamados simples", "Sistema entregue por um fornecedor que sumiu e ninguém sustenta"],
+    faq: [
+      { q: "O que são suporte N1, N2 e N3?", a: "São os três níveis de atendimento técnico. N1 recebe o chamado, classifica e resolve o básico (acesso, dúvida, procedimento). N2 resolve incidentes que exigem conhecimento técnico do sistema. N3 é a engenharia: corrige a causa raiz no código ou na infraestrutura e evolui o sistema." },
+      { q: "Como funciona o SLA no BPO de suporte da EGD?", a: "Cada prioridade tem prazo de primeira resposta e de solução, contados no horário acordado (comercial ou estendido). O painel mostra os chamados em risco, e o relatório mensal traz volume, tempos, reincidência e satisfação por sistema." },
+      { q: "A EGD sustenta sistemas que não foram feitos por ela?", a: "Sim. O BPO começa por uma transição de 2 a 4 semanas em que a EGD documenta o sistema, monta a base de conhecimento e assume os chamados por nível. Vale para sistemas de fornecedores que saíram e para plataformas como Power Platform e SharePoint." },
+    ],
+  },
 ];
 
 export const serviceDetail = (id: string) => SERVICE_DETAILS.find((s) => s.id === id);

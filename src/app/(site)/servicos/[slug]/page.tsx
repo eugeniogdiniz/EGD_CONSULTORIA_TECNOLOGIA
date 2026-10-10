@@ -5,6 +5,7 @@ import { Arrow, Icon } from "@/components/legacy/ui";
 import { Faq } from "@/components/site/faq";
 import { JsonLd } from "@/components/site/json-ld";
 import { article } from "@/content/artigos";
+import { SERVICES } from "@/content/legacy-pages";
 import { SERVICE_DETAILS, serviceBase, serviceDetail } from "@/content/servicos-detalhe";
 import { breadcrumbJsonLd, faqJsonLd, pageMeta, serviceJsonLd, webPageJsonLd } from "@/content/seo";
 
@@ -33,7 +34,7 @@ export default async function ServicoPage({ params }: PageProps<"/servicos/[slug
       <JsonLd data={[webPageJsonLd({ path, title: d.metaTitle, description: d.metaDescription }), breadcrumbJsonLd([{ name: "Serviços", path: "/servicos" }, { name: s.title, path }]), serviceJsonLd(s, { standalone: true }), faqJsonLd(d.faq)]} />
       <section className="page-head">
         <div className="container">
-          <div className="crumbs"><Link href="/">/</Link><span className="sep">→</span><Link href="/servicos">SERVIÇOS</Link><span className="sep">→</span><span>{s.num}/06</span></div>
+          <div className="crumbs"><Link href="/">/</Link><span className="sep">→</span><Link href="/servicos">SERVIÇOS</Link><span className="sep">→</span><span>{s.num}/{String(SERVICES.length).padStart(2, "0")}</span></div>
           <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 24 }}>
             <div className="icon-tile lg accent"><Icon d={s.icon} size={26} /></div>
             <h1>{s.title}</h1>
@@ -70,7 +71,7 @@ export default async function ServicoPage({ params }: PageProps<"/servicos/[slug
         </div>
       </section>
 
-      <Faq items={d.faq} title={`Perguntas sobre ${s.title.toLowerCase()}.`} />
+      <Faq items={d.faq} title={`Perguntas sobre ${s.title}.`} />
 
       <section className="cta-final">
         <div className="container">
