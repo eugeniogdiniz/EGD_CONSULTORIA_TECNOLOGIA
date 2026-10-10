@@ -142,6 +142,8 @@ describe("llms.txt", () => {
     for (const s of SERVICES) expect(short).toContain(`[${s.title}](${SITE.url}/servicos/${s.id})`);
     for (const p of PRODUCTS_FULL) expect(short).toContain(`[${p.title}](${SITE.url}/produtos/${p.id})`);
     expect(short).toContain(`${SITE.url}/consorcios`);
+    expect(short).toContain(`${SITE.url}/para/construtoras`);
+    expect(full).toContain("## Para incorporadoras");
     expect(short).toContain(`${SITE.url}/artigos/`);
     expect(short).toContain(`(${SITE.url}/contato)`);
     expect(short).toContain(`${SITE.url}/llms-full.txt`);
