@@ -75,6 +75,7 @@ export default function ServicosPage() {
                   {s.stack.outros.length > 0 && <div className="row"><span className="k">Outros</span><span className="v">{s.stack.outros.join(" · ")}</span></div>}
                   <div className="row" style={{ marginTop: 14 }}><span className="k">delivery</span><span className="v accent">{s.delivery}</span></div>
                   <div className="row"><span className="k">squad</span><span className="v">{s.squad}</span></div>
+                  <Link href={`/servicos/${s.id}`} className="btn btn-ghost btn-sm" style={{ marginTop: 18 }}>Página completa <Arrow size={13} /></Link>
                 </div>
               </div>
             </article>

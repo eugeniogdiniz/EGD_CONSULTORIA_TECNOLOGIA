@@ -50,7 +50,8 @@ export default function ProdutosPage() {
                 <div className="row"><span className="k">stack</span><span className="v">{p.stack.join(" · ")}</span></div>
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-                <Link href="/contato" className="btn btn-primary btn-sm">Solicitar demo <Arrow size={13} /></Link>
+                <Link href={`/produtos/${p.id}`} className="btn btn-primary btn-sm">Página completa <Arrow size={13} /></Link>
+                <Link href="/contato" className="btn btn-ghost btn-sm">Solicitar demo</Link>
                 {SHOW_CASES && <Link href="/cases" className="btn btn-ghost btn-sm">Ver caso real</Link>}
               </div>
             </div>

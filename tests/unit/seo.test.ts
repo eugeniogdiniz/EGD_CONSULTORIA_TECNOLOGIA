@@ -51,7 +51,7 @@ describe("organizationJsonLd", () => {
   });
   it("lista as seis frentes de serviço no catálogo", () => {
     expect(j.hasOfferCatalog.itemListElement).toHaveLength(SERVICES.length);
-    expect(j.hasOfferCatalog.itemListElement[0].itemOffered.url).toBe(`${SITE.url}/servicos#dev`);
+    expect(j.hasOfferCatalog.itemListElement[0].itemOffered.url).toBe(`${SITE.url}/servicos/dev`);
   });
   it("serializa em JSON válido", () => serializable(j));
 });
@@ -114,7 +114,7 @@ describe("servicesJsonLd e productsJsonLd", () => {
     for (const li of j.itemListElement) {
       expect(li.item["@type"]).toBe("Service");
       expect(li.item.provider).toEqual({ "@id": ORG_ID });
-      expect(li.item.url.startsWith(`${SITE.url}/servicos#`)).toBe(true);
+      expect(li.item.url.startsWith(`${SITE.url}/servicos/`)).toBe(true);
     }
     serializable(j);
   });
@@ -139,8 +139,10 @@ describe("llms.txt", () => {
     expect(full.startsWith(`# ${SITE.name}\n\n> `)).toBe(true);
   });
   it("lista serviços, produtos e páginas com links absolutos", () => {
-    for (const s of SERVICES) expect(short).toContain(`[${s.title}](${SITE.url}/servicos#${s.id})`);
-    for (const p of PRODUCTS_FULL) expect(short).toContain(`[${p.title}](${SITE.url}/produtos#${p.id})`);
+    for (const s of SERVICES) expect(short).toContain(`[${s.title}](${SITE.url}/servicos/${s.id})`);
+    for (const p of PRODUCTS_FULL) expect(short).toContain(`[${p.title}](${SITE.url}/produtos/${p.id})`);
+    expect(short).toContain(`${SITE.url}/consorcios`);
+    expect(short).toContain(`${SITE.url}/artigos/`);
     expect(short).toContain(`(${SITE.url}/contato)`);
     expect(short).toContain(`${SITE.url}/llms-full.txt`);
     expect(short).not.toContain("/cases");

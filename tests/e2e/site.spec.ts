@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-for (const path of ["/", "/servicos", "/produtos", "/sobre", "/contato"]) {
+for (const path of ["/", "/servicos", "/produtos", "/consorcios", "/artigos", "/sobre", "/contato", "/produtos/contratos", "/servicos/ia", "/artigos/checklist-de-vistoria-de-obra"]) {
   test(`página ${path} responde e tem h1`, async ({ page }) => {
     const res = await page.goto(path);
     expect(res?.status()).toBe(200);
@@ -23,6 +23,13 @@ test("formulário de contato valida e envia", async ({ page }) => {
   await expect(sucesso.or(limite)).toBeVisible({ timeout: 15_000 });
   test.skip(await limite.isVisible(), "limite de 3 envios por hora atingido nesta máquina");
   await expect(sucesso).toBeVisible();
+});
+
+test("produto, serviço e artigo inexistentes devolvem 404", async ({ page }) => {
+  for (const path of ["/produtos/nao-existe", "/servicos/nao-existe", "/artigos/nao-existe"]) {
+    const res = await page.goto(path);
+    expect(res?.status(), path).toBe(404);
+  }
 });
 
 test("página inexistente devolve 404 com o chrome do site", async ({ page }) => {

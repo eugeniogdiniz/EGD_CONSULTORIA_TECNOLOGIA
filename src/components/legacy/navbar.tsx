@@ -11,7 +11,9 @@ export const NAV_LINKS = withoutHiddenCases([
   { href: "/", label: "Início" },
   { href: "/servicos", label: "Serviços" },
   { href: "/produtos", label: "Produtos" },
+  { href: "/consorcios", label: "Consórcios" },
   { href: "/cases", label: "Cases" },
+  { href: "/artigos", label: "Artigos" },
   { href: "/sobre", label: "Sobre" },
   { href: "/contato", label: "Contato" },
 ]);

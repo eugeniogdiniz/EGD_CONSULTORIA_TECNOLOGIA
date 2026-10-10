@@ -69,7 +69,9 @@ Tudo nasce do mesmo conteúdo das páginas, então não desatualiza sozinho:
 - `src/content/faq.ts`: perguntas frequentes de cada página, visíveis na tela (`<Faq>`) e no JSON-LD com o mesmo texto. Resposta primeiro, uma ou duas frases: é o trecho que o Google e as IAs citam.
 - `/llms.txt` e `/llms-full.txt` (`src/content/llms.ts`): resumo em Markdown para assistentes de IA, no formato llmstxt.org.
 - `src/app/robots.ts`: robôs de IA (GPTBot, ClaudeBot, PerplexityBot, Google-Extended etc.) liberados de forma explícita; áreas privadas fechadas para todos.
-- Testes: `tests/unit/seo.test.ts` e `tests/e2e/seo.spec.ts`.
+- Páginas próprias por produto (`/produtos/<id>`, `src/content/produtos-detalhe.ts`), por frente de serviço (`/servicos/<id>`, `src/content/servicos-detalhe.ts`) e para consórcios de engenharia (`/consorcios`, `src/content/consorcios.ts`): uma URL por termo de busca, com definição em uma frase, perguntas e dados estruturados (Service, SoftwareApplication). As listas em `/servicos` e `/produtos` continuam com as âncoras antigas.
+- Artigos (`/artigos`, `src/content/artigos.ts`): textos de nicho (RDO, medição, vistoria, documentos em consórcio, automação de relatórios), cada um com um modelo em planilha para baixar em `public/modelos/`, gerado por `python3 scripts/build-modelos.py` (só biblioteca padrão). Novo artigo: entrada em `ARTICLES` e, se tiver modelo, entrada em `MODELOS` do script.
+- Testes: `tests/unit/seo.test.ts`, `tests/unit/conteudo-site.test.ts` e `tests/e2e/seo.spec.ts`.
 
 Fora do código, quem administra o domínio precisa cadastrar o site no Google Search Console e no Bing Webmaster Tools (enviando o sitemap) e criar o Perfil da Empresa no Google (Google Business Profile) com o mesmo nome, e-mail e cidade do site.
 
