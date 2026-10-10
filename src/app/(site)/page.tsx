@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUR } from "@/components/legacy/ui";
 import { SVC, PRODUCTS } from "@/content/legacy-home";
-import { faqJsonLd, organizationJsonLd, pageMeta, webPageJsonLd, websiteJsonLd } from "@/content/seo";
+import { faqJsonLd, organizationJsonLd, pageMeta, personJsonLd, webPageJsonLd, websiteJsonLd } from "@/content/seo";
 import { FAQ } from "@/content/faq";
 import { JsonLd } from "@/components/site/json-ld";
 import { Faq } from "@/components/site/faq";
@@ -27,7 +27,7 @@ export default async function HomePage() {
   const TOTAIS = SHOW_CASES ? (await getSiteCases()).totals : null;
   return (
     <>
-      <JsonLd data={[organizationJsonLd(), websiteJsonLd(), webPageJsonLd({ path: "/", title: META.title, description: META.description }), faqJsonLd(FAQ.home)]} />
+      <JsonLd data={[organizationJsonLd(), personJsonLd(), websiteJsonLd(), webPageJsonLd({ path: "/", title: META.title, description: META.description }), faqJsonLd(FAQ.home)]} />
       <section className="brand-hero container">
         <div className="brand-kicker"><span className="brand-dot" /> Consultoria &amp; tecnologia <span>São Paulo · Brasil</span></div>
         <div className="brand-hero-heading">

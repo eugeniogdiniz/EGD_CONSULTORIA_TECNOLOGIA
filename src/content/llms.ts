@@ -20,6 +20,7 @@ const PAGES = [
   { path: "/artigos", title: "Artigos", note: "textos práticos sobre RDO, medição, vistoria, documentos e automação, com modelos em planilha" },
   ...(SHOW_CASES ? [{ path: "/cases", title: "Cases", note: "clientes, sistemas e automações em produção" }] : []),
   { path: "/sobre", title: "Sobre", note: "origem, princípios e setores atendidos" },
+  { path: SITE.founder.path, title: SITE.founder.name, note: "quem responde pela EGD: fundador, áreas de atuação, artigos e perfis públicos" },
   { path: "/contato", title: "Contato", note: "formulário, e-mail, horário e portal do cliente" },
 ];
 
@@ -35,6 +36,8 @@ function header() {
     `- E-mail: ${SITE.email}`,
     `- Atendimento: ${SITE.hours} (${SITE.hoursNote.replace(/\.$/, "")}). ${SITE.responseTime}`,
     `- Setores: ${SITE.sectors.join(", ")}.`,
+    `- Responsável: ${SITE.founder.name}, ${SITE.founder.jobTitle.toLowerCase()} (${SITE.url}${SITE.founder.path}). LinkedIn: ${SITE.founder.linkedin}. GitHub: ${SITE.founder.github}.`,
+    ...(SITE.profiles.length ? [`- Perfis da empresa: ${SITE.profiles.join(", ")}.`] : []),
     `- Idioma: português do Brasil.`,
   ].join("\n");
 }

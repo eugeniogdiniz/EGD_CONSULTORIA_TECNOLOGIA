@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-for (const path of ["/", "/servicos", "/produtos", "/consorcios", "/para", "/para/incorporadoras", "/artigos", "/sobre", "/contato", "/produtos/contratos", "/servicos/ia", "/artigos/checklist-de-vistoria-de-obra"]) {
+for (const path of ["/", "/servicos", "/produtos", "/consorcios", "/para", "/para/incorporadoras", "/artigos", "/sobre", "/sobre/eugenio-diniz", "/contato", "/produtos/contratos", "/servicos/ia", "/artigos/checklist-de-vistoria-de-obra"]) {
   test(`página ${path} responde e tem h1`, async ({ page }) => {
     const res = await page.goto(path);
     expect(res?.status()).toBe(200);

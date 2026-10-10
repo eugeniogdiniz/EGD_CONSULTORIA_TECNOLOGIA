@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 const SITE_URL = "https://egdsystem.com.br";
 // /cases está oculto por enquanto (SHOW_CASES = false em src/content/site.ts).
-const PAGES = ["/", "/servicos", "/produtos", "/consorcios", "/para", "/para/construtoras", "/para/empresas-de-engenharia", "/artigos", "/sobre", "/contato", "/produtos/vistorias", "/servicos/auto", "/servicos/bpo", "/artigos/rdo-relatorio-diario-de-obra"];
+const PAGES = ["/", "/servicos", "/produtos", "/consorcios", "/para", "/para/construtoras", "/para/empresas-de-engenharia", "/artigos", "/sobre", "/sobre/eugenio-diniz", "/contato", "/produtos/vistorias", "/servicos/auto", "/servicos/bpo", "/artigos/rdo-relatorio-diario-de-obra"];
 
 for (const path of PAGES) {
   test(`SEO ${path}: título, descrição, canonical, Open Graph e um único h1`, async ({ page }) => {
@@ -46,12 +46,15 @@ async function jsonLd(page: import("@playwright/test").Page) {
 test("SEO: a home publica JSON-LD de Organization, WebSite, WebPage e FAQPage válidos", async ({ page }) => {
   await page.goto("/");
   const types = (await jsonLd(page)).map((d) => d["@type"]);
-  expect(types).toEqual(["Organization", "WebSite", "WebPage", "FAQPage"]);
-  const org = (await jsonLd(page))[0] as { url: string; email: string; founder: { name: string }; sameAs: string[] };
+  expect(types).toEqual(["Organization", "Person", "WebSite", "WebPage", "FAQPage"]);
+  const [org, person] = (await jsonLd(page)) as [{ url: string; email: string; founder: { "@id": string; name: string }; sameAs: string[] }, { "@id": string; url: string }];
   expect(org.url).toBe(SITE_URL);
   expect(org.email).toMatch(/@egdsystem\.com\.br$/);
   expect(org.founder.name).toBeTruthy();
   expect(org.sameAs.length).toBeGreaterThan(0);
+  // a Person do fundador é a mesma entidade que a Organization aponta, e tem página própria
+  expect(person["@id"]).toBe(org.founder["@id"]);
+  expect(person.url).toBe(`${SITE_URL}/sobre/eugenio-diniz`);
 });
 
 test("SEO: páginas internas publicam trilha (BreadcrumbList) e perguntas frequentes (FAQPage) visíveis", async ({ page }) => {
