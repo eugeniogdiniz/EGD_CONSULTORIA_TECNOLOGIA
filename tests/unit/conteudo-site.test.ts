@@ -82,7 +82,8 @@ describe("artigos", () => {
     const j = articleJsonLd(ARTICLES[0]);
     expect(j["@type"]).toBe("Article");
     expect(j.datePublished).toBe(ARTICLES[0].published);
-    expect(j.author).toEqual({ "@id": `${SITE.url}/#organization` });
+    expect(j.author).toMatchObject({ "@type": "Person", "@id": `${SITE.url}/#founder`, name: SITE.founder.name, url: `${SITE.url}${SITE.founder.path}` });
+    expect(j.publisher).toEqual({ "@id": `${SITE.url}/#organization` });
     expect(j.associatedMedia.contentUrl).toBe(`${SITE.url}${ARTICLES[0].model.file}`);
     expect(() => JSON.parse(JSON.stringify(j))).not.toThrow();
   });
@@ -119,7 +120,7 @@ describe("navegação e sitemap", () => {
   it("sitemap lista páginas fixas, produtos, serviços e artigos, com lastModified só nos artigos", () => {
     const entries = sitemap();
     const urls = entries.map((e) => e.url);
-    for (const p of ["/", "/consorcios", "/para", "/para/construtoras", "/artigos", "/servicos/dev", "/produtos/vistorias", `/artigos/${ARTICLES[0].slug}`]) expect(urls).toContain(`${SITE.url}${p}`);
+    for (const p of ["/", "/consorcios", "/para", "/para/construtoras", "/artigos", "/servicos/dev", "/produtos/vistorias", SITE.founder.path, `/artigos/${ARTICLES[0].slug}`]) expect(urls).toContain(`${SITE.url}${p}`);
     expect(urls).not.toContain(`${SITE.url}/cases`);
     for (const e of entries) {
       if (e.url.includes("/artigos/")) expect(e.lastModified).toBeTruthy();

@@ -16,6 +16,22 @@ type Title = string | { absolute: string };
 /** Identificadores estáveis das entidades (schema.org `@id`): as páginas apontam para eles. */
 export const ORG_ID = `${SITE.url}/#organization`;
 export const WEBSITE_ID = `${SITE.url}/#website`;
+export const FOUNDER_ID = `${SITE.url}/#founder`;
+
+/** Assuntos que a EGD (e quem responde por ela) domina; entra em Organization e Person. */
+export const KNOWS_ABOUT = [
+  "Desenvolvimento de sistemas de gestão",
+  "Automação de processos",
+  "Dados e painéis (BI)",
+  "Agentes de IA",
+  "Governança de dados",
+  "Gestão de projetos ágeis",
+  "Consultoria especializada em tecnologia",
+  "BPO de suporte técnico N1, N2 e N3",
+  "Aplicativos de vistoria e fiscalização de obras",
+  "Gestão de contratos de engenharia",
+  "Software para consórcios de engenharia",
+];
 
 const abs = (path: string) => (path === "/" ? `${SITE.url}/` : `${SITE.url}${path}`);
 
@@ -66,26 +82,17 @@ export function organizationJsonLd() {
     foundingDate: SITE.foundingYear,
     founder: {
       "@type": "Person",
+      "@id": FOUNDER_ID,
       name: SITE.founder.name,
       jobTitle: SITE.founder.jobTitle,
+      url: abs(SITE.founder.path),
       worksFor: { "@id": ORG_ID },
       sameAs: [SITE.founder.linkedin, SITE.founder.github],
     },
-    sameAs: [SITE.founder.linkedin, SITE.founder.github],
+    sameAs: [...SITE.profiles, SITE.founder.linkedin, SITE.founder.github],
     areaServed: { "@type": "Country", name: "Brasil" },
     address: { "@type": "PostalAddress", addressLocality: "São Paulo", addressRegion: "SP", addressCountry: "BR" },
-    knowsAbout: [
-      "Desenvolvimento de sistemas de gestão",
-      "Automação de processos",
-      "Dados e painéis (BI)",
-      "Agentes de IA",
-      "Governança de dados",
-      "Gestão de projetos ágeis",
-      "Consultoria especializada em tecnologia",
-      "BPO de suporte técnico N1, N2 e N3",
-      "Aplicativos de vistoria e fiscalização de obras",
-      "Gestão de contratos de engenharia",
-    ],
+    knowsAbout: KNOWS_ABOUT,
     knowsLanguage: "pt-BR",
     contactPoint: {
       "@type": "ContactPoint",
@@ -106,6 +113,30 @@ export function organizationJsonLd() {
   };
 }
 
+/**
+ * Quem responde pela EGD (schema.org Person), com `@id` estável: a Organization aponta para ele
+ * como fundador, cada Article como autor, e a página do autor é a ProfilePage dele. Buscadores e
+ * IAs usam isso para ligar a pessoa, a empresa e os perfis públicos (E-E-A-T).
+ */
+export function personJsonLd({ standalone = true } = {}) {
+  return {
+    ...(standalone ? { "@context": "https://schema.org" } : {}),
+    "@type": "Person",
+    "@id": FOUNDER_ID,
+    name: SITE.founder.name,
+    jobTitle: SITE.founder.jobTitle,
+    description: SITE.founder.bio,
+    url: abs(SITE.founder.path),
+    mainEntityOfPage: abs(SITE.founder.path),
+    worksFor: { "@id": ORG_ID },
+    affiliation: { "@id": ORG_ID },
+    sameAs: [SITE.founder.linkedin, SITE.founder.github],
+    knowsAbout: KNOWS_ABOUT,
+    knowsLanguage: "pt-BR",
+    workLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: "São Paulo", addressRegion: "SP", addressCountry: "BR" } },
+  };
+}
+
 /** O site como entidade (schema.org WebSite), para a home. */
 export function websiteJsonLd() {
   return {
@@ -121,7 +152,7 @@ export function websiteJsonLd() {
   };
 }
 
-export type WebPageKind = "WebPage" | "AboutPage" | "ContactPage" | "CollectionPage";
+export type WebPageKind = "WebPage" | "AboutPage" | "ContactPage" | "CollectionPage" | "ProfilePage";
 
 /** A página em si, ligada ao site e à organização. */
 export function webPageJsonLd({ kind = "WebPage", path, title, description }: { kind?: WebPageKind; path: string; title: string; description: string }) {
@@ -233,7 +264,7 @@ export function articleJsonLd(a: Article) {
     inLanguage: "pt-BR",
     datePublished: a.published,
     dateModified: a.updated ?? a.published,
-    author: { "@id": ORG_ID },
+    author: { "@type": "Person", "@id": FOUNDER_ID, name: SITE.founder.name, url: abs(SITE.founder.path) },
     publisher: { "@id": ORG_ID },
     image: `${SITE.url}${SOCIAL_IMAGE.url}`,
     isPartOf: { "@id": WEBSITE_ID },

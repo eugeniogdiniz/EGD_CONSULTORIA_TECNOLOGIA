@@ -26,9 +26,18 @@ export const SITE = {
   founder: {
     name: "Eugênio G. Diniz",
     jobTitle: "Consultor em Tecnologia",
+    /** Página do autor no site (schema.org Person com `@id` estável; os artigos apontam para ela). */
+    path: "/sobre/eugenio-diniz",
+    bio: "Fundador e consultor responsável pela EGD Consultoria em Tecnologia, em São Paulo. Desde 2018 desenvolve sistemas de gestão, aplicativos de campo e automações de relatórios para consórcios de engenharia, habitação e energia, e hoje também entrega dados, painéis e agentes de IA.",
     linkedin: "https://www.linkedin.com/in/eugeniodiniz/",
     github: "https://github.com/eugeniogdiniz",
   },
+  /**
+   * Perfis públicos da EMPRESA (não do fundador): entram no `sameAs` da Organization, no llms.txt
+   * e no rodapé. Preencher conforme forem criados: perfil no Google Business, página da empresa
+   * no LinkedIn, Instagram. Só URLs https.
+   */
+  profiles: [] as string[],
   /** Setores em que a EGD atua, na ordem em que aparecem no site. */
   sectors: ["Consórcios de engenharia", "Habitação", "Energia", "Infraestrutura"],
 } as const;

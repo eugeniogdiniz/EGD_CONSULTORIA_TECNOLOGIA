@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { breadcrumbJsonLd, faqJsonLd, organizationJsonLd, ORG_ID, pageMeta, productsJsonLd, servicesJsonLd, webPageJsonLd, websiteJsonLd, WEBSITE_ID } from "@/content/seo";
+import { breadcrumbJsonLd, faqJsonLd, FOUNDER_ID, organizationJsonLd, ORG_ID, pageMeta, personJsonLd, productsJsonLd, servicesJsonLd, webPageJsonLd, websiteJsonLd, WEBSITE_ID } from "@/content/seo";
 import { FAQ } from "@/content/faq";
 import { llmsFullTxt, llmsTxt } from "@/content/llms";
 import { SERVICES, PRODUCTS_FULL } from "@/content/legacy-pages";
@@ -45,9 +45,20 @@ describe("organizationJsonLd", () => {
     expect(j.contactPoint.email).toBe(SITE.email);
   });
   it("liga a empresa a quem responde por ela (fundador e perfis públicos)", () => {
-    expect(j.founder).toMatchObject({ "@type": "Person", name: SITE.founder.name, worksFor: { "@id": ORG_ID } });
-    expect(j.sameAs).toEqual([SITE.founder.linkedin, SITE.founder.github]);
+    expect(j.founder).toMatchObject({ "@type": "Person", "@id": FOUNDER_ID, name: SITE.founder.name, url: `${SITE.url}${SITE.founder.path}`, worksFor: { "@id": ORG_ID } });
+    expect(j.sameAs).toEqual([...SITE.profiles, SITE.founder.linkedin, SITE.founder.github]);
     for (const url of j.sameAs) expect(url.startsWith("https://")).toBe(true);
+  });
+  it("o fundador é uma Person com @id estável, página própria e os mesmos perfis", () => {
+    const p = personJsonLd();
+    expect(p["@context"]).toBe("https://schema.org");
+    expect(p["@id"]).toBe(FOUNDER_ID);
+    expect(p.url).toBe(`${SITE.url}${SITE.founder.path}`);
+    expect(p.worksFor).toEqual({ "@id": ORG_ID });
+    expect(p.sameAs).toEqual(j.founder.sameAs);
+    expect(p.description.length).toBeGreaterThan(80);
+    expect(personJsonLd({ standalone: false })).not.toHaveProperty("@context");
+    serializable(p);
   });
   it("lista todas as frentes de serviço no catálogo", () => {
     expect(j.hasOfferCatalog.itemListElement).toHaveLength(SERVICES.length);

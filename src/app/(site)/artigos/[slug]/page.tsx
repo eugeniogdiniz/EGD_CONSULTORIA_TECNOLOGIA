@@ -5,6 +5,7 @@ import { Arrow } from "@/components/legacy/ui";
 import { JsonLd } from "@/components/site/json-ld";
 import { ARTICLES, article, type ArticleBlock } from "@/content/artigos";
 import { articleJsonLd, breadcrumbJsonLd, pageMeta, webPageJsonLd } from "@/content/seo";
+import { SITE } from "@/content/site";
 
 export const dynamicParams = false;
 export function generateStaticParams() {
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: PageProps<"/artigos/[slug]">)
   const a = article(slug);
   if (!a) return {};
   const m = pageMeta({ title: a.title, description: a.description, path: `/artigos/${a.slug}` });
-  return { ...m, openGraph: { ...m.openGraph, type: "article", publishedTime: a.published, modifiedTime: a.updated ?? a.published, authors: ["EGD Consultoria em Tecnologia"] } };
+  return { ...m, openGraph: { ...m.openGraph, type: "article", publishedTime: a.published, modifiedTime: a.updated ?? a.published, authors: [SITE.founder.name] } };
 }
 
 const fmt = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "long", year: "numeric", timeZone: "UTC" });
@@ -43,8 +44,9 @@ export default async function ArtigoPage({ params }: PageProps<"/artigos/[slug]"
             <div className="crumbs"><Link href="/">/</Link><span className="sep">→</span><Link href="/artigos">ARTIGOS</Link></div>
             <h1 style={{ marginTop: 24, maxWidth: 900 }}>{a.title}</h1>
             <div className="brand-article-meta">
-              <span>Por EGD Consultoria em Tecnologia</span>
+              <span>Por <Link href={SITE.founder.path} rel="author">{SITE.founder.name}</Link>, EGD</span>
               <time dateTime={a.published}>{fmt.format(new Date(a.published))}</time>
+              {a.updated && <span>Atualizado em <time dateTime={a.updated}>{fmt.format(new Date(a.updated))}</time></span>}
               <span>{a.readingMinutes} min de leitura</span>
             </div>
           </div>
@@ -61,6 +63,10 @@ export default async function ArtigoPage({ params }: PageProps<"/artigos/[slug]"
               <div className="brand-download">
                 <div><h2 style={{ margin: "0 0 6px" }}>Como a EGD ajuda</h2><p>{a.related.label}: o que fazemos quando a planilha deixa de bastar.</p></div>
                 <Link href={a.related.href} className="btn btn-ghost btn-sm">Ver página <Arrow size={13} /></Link>
+              </div>
+              <div className="brand-download" style={{ background: "var(--bg-2)", borderColor: "var(--line)" }}>
+                <div><h2 style={{ margin: "0 0 6px" }}>Sobre o autor</h2><p><strong>{SITE.founder.name}</strong>, {SITE.founder.jobTitle.toLowerCase()}. {SITE.founder.bio.replace(/^Fundador/, "Fundador")}</p></div>
+                <Link href={SITE.founder.path} rel="author" className="btn btn-ghost btn-sm">Página do autor <Arrow size={13} /></Link>
               </div>
             </div>
           </div>

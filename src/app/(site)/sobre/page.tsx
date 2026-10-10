@@ -6,7 +6,7 @@ import { Faq } from "@/components/site/faq";
 import Link from "next/link";
 import Image from "next/image";
 import { getSiteCases } from "@/modules/cases/site";
-import { SHOW_CASES } from "@/content/site";
+import { SHOW_CASES, SITE } from "@/content/site";
 import { Arrow, ArrowUR } from "@/components/legacy/ui";
 import { PRINCIPLES, TIMELINE, SECTORS } from "@/content/legacy-pages";
 import { BrandFilm } from "@/components/site/brand-film";
@@ -91,6 +91,15 @@ export default async function SobrePage() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-tight" style={{ borderTop: "1px solid var(--line)" }}>
+        <div className="container">
+          <div className="brand-download" style={{ marginTop: 0 }}>
+            <div><span className="eyebrow">QUEM RESPONDE</span><h2 style={{ margin: "10px 0 6px", fontSize: 24 }}>{SITE.founder.name}</h2><p>{SITE.founder.bio}</p></div>
+            <Link href={SITE.founder.path} className="btn btn-ghost btn-sm">Página do autor <Arrow size={13} /></Link>
           </div>
         </div>
       </section>
