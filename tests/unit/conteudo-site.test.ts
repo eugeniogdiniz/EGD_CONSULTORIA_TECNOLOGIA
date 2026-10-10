@@ -5,12 +5,13 @@ import { CONSORCIOS } from "@/content/consorcios";
 import { FAQ } from "@/content/faq";
 import { PRODUCTS_FULL, SERVICES } from "@/content/legacy-pages";
 import { PRODUCT_DETAILS } from "@/content/produtos-detalhe";
+import { PUBLICOS, PUBLICOS_LINKS } from "@/content/publicos";
 import { SERVICE_DETAILS } from "@/content/servicos-detalhe";
 import { articleJsonLd, productJsonLd, serviceJsonLd } from "@/content/seo";
 import { FOOTER_COLUMNS, NAV_LINKS, SITE } from "@/content/site";
 import sitemap from "@/app/sitemap";
 
-const allFaq = [...Object.values(FAQ).flat(), ...PRODUCT_DETAILS.flatMap((p) => p.faq), ...SERVICE_DETAILS.flatMap((s) => s.faq), ...CONSORCIOS.faq];
+const allFaq = [...Object.values(FAQ).flat(), ...PRODUCT_DETAILS.flatMap((p) => p.faq), ...SERVICE_DETAILS.flatMap((s) => s.faq), ...CONSORCIOS.faq, ...PUBLICOS.flatMap((p) => p.faq)];
 
 describe("páginas próprias de produtos e serviços", () => {
   it("todo produto e toda frente têm página própria, e nenhuma página aponta para id inexistente", () => {
@@ -75,14 +76,37 @@ describe("artigos", () => {
     ]);
     for (const a of ARTICLES) expect(known.has(a.related.href), a.slug).toBe(true);
     for (const d of CONSORCIOS.deliverables) expect(known.has(d.href), d.href).toBe(true);
+    for (const p of PUBLICOS) for (const d of p.deliverables) expect(known.has(d.href), `${p.slug}: ${d.href}`).toBe(true);
   });
   it("JSON-LD de Article tem autor, data e o modelo como anexo", () => {
     const j = articleJsonLd(ARTICLES[0]);
     expect(j["@type"]).toBe("Article");
     expect(j.datePublished).toBe(ARTICLES[0].published);
-    expect(j.author).toEqual({ "@id": `${SITE.url}/#organization` });
+    expect(j.author).toMatchObject({ "@type": "Person", "@id": `${SITE.url}/#founder`, name: SITE.founder.name, url: `${SITE.url}${SITE.founder.path}` });
+    expect(j.publisher).toEqual({ "@id": `${SITE.url}/#organization` });
     expect(j.associatedMedia.contentUrl).toBe(`${SITE.url}${ARTICLES[0].model.file}`);
     expect(() => JSON.parse(JSON.stringify(j))).not.toThrow();
+  });
+});
+
+describe("páginas por público (/para)", () => {
+  it("slugs únicos, título e descrição no limite da busca, seis problemas, quatro entregas e artigos existentes", () => {
+    expect(new Set(PUBLICOS.map((p) => p.slug)).size).toBe(PUBLICOS.length);
+    const slugs = new Set(ARTICLES.map((a) => a.slug));
+    for (const p of PUBLICOS) {
+      expect(p.slug).toMatch(/^[a-z0-9-]+$/);
+      expect(`${p.metaTitle} · EGD`.length, p.slug).toBeLessThanOrEqual(70);
+      expect(p.metaDescription.length, p.slug).toBeGreaterThanOrEqual(70);
+      expect(p.metaDescription.length, p.slug).toBeLessThanOrEqual(180);
+      expect(p.definition.length, p.slug).toBeGreaterThan(80);
+      expect(p.problems).toHaveLength(6);
+      expect(p.deliverables).toHaveLength(4);
+      expect(p.faq.length, p.slug).toBeGreaterThanOrEqual(3);
+      for (const s of p.articles) expect(slugs.has(s), `${p.slug}: ${s}`).toBe(true);
+    }
+  });
+  it("a lista de públicos inclui consórcios e todas as páginas /para/<slug>", () => {
+    expect(PUBLICOS_LINKS.map((l) => l.href)).toEqual(["/consorcios", ...PUBLICOS.map((p) => `/para/${p.slug}`)]);
   });
 });
 
@@ -90,13 +114,13 @@ describe("navegação e sitemap", () => {
   it("menu e rodapé levam às páginas novas e não usam âncoras de serviço", () => {
     expect(NAV_LINKS.map((l) => l.href)).toEqual(expect.arrayContaining(["/consorcios", "/artigos"]));
     const footer = FOOTER_COLUMNS.flatMap((c) => c.links.map((l) => l.href));
-    expect(footer).toEqual(expect.arrayContaining(["/servicos/dev", "/produtos", "/consorcios", "/artigos"]));
+    expect(footer).toEqual(expect.arrayContaining(["/servicos/dev", "/produtos", "/consorcios", "/artigos", "/para", ...PUBLICOS.map((p) => `/para/${p.slug}`)]));
     expect(footer.some((h) => h.includes("#"))).toBe(false);
   });
   it("sitemap lista páginas fixas, produtos, serviços e artigos, com lastModified só nos artigos", () => {
     const entries = sitemap();
     const urls = entries.map((e) => e.url);
-    for (const p of ["/", "/consorcios", "/artigos", "/servicos/dev", "/produtos/vistorias", `/artigos/${ARTICLES[0].slug}`]) expect(urls).toContain(`${SITE.url}${p}`);
+    for (const p of ["/", "/consorcios", "/para", "/para/construtoras", "/artigos", "/servicos/dev", "/produtos/vistorias", SITE.founder.path, `/artigos/${ARTICLES[0].slug}`]) expect(urls).toContain(`${SITE.url}${p}`);
     expect(urls).not.toContain(`${SITE.url}/cases`);
     for (const e of entries) {
       if (e.url.includes("/artigos/")) expect(e.lastModified).toBeTruthy();

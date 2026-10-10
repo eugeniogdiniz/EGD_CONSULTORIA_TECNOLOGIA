@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUR } from "@/components/legacy/ui";
 import { SVC, PRODUCTS } from "@/content/legacy-home";
-import { faqJsonLd, organizationJsonLd, pageMeta, webPageJsonLd, websiteJsonLd } from "@/content/seo";
+import { faqJsonLd, organizationJsonLd, pageMeta, personJsonLd, webPageJsonLd, websiteJsonLd } from "@/content/seo";
 import { FAQ } from "@/content/faq";
 import { JsonLd } from "@/components/site/json-ld";
 import { Faq } from "@/components/site/faq";
@@ -11,6 +11,7 @@ import { getSiteCases } from "@/modules/cases/site";
 import { SHOW_CASES } from "@/content/site";
 import { BrandFilm } from "@/components/site/brand-film";
 import { OperationFlow } from "@/components/site/operation-flow";
+import { PUBLICOS_LINKS } from "@/content/publicos";
 
 const META = {
   title: "EGD — Tecnologia que conecta projeto e operação",
@@ -26,7 +27,7 @@ export default async function HomePage() {
   const TOTAIS = SHOW_CASES ? (await getSiteCases()).totals : null;
   return (
     <>
-      <JsonLd data={[organizationJsonLd(), websiteJsonLd(), webPageJsonLd({ path: "/", title: META.title, description: META.description }), faqJsonLd(FAQ.home)]} />
+      <JsonLd data={[organizationJsonLd(), personJsonLd(), websiteJsonLd(), webPageJsonLd({ path: "/", title: META.title, description: META.description }), faqJsonLd(FAQ.home)]} />
       <section className="brand-hero container">
         <div className="brand-kicker"><span className="brand-dot" /> Consultoria &amp; tecnologia <span>São Paulo · Brasil</span></div>
         <div className="brand-hero-heading">
@@ -55,6 +56,13 @@ export default async function HomePage() {
         <div className="brand-section-heading"><span className="brand-label">O que fazemos</span><div><h2>Complexidade na operação.<br />Clareza na solução.</h2><p>A EGD Consultoria em Tecnologia é uma consultoria de São Paulo que desenvolve sistemas de gestão, aplicativos de campo e automações de relatórios para consórcios de engenharia, habitação e energia, com atendimento remoto em todo o Brasil. Um parceiro para conectar o que hoje está separado: processos, informação e tecnologia.</p></div></div>
         <div className="brand-services">
           {SVC.map((service) => <Link href={`/servicos/${service.id}`} key={service.id} className="brand-service"><h3>{service.title}</h3><p>{service.desc}</p><ArrowUR size={22} /></Link>)}
+        </div>
+      </section>
+
+      <section className="brand-section container" style={{ paddingTop: 0 }}>
+        <div className="brand-section-heading"><span className="brand-label">Para quem</span><div><h2>Quem executa contrato de engenharia<br />encontra aqui a sua operação.</h2><p>Consórcios, construtoras, incorporadoras e empresas de engenharia consultiva: cada página fala dos problemas de quem toca aquela operação e do que entregamos para cada um.</p></div></div>
+        <div className="brand-cards">
+          {PUBLICOS_LINKS.map((l) => <Link href={l.href} key={l.href} className="brand-card"><h3>{l.nome}</h3><p>{l.resumo}</p><span className="meta">{l.rotulo} <ArrowUR size={12} /></span></Link>)}
         </div>
       </section>
 
