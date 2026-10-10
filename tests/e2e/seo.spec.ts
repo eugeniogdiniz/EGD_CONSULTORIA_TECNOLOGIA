@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 const SITE_URL = "https://egdsystem.com.br";
 // /cases está oculto por enquanto (SHOW_CASES = false em src/content/site.ts).
-const PAGES = ["/", "/servicos", "/produtos", "/sobre", "/contato"];
+const PAGES = ["/", "/servicos", "/produtos", "/consorcios", "/artigos", "/sobre", "/contato", "/produtos/vistorias", "/servicos/auto", "/artigos/rdo-relatorio-diario-de-obra"];
 
 for (const path of PAGES) {
   test(`SEO ${path}: título, descrição, canonical, Open Graph e um único h1`, async ({ page }) => {
@@ -60,6 +60,9 @@ test("SEO: páginas internas publicam trilha (BreadcrumbList) e perguntas freque
     "/produtos": ["CollectionPage", "BreadcrumbList", "ItemList", "FAQPage"],
     "/sobre": ["AboutPage", "BreadcrumbList", "FAQPage"],
     "/contato": ["ContactPage", "BreadcrumbList", "FAQPage"],
+    "/consorcios": ["WebPage", "BreadcrumbList", "FAQPage"],
+    "/produtos/vistorias": ["WebPage", "BreadcrumbList", "SoftwareApplication", "FAQPage"],
+    "/servicos/auto": ["WebPage", "BreadcrumbList", "Service", "FAQPage"],
   };
   for (const [path, types] of Object.entries(expected)) {
     await page.goto(path);
@@ -73,8 +76,33 @@ test("SEO: páginas internas publicam trilha (BreadcrumbList) e perguntas freque
     }
     const crumbs = data.find((d) => d["@type"] === "BreadcrumbList") as { itemListElement: { item: string }[] };
     expect(crumbs.itemListElement[0].item).toBe(`${SITE_URL}/`);
-    expect(crumbs.itemListElement[1].item).toBe(`${SITE_URL}${path}`);
+    expect(crumbs.itemListElement.at(-1)?.item).toBe(`${SITE_URL}${path}`);
   }
+});
+
+test("SEO: artigo publica Article com autor e data, e o modelo em planilha baixa de verdade", async ({ page, request }) => {
+  await page.goto("/artigos");
+  const first = page.locator('a[href^="/artigos/"]').first();
+  const href = await first.getAttribute("href");
+  await page.goto(href!);
+  const data = await jsonLd(page);
+  expect(data.map((d) => d["@type"])).toEqual(["WebPage", "BreadcrumbList", "Article"]);
+  const art = data[2] as { headline: string; datePublished: string; associatedMedia: { contentUrl: string } };
+  expect(art.headline).toBe(await page.locator("h1").textContent());
+  expect(art.datePublished).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  expect(await page.locator('meta[property="og:type"]').getAttribute("content")).toBe("article");
+  const file = new URL(art.associatedMedia.contentUrl).pathname;
+  await expect(page.locator(`a[href="${file}"][download]`)).toBeVisible();
+  const res = await request.get(file);
+  expect(res.status()).toBe(200);
+  expect(res.headers()["content-type"]).toContain("spreadsheetml");
+  expect((await res.body()).subarray(0, 2).toString()).toBe("PK");
+});
+
+test("SEO: sitemap inclui páginas próprias de produto, serviço, consórcios e artigos (artigos com lastmod)", async ({ request }) => {
+  const sitemap = await (await request.get("/sitemap.xml")).text();
+  for (const p of ["/consorcios", "/artigos", "/produtos/vistorias", "/servicos/auto", "/artigos/rdo-relatorio-diario-de-obra"]) expect(sitemap).toContain(`<loc>${SITE_URL}${p}</loc>`);
+  expect(sitemap).toContain("<lastmod>2026-");
 });
 
 test("SEO: llms.txt e llms-full.txt respondem em texto puro com o resumo da EGD", async ({ request }) => {
@@ -106,7 +134,8 @@ test("SEO: páginas de acesso saem do índice (noindex)", async ({ page }) => {
 test("SEO: sitemap lista as páginas públicas (sem /cases) sem lastmod e robots aponta para ele", async ({ request }) => {
   const sitemap = await (await request.get("/sitemap.xml")).text();
   for (const path of PAGES) expect(sitemap).toContain(`<loc>${SITE_URL}${path === "/" ? "/" : path}</loc>`);
-  expect(sitemap).not.toContain("<lastmod>");
+  // páginas fixas sem lastmod (só os artigos levam data real)
+  expect(sitemap.split("<url>").filter((u) => u.includes("/servicos</loc>") || u.includes("/produtos</loc>")).every((u) => !u.includes("<lastmod>"))).toBe(true);
   expect(sitemap).not.toContain("/cases");
   expect(sitemap).not.toContain("/admin");
   const robots = await (await request.get("/robots.txt")).text();

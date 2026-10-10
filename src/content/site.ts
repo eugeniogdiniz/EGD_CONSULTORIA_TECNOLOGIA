@@ -39,7 +39,9 @@ export const NAV_LINKS: NavLink[] = withoutHiddenCases([
   { href: "/", label: "Início" },
   { href: "/servicos", label: "Serviços" },
   { href: "/produtos", label: "Produtos" },
+  { href: "/consorcios", label: "Consórcios" },
   { href: "/cases", label: "Cases" },
+  { href: "/artigos", label: "Artigos" },
   { href: "/sobre", label: "Sobre" },
   { href: "/contato", label: "Contato" },
 ]);
@@ -48,18 +50,20 @@ export const FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
   {
     title: "Serviços",
     links: [
-      { href: "/servicos#dev", label: "Desenvolvimento de sistemas" },
-      { href: "/servicos#auto", label: "Automação de processos" },
-      { href: "/servicos#dados", label: "Dados e painéis" },
-      { href: "/servicos#ia", label: "Agentes de IA" },
-      { href: "/servicos#gov", label: "Governança de dados" },
-      { href: "/servicos#gestao", label: "Gestão de projetos" },
+      { href: "/servicos/dev", label: "Desenvolvimento de sistemas" },
+      { href: "/servicos/auto", label: "Automação de processos" },
+      { href: "/servicos/data", label: "Dados e painéis" },
+      { href: "/servicos/ia", label: "Agentes de IA" },
+      { href: "/servicos/gov", label: "Governança de dados" },
+      { href: "/servicos/agile", label: "Gestão de projetos" },
     ],
   },
   {
     title: "Empresa",
     links: [
       { href: "/produtos", label: "Produtos" },
+      { href: "/consorcios", label: "Para consórcios" },
+      { href: "/artigos", label: "Artigos" },
       ...(SHOW_CASES ? [{ href: "/cases", label: "Cases" }] : []),
       { href: "/sobre", label: "Sobre" },
       { href: "/contato", label: "Contato" },

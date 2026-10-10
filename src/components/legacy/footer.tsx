@@ -23,12 +23,12 @@ export function Footer() {
           <div>
             <h4 aria-level={2}>Serviços</h4>
             <ul>
-              <li><Link href="/servicos#dev">Desenvolvimento</Link></li>
-              <li><Link href="/servicos#auto">Automação</Link></li>
-              <li><Link href="/servicos#data">Data &amp; BI</Link></li>
-              <li><Link href="/servicos#ia">Agentes de IA</Link></li>
-              <li><Link href="/servicos#gov">Governança</Link></li>
-              <li><Link href="/servicos#agile">Projetos Ágeis</Link></li>
+              <li><Link href="/servicos/dev">Desenvolvimento</Link></li>
+              <li><Link href="/servicos/auto">Automação</Link></li>
+              <li><Link href="/servicos/data">Data &amp; BI</Link></li>
+              <li><Link href="/servicos/ia">Agentes de IA</Link></li>
+              <li><Link href="/servicos/gov">Governança</Link></li>
+              <li><Link href="/servicos/agile">Projetos Ágeis</Link></li>
             </ul>
           </div>
           <div>
@@ -36,6 +36,8 @@ export function Footer() {
             <ul>
               <li><Link href="/sobre">Sobre</Link></li>
               <li><Link href="/produtos">Produtos</Link></li>
+              <li><Link href="/consorcios">Para consórcios</Link></li>
+              <li><Link href="/artigos">Artigos</Link></li>
               {SHOW_CASES && <li><Link href="/cases">Cases</Link></li>}
               <li><Link href="/contato">Contato</Link></li>
               <li><Link href="/entrar">Portal do cliente</Link></li>

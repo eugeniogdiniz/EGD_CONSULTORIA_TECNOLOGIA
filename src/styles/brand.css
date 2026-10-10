@@ -189,3 +189,49 @@
 @media (max-width: 800px) {
   .site-root .brand-faq-list { grid-template-columns: 1fr; }
 }
+/* Páginas próprias de produto, serviço, consórcios e artigos. */
+.site-root .brand-detail { display: grid; grid-template-columns: 1.3fr 1fr; gap: 64px; align-items: start; }
+.site-root .brand-detail-aside { border: 1px solid var(--line); background: #ffffff; padding: 28px; position: sticky; top: 108px; }
+.site-root .brand-detail-aside h2 { font-size: 15px; font-weight: 600; letter-spacing: 0; margin-bottom: 14px; }
+.site-root .brand-detail-aside .row { display: flex; gap: 12px; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.site-root .brand-detail-aside .row:first-of-type { border-top: 0; padding-top: 0; }
+.site-root .brand-detail-aside .k { color: var(--fg-dim); white-space: nowrap; }
+.site-root .brand-detail-aside .v { text-align: right; }
+.site-root .brand-detail-aside .btn { width: 100%; justify-content: center; margin-top: 18px; }
+.site-root .brand-block { margin-top: 48px; }
+.site-root .brand-block h2 { font-size: clamp(24px, 2.6vw, 32px); margin-bottom: 18px; }
+.site-root .brand-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.site-root .brand-list li { display: grid; grid-template-columns: 18px 1fr; gap: 12px; font-size: 15.5px; line-height: 1.6; color: var(--fg-dim); }
+.site-root .brand-list li::before { content: ''; height: 7px; width: 7px; margin-top: 9px; background: #0875e1; }
+.site-root .brand-steps { list-style: none; padding: 0; margin: 0; counter-reset: step; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.site-root .brand-steps li { counter-increment: step; display: grid; grid-template-columns: 56px 1fr; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+.site-root .brand-steps li::before { content: counter(step, decimal-leading-zero); font-family: var(--font-mono); font-size: 13px; color: #075eb5; padding-top: 4px; }
+.site-root .brand-steps h3 { font-size: 18px; font-weight: 500; }
+.site-root .brand-steps p { margin-top: 6px; font-size: 15px; color: var(--fg-dim); line-height: 1.6; }
+.site-root .brand-problems { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.site-root .brand-problems > div { background: var(--bg); padding: 28px 24px; }
+.site-root .brand-problems h3 { font-size: 19px; font-weight: 500; margin-bottom: 10px; }
+.site-root .brand-problems p { font-size: 14.5px; color: var(--fg-dim); line-height: 1.6; }
+.site-root .brand-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.site-root .brand-card { display: block; border: 1px solid var(--line); background: #ffffff; padding: 24px; transition: background .2s; }
+.site-root .brand-card:hover { background: #eaf1fa; }
+.site-root .brand-card :is(h2, h3) { font-size: 19px; font-weight: 500; letter-spacing: -.02em; }
+.site-root .brand-card p { margin-top: 8px; font-size: 14.5px; color: var(--fg-dim); line-height: 1.6; }
+.site-root .brand-card .meta { display: block; margin-top: 14px; font-family: var(--font-mono); font-size: 12px; color: #576c84; }
+.site-root .brand-download { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; border: 1px solid #9db5d2; background: #e7eef8; padding: 24px 28px; margin-top: 32px; }
+.site-root .brand-download h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+.site-root .brand-download p { font-size: 14px; color: var(--fg-dim); }
+.site-root .brand-article { max-width: 760px; }
+.site-root .brand-article .lead { font-size: 19px; line-height: 1.65; }
+.site-root .brand-article h2 { font-size: clamp(24px, 2.6vw, 30px); margin: 44px 0 16px; }
+.site-root .brand-article p { font-size: 17px; line-height: 1.7; margin-bottom: 18px; }
+.site-root .brand-article ul, .site-root .brand-article ol { margin: 0 0 22px; padding-left: 22px; display: grid; gap: 8px; }
+.site-root .brand-article li { font-size: 16.5px; line-height: 1.65; }
+.site-root .brand-article-meta { display: flex; gap: 18px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 12.5px; color: #576c84; margin-top: 18px; }
+@media (max-width: 1100px) { .site-root .brand-problems { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 800px) {
+  .site-root .brand-detail { grid-template-columns: 1fr; gap: 32px; }
+  .site-root .brand-detail-aside { position: static; }
+  .site-root .brand-problems, .site-root .brand-cards { grid-template-columns: 1fr; }
+  .site-root .brand-download { grid-template-columns: 1fr; }
+}

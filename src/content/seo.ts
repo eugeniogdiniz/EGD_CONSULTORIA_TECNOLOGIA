@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Article } from "./artigos";
 import type { FaqItem } from "./faq";
 import { SERVICES, PRODUCTS_FULL } from "./legacy-pages";
 import { SITE } from "./site";
@@ -97,7 +98,7 @@ export function organizationJsonLd() {
       name: "Serviços da EGD",
       itemListElement: SERVICES.map((s) => ({
         "@type": "Offer",
-        itemOffered: { "@type": "Service", name: s.title, url: abs(`/servicos#${s.id}`) },
+        itemOffered: { "@type": "Service", name: s.title, url: abs(`/servicos/${s.id}`) },
       })),
     },
   };
@@ -159,56 +160,92 @@ export function faqJsonLd(items: FaqItem[]) {
   };
 }
 
-/** As seis frentes de serviço (schema.org Service), para /servicos. */
+/** Uma frente de serviço (schema.org Service), com a URL da página própria. */
+export function serviceJsonLd(s: (typeof SERVICES)[number], { standalone = false } = {}) {
+  return {
+    ...(standalone ? { "@context": "https://schema.org" } : {}),
+    "@type": "Service",
+    "@id": abs(`/servicos/${s.id}`),
+    url: abs(`/servicos/${s.id}`),
+    name: s.title,
+    description: s.lead,
+    serviceType: s.title,
+    provider: { "@id": ORG_ID },
+    areaServed: { "@type": "Country", name: "Brasil" },
+    availableLanguage: "pt-BR",
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: s.title,
+      itemListElement: s.capabilities.map((c) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: c.t, description: c.d } })),
+    },
+  };
+}
+
+/** As seis frentes de serviço, para a lista em /servicos. */
 export function servicesJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "Serviços da EGD",
-    itemListElement: SERVICES.map((s, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      item: {
-        "@type": "Service",
-        "@id": abs(`/servicos#${s.id}`),
-        url: abs(`/servicos#${s.id}`),
-        name: s.title,
-        description: s.lead,
-        serviceType: s.title,
-        provider: { "@id": ORG_ID },
-        areaServed: { "@type": "Country", name: "Brasil" },
-        availableLanguage: "pt-BR",
-        hasOfferCatalog: {
-          "@type": "OfferCatalog",
-          name: s.title,
-          itemListElement: s.capabilities.map((c) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: c.t, description: c.d } })),
-        },
-      },
-    })),
+    itemListElement: SERVICES.map((s, i) => ({ "@type": "ListItem", position: i + 1, item: serviceJsonLd(s) })),
   };
 }
 
-/** Os quatro produtos prontos (schema.org SoftwareApplication), para /produtos. */
+/** Um produto pronto (schema.org SoftwareApplication), com a URL da página própria. */
+export function productJsonLd(p: (typeof PRODUCTS_FULL)[number], { standalone = false } = {}) {
+  return {
+    ...(standalone ? { "@context": "https://schema.org" } : {}),
+    "@type": "SoftwareApplication",
+    "@id": abs(`/produtos/${p.id}`),
+    url: abs(`/produtos/${p.id}`),
+    name: p.title,
+    description: p.lead,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    featureList: p.features,
+    provider: { "@id": ORG_ID },
+    offers: { "@type": "Offer", url: abs("/contato"), availability: "https://schema.org/InStock", priceCurrency: "BRL", description: `Implantação em ${p.deploy}. Investimento sob proposta.` },
+  };
+}
+
+/** Os quatro produtos prontos, para a lista em /produtos. */
 export function productsJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "Produtos da EGD",
-    itemListElement: PRODUCTS_FULL.map((p, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      item: {
-        "@type": "SoftwareApplication",
-        "@id": abs(`/produtos#${p.id}`),
-        url: abs(`/produtos#${p.id}`),
-        name: p.title,
-        description: p.lead,
-        applicationCategory: "BusinessApplication",
-        operatingSystem: "Web",
-        featureList: p.features,
-        provider: { "@id": ORG_ID },
-        offers: { "@type": "Offer", url: abs("/contato"), availability: "https://schema.org/InStock", priceCurrency: "BRL", description: `Implantação em ${p.deploy}. Investimento sob proposta.` },
-      },
-    })),
+    itemListElement: PRODUCTS_FULL.map((p, i) => ({ "@type": "ListItem", position: i + 1, item: productJsonLd(p) })),
+  };
+}
+
+/** Um artigo (schema.org Article) assinado pela EGD, com o modelo para baixar como anexo. */
+export function articleJsonLd(a: Article) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${abs(`/artigos/${a.slug}`)}#article`,
+    mainEntityOfPage: abs(`/artigos/${a.slug}`),
+    url: abs(`/artigos/${a.slug}`),
+    headline: a.title,
+    description: a.description,
+    inLanguage: "pt-BR",
+    datePublished: a.published,
+    dateModified: a.updated ?? a.published,
+    author: { "@id": ORG_ID },
+    publisher: { "@id": ORG_ID },
+    image: `${SITE.url}${SOCIAL_IMAGE.url}`,
+    isPartOf: { "@id": WEBSITE_ID },
+    timeRequired: `PT${a.readingMinutes}M`,
+    associatedMedia: { "@type": "DataDownload", name: a.model.label, description: a.model.what, contentUrl: `${SITE.url}${a.model.file}`, encodingFormat: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+  };
+}
+
+/** Lista de artigos (schema.org ItemList), para /artigos. */
+export function articlesJsonLd(items: Article[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Artigos da EGD",
+    itemListElement: items.map((a, i) => ({ "@type": "ListItem", position: i + 1, url: abs(`/artigos/${a.slug}`), name: a.title })),
   };
 }

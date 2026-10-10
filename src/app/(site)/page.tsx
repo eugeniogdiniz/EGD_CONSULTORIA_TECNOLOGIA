@@ -54,7 +54,7 @@ export default async function HomePage() {
       <section className="brand-section container">
         <div className="brand-section-heading"><span className="brand-label">O que fazemos</span><div><h2>Complexidade na operação.<br />Clareza na solução.</h2><p>A EGD Consultoria em Tecnologia é uma consultoria de São Paulo que desenvolve sistemas de gestão, aplicativos de campo e automações de relatórios para consórcios de engenharia, habitação e energia, com atendimento remoto em todo o Brasil. Um parceiro para conectar o que hoje está separado: processos, informação e tecnologia.</p></div></div>
         <div className="brand-services">
-          {SVC.map((service) => <Link href={`/servicos#${service.id}`} key={service.id} className="brand-service"><h3>{service.title}</h3><p>{service.desc}</p><ArrowUR size={22} /></Link>)}
+          {SVC.map((service) => <Link href={`/servicos/${service.id}`} key={service.id} className="brand-service"><h3>{service.title}</h3><p>{service.desc}</p><ArrowUR size={22} /></Link>)}
         </div>
       </section>
 
@@ -68,7 +68,7 @@ export default async function HomePage() {
       <section className="brand-section container">
         <div className="brand-section-heading"><span className="brand-label">Produtos EGD</span><div><h2>Seu próximo passo<br />já tem um ponto de partida.</h2><p>Soluções para contratos, pessoas, vistorias e atendimento. Adaptadas ao contexto da sua empresa.</p></div></div>
         <div className="brand-products">
-          {PRODUCTS.map((product, i) => <Link href={`/produtos#${product.id}`} key={product.id} className="brand-product"><span className="brand-product-symbol" aria-hidden="true">{["↗", "⊞", "⌖", "≋"][i]}</span><h3>{product.title}</h3><p>{product.desc}</p><span className="brand-product-link">Explorar solução <ArrowUR /></span></Link>)}
+          {PRODUCTS.map((product, i) => <Link href={`/produtos/${product.id}`} key={product.id} className="brand-product"><span className="brand-product-symbol" aria-hidden="true">{["↗", "⊞", "⌖", "≋"][i]}</span><h3>{product.title}</h3><p>{product.desc}</p><span className="brand-product-link">Explorar solução <ArrowUR /></span></Link>)}
         </div>
       </section>
 
