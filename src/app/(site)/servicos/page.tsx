@@ -9,8 +9,8 @@ import { Arrow, Icon } from "@/components/legacy/ui";
 import { SERVICES } from "@/content/legacy-pages";
 
 const META = {
-  title: "Serviços de desenvolvimento, automação, dados e IA",
-  description: "Desenvolvimento de sistemas, automação de processos, dados e painéis, agentes de IA, governança de dados e gestão de projetos para consórcios de engenharia, habitação e energia.",
+  title: "Serviços: desenvolvimento, automação, dados, IA e suporte",
+  description: "Desenvolvimento de sistemas, automação, dados e painéis, agentes de IA, governança, projetos ágeis, consultoria especializada e BPO de suporte N1, N2 e N3.",
   path: "/servicos",
 };
 export const metadata: Metadata = pageMeta(META);
@@ -28,12 +28,12 @@ export default function ServicosPage() {
               Tecnologia ponta-a-ponta —<br />
               do <span className="italic-grad">código</span> à decisão.
             </h1>
-            <p className="lead">Seis frentes especializadas que somam capacidade de delivery sobre as principais clouds (AWS, Azure) e o ecossistema open-source moderno (Apache, Power Platform, Python).</p>
+            <p className="lead">Oito frentes especializadas, do diagnóstico ao suporte, que somam capacidade de delivery sobre as principais clouds (AWS, Azure) e o ecossistema open-source moderno (Apache, Power Platform, Python).</p>
           </div>
           <div className="reveal" style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 32 }}>
             {SERVICES.map((s) => (
               <a key={s.id} href={`#${s.id}`} className="tag accent" style={{ padding: "8px 14px" }}>
-                <span style={{ color: "var(--fg-faint)" }}>{s.num}</span> {s.title.split(" ")[0]}
+                <span style={{ color: "var(--fg-faint)" }}>{s.num}</span> {s.short ?? s.title.split(" ")[0]}
               </a>
             ))}
           </div>
@@ -46,7 +46,7 @@ export default function ServicosPage() {
           {SERVICES.map((s) => (
             <article className="svc-deep" id={s.id} key={s.id}>
               <div className="svc-deep-head">
-                <div className="svc-deep-num">SERVIÇO {s.num}/06</div>
+                <div className="svc-deep-num">SERVIÇO {s.num}/{String(SERVICES.length).padStart(2, "0")}</div>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                     <div className="icon-tile lg accent"><Icon d={s.icon} size={26} /></div>

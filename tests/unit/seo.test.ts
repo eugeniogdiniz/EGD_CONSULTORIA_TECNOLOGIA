@@ -49,7 +49,7 @@ describe("organizationJsonLd", () => {
     expect(j.sameAs).toEqual([SITE.founder.linkedin, SITE.founder.github]);
     for (const url of j.sameAs) expect(url.startsWith("https://")).toBe(true);
   });
-  it("lista as seis frentes de serviço no catálogo", () => {
+  it("lista todas as frentes de serviço no catálogo", () => {
     expect(j.hasOfferCatalog.itemListElement).toHaveLength(SERVICES.length);
     expect(j.hasOfferCatalog.itemListElement[0].itemOffered.url).toBe(`${SITE.url}/servicos/dev`);
   });

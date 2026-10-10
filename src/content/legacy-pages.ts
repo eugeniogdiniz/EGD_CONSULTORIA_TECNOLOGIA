@@ -1,6 +1,16 @@
 /* Conteúdo das páginas internas originais (portado de legacy/assets/*.jsx). */
 
-export const SERVICES = [
+export type Service = {
+  id: string; num: string; title: string;
+  /** Rótulo curto para os chips de /servicos quando a primeira palavra do título se repete. */
+  short?: string;
+  lead: string; icon: string;
+  capabilities: { t: string; d: string }[];
+  stack: { aws: string[]; azure: string[]; apache: string[]; outros: string[] };
+  delivery: string; squad: string;
+};
+
+export const SERVICES: Service[] = [
   {
     id: "dev", num: "01", title: "Desenvolvimento de Sistemas",
     lead: "Aplicações web, mobile e plataformas internas sob medida — do MVP à arquitetura distribuída em cloud.",
@@ -77,7 +87,7 @@ export const SERVICES = [
     delivery: "Diagnóstico em 2 semanas", squad: "Data architect, gov lead, eng. dados",
   },
   {
-    id: "agile", num: "06", title: "Consultoria em Projetos Ágeis",
+    id: "agile", num: "06", title: "Consultoria em Projetos Ágeis", short: "Projetos Ágeis",
     lead: "Discovery, descoberta de produto e gestão de squads. Aceleramos sua entrega com cadência, foco em valor e métricas claras.",
     icon: "M3 12h4l2-6 4 12 2-6h4",
     capabilities: [
@@ -90,6 +100,36 @@ export const SERVICES = [
     ],
     stack: { aws: [], azure: ["DevOps", "Boards"], apache: [], outros: ["Jira", "Linear", "Miro", "Notion", "ProductBoard"] },
     delivery: "Onboarding em 2 semanas", squad: "Agile coach, PM, tech lead",
+  },
+  {
+    id: "consultoria", num: "07", title: "Consultoria Especializada", short: "Consultoria",
+    lead: "Diagnóstico, arquitetura e acompanhamento técnico por especialistas sêniores — para quando a sua equipe precisa de decisão, não de mais mãos.",
+    icon: "M9 18h6 M10 21h4 M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1.1 2.1h4.8c.1-.9.5-1.6 1.1-2.1A6 6 0 0 0 12 3z",
+    capabilities: [
+      { t: "Diagnóstico técnico e de processos", d: "Duas semanas para dizer o que está travando, o que vale mudar e em que ordem." },
+      { t: "Arquitetura de soluções", d: "Desenho de sistemas, dados, integrações e nuvem antes de contratar ou construir." },
+      { t: "Seleção de tecnologia e fornecedores", d: "Critérios, prova de conceito e comparação isenta: a EGD não revende licença." },
+      { t: "Revisão de código, segurança e LGPD", d: "Auditoria do que já existe, com plano de correção priorizado por risco." },
+      { t: "Acompanhamento de implantação", d: "Especialista ao lado do time ou do fornecedor até o sistema entrar em operação." },
+      { t: "Mentoria técnica", d: "Capacitação da equipe interna para sustentar a solução sem depender da EGD." },
+    ],
+    stack: { aws: ["Well-Architected"], azure: ["Cloud Adoption Framework"], apache: [], outros: ["Arquitetura", "Segurança", "LGPD", "Dados", "Integrações"] },
+    delivery: "Diagnóstico em 1–2 semanas", squad: "Consultor sênior, arquiteto",
+  },
+  {
+    id: "bpo", num: "08", title: "BPO de Suporte N1, N2 e N3", short: "BPO de Suporte",
+    lead: "Operação de suporte terceirizada em três níveis — atendimento ao usuário, resolução técnica e sustentação de sistemas — com SLA, indicadores e base de conhecimento.",
+    icon: "M4 14v-2a8 8 0 0 1 16 0v2 M4 13h3v6H4z M17 13h3v6h-3z M12 22h3a3 3 0 0 0 3-3",
+    capabilities: [
+      { t: "N1: atendimento e triagem", d: "Recebe por e-mail, WhatsApp, Teams ou portal, classifica, resolve o básico e registra tudo no chamado." },
+      { t: "N2: resolução técnica", d: "Analistas que resolvem incidentes de sistemas, acessos, integrações e dados, com procedimento documentado." },
+      { t: "N3: sustentação e evolução", d: "Engenheiros que corrigem a causa raiz, ajustam o código e evoluem o sistema em ciclos curtos." },
+      { t: "SLA e horário acordados", d: "Prazos de primeira resposta e de solução por prioridade, em horário comercial ou estendido." },
+      { t: "Base de conhecimento viva", d: "Cada solução vira procedimento; o N1 resolve mais e o N3 recebe menos." },
+      { t: "Indicadores mensais", d: "Volume, tempo de resposta e de solução, reincidência e satisfação, por sistema e por área." },
+    ],
+    stack: { aws: [], azure: ["OpenAI"], apache: [], outros: ["Central de Chamados EGD", "Teams", "WhatsApp", "Power BI"] },
+    delivery: "Operação em 2–4 semanas", squad: "Coordenador, analistas N1 e N2, engenheiro N3",
   },
 ];
 

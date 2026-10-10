@@ -81,6 +81,8 @@ export function organizationJsonLd() {
       "Agentes de IA",
       "Governança de dados",
       "Gestão de projetos ágeis",
+      "Consultoria especializada em tecnologia",
+      "BPO de suporte técnico N1, N2 e N3",
       "Aplicativos de vistoria e fiscalização de obras",
       "Gestão de contratos de engenharia",
     ],
@@ -181,7 +183,7 @@ export function serviceJsonLd(s: (typeof SERVICES)[number], { standalone = false
   };
 }
 
-/** As seis frentes de serviço, para a lista em /servicos. */
+/** Todas as frentes de serviço, para a lista em /servicos. */
 export function servicesJsonLd() {
   return {
     "@context": "https://schema.org",

@@ -29,6 +29,8 @@ export function Footer() {
               <li><Link href="/servicos/ia">Agentes de IA</Link></li>
               <li><Link href="/servicos/gov">Governança</Link></li>
               <li><Link href="/servicos/agile">Projetos Ágeis</Link></li>
+              <li><Link href="/servicos/consultoria">Consultoria</Link></li>
+              <li><Link href="/servicos/bpo">BPO de Suporte</Link></li>
             </ul>
           </div>
           <div>

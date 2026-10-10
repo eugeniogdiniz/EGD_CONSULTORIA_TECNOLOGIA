@@ -73,7 +73,7 @@ export default async function ProdutoPage({ params }: PageProps<"/produtos/[slug
         </div>
       </section>
 
-      <Faq items={d.faq} title={`Perguntas sobre ${p.title.toLowerCase()}.`} />
+      <Faq items={d.faq} title={`Perguntas sobre ${p.title}.`} />
 
       <section className="cta-final">
         <div className="container">

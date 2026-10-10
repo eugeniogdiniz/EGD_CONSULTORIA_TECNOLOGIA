@@ -11,7 +11,7 @@ import { SHOW_CASES, SITE } from "./site";
  */
 const PAGES = [
   { path: "/", title: "Início", note: "quem é a EGD, serviços e produtos em resumo" },
-  { path: "/servicos", title: "Serviços", note: "seis frentes, capacidades, stack e prazos" },
+  { path: "/servicos", title: "Serviços", note: "oito frentes, capacidades, stack e prazos" },
   { path: "/produtos", title: "Produtos", note: "quatro aceleradores prontos, funcionalidades e prazo de implantação" },
   { path: "/consorcios", title: "Para consórcios de engenharia", note: "problemas típicos do consórcio e o que a EGD entrega para cada um" },
   { path: "/artigos", title: "Artigos", note: "textos práticos sobre RDO, medição, vistoria, documentos e automação, com modelos em planilha" },

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 const SITE_URL = "https://egdsystem.com.br";
 // /cases está oculto por enquanto (SHOW_CASES = false em src/content/site.ts).
-const PAGES = ["/", "/servicos", "/produtos", "/consorcios", "/artigos", "/sobre", "/contato", "/produtos/vistorias", "/servicos/auto", "/artigos/rdo-relatorio-diario-de-obra"];
+const PAGES = ["/", "/servicos", "/produtos", "/consorcios", "/artigos", "/sobre", "/contato", "/produtos/vistorias", "/servicos/auto", "/servicos/bpo", "/artigos/rdo-relatorio-diario-de-obra"];
 
 for (const path of PAGES) {
   test(`SEO ${path}: título, descrição, canonical, Open Graph e um único h1`, async ({ page }) => {
@@ -63,6 +63,7 @@ test("SEO: páginas internas publicam trilha (BreadcrumbList) e perguntas freque
     "/consorcios": ["WebPage", "BreadcrumbList", "FAQPage"],
     "/produtos/vistorias": ["WebPage", "BreadcrumbList", "SoftwareApplication", "FAQPage"],
     "/servicos/auto": ["WebPage", "BreadcrumbList", "Service", "FAQPage"],
+    "/servicos/bpo": ["WebPage", "BreadcrumbList", "Service", "FAQPage"],
   };
   for (const [path, types] of Object.entries(expected)) {
     await page.goto(path);

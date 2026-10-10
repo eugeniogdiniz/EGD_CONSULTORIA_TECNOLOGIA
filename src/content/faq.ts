@@ -30,7 +30,7 @@ export const FAQ: Record<"home" | "servicos" | "produtos" | "sobre" | "contato",
   servicos: [
     {
       q: "Quais serviços a EGD oferece?",
-      a: `Seis frentes: desenvolvimento de sistemas sob medida, automação de processos, dados e painéis (BI), agentes de IA, governança de dados e consultoria em projetos ágeis. Cada frente pode ser contratada sozinha ou combinada, conforme o problema a resolver.`,
+      a: `Oito frentes: desenvolvimento de sistemas sob medida, automação de processos, dados e painéis (BI), agentes de IA, governança de dados, consultoria em projetos ágeis, consultoria especializada e BPO de suporte N1, N2 e N3. Cada frente pode ser contratada sozinha ou combinada, conforme o problema a resolver.`,
     },
     {
       q: "Quanto tempo leva para ter uma primeira entrega?",
