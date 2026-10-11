@@ -12,7 +12,7 @@ export const FAQ: Record<"home" | "servicos" | "produtos" | "sobre" | "contato",
   home: [
     {
       q: "O que a EGD Consultoria em Tecnologia faz?",
-      a: `A EGD desenvolve sistemas de gestão, aplicativos de campo e automações de relatórios para consórcios de engenharia, habitação e energia. O trabalho vai do levantamento do processo até o software em produção, com dados, painéis e agentes de IA quando fazem sentido para a operação.`,
+      a: `A EGD desenvolve sistemas de gestão, aplicativos de campo, automações de relatórios, dados e agentes de IA sob medida para a operação de cada cliente. Atua com força em consórcios de engenharia, habitação e energia e atende empresas de outros setores. O trabalho vai do levantamento do processo até o software em produção.`,
     },
     {
       q: "Onde a EGD atende?",
