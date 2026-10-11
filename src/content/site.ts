@@ -37,7 +37,11 @@ export const SITE = {
    * e no rodapé. Preencher conforme forem criados: perfil no Google Business, página da empresa
    * no LinkedIn, Instagram. Só URLs https.
    */
-  profiles: [] as string[],
+  profiles: [
+    "https://www.linkedin.com/company/egd-system/",
+    // Perfil da Empresa no Google (link público do botão "Compartilhar"; entidade /g/11p1qq25n_).
+    "https://share.google/3E3NtFTlOrzzpFjaY",
+  ] as string[],
   /** Setores em que a EGD atua, na ordem em que aparecem no site. */
   sectors: ["Consórcios de engenharia", "Habitação", "Energia", "Infraestrutura"],
 } as const;
