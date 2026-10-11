@@ -29,6 +29,13 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["pdfkit"],
   // upload de arquivos via server action: spec permite até 50 MB
   experimental: { serverActions: { bodySizeLimit: "52mb" } },
+  async rewrites() {
+    return [
+      // IndexNow: o Bing só aceita URLs abaixo da pasta do arquivo da chave, então ela precisa
+      // responder na raiz (/<chave>.txt). A rota continua em /indexnow/[file].
+      { source: "/:key([a-f0-9]{32}).txt", destination: "/indexnow/:key.txt" },
+    ];
+  },
   async headers() {
     return [
       { source: "/(.*)", headers: securityHeaders },

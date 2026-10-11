@@ -33,7 +33,9 @@ Consultas alvo: "software para consórcio de engenharia", "app de vistoria de ob
 
 1. Gerar uma chave: `openssl rand -hex 16` (32 caracteres).
 2. Colocar em `INDEXNOW_KEY` no Coolify (e no `.env` local) e fazer o deploy. O site passa a servir
-   `https://egdsystem.com.br/indexnow/<chave>.txt` com a própria chave (é assim que o Bing confere).
+   `https://egdsystem.com.br/<chave>.txt` com a própria chave (é assim que o Bing confere). O arquivo
+   precisa ficar na raiz: o Bing só aceita URLs abaixo da pasta onde a chave está (em `/indexnow/`
+   a API devolvia 422 "URLs are not related to your site verified through the keylocation").
 3. Depois de cada deploy que publique página nova ou texto revisado, rodar localmente:
 
    ```

@@ -1,13 +1,14 @@
 /**
  * IndexNow (indexnow.org): avisa o Bing (e quem compartilha o índice dele: ChatGPT, Copilot,
  * DuckDuckGo, Yandex) que uma URL mudou, em vez de esperar o rastreio. Precisa de uma chave
- * publicada em um arquivo do próprio site; aqui ela fica em /indexnow/<chave>.txt.
+ * publicada em um arquivo do próprio site. O Bing só aceita URLs abaixo da pasta do arquivo,
+ * então ele fica na raiz: /<chave>.txt (rewrite em next.config para a rota /indexnow/[file]).
  */
 export const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
 
 export const keyFileName = (key: string) => `${key}.txt`;
 
-export const keyLocation = (siteUrl: string, key: string) => `${siteUrl.replace(/\/$/, "")}/indexnow/${keyFileName(key)}`;
+export const keyLocation = (siteUrl: string, key: string) => `${siteUrl.replace(/\/$/, "")}/${keyFileName(key)}`;
 
 /** URLs de um sitemap XML, na ordem em que aparecem. */
 export const sitemapUrls = (xml: string) => [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].trim());
