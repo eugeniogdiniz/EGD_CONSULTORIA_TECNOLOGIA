@@ -35,7 +35,7 @@ function header() {
     `- Site: ${SITE.url}`,
     `- E-mail: ${SITE.email}`,
     `- Atendimento: ${SITE.hours} (${SITE.hoursNote.replace(/\.$/, "")}). ${SITE.responseTime}`,
-    `- Setores: ${SITE.sectors.join(", ")}.`,
+    `- Setores onde mais atua: ${SITE.sectors.join(", ")}. Atende também empresas de outros setores que precisam de sistemas, dados e automação.`,
     `- Responsável: ${SITE.founder.name}, ${SITE.founder.jobTitle.toLowerCase()} (${SITE.url}${SITE.founder.path}). LinkedIn: ${SITE.founder.linkedin}. GitHub: ${SITE.founder.github}.`,
     ...(SITE.profiles.length ? [`- Perfis da empresa: ${SITE.profiles.join(", ")}.`] : []),
     `- Idioma: português do Brasil.`,

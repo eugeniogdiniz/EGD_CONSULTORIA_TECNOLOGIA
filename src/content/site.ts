@@ -14,7 +14,7 @@ export const SITE = {
   shortName: "EGD",
   url: "https://egdsystem.com.br",
   description:
-    "Sistemas de gestão, apps de campo e automação de relatórios para consórcios de engenharia, habitação e energia.",
+    "Sistemas de gestão, apps de campo, automação de relatórios, dados e agentes de IA sob medida para a operação de cada cliente.",
   email: "contato@egdsystem.com.br",
   city: "São Paulo, Brasil",
   hours: "Segunda a sexta, 9h às 18h",
@@ -28,7 +28,7 @@ export const SITE = {
     jobTitle: "Consultor em Tecnologia",
     /** Página do autor no site (schema.org Person com `@id` estável; os artigos apontam para ela). */
     path: "/sobre/eugenio-diniz",
-    bio: "Fundador e consultor responsável pela EGD Consultoria em Tecnologia, em São Paulo. Desde 2018 desenvolve sistemas de gestão, aplicativos de campo e automações de relatórios para consórcios de engenharia, habitação e energia, e hoje também entrega dados, painéis e agentes de IA.",
+    bio: "Fundador e consultor responsável pela EGD Consultoria em Tecnologia, em São Paulo. Desde 2018 desenvolve sistemas de gestão, aplicativos de campo e automações de relatórios sob medida, com atuação forte em consórcios de engenharia, habitação e energia, e hoje também entrega dados, painéis e agentes de IA para empresas de diferentes setores.",
     linkedin: "https://www.linkedin.com/in/eugeniodiniz/",
     github: "https://github.com/eugeniogdiniz",
   },

@@ -15,7 +15,7 @@ import { PUBLICOS_LINKS } from "@/content/publicos";
 
 const META = {
   title: "EGD — Tecnologia que conecta projeto e operação",
-  description: "Consultoria de tecnologia em São Paulo: sistemas de gestão, apps de campo, automação de relatórios, dados e IA para consórcios de engenharia, habitação e energia.",
+  description: "Consultoria de tecnologia em São Paulo: sistemas de gestão, apps de campo, automação de relatórios, dados e IA sob medida para a operação de cada cliente.",
 };
 export const metadata: Metadata = pageMeta({ title: { absolute: META.title }, description: META.description, path: "/" });
 
@@ -53,7 +53,7 @@ export default async function HomePage() {
       </section>
 
       <section className="brand-section container">
-        <div className="brand-section-heading"><span className="brand-label">O que fazemos</span><div><h2>Complexidade na operação.<br />Clareza na solução.</h2><p>A EGD Consultoria em Tecnologia é uma consultoria de São Paulo que desenvolve sistemas de gestão, aplicativos de campo e automações de relatórios para consórcios de engenharia, habitação e energia, com atendimento remoto em todo o Brasil. Um parceiro para conectar o que hoje está separado: processos, informação e tecnologia.</p></div></div>
+        <div className="brand-section-heading"><span className="brand-label">O que fazemos</span><div><h2>Complexidade na operação.<br />Clareza na solução.</h2><p>A EGD Consultoria em Tecnologia é uma consultoria de São Paulo que desenvolve sistemas de gestão, aplicativos de campo, automações de relatórios, dados e agentes de IA sob medida para a operação de cada cliente, com atendimento remoto em todo o Brasil. Atuação forte em consórcios de engenharia, habitação e energia, e em empresas de outros setores. Um parceiro para conectar o que hoje está separado: processos, informação e tecnologia.</p></div></div>
         <div className="brand-services">
           {SVC.map((service) => <Link href={`/servicos/${service.id}`} key={service.id} className="brand-service"><h3>{service.title}</h3><p>{service.desc}</p><ArrowUR size={22} /></Link>)}
         </div>
