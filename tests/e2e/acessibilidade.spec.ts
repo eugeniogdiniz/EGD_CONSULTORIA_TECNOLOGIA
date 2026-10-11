@@ -23,7 +23,7 @@ async function check(page: Page, urls: string[]) {
 
 test("site e login sem violações de acessibilidade", async ({ page }) => {
   test.setTimeout(120_000);
-  await check(page, ["/", "/servicos", "/produtos", "/consorcios", "/artigos", "/sobre", "/contato", "/produtos/vistorias", "/servicos/auto", "/servicos/bpo", "/servicos/consultoria", "/artigos/rdo-relatorio-diario-de-obra", "/entrar"]);
+  await check(page, ["/", "/servicos", "/produtos", "/consorcios", "/para", "/para/construtoras", "/artigos", "/sobre", "/sobre/eugenio-diniz", "/contato", "/produtos/vistorias", "/servicos/auto", "/servicos/bpo", "/servicos/consultoria", "/artigos/rdo-relatorio-diario-de-obra", "/entrar"]);
 });
 
 test("admin sem violações de acessibilidade", async ({ page }) => {

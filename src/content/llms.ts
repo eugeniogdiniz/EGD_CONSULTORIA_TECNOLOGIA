@@ -1,6 +1,7 @@
 import { ARTICLES } from "./artigos";
 import { CONSORCIOS } from "./consorcios";
 import { FAQ } from "./faq";
+import { PUBLICOS } from "./publicos";
 import { SERVICES, PRODUCTS_FULL, PRINCIPLES } from "./legacy-pages";
 import { SHOW_CASES, SITE } from "./site";
 
@@ -14,9 +15,12 @@ const PAGES = [
   { path: "/servicos", title: "Serviços", note: "oito frentes, capacidades, stack e prazos" },
   { path: "/produtos", title: "Produtos", note: "quatro aceleradores prontos, funcionalidades e prazo de implantação" },
   { path: "/consorcios", title: "Para consórcios de engenharia", note: "problemas típicos do consórcio e o que a EGD entrega para cada um" },
+  { path: "/para", title: "Para quem", note: "os quatro públicos atendidos: consórcios, construtoras, incorporadoras e empresas de engenharia" },
+  ...PUBLICOS.map((p) => ({ path: `/para/${p.slug}`, title: p.rotulo, note: p.resumo.replace(/\.$/, "").toLowerCase() })),
   { path: "/artigos", title: "Artigos", note: "textos práticos sobre RDO, medição, vistoria, documentos e automação, com modelos em planilha" },
   ...(SHOW_CASES ? [{ path: "/cases", title: "Cases", note: "clientes, sistemas e automações em produção" }] : []),
   { path: "/sobre", title: "Sobre", note: "origem, princípios e setores atendidos" },
+  { path: SITE.founder.path, title: SITE.founder.name, note: "quem responde pela EGD: fundador, áreas de atuação, artigos e perfis públicos" },
   { path: "/contato", title: "Contato", note: "formulário, e-mail, horário e portal do cliente" },
 ];
 
@@ -32,6 +36,8 @@ function header() {
     `- E-mail: ${SITE.email}`,
     `- Atendimento: ${SITE.hours} (${SITE.hoursNote.replace(/\.$/, "")}). ${SITE.responseTime}`,
     `- Setores: ${SITE.sectors.join(", ")}.`,
+    `- Responsável: ${SITE.founder.name}, ${SITE.founder.jobTitle.toLowerCase()} (${SITE.url}${SITE.founder.path}). LinkedIn: ${SITE.founder.linkedin}. GitHub: ${SITE.founder.github}.`,
+    ...(SITE.profiles.length ? [`- Perfis da empresa: ${SITE.profiles.join(", ")}.`] : []),
     `- Idioma: português do Brasil.`,
   ].join("\n");
 }
@@ -52,6 +58,10 @@ export function llmsTxt() {
     "## Para consórcios de engenharia",
     "",
     CONSORCIOS.definition,
+    "",
+    "## Para construtoras, incorporadoras e empresas de engenharia",
+    "",
+    ...PUBLICOS.map((p) => `- [${p.rotulo}](${SITE.url}/para/${p.slug}): ${p.definition}`),
     "",
     "## Artigos",
     "",
@@ -107,6 +117,7 @@ export function llmsFullTxt() {
     "",
     ...CONSORCIOS.problems.map((p) => `- ${p.t}: ${p.d}`),
     "",
+    ...PUBLICOS.flatMap((p) => [`## ${p.rotulo}`, "", p.definition, "", ...p.problems.map((x) => `- ${x.t}: ${x.d}`), "", `Página: ${SITE.url}/para/${p.slug}`, ""]),
     "## Artigos",
     "",
     ...ARTICLES.flatMap((a) => [`### ${a.title}`, "", a.lead, "", `Modelo para baixar: ${SITE.url}${a.model.file}`, `Página: ${SITE.url}/artigos/${a.slug}`, ""]),
@@ -124,6 +135,7 @@ export function llmsFullTxt() {
     "### Consórcios de engenharia",
     "",
     ...CONSORCIOS.faq.flatMap((f) => [`**${f.q}**`, "", f.a, ""]),
+    ...PUBLICOS.flatMap((p) => [`### ${p.nome}`, "", ...p.faq.flatMap((f) => [`**${f.q}**`, "", f.a, ""])]),
     "## Páginas",
     "",
     ...PAGES.map(link),

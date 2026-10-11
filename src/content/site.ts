@@ -26,9 +26,18 @@ export const SITE = {
   founder: {
     name: "Eugênio G. Diniz",
     jobTitle: "Consultor em Tecnologia",
+    /** Página do autor no site (schema.org Person com `@id` estável; os artigos apontam para ela). */
+    path: "/sobre/eugenio-diniz",
+    bio: "Fundador e consultor responsável pela EGD Consultoria em Tecnologia, em São Paulo. Desde 2018 desenvolve sistemas de gestão, aplicativos de campo e automações de relatórios para consórcios de engenharia, habitação e energia, e hoje também entrega dados, painéis e agentes de IA.",
     linkedin: "https://www.linkedin.com/in/eugeniodiniz/",
     github: "https://github.com/eugeniogdiniz",
   },
+  /**
+   * Perfis públicos da EMPRESA (não do fundador): entram no `sameAs` da Organization, no llms.txt
+   * e no rodapé. Preencher conforme forem criados: perfil no Google Business, página da empresa
+   * no LinkedIn, Instagram. Só URLs https.
+   */
+  profiles: [] as string[],
   /** Setores em que a EGD atua, na ordem em que aparecem no site. */
   sectors: ["Consórcios de engenharia", "Habitação", "Energia", "Infraestrutura"],
 } as const;
@@ -46,30 +55,40 @@ export const NAV_LINKS: NavLink[] = withoutHiddenCases([
   { href: "/contato", label: "Contato" },
 ]);
 
+/** Colunas de links do rodapé; o componente `Footer` renderiza daqui. */
 export const FOOTER_COLUMNS: { title: string; links: NavLink[] }[] = [
   {
     title: "Serviços",
     links: [
-      { href: "/servicos/dev", label: "Desenvolvimento de sistemas" },
-      { href: "/servicos/auto", label: "Automação de processos" },
-      { href: "/servicos/data", label: "Dados e painéis" },
+      { href: "/servicos/dev", label: "Desenvolvimento" },
+      { href: "/servicos/auto", label: "Automação" },
+      { href: "/servicos/data", label: "Data & BI" },
       { href: "/servicos/ia", label: "Agentes de IA" },
-      { href: "/servicos/gov", label: "Governança de dados" },
-      { href: "/servicos/agile", label: "Gestão de projetos" },
-      { href: "/servicos/consultoria", label: "Consultoria especializada" },
-      { href: "/servicos/bpo", label: "BPO de suporte N1, N2 e N3" },
+      { href: "/servicos/gov", label: "Governança" },
+      { href: "/servicos/agile", label: "Projetos Ágeis" },
+      { href: "/servicos/consultoria", label: "Consultoria" },
+      { href: "/servicos/bpo", label: "BPO de Suporte" },
+    ],
+  },
+  {
+    title: "Para quem",
+    links: [
+      { href: "/consorcios", label: "Consórcios de engenharia" },
+      { href: "/para/construtoras", label: "Construtoras" },
+      { href: "/para/incorporadoras", label: "Incorporadoras" },
+      { href: "/para/empresas-de-engenharia", label: "Empresas de engenharia" },
+      { href: "/para", label: "Todos os públicos" },
     ],
   },
   {
     title: "Empresa",
     links: [
+      { href: "/sobre", label: "Sobre" },
       { href: "/produtos", label: "Produtos" },
-      { href: "/consorcios", label: "Para consórcios" },
       { href: "/artigos", label: "Artigos" },
       ...(SHOW_CASES ? [{ href: "/cases", label: "Cases" }] : []),
-      { href: "/sobre", label: "Sobre" },
       { href: "/contato", label: "Contato" },
-      { href: "/entrar", label: "Entrar no portal" },
+      { href: "/entrar", label: "Portal do cliente" },
     ],
   },
 ];

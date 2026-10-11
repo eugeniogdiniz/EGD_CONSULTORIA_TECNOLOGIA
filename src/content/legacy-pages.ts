@@ -1,4 +1,5 @@
 /* Conteúdo das páginas internas originais (portado de legacy/assets/*.jsx). */
+import { SITE } from "./site";
 
 export type Service = {
   id: string; num: string; title: string;
@@ -152,18 +153,18 @@ export const PRINCIPLES = [
 ];
 
 export const TIMELINE = [
-  { y: "2018", t: "Fundação", d: "Nasce em São Paulo com foco em automação Microsoft e BI." },
-  { y: "2020", t: "Primeira plataforma de dados", d: "Entregamos lakehouse em produção para cliente do setor industrial." },
-  { y: "2022", t: "Cloud-native e DevOps", d: "Squad dedicado a AWS, Azure, Kubernetes e SRE para clientes enterprise." },
-  { y: "2024", t: "Vertical de IA", d: "Primeiros agentes em produção sobre Bedrock e Azure OpenAI." },
-  { y: "2026", t: "40+ projetos", d: "Plataformas em prod em 6 setores: indústria, varejo, saúde, jurídico, infra, financeiro." },
+  { y: "ORIGEM", t: "Fundação em São Paulo", d: `Fundada em ${SITE.foundingYear}, dentro de contratos de engenharia e habitação: as primeiras entregas foram automações de planilhas, documentos e relatórios com Microsoft 365 e BI.` },
+  { y: "CAMPO", t: "Vistorias e fiscalização no celular", d: "O app de vistorias leva o checklist para o canteiro, com foto, assinatura e PDF automático, e funciona sem sinal." },
+  { y: "CONTRATOS", t: "Documentos e medições em sistema", d: "Lista mestra de documentos, boletim de medição e gestão de contratos passam a rodar com histórico auditável, inclusive entre consorciadas." },
+  { y: "DADOS", t: "Painéis e governança", d: "Camada semântica única para que campo, consorciadas, contratante e diretoria leiam o mesmo número." },
+  { y: "HOJE", t: "IA e operação assistida", d: "Agentes de IA sobre a base do cliente, suporte N1 a N3 e consultoria especializada completam as oito frentes de serviço." },
 ];
-
-export const SECTORS = [
-  { n: "Indústria", d: "Manufatura, energia, infraestrutura" },
-  { n: "Varejo", d: "E-commerce, supply chain, omnichannel" },
-  { n: "Saúde", d: "Hospitais, operadoras, healthtech" },
-  { n: "Jurídico", d: "Escritórios, departamentos jurídicos" },
-  { n: "Construção", d: "Incorporadoras, gerenciadoras, obras" },
-  { n: "Financeiro", d: "Bancos médios, fintechs, asset" },
+/** Públicos e setores da página Sobre; os quatro primeiros têm página própria. */
+export const SECTORS: { n: string; d: string; href?: string }[] = [
+  { n: "Consórcios de engenharia", d: "Documentos, vistorias, medições e prestação de contas entre consorciadas", href: "/consorcios" },
+  { n: "Construtoras", d: "RDO, medição, vistorias de qualidade e painel de obra", href: "/para/construtoras" },
+  { n: "Incorporadoras", d: "Vistoria de entrega, assistência técnica pós-obra e habitação", href: "/para/incorporadoras" },
+  { n: "Empresas de engenharia", d: "Gerenciadoras, fiscalizadoras e projetistas", href: "/para/empresas-de-engenharia" },
+  { n: "Energia", d: "Geração, transmissão e manutenção de ativos" },
+  { n: "Infraestrutura", d: "Rodovias, saneamento e obras públicas" },
 ];

@@ -25,6 +25,11 @@ const schema = z.object({
   LOGIN_IP_LIMIT: z.coerce.number().int().positive().optional(),
   /** "1" no servidor da suíte E2E (CI roda em modo produção): libera rotas e regras só de teste. */
   E2E: z.enum(["0", "1"]).optional(),
+  /** Tokens de verificação do Google Search Console e do Bing Webmaster Tools (meta tags). */
+  GOOGLE_SITE_VERIFICATION: z.string().optional(),
+  BING_SITE_VERIFICATION: z.string().optional(),
+  /** Chave do IndexNow (Bing, que alimenta ChatGPT e Copilot): servida em /indexnow/<chave>.txt. */
+  INDEXNOW_KEY: z.string().regex(/^[a-zA-Z0-9-]{8,128}$/).optional(),
   SEED_ADMIN_EMAIL: z.email().optional(),
   SEED_ADMIN_PASSWORD: z.string().min(10).optional(),
 });

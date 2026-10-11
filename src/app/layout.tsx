@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { fontSans, fontMono } from "./fonts";
+import { env } from "@/lib/env";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,6 +16,11 @@ export const metadata: Metadata = {
   creator: "EGD Consultoria em Tecnologia",
   publisher: "EGD Consultoria em Tecnologia",
   formatDetection: { email: false, address: false, telephone: false },
+  // Verificação do Search Console e do Bing Webmaster Tools, só quando o token está no ambiente.
+  verification: {
+    ...(env.GOOGLE_SITE_VERIFICATION ? { google: env.GOOGLE_SITE_VERIFICATION } : {}),
+    ...(env.BING_SITE_VERIFICATION ? { other: { "msvalidate.01": env.BING_SITE_VERIFICATION } } : {}),
+  },
   title: { default: "EGD — Tecnologia que conecta projeto e operação", template: "%s · EGD" },
   description:
     "Consultoria, dados e sistemas para conectar pessoas e transformar a operação. Da primeira conversa ao software em produção.",
