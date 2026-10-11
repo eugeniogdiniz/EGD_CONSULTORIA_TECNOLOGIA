@@ -28,7 +28,7 @@ const schema = z.object({
   /** Tokens de verificação do Google Search Console e do Bing Webmaster Tools (meta tags). */
   GOOGLE_SITE_VERIFICATION: z.string().optional(),
   BING_SITE_VERIFICATION: z.string().optional(),
-  /** Chave do IndexNow (Bing, que alimenta ChatGPT e Copilot): servida em /indexnow/<chave>.txt. */
+  /** Chave do IndexNow (Bing, que alimenta ChatGPT e Copilot): servida em /<chave>.txt (rewrite para /indexnow/<chave>.txt). */
   INDEXNOW_KEY: z.string().regex(/^[a-zA-Z0-9-]{8,128}$/).optional(),
   SEED_ADMIN_EMAIL: z.email().optional(),
   SEED_ADMIN_PASSWORD: z.string().min(10).optional(),
