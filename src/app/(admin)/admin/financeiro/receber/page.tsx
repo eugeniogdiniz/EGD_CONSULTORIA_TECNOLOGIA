@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { requireOwner } from "@/modules/auth/context";
 import { listAllInvoices, listProjectOptions } from "@/modules/projects/queries";
-import { INVOICE_STATE_LABEL, INVOICE_STATE_STYLE, invoiceState, summarizeInvoices } from "@/modules/projects/invoices";
-import { paidInPeriod } from "@/modules/projects/payables";
-import { cancelInvoiceForm, markInvoicePaidForm } from "@/modules/projects/form-actions";
+import { INVOICE_STATE_LABEL, INVOICE_STATE_STYLE, invoiceState, receivedInPeriod, summarizeInvoices } from "@/modules/projects/invoices";
+import { cancelInvoiceForm, reopenInvoiceForm } from "@/modules/projects/form-actions";
+import { ReceiptDialog } from "@/modules/projects/components/receipt-dialog";
+import { InvoiceAmountCell } from "@/modules/projects/components/receipt-cell";
 import { todayInSaoPaulo } from "@/modules/reports/dates";
 import { PageHeader, Block, EmptyState } from "@/components/shell/page-header";
 import { ConfirmAction } from "@/components/shell/confirm-action";
@@ -24,7 +25,7 @@ export default async function ContasAReceberPage({ searchParams }: PageProps<"/a
   ]);
   const totals = summarizeInvoices(all, today);
   const monthStart = `${today.slice(0, 7)}-01`;
-  const receivedThisMonth = paidInPeriod(all, monthStart, today);
+  const receivedThisMonth = receivedInPeriod(all, monthStart, today);
   const listedCents = rows.reduce((s, r) => s + (r.status === "cancelled" ? 0 : r.amountCents), 0);
 
   return (
@@ -63,7 +64,6 @@ export default async function ContasAReceberPage({ searchParams }: PageProps<"/a
                     <tr key={inv.id} className="border-t border-border" data-testid={`receber-${inv.id}`}>
                       <td className="type-data px-4 py-2 whitespace-nowrap">
                         {formatIsoDate(inv.dueAt)}
-                        {st === "paid" && inv.paidAt && <span className="type-micro block text-success">recebida em {formatIsoDate(inv.paidAt)}</span>}
                       </td>
                       <td className="px-4 py-2">
                         <Link href={`/admin/projetos/${inv.projectId}/financeiro`} className="font-medium hover:text-link">{inv.projectTitle}</Link>
@@ -73,18 +73,12 @@ export default async function ContasAReceberPage({ searchParams }: PageProps<"/a
                         <span className="type-data text-faint">#{inv.number}</span> {inv.description}
                         {inv.notes && <span className="type-micro block text-faint">{inv.notes}</span>}
                       </td>
-                      <td className="type-data px-4 py-2 text-right">{formatBrlCents(inv.amountCents)}</td>
+                      <td className="px-4 py-2 text-right whitespace-nowrap"><InvoiceAmountCell inv={inv} /></td>
                       <td className="px-4 py-2"><StateBadge label={INVOICE_STATE_LABEL[st]} klass={INVOICE_STATE_STYLE[st]} /></td>
                       <td className="px-4 py-2">
                         {inv.status === "pending" && (
                           <div className="flex flex-wrap gap-1.5">
-                            <form action={markInvoicePaidForm} className="flex items-center gap-1">
-                              <input type="hidden" name="id" value={inv.id} />
-                              <input type="hidden" name="projectId" value={inv.projectId} />
-                              <label className="sr-only" htmlFor={`paid-${inv.id}`}>Data do recebimento</label>
-                              <input id={`paid-${inv.id}`} name="paidAt" type="date" defaultValue={today} className="h-8 rounded-sm border border-input bg-card px-2 text-xs" />
-                              <Button type="submit" size="sm" variant="outline">Marcar recebida</Button>
-                            </form>
+                            <ReceiptDialog invoice={inv} today={today} trigger={<Button type="button" size="sm" variant="outline">Registrar recebimento</Button>} />
                             <ConfirmAction
                               trigger={<Button variant="ghost" size="sm">Cancelar</Button>}
                               title={`Cancelar a parcela ${inv.number} de ${inv.projectTitle}?`}
@@ -95,6 +89,7 @@ export default async function ContasAReceberPage({ searchParams }: PageProps<"/a
                             />
                           </div>
                         )}
+                        {inv.status === "paid" && <PaidActions inv={inv} today={today} />}
                       </td>
                     </tr>
                   );
@@ -106,5 +101,22 @@ export default async function ContasAReceberPage({ searchParams }: PageProps<"/a
         )}
       </Block>
     </>
+  );
+}
+
+function PaidActions({ inv, today }: { inv: Parameters<typeof ReceiptDialog>[0]["invoice"]; today: string }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      <ReceiptDialog invoice={inv} today={today} trigger={<Button type="button" size="sm" variant="ghost">Corrigir recebimento</Button>} />
+      <ConfirmAction
+        trigger={<Button variant="ghost" size="sm">Desfazer</Button>}
+        title={`Desfazer o recebimento da parcela ${inv.number}?`}
+        description="A parcela volta a pendente e o valor sai do recebido. Use se o recebimento foi lançado por engano."
+        confirmLabel="Desfazer recebimento"
+        action={reopenInvoiceForm}
+        fields={{ id: inv.id, projectId: inv.projectId }}
+        destructive={false}
+      />
+    </div>
   );
 }

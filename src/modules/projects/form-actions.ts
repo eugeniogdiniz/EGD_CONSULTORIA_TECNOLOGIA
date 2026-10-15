@@ -18,6 +18,8 @@ import {
   createInvoice,
   updateInvoice,
   markInvoicePaid,
+  updateInvoiceReceipt,
+  reopenInvoice,
   cancelInvoice,
   setProjectRate,
   createMilestone,
@@ -562,12 +564,30 @@ export async function updateInvoiceForm(_p: NullState, fd: FormData): Promise<Nu
   return r;
 }
 
-export async function markInvoicePaidForm(fd: FormData): Promise<void> {
-  const ctx = await requireOwner();
-  await markInvoicePaid(ctx, String(fd.get("id") ?? ""), String(fd.get("paidAt") ?? ""));
-  revalidatePath(`/admin/projetos/${String(fd.get("projectId") ?? "")}/financeiro`);
+function revalidateReceivables(projectId: string) {
+  revalidatePath(`/admin/projetos/${projectId}/financeiro`);
   revalidatePath("/admin/financeiro/receber");
   revalidatePath("/admin");
+}
+
+/** Registra (pendente) ou corrige (já recebida) o recebimento de uma parcela. */
+export async function saveInvoiceReceiptForm(_p: NullState, fd: FormData): Promise<NullState> {
+  const ctx = await requireOwner();
+  const id = String(fd.get("id") ?? "");
+  const paidAt = String(fd.get("paidAt") ?? "");
+  const receivedCents = String(fd.get("receivedCents") ?? "");
+  const r =
+    fd.get("mode") === "edit"
+      ? await updateInvoiceReceipt(ctx, id, { paidAt, receivedCents })
+      : await markInvoicePaid(ctx, id, paidAt, receivedCents === "" ? "0" : receivedCents);
+  if (r.ok) revalidateReceivables(String(fd.get("projectId") ?? ""));
+  return r;
+}
+
+export async function reopenInvoiceForm(fd: FormData): Promise<void> {
+  const ctx = await requireOwner();
+  await reopenInvoice(ctx, String(fd.get("id") ?? ""));
+  revalidateReceivables(String(fd.get("projectId") ?? ""));
 }
 
 export async function cancelInvoiceForm(fd: FormData): Promise<void> {

@@ -740,6 +740,7 @@ export function listInvoices(_ctx: AdminContext, projectId: string) {
       dueAt: projectInvoice.dueAt,
       status: projectInvoice.status,
       paidAt: projectInvoice.paidAt,
+      receivedCents: projectInvoice.receivedCents,
       notes: projectInvoice.notes,
     })
     .from(projectInvoice)
@@ -858,6 +859,7 @@ export function listAllInvoices(_ctx: AdminContext, f: LedgerFilters) {
       dueAt: projectInvoice.dueAt,
       status: projectInvoice.status,
       paidAt: projectInvoice.paidAt,
+      receivedCents: projectInvoice.receivedCents,
       notes: projectInvoice.notes,
     })
     .from(projectInvoice)
