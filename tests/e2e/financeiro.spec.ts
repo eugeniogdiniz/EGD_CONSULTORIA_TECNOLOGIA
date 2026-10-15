@@ -20,10 +20,17 @@ test("financeiro: parcelas, rate do projeto, estimativa, burndown e relatório d
   await expect(row).toContainText("Entrada 40%", { timeout: 10_000 });
   await expect(row).toContainText("Pendente");
   await expect(row).toContainText("R$ 1.500,00");
-  await row.getByRole("button", { name: /marcar paga/i }).click();
+  // recebimento: valor que de fato entrou (menor que a parcela) e data
+  await row.getByRole("button", { name: /registrar recebimento/i }).click();
+  const rd = page.getByRole("dialog", { name: /registrar recebimento/i });
+  await rd.getByLabel(/valor recebido/i).fill("1.450,00");
+  await rd.getByLabel(/data do recebimento/i).fill("2026-10-10");
+  await rd.getByRole("button", { name: /^registrar$/i }).click();
   await expect(page.getByTestId("parcela-1")).toContainText("Paga", { timeout: 10_000 });
   // a moeda usa espaço inseparável entre "R$" e o número
-  await expect(page.getByText(/recebido R\$\s1\.500,00/)).toBeVisible();
+  await expect(page.getByTestId("parcela-1")).toContainText(/recebido R\$\s1\.450,00 em 10\/10\/2026/);
+  await expect(page.getByTestId("parcela-1")).toContainText(/R\$\s50,00 a menos/);
+  await expect(page.getByText(/faturado R\$\s1\.500,00 · recebido R\$\s1\.450,00/)).toBeVisible();
 
   // ── rate do projeto ─────────────────────────────────────────────────────
   const rateInput = page.getByLabel(/rate de .* neste projeto/i).first();
@@ -121,7 +128,8 @@ test("financeiro consolidado: contas a receber e a pagar de todos os projetos e 
   const parcela = page.locator("tr", { hasText: parcelaDesc });
   await expect(parcela).toContainText(p.title);
   await expect(parcela).toContainText("Pendente");
-  await parcela.getByRole("button", { name: /marcar recebida/i }).click();
+  await parcela.getByRole("button", { name: /registrar recebimento/i }).click();
+  await page.getByRole("dialog", { name: /registrar recebimento/i }).getByRole("button", { name: /^registrar$/i }).click();
   await expect(page.locator("tr", { hasText: parcelaDesc })).toHaveCount(0, { timeout: 10_000 });
   await page.goto("/admin/financeiro/receber?situacao=paid");
   await expect(page.locator("tr", { hasText: parcelaDesc })).toContainText("Paga");
