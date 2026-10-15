@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cn } from "cn";
-import { requireAdmin } from "@/modules/auth/context";
+import { isOwner, requireAdmin } from "@/modules/auth/context";
+import { getPortalAccessSummary } from "@/modules/tenancy/queries";
 import {
   getProject,
   listMilestones,
@@ -11,6 +12,7 @@ import {
 import {
   changeProjectStatusForm,
   deleteMilestoneForm,
+  enableClientPortalForm,
   deletePhaseForm,
   movePhaseForm,
   toggleMilestoneCompletedForm,
@@ -48,11 +50,13 @@ export default async function ProjetoDetalhePage({ params }: PageProps<"/admin/p
   if (!row) notFound();
   const p = row.project;
 
-  const [phases, milestones, upcoming] = await Promise.all([
+  const [phases, milestones, upcoming, portal] = await Promise.all([
     listPhasesWithCounts(ctx, id),
     listMilestones(ctx, id),
     upcomingDeliverables(ctx, id, 5),
+    row.company.linkedOrganizationId ? getPortalAccessSummary(row.company.linkedOrganizationId) : null,
   ]);
+  const canManageOrgs = isOwner(ctx);
 
   const archived = Boolean(p.archivedAt);
   const today = new Date().toISOString().slice(0, 10);
@@ -266,6 +270,48 @@ export default async function ProjetoDetalhePage({ params }: PageProps<"/admin/p
               <dt className="text-muted-foreground">Oportunidade</dt>
               <dd><Link href={`/admin/crm/oportunidades/${row.opportunity.id}`} className="text-link hover:underline">{row.opportunity.title}</Link></dd>
             </dl>
+          </Block>
+
+          <Block title="Portal do cliente">
+            {portal ? (
+              <div className="grid gap-2 text-sm">
+                <p>
+                  O cliente acompanha este projeto pela organização{" "}
+                  {canManageOrgs ? (
+                    <Link href={`/admin/organizacoes/${portal.id}`} className="font-medium text-link hover:underline">{portal.name}</Link>
+                  ) : (
+                    <span className="font-medium">{portal.name}</span>
+                  )}
+                  .
+                </p>
+                <p className="type-micro text-muted-foreground">
+                  {portal.members === 1 ? "1 pessoa com acesso" : `${portal.members} pessoas com acesso`}
+                  {portal.pendingInvites > 0 ? ` · ${portal.pendingInvites === 1 ? "1 convite pendente" : `${portal.pendingInvites} convites pendentes`}` : ""}
+                  {portal.status === "inactive" ? " · organização inativa" : ""}
+                </p>
+                {portal.members === 0 && (
+                  <p className="text-muted-foreground">
+                    Ninguém entrou ainda.{" "}
+                    {canManageOrgs ? (
+                      <Link href={`/admin/organizacoes/${portal.id}`} className="text-link hover:underline">Convide o contato do cliente</Link>
+                    ) : (
+                      "Peça ao administrador para convidar o contato do cliente"
+                    )}{" "}
+                    para liberar o acesso.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <form action={enableClientPortalForm} className="grid gap-3 text-sm">
+                <input type="hidden" name="id" value={p.id} />
+                <p className="text-muted-foreground">
+                  {row.company.name} ainda não tem organização no portal, então o cliente não vê este projeto.
+                </p>
+                <div>
+                  <Button type="submit" size="sm">Liberar acesso do cliente</Button>
+                </div>
+              </form>
+            )}
           </Block>
 
           {p.notes && (

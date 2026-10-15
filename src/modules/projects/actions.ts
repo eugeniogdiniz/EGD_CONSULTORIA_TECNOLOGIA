@@ -31,6 +31,9 @@ import { uploadFile } from "@/modules/files/actions";
 import { reorderPositions } from "./reorder";
 import { detectDependencyCycle } from "./dependency";
 import { computeMinutes } from "./time-math";
+import { ensureCompanyOrganization, type ProvisionedOrganization } from "@/modules/tenancy/provision";
+import { projectDocumentFolder } from "@/modules/project-documents/schema";
+import { defaultFolderRows } from "@/modules/project-documents/folders";
 import {
   changeDeliverableStatusSchema,
   changeProjectStatusSchema,
@@ -109,7 +112,7 @@ export async function createProjectFromOpportunity(
   }
 
   try {
-    const projectId = await db.transaction(async (tx) => {
+    const { projectId, portal } = await db.transaction(async (tx) => {
       const [row] = await tx
         .insert(project)
         .values({
@@ -122,6 +125,11 @@ export async function createProjectFromOpportunity(
           ownerId: ctx.user.id,
         })
         .returning({ id: project.id });
+
+      // GED: todo projeto nasce com as pastas padrão
+      await tx.insert(projectDocumentFolder).values(defaultFolderRows(row.id));
+      // portal: a empresa ganha (ou reaproveita) a organização onde o cliente acompanha o projeto
+      const portal = await ensureCompanyOrganization(tx, opp.companyId);
 
       if (template) {
         const tphases = await tx
@@ -164,8 +172,9 @@ export async function createProjectFromOpportunity(
         }
       }
 
-      return row.id;
+      return { projectId: row.id, portal };
     });
+    await auditPortalProvisioning(ctx, opp.companyId, portal);
 
     await audit({
       actorId: ctx.user.id,
@@ -190,6 +199,44 @@ export async function createProjectFromOpportunity(
     }
     throw err;
   }
+}
+
+async function auditPortalProvisioning(ctx: AdminContext, companyId: string, portal: ProvisionedOrganization | null) {
+  if (!portal || portal.outcome === "existing") return;
+  if (portal.outcome === "created")
+    await audit({
+      actorId: ctx.user.id,
+      action: "organization.created",
+      entityType: "organization",
+      entityId: portal.organizationId,
+      organizationId: portal.organizationId,
+      metadata: { companyId, via: "project" },
+    });
+  await audit({
+    actorId: ctx.user.id,
+    action: "crm.company.linked_to_organization",
+    entityType: "crm_company",
+    entityId: companyId,
+    organizationId: portal.organizationId,
+    metadata: { organizationId: portal.organizationId, via: "project" },
+  });
+}
+
+/**
+ * Libera o portal para o cliente de um projeto que nasceu antes do vínculo
+ * automático: cria ou reaproveita a organização da empresa. Idempotente.
+ */
+export async function enableClientPortal(
+  ctx: AdminContext,
+  projectId: string,
+): Promise<ActionResult<{ organizationId: string }>> {
+  if (!isUuid(projectId)) return fail("Projeto não encontrado.");
+  const p = await db.query.project.findFirst({ where: eq(project.id, projectId), columns: { id: true, companyId: true } });
+  if (!p) return fail("Projeto não encontrado.");
+  const portal = await db.transaction((tx) => ensureCompanyOrganization(tx, p.companyId));
+  if (!portal) return fail("Empresa não encontrada.");
+  await auditPortalProvisioning(ctx, p.companyId, portal);
+  return ok({ organizationId: portal.organizationId });
 }
 
 export async function updateProject(

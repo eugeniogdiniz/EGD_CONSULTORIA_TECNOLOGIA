@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gt, isNull } from "drizzle-orm";
+import { and, asc, count, eq, gt, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { organizations, memberships, invitations, users } from "@/db/schema";
 import type { AdminContext } from "@/modules/auth/context";
@@ -53,6 +53,23 @@ export async function getInvitationByToken(raw: string) {
         gt(invitations.expiresAt, new Date()),
       ),
     )
+    .limit(1);
+  return row ?? null;
+}
+
+/** Resumo do acesso de uma organização ao portal: nome, membros e convites pendentes. */
+export async function getPortalAccessSummary(organizationId: string) {
+  if (!isUuid(organizationId)) return null;
+  const [row] = await db
+    .select({
+      id: organizations.id,
+      name: organizations.name,
+      status: organizations.status,
+      members: sql<number>`(select count(*)::int from ${memberships} where ${memberships.organizationId} = ${organizations.id})`,
+      pendingInvites: sql<number>`(select count(*)::int from ${invitations} where ${invitations.organizationId} = ${organizations.id} and ${invitations.acceptedAt} is null and ${invitations.expiresAt} > now())`,
+    })
+    .from(organizations)
+    .where(eq(organizations.id, organizationId))
     .limit(1);
   return row ?? null;
 }

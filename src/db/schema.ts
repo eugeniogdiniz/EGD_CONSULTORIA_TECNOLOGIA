@@ -17,3 +17,4 @@ export * from "@/modules/settings/schema";
 export * from "@/modules/errors/schema";
 export * from "@/modules/rate-limit/schema";
 export * from "@/modules/webhooks/schema";
+export * from "@/modules/project-documents/schema";
