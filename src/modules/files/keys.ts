@@ -1,4 +1,6 @@
 export const MAX_FILE_BYTES = 50 * 1024 * 1024;
+/** GED do projeto: documentos grandes (projetos, plantas, bases exportadas). */
+export const MAX_DOCUMENT_BYTES = 100 * 1024 * 1024;
 
 const MAX_KEY_NAME = 120;
 

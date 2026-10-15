@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/modules/auth/context";
+import { listAttachmentsForDeliverables } from "@/modules/projects/queries";
 import {
   getProject,
   listDeliverablesGroupedByStatus,
@@ -33,6 +34,7 @@ export default async function KanbanPage({ params, searchParams }: PageProps<"/a
   const phaseOpts = phases.map((p) => ({ id: p.id, name: p.name }));
   const assigneeOpts = [{ id: ctx.user.id, name: ctx.user.name }];
 
+  const attachments = await listAttachmentsForDeliverables(columns.flatMap((c) => c.items.map((d) => d.id)));
   const boardColumns = columns.map((col) => ({
     status: col.status,
     items: col.items.map<KanbanCard>((d) => ({
@@ -47,7 +49,7 @@ export default async function KanbanPage({ params, searchParams }: PageProps<"/a
       assigneeId: d.assigneeId,
       assigneeName: d.assigneeName,
       dueAt: d.dueAt,
-      fileId: d.fileId,
+      attachments: attachments.filter((a) => a.deliverableId === d.id),
     })),
   }));
 

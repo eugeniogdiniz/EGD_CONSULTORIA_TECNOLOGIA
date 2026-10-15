@@ -84,20 +84,24 @@ export default async function PortalEntregaPage({
             </Block>
           )}
 
-          {d.fileId && d.fileName && (
-            <Block title="Arquivo da entrega">
-              <div className="flex items-center gap-3.5 rounded-md border border-border bg-card p-3">
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">{d.fileName}</div>
-                  <div className="type-micro text-muted-foreground">
-                    {d.fileSize != null && `${formatBytes(d.fileSize)}`}
-                    {d.fileCreatedAt && ` · enviado em ${formatDate(d.fileCreatedAt)}`}
-                  </div>
-                </div>
-                <form method="post" action={`/portal/projetos/${id}/entregas/${deliverableId}/baixar`}>
-                  <Button type="submit" variant="outline" size="sm">Baixar</Button>
-                </form>
-              </div>
+          {d.attachments.length > 0 && (
+            <Block title={d.attachments.length === 1 ? "Arquivo da entrega" : "Arquivos da entrega"} aside={d.attachments.length > 1 ? `${d.attachments.length} arquivos` : undefined}>
+              <ul className="grid gap-2">
+                {d.attachments.map((a) => (
+                  <li key={a.fileId} className="flex items-center gap-3.5 rounded-md border border-border bg-card p-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium">{a.name}</div>
+                      <div className="type-micro text-muted-foreground">
+                        {formatBytes(a.sizeBytes)} · enviado em {formatDate(a.createdAt)}
+                      </div>
+                    </div>
+                    <form method="post" action={`/portal/projetos/${id}/entregas/${deliverableId}/baixar`}>
+                      <input type="hidden" name="fileId" value={a.fileId} />
+                      <Button type="submit" variant="outline" size="sm" aria-label={`Baixar ${a.name}`}>Baixar</Button>
+                    </form>
+                  </li>
+                ))}
+              </ul>
               <p className="type-micro mt-2.5 text-faint">
                 O download abre um link temporário e fica registrado no histórico da EGD.
               </p>

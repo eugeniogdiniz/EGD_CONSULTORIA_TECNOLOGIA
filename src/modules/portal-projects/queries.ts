@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { crmCompany, files, project, projectDeliverable, projectDeliverableComment, projectMilestone, projectPhase, users, projectDeliverableAcceptance } from "@/db/schema";
+import { crmCompany, files, project, projectDeliverable, projectDeliverableAttachment, projectDeliverableComment, projectMilestone, projectPhase, users, projectDeliverableAcceptance } from "@/db/schema";
 import type { PortalContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import { stripInternalNotes, summarizeProject, type ProjectSummary } from "./scope";
@@ -153,17 +153,12 @@ export async function getPortalDeliverable(ctx: PortalContext, projectId: string
       dueAt: projectDeliverable.dueAt,
       phaseName: projectPhase.name,
       assigneeName: users.name,
-      fileId: projectDeliverable.fileId,
-      fileName: files.originalName,
-      fileSize: files.sizeBytes,
-      fileCreatedAt: files.createdAt,
     })
     .from(projectDeliverable)
     .innerJoin(project, eq(projectDeliverable.projectId, project.id))
     .innerJoin(crmCompany, eq(project.companyId, crmCompany.id))
     .leftJoin(projectPhase, eq(projectDeliverable.phaseId, projectPhase.id))
     .leftJoin(users, eq(projectDeliverable.assigneeId, users.id))
-    .leftJoin(files, eq(projectDeliverable.fileId, files.id))
     .where(
       and(
         eq(projectDeliverable.id, deliverableId),
@@ -174,7 +169,14 @@ export async function getPortalDeliverable(ctx: PortalContext, projectId: string
     )
     .limit(1);
   if (!row) return null;
-  return { ...row, description: stripInternalNotes(row.description) };
+  // só metadados: o download passa pela rota que revalida o escopo
+  const attachments = await db
+    .select({ fileId: files.id, name: files.originalName, sizeBytes: files.sizeBytes, createdAt: projectDeliverableAttachment.createdAt })
+    .from(projectDeliverableAttachment)
+    .innerJoin(files, eq(projectDeliverableAttachment.fileId, files.id))
+    .where(eq(projectDeliverableAttachment.deliverableId, row.id))
+    .orderBy(asc(projectDeliverableAttachment.createdAt));
+  return { ...row, description: stripInternalNotes(row.description), attachments };
 }
 
 /**
@@ -239,16 +241,18 @@ export async function findVisibleDeliverable(ctx: PortalContext, deliverableId: 
  * Arquivo anexado a uma entrega visível da organização ativa. O único caminho
  * de download do portal: valida arquivo → entrega visível → projeto → empresa → organização.
  */
-export async function getPortalDeliverableFile(ctx: PortalContext, projectId: string, deliverableId: string) {
-  if (!isUuid(projectId) || !isUuid(deliverableId)) return null;
+export async function getPortalDeliverableFile(ctx: PortalContext, projectId: string, deliverableId: string, fileId: string) {
+  if (!isUuid(projectId) || !isUuid(deliverableId) || !isUuid(fileId)) return null;
   const [row] = await db
     .select({ id: files.id, bucketKey: files.bucketKey, originalName: files.originalName })
-    .from(projectDeliverable)
+    .from(projectDeliverableAttachment)
+    .innerJoin(projectDeliverable, eq(projectDeliverableAttachment.deliverableId, projectDeliverable.id))
     .innerJoin(project, eq(projectDeliverable.projectId, project.id))
     .innerJoin(crmCompany, eq(project.companyId, crmCompany.id))
-    .innerJoin(files, eq(projectDeliverable.fileId, files.id))
+    .innerJoin(files, eq(projectDeliverableAttachment.fileId, files.id))
     .where(
       and(
+        eq(projectDeliverableAttachment.fileId, fileId),
         eq(projectDeliverable.id, deliverableId),
         eq(projectDeliverable.projectId, projectId),
         eq(projectDeliverable.visibleToClient, true),

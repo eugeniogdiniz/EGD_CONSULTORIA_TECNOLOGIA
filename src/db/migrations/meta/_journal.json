@@ -183,6 +183,13 @@
       "when": 1792026887867,
       "tag": "0025_recebimento_real",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792030390777,
+      "tag": "0026_anexos_entrega",
+      "breakpoints": true
     }
   ]
 }

@@ -9,6 +9,7 @@ import {
   organizations,
   project,
   projectDeliverable,
+  projectDeliverableAttachment,
   projectMilestone,
   projectPhase,
   users,
@@ -46,6 +47,7 @@ let visibleA: string;
 let hiddenA: string;
 let blockedA: string;
 let fileDelA: string;
+let fileA: string;
 let visibleB: string;
 
 async function createClientUser(email: string, name: string) {
@@ -133,7 +135,9 @@ beforeAll(async () => {
     status: "blocked",
     description: "Texto público.\n\n## Bloqueio\nSegredo interno do bloqueio",
   });
-  fileDelA = await makeDeliverable(projA, "Entrega com arquivo A", { visibleToClient: true, fileId: file.id });
+  fileDelA = await makeDeliverable(projA, "Entrega com arquivo A", { visibleToClient: true });
+  fileA = file.id;
+  await db.insert(projectDeliverableAttachment).values({ deliverableId: fileDelA, fileId: file.id, uploadedBy: admin.user.id });
   visibleB = await makeDeliverable(projB, "Entrega visível B", { visibleToClient: true });
   await makeDeliverable(projArchived, "Entrega do arquivado", { visibleToClient: true });
 
@@ -213,17 +217,24 @@ describe("visibilidade de entregas", () => {
 
 describe("download de arquivo", () => {
   it("devolve o arquivo só para a organização dona e com entrega visível", async () => {
-    const f = await getPortalDeliverableFile(ctxA, projA, fileDelA);
+    const f = await getPortalDeliverableFile(ctxA, projA, fileDelA, fileA);
     expect(f?.originalName).toBe("entrega-a.xlsx");
-    expect(await getPortalDeliverableFile(ctxB, projA, fileDelA)).toBeNull();
-    expect(await getPortalDeliverableFile(ctxA, projB, fileDelA)).toBeNull();
+    expect(await getPortalDeliverableFile(ctxB, projA, fileDelA, fileA)).toBeNull();
+    expect(await getPortalDeliverableFile(ctxA, projB, fileDelA, fileA)).toBeNull();
+    // arquivo que não é anexo desta entrega
+    expect(await getPortalDeliverableFile(ctxA, projA, visibleA, fileA)).toBeNull();
+  });
+
+  it("detalhe da entrega lista os anexos", async () => {
+    const d = await getPortalDeliverable(ctxA, projA, fileDelA);
+    expect(d?.attachments.map((a) => a.name)).toEqual(["entrega-a.xlsx"]);
   });
 
   it("some quando a entrega deixa de ser visível", async () => {
     await db.update(projectDeliverable).set({ visibleToClient: false }).where(eq(projectDeliverable.id, fileDelA));
-    expect(await getPortalDeliverableFile(ctxA, projA, fileDelA)).toBeNull();
+    expect(await getPortalDeliverableFile(ctxA, projA, fileDelA, fileA)).toBeNull();
     await db.update(projectDeliverable).set({ visibleToClient: true }).where(eq(projectDeliverable.id, fileDelA));
-    expect(await getPortalDeliverableFile(ctxA, projA, fileDelA)).not.toBeNull();
+    expect(await getPortalDeliverableFile(ctxA, projA, fileDelA, fileA)).not.toBeNull();
   });
 });
 

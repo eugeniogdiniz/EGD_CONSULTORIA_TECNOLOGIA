@@ -10,12 +10,13 @@ import { audit } from "@/modules/audit/log";
  * escopo vem da cadeia entrega → projeto → empresa → organização.
  */
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string; deliverableId: string }> },
 ) {
   const ctx = await requirePortal();
   const { id, deliverableId } = await params;
-  const file = await getPortalDeliverableFile(ctx, id, deliverableId);
+  const fd = await req.formData().catch(() => null);
+  const file = await getPortalDeliverableFile(ctx, id, deliverableId, String(fd?.get("fileId") ?? ""));
   if (!file) return new NextResponse("Arquivo não encontrado", { status: 404 });
 
   await audit({

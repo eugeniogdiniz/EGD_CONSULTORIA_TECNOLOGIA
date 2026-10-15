@@ -8,6 +8,7 @@ import {
   files,
   project,
   projectDeliverable,
+  projectDeliverableAttachment,
   projectDocument,
   projectDocumentFolder,
   users,
@@ -153,9 +154,8 @@ async function systemDocuments(
   const deliveryFolder = folder("entregas");
   if (deliveryFolder) {
     const rows = await db
-      .select({ id: projectDeliverable.id, title: projectDeliverable.title, file: files, acceptance: acceptanceFiles })
+      .select({ id: projectDeliverable.id, title: projectDeliverable.title, acceptance: acceptanceFiles })
       .from(projectDeliverable)
-      .leftJoin(files, eq(projectDeliverable.fileId, files.id))
       .leftJoin(acceptanceFiles, eq(projectDeliverable.acceptanceFileId, acceptanceFiles.id))
       .where(
         and(
@@ -164,19 +164,27 @@ async function systemDocuments(
         ),
       )
       .orderBy(asc(projectDeliverable.createdAt));
+    const attachments = rows.length
+      ? await db
+          .select({ deliverableId: projectDeliverableAttachment.deliverableId, file: files })
+          .from(projectDeliverableAttachment)
+          .innerJoin(files, eq(projectDeliverableAttachment.fileId, files.id))
+          .where(inArray(projectDeliverableAttachment.deliverableId, rows.map((r) => r.id)))
+          .orderBy(asc(projectDeliverableAttachment.createdAt))
+      : [];
     for (const r of rows) {
       const base = { folderId: deliveryFolder, notes: null, uploadedByName: null, documentId: null, originHref: `/admin/projetos/${p.id}/entregas/${r.id}` };
-      if (r.file)
+      for (const a of attachments.filter((x) => x.deliverableId === r.id))
         out.push({
           ...base,
-          key: `deliverable:${r.id}`,
+          key: `deliverable:${a.file.id}`,
           source: "deliverable",
           title: r.title,
-          detail: "arquivo da entrega",
-          fileId: r.file.id,
-          fileName: r.file.originalName,
-          sizeBytes: r.file.sizeBytes,
-          createdAt: r.file.createdAt,
+          detail: "anexo da entrega",
+          fileId: a.file.id,
+          fileName: a.file.originalName,
+          sizeBytes: a.file.sizeBytes,
+          createdAt: a.file.createdAt,
         });
       if (r.acceptance)
         out.push({

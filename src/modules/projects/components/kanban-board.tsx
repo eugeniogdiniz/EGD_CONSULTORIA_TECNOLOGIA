@@ -34,6 +34,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DeliverableFormDialog } from "./deliverable-form";
+import type { AttachmentItem } from "./deliverable-attachments";
 import { reorderDeliverableForm } from "@/modules/projects/form-actions";
 import { formatIsoDate } from "@/lib/format";
 import { PRIORITY_LABEL, PRIORITY_STYLE, type Priority } from "@/modules/projects/priority";
@@ -52,7 +53,7 @@ export type KanbanCard = {
   assigneeId: string | null;
   assigneeName: string | null;
   dueAt: string | null;
-  fileId: string | null;
+  attachments: AttachmentItem[];
 };
 
 type Column = { status: Status; items: KanbanCard[] };
@@ -108,9 +109,9 @@ function CardBody({ card, today }: { card: KanbanCard; today: string }) {
             {initials(card.assigneeName)}
           </span>
         )}
-        {card.fileId && (
-          <span className="type-data text-[10px]" title="Tem anexo">
-            📎
+        {card.attachments.length > 0 && (
+          <span className="type-data text-[10px]" title={card.attachments.length === 1 ? "1 anexo" : `${card.attachments.length} anexos`}>
+            📎{card.attachments.length > 1 ? ` ${card.attachments.length}` : ""}
           </span>
         )}
         {card.dueAt && (
@@ -165,6 +166,7 @@ function SortableCard({
           assigneeId: card.assigneeId,
           dueAt: card.dueAt,
           priority: card.priority,
+          attachments: card.attachments,
         }}
         trigger={
           <button

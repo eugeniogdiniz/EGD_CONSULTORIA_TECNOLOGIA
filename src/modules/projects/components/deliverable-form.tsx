@@ -16,6 +16,7 @@ import {
 } from "@/modules/projects/form-actions";
 import type { ActionResult } from "@/lib/action-result";
 import { PRIORITIES, PRIORITY_LABEL } from "@/modules/projects/priority";
+import { DeliverableAttachments, type AttachmentItem } from "./deliverable-attachments";
 
 type Phase = { id: string; name: string };
 type Assignee = { id: string; name: string };
@@ -29,6 +30,7 @@ type Deliverable = {
   dueAt: string | null;
   priority: "urgent" | "high" | "medium" | "low";
   estimateMinutes?: number | null;
+  attachments?: AttachmentItem[];
 };
 
 const STATUSES = [
@@ -59,7 +61,7 @@ export function DeliverableFormDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger as React.ReactElement} />
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Editar entrega" : "Nova entrega"}</DialogTitle>
         </DialogHeader>
@@ -259,6 +261,13 @@ function EditForm({
           <p role="alert" className="text-xs text-danger">{statusState.error}</p>
         )}
       </form>
+
+      {deliverable.attachments && (
+        <div className="grid gap-2">
+          <span className="text-sm font-medium">Anexos</span>
+          <DeliverableAttachments deliverableId={deliverable.id} attachments={deliverable.attachments} compact />
+        </div>
+      )}
 
       <form action={formAction} className="grid gap-4">
         <Fields projectId={projectId} phases={phases} assignees={assignees} deliverable={deliverable} fe={fe} />

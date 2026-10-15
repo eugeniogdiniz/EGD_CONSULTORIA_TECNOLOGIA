@@ -27,8 +27,10 @@ const nextConfig: NextConfig = {
   output: "standalone",
   // pdfkit (PDF da proposta, Fase 16) lê fontes e dados do próprio pacote em runtime: fica fora do bundle
   serverExternalPackages: ["pdfkit"],
-  // upload de arquivos via server action: spec permite até 50 MB
-  experimental: { serverActions: { bodySizeLimit: "52mb" } },
+  // Uploads via server action: GED do projeto aceita até 100 MB por arquivo (um arquivo por
+  // requisição); os demais envios, 50 MB. O proxy (src/proxy.ts) bufferiza o corpo das rotas que
+  // intercepta e, sem este ajuste, corta tudo acima de 10 MB (padrão do Next 16).
+  experimental: { serverActions: { bodySizeLimit: "105mb" }, proxyClientMaxBodySize: "105mb" },
   async rewrites() {
     return [
       // IndexNow: o Bing só aceita URLs abaixo da pasta do arquivo da chave, então ela precisa

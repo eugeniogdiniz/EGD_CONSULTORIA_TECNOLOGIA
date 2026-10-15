@@ -18,6 +18,7 @@ import {
   users,
   projectInvoice,
   projectRate,
+  projectDeliverableAttachment,
 } from "@/db/schema";
 import { ok, fail, fromZod, type ActionResult } from "@/lib/action-result";
 import { audit } from "@/modules/audit/log";
@@ -27,7 +28,9 @@ import { enqueueWebhook } from "@/modules/webhooks/queue";
 import { invoiceSchema, markPaidSchema, projectRateSchema, receiptSchema, type InvoiceInput, type ProjectRateInput, type ReceiptInput } from "./validation";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
-import { uploadFile } from "@/modules/files/actions";
+import { storeFile } from "@/modules/files/actions";
+import { MAX_DOCUMENT_BYTES } from "@/modules/files/keys";
+import { deleteObjects } from "@/lib/storage";
 import { reorderPositions } from "./reorder";
 import { detectDependencyCycle } from "./dependency";
 import { computeMinutes } from "./time-math";
@@ -710,7 +713,8 @@ export async function changeDeliverableStatus(
     metadata: to === "blocked" ? { from: existing.status, to, reason: blockReason } : { from: existing.status, to },
   });
   if (to === "done") {
-    await notifyDeliverableDone({ deliverableId: id, hasFile: existing.fileId !== null, actorId: ctx.user.id });
+    const hasFile = (await db.$count(projectDeliverableAttachment, eq(projectDeliverableAttachment.deliverableId, id))) > 0;
+    await notifyDeliverableDone({ deliverableId: id, hasFile, actorId: ctx.user.id });
     await enqueueWebhook("project.deliverable.done", { id, title: existing.title, projectId: existing.projectId, completedAt: patch.completedAt });
   }
   return ok(null);
@@ -782,31 +786,67 @@ export async function setDeliverableVisibility(
   return ok(null);
 }
 
-export async function attachDeliverableFile(
+/**
+ * Anexa um arquivo à entrega (até 100 MB). O arquivo fica interno: o cliente
+ * só o alcança pela entrega visível no portal ou pelo GED do projeto.
+ */
+export async function addDeliverableAttachment(
   ctx: AdminContext,
-  id: string,
-  formData: FormData,
-): Promise<ActionResult<{ fileId: string }>> {
-  if (!isUuid(id)) return fail("Entrega não encontrada.");
-  const existing = await db.query.projectDeliverable.findFirst({
-    where: eq(projectDeliverable.id, id),
-    columns: { id: true },
-  });
+  deliverableId: string,
+  file: File,
+): Promise<ActionResult<{ id: string; projectId: string }>> {
+  if (!isUuid(deliverableId)) return fail("Entrega não encontrada.");
+  const [existing] = await db
+    .select({ id: projectDeliverable.id, projectId: projectDeliverable.projectId, archivedAt: project.archivedAt })
+    .from(projectDeliverable)
+    .innerJoin(project, eq(projectDeliverable.projectId, project.id))
+    .where(eq(projectDeliverable.id, deliverableId))
+    .limit(1);
   if (!existing) return fail("Entrega não encontrada.");
+  if (existing.archivedAt) return fail("Projeto arquivado: desarquive para anexar arquivos.");
 
-  if (!formData.has("organizationId")) formData.append("organizationId", "");
-  const upload = await uploadFile(ctx, formData);
-  if (!upload.ok) return upload;
-
-  await db.update(projectDeliverable).set({ fileId: upload.data.id }).where(eq(projectDeliverable.id, id));
+  const stored = await storeFile(ctx, file, null, { maxBytes: MAX_DOCUMENT_BYTES });
+  if (!stored.ok) return stored;
+  const [row] = await db
+    .insert(projectDeliverableAttachment)
+    .values({ deliverableId, fileId: stored.data.id, uploadedBy: ctx.user.id })
+    .returning({ id: projectDeliverableAttachment.id });
   await audit({
     actorId: ctx.user.id,
     action: "project.deliverable.file_attached",
     entityType: "project_deliverable",
-    entityId: id,
-    metadata: { fileId: upload.data.id },
+    entityId: deliverableId,
+    metadata: { fileId: stored.data.id, attachmentId: row.id, name: file.name, size: file.size },
   });
-  return ok({ fileId: upload.data.id });
+  return ok({ id: row.id, projectId: existing.projectId });
+}
+
+/** Remove o anexo e apaga o arquivo (registro e objeto no storage). */
+export async function deleteDeliverableAttachment(ctx: AdminContext, id: string): Promise<ActionResult<{ projectId: string; deliverableId: string }>> {
+  if (!isUuid(id)) return fail("Anexo não encontrado.");
+  const [row] = await db
+    .select({ a: projectDeliverableAttachment, projectId: projectDeliverable.projectId, bucketKey: filesTable.bucketKey, name: filesTable.originalName })
+    .from(projectDeliverableAttachment)
+    .innerJoin(projectDeliverable, eq(projectDeliverableAttachment.deliverableId, projectDeliverable.id))
+    .innerJoin(filesTable, eq(projectDeliverableAttachment.fileId, filesTable.id))
+    .where(eq(projectDeliverableAttachment.id, id))
+    .limit(1);
+  if (!row) return fail("Anexo não encontrado.");
+  // apagar o arquivo leva o anexo junto (fk com cascade)
+  await db.delete(filesTable).where(eq(filesTable.id, row.a.fileId));
+  try {
+    await deleteObjects([row.bucketKey]);
+  } catch {
+    // objeto órfão no bucket não afeta o sistema
+  }
+  await audit({
+    actorId: ctx.user.id,
+    action: "project.deliverable.file_removed",
+    entityType: "project_deliverable",
+    entityId: row.a.deliverableId,
+    metadata: { fileId: row.a.fileId, attachmentId: id, name: row.name },
+  });
+  return ok({ projectId: row.projectId, deliverableId: row.a.deliverableId });
 }
 
 export async function deleteDeliverable(ctx: AdminContext, id: string): Promise<ActionResult<null>> {

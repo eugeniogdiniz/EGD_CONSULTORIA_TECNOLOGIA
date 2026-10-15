@@ -7,7 +7,8 @@ import type { ActionResult } from "@/lib/action-result";
 import {
   archiveProject,
   assignDeliverable,
-  attachDeliverableFile,
+  addDeliverableAttachment,
+  deleteDeliverableAttachment,
   changeDeliverableStatus,
   changeProjectStatus,
   completeMilestone,
@@ -275,13 +276,29 @@ export async function assignDeliverableForm(fd: FormData): Promise<void> {
   revalidatePath(`/admin/projetos/${projectId}/kanban`);
 }
 
-export async function attachDeliverableFileForm(_p: NullState, fd: FormData): Promise<NullState> {
-  const ctx = await requireAdmin();
-  const id = String(fd.get("id") ?? "");
-  const r = await attachDeliverableFile(ctx, id, fd);
-  const projectId = String(fd.get("projectId") ?? "");
+function revalidateDeliverable(projectId: string, deliverableId: string) {
   revalidatePath(`/admin/projetos/${projectId}/kanban`);
-  return r.ok ? { ok: true, data: null } : r;
+  revalidatePath(`/admin/projetos/${projectId}/entregas/${deliverableId}`);
+  revalidatePath(`/admin/projetos/${projectId}/documentos`);
+  revalidatePath(`/portal/projetos/${projectId}/entregas/${deliverableId}`);
+}
+
+/** Um arquivo por chamada: o componente envia em sequência (até 100 MB cada). */
+export async function addDeliverableAttachmentForm(_p: NullState, fd: FormData): Promise<NullState> {
+  const ctx = await requireAdmin();
+  const deliverableId = String(fd.get("deliverableId") ?? "");
+  const file = fd.get("file");
+  if (!(file instanceof File) || file.size === 0) return { ok: false, error: "Selecione um arquivo." };
+  const r = await addDeliverableAttachment(ctx, deliverableId, file);
+  if (!r.ok) return r;
+  revalidateDeliverable(r.data.projectId, deliverableId);
+  return { ok: true, data: null };
+}
+
+export async function deleteDeliverableAttachmentForm(fd: FormData): Promise<void> {
+  const ctx = await requireAdmin();
+  const r = await deleteDeliverableAttachment(ctx, String(fd.get("id") ?? ""));
+  if (r.ok) revalidateDeliverable(r.data.projectId, r.data.deliverableId);
 }
 
 export async function setDeliverablePriorityForm(fd: FormData): Promise<void> {
