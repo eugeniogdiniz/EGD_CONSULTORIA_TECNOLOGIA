@@ -20,10 +20,13 @@ export async function storeFile(
   ctx: AdminContext | PortalContext,
   file: File,
   organizationId: string | null,
+  opts: { maxBytes?: number } = {},
 ): Promise<ActionResult<{ id: string }>> {
   if (ctx.kind === "portal") organizationId = ctx.organization.id;
+  const maxBytes = opts.maxBytes ?? MAX_FILE_BYTES;
+  const maxMb = Math.round(maxBytes / 1024 / 1024);
   if (file.size === 0) return fail("Selecione um arquivo.", { file: ["Obrigatório"] });
-  if (file.size > MAX_FILE_BYTES) return fail("Arquivo acima de 50 MB.", { file: ["Máximo 50 MB"] });
+  if (file.size > maxBytes) return fail(`Arquivo acima de ${maxMb} MB.`, { file: [`Máximo ${maxMb} MB`] });
 
   const id = randomUUID();
   const mimeType = file.type || DEFAULT_MIME;

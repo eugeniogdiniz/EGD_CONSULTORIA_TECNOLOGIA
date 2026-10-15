@@ -5,6 +5,7 @@ import { requireAdmin } from "@/modules/auth/context";
 import { getProject } from "@/modules/projects/queries";
 import { getProjectDocuments, type DocumentSource } from "@/modules/project-documents/queries";
 import { deleteDocumentForm } from "@/modules/project-documents/form-actions";
+import { ensureDefaultFolders } from "@/modules/project-documents/actions";
 import { UploadDocumentsForm } from "@/modules/project-documents/components/upload-documents-form";
 import { FolderDialog } from "@/modules/project-documents/components/folder-dialog";
 import { DocumentDialog } from "@/modules/project-documents/components/document-dialog";
@@ -28,8 +29,14 @@ export default async function ProjetoDocumentosPage({ params, searchParams }: Pa
   const ctx = await requireAdmin();
   const { id } = await params;
   const sp = await searchParams;
-  const [row, ged] = await Promise.all([getProject(ctx, id), getProjectDocuments(ctx, id)]);
-  if (!row || !ged) notFound();
+  const row = await getProject(ctx, id);
+  if (!row) notFound();
+  let ged = await getProjectDocuments(ctx, id);
+  if (ged && ged.folders.length === 0) {
+    await ensureDefaultFolders(id);
+    ged = await getProjectDocuments(ctx, id);
+  }
+  if (!ged) notFound();
   const p = row.project;
   const archived = Boolean(p.archivedAt);
 
@@ -92,7 +99,7 @@ export default async function ProjetoDocumentosPage({ params, searchParams }: Pa
           )}
 
           {!archived && (
-            <Block title="Enviar documentos" aside="até 20 arquivos de 50 MB por vez">
+            <Block title="Enviar documentos" aside="até 100 MB por arquivo">
               <UploadDocumentsForm projectId={p.id} folders={folderOptions} defaultFolderId={current?.id ?? null} />
             </Block>
           )}

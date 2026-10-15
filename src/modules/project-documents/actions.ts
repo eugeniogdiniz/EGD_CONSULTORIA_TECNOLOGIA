@@ -8,8 +8,8 @@ import { deleteObjects } from "@/lib/storage";
 import { audit } from "@/modules/audit/log";
 import type { AdminContext } from "@/modules/auth/context";
 import { storeFile } from "@/modules/files/actions";
-import { MAX_FILE_BYTES } from "@/modules/files/keys";
-import { titleFromFilename } from "./folders";
+import { MAX_DOCUMENT_BYTES } from "@/modules/files/keys";
+import { defaultFolderRows, titleFromFilename } from "./folders";
 import { documentSchema, folderSchema, type DocumentInput, type FolderInput } from "./validation";
 
 const MAX_FILES_PER_UPLOAD = 20;
@@ -24,6 +24,15 @@ async function activeProject(projectId: string) {
   return (
     (await db.query.project.findFirst({ where: eq(project.id, projectId), columns: { id: true, archivedAt: true } })) ?? null
   );
+}
+
+/**
+ * Garante as pastas padrão de um projeto que nasceu sem elas (criado fora do
+ * fluxo normal, como seeds e importações). Idempotente: só cria as que faltam.
+ */
+export async function ensureDefaultFolders(projectId: string): Promise<void> {
+  if (!isUuid(projectId)) return;
+  await db.insert(projectDocumentFolder).values(defaultFolderRows(projectId)).onConflictDoNothing();
 }
 
 // Pastas ──────────────────────────────────────────────────────────────────
@@ -107,8 +116,8 @@ export async function uploadDocuments(
   const list = input.files.filter((f) => f.size > 0);
   if (list.length === 0) return fail("Selecione ao menos um arquivo.", { files: ["Obrigatório"] });
   if (list.length > MAX_FILES_PER_UPLOAD) return fail(`Envie no máximo ${MAX_FILES_PER_UPLOAD} arquivos por vez.`, { files: ["Muitos arquivos"] });
-  const big = list.find((f) => f.size > MAX_FILE_BYTES);
-  if (big) return fail(`"${big.name}" passa de 50 MB.`, { files: ["Máximo 50 MB por arquivo"] });
+  const big = list.find((f) => f.size > MAX_DOCUMENT_BYTES);
+  if (big) return fail(`"${big.name}" passa de 100 MB.`, { files: ["Máximo 100 MB por arquivo"] });
 
   const single = list.length === 1;
   const meta = documentSchema.safeParse({
@@ -120,7 +129,7 @@ export async function uploadDocuments(
 
   const ids: string[] = [];
   for (const file of list) {
-    const stored = await storeFile(ctx, file, null);
+    const stored = await storeFile(ctx, file, null, { maxBytes: MAX_DOCUMENT_BYTES });
     if (!stored.ok) return ids.length ? fail(`${ids.length} enviado(s); falhou em "${file.name}": ${stored.error}`) : stored;
     const [row] = await db
       .insert(projectDocument)

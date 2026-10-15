@@ -20,6 +20,7 @@ import {
   users,
   projectInvoice,
   projectRate,
+  projectDeliverableAttachment,
 } from "@/db/schema";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
@@ -205,7 +206,7 @@ export function listDeliverables(
       position: projectDeliverable.position,
       dueAt: projectDeliverable.dueAt,
       completedAt: projectDeliverable.completedAt,
-      fileId: projectDeliverable.fileId,
+      attachmentCount: sql<number>`(select count(*)::int from project_deliverable_attachment a where a.deliverable_id = ${projectDeliverable.id})`,
       visibleToClient: projectDeliverable.visibleToClient,
       phaseId: projectDeliverable.phaseId,
       phaseName: projectPhase.name,
@@ -904,4 +905,40 @@ export function listProjectOptions(_ctx: AdminContext) {
     .innerJoin(crmCompany, eq(project.companyId, crmCompany.id))
     .where(isNull(project.archivedAt))
     .orderBy(asc(project.title));
+}
+
+export type DeliverableAttachment = {
+  id: string;
+  deliverableId: string;
+  fileId: string;
+  name: string;
+  sizeBytes: number;
+  createdAt: Date;
+  uploadedByName: string;
+};
+
+/** Anexos de uma ou mais entregas, do mais antigo para o mais novo (sem checar quem pede). */
+export async function listAttachmentsForDeliverables(deliverableIds: string[]): Promise<DeliverableAttachment[]> {
+  const ids = deliverableIds.filter(isUuid);
+  if (ids.length === 0) return [];
+  return db
+    .select({
+      id: projectDeliverableAttachment.id,
+      deliverableId: projectDeliverableAttachment.deliverableId,
+      fileId: files.id,
+      name: files.originalName,
+      sizeBytes: files.sizeBytes,
+      createdAt: projectDeliverableAttachment.createdAt,
+      uploadedByName: users.name,
+    })
+    .from(projectDeliverableAttachment)
+    .innerJoin(files, eq(projectDeliverableAttachment.fileId, files.id))
+    .innerJoin(users, eq(projectDeliverableAttachment.uploadedBy, users.id))
+    .where(inArray(projectDeliverableAttachment.deliverableId, ids))
+    .orderBy(asc(projectDeliverableAttachment.createdAt));
+}
+
+/** Anexos de uma entrega para a equipe. */
+export function listDeliverableAttachments(_ctx: AdminContext, deliverableId: string) {
+  return listAttachmentsForDeliverables([deliverableId]);
 }

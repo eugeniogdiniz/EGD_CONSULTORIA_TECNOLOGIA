@@ -10,6 +10,7 @@ import {
   files,
   organizations,
   projectDeliverable,
+  projectDeliverableAttachment,
   projectDocument,
   projectDocumentFolder,
 } from "@/db/schema";
@@ -142,6 +143,18 @@ describe("GED do projeto", () => {
     expect(titles).toEqual(["ART", "Alvará de obra"]);
   });
 
+  it("aceita documento acima de 50 MB e recusa acima de 100 MB", async () => {
+    const folder = await folderId(pid, "tecnico");
+    const big = new File([new Uint8Array(60 * 1024 * 1024)], "base-exportada.zip", { type: "application/zip" });
+    const r = await uploadDocuments(admin, { folderId: folder, files: [big] });
+    expect(r.ok).toBe(true);
+    const tooBig = new File([new Uint8Array(100 * 1024 * 1024 + 1)], "grande-demais.zip", { type: "application/zip" });
+    const r2 = await uploadDocuments(admin, { folderId: folder, files: [tooBig] });
+    expect(r2.ok).toBe(false);
+    if (!r2.ok) expect(r2.error).toMatch(/100 MB/);
+    if (r.ok) await deleteDocument(admin, r.data.ids[0]);
+  });
+
   it("cliente não vê pasta interna nem baixa o arquivo dela", async () => {
     const ged = await getPortalProjectDocuments(client, pid);
     expect(ged?.folders.map((f) => f.name)).toEqual(["Proposta", "Contrato", "Entregas"]);
@@ -177,9 +190,17 @@ describe("GED do projeto", () => {
       .values({ number: "PROP-26-902", opportunityId: proj!.opportunityId, title: "Enviada", valueCents: 1, status: "accepted", ownerId: admin.user.id, fileId: await mkFile("enviada.pdf") })
       .returning({ id: crmProposal.id });
     await db.insert(crmContract).values({ number: "CT-26-901", proposalId: sent.id, status: "signed", createdBy: admin.user.id, fileId: await mkFile("ct.pdf"), signedFileId: await mkFile("ct-assinado.pdf") });
-    await db.insert(projectDeliverable).values([
-      { projectId: pid, title: "Projeto executivo", ownerId: admin.user.id, visibleToClient: true, fileId: await mkFile("executivo.pdf") },
-      { projectId: pid, title: "Rascunho interno", ownerId: admin.user.id, visibleToClient: false, fileId: await mkFile("interno.pdf") },
+    const dels = await db
+      .insert(projectDeliverable)
+      .values([
+        { projectId: pid, title: "Projeto executivo", ownerId: admin.user.id, visibleToClient: true },
+        { projectId: pid, title: "Rascunho interno", ownerId: admin.user.id, visibleToClient: false },
+      ])
+      .returning({ id: projectDeliverable.id });
+    await db.insert(projectDeliverableAttachment).values([
+      { deliverableId: dels[0].id, fileId: await mkFile("executivo.pdf"), uploadedBy: admin.user.id },
+      { deliverableId: dels[0].id, fileId: await mkFile("executivo-memorial.pdf"), uploadedBy: admin.user.id },
+      { deliverableId: dels[1].id, fileId: await mkFile("interno.pdf"), uploadedBy: admin.user.id },
     ]);
 
     const team = (await getProjectDocuments(admin, pid))!.documents.map((d) => d.key.split(":")[0] + ":" + d.title);
@@ -194,7 +215,9 @@ describe("GED do projeto", () => {
       ]),
     );
 
-    const seen = (await getPortalProjectDocuments(client, pid))!.documents.map((d) => d.title);
+    const seenDocs = (await getPortalProjectDocuments(client, pid))!.documents;
+    expect(seenDocs.filter((d) => d.source === "deliverable").map((d) => d.fileName).sort()).toEqual(["executivo-memorial.pdf", "executivo.pdf"]);
+    const seen = seenDocs.map((d) => d.title);
     expect(seen).toContain("Proposta PROP-26-902");
     expect(seen).not.toContain("Proposta PROP-26-901");
     expect(seen).toContain("Contrato CT-26-901 assinado");

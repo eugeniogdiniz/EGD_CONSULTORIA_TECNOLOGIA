@@ -39,3 +39,34 @@ test("kanban: clicar no cartão abre o diálogo e arrastar muda o status (e pers
   await expect(doing.getByText("Laudo final assinado")).toBeVisible({ timeout: 20_000 });
   await expect(todo.getByText("Laudo final assinado")).toHaveCount(0);
 });
+
+test("anexos: vários arquivos pelo card do kanban, contador no card e lista na página da entrega", async ({ page }) => {
+  test.setTimeout(90_000);
+  const fx = createTwoOrgsWithClientsAndFiles();
+  await loginAs(page, ADMIN.email, ADMIN.password);
+  await page.goto(`/admin/projetos/${fx.projectA.id}/kanban`);
+
+  const card = page.locator("section[data-status]").getByRole("button", { name: /Laudo final assinado/ });
+  await card.click();
+  const dlg = page.getByRole("dialog");
+  const anexos = dlg.getByTestId("anexos-entrega");
+  await expect(anexos).toContainText("Nenhum anexo");
+  await anexos.locator('input[type="file"]').setInputFiles([
+    { name: "laudo.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4 laudo") },
+    { name: "fotos.zip", mimeType: "application/zip", buffer: Buffer.from("PK zip") },
+  ]);
+  await expect(anexos).toContainText("2 arquivos anexados.", { timeout: 20_000 });
+  await expect(anexos.getByRole("listitem")).toHaveCount(2);
+  await expect(anexos).toContainText("laudo.pdf");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(card).toContainText("📎 2");
+
+  await page.goto(`/admin/projetos/${fx.projectA.id}/kanban`);
+  await card.click();
+  await page.getByRole("dialog").getByRole("link", { name: /abrir a página da entrega/i }).click();
+  const bloco = page.getByTestId("anexos-entrega");
+  await expect(bloco.getByRole("listitem")).toHaveCount(2, { timeout: 20_000 });
+  const href = await bloco.getByRole("link", { name: "Baixar" }).first().getAttribute("href");
+  expect(href).toMatch(/\/admin\/arquivos\/[0-9a-f-]+\/baixar$/);
+});

@@ -14,6 +14,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { users } from "@/modules/auth/schema";
+import { files } from "@/modules/files/schema";
 import { project, projectDeliverable } from "./schema";
 
 // Enums ─────────────────────────────────────────────────────────────────────
@@ -289,4 +290,28 @@ export const projectTemplateDeliverable = pgTable(
   (t) => [
     index("template_deliverable_template_idx").on(t.templateId),
   ],
+);
+
+/**
+ * Anexos de uma entrega (vários por entrega). Substitui o arquivo único
+ * `project_deliverable.file_id`, que fica só como legado: a migração copia o
+ * que havia lá para cá e nada mais o lê.
+ */
+export const projectDeliverableAttachment = pgTable(
+  "project_deliverable_attachment",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    deliverableId: uuid()
+      .notNull()
+      .references(() => projectDeliverable.id, { onDelete: "cascade" }),
+    fileId: uuid()
+      .notNull()
+      .unique()
+      .references(() => files.id, { onDelete: "cascade" }),
+    uploadedBy: uuid()
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("project_deliverable_attachment_deliverable_idx").on(t.deliverableId, t.createdAt)],
 );

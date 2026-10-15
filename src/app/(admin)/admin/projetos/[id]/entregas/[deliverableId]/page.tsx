@@ -13,6 +13,7 @@ import {
   getOpenTimer,
   getProject,
   listComments,
+  listDeliverableAttachments,
   listDeliverables,
   listPhases,
   listPredecessors,
@@ -29,6 +30,7 @@ import { DeliverableFormDialog } from "@/modules/projects/components/deliverable
 import { TimerPanel, ManualTimeForm } from "@/modules/projects/components/timer-panel";
 import { CommentThread } from "@/modules/projects/components/comment-thread";
 import { DependencyPicker } from "@/modules/projects/components/dependency-picker";
+import { DeliverableAttachments } from "@/modules/projects/components/deliverable-attachments";
 import { formatBrlCents, formatDate, formatDateTime, formatIsoDate } from "@/lib/format";
 
 export const metadata = { title: "Entrega" };
@@ -76,7 +78,7 @@ export default async function DeliverableDetailPage({
   if (!row || row.deliverable.projectId !== id) notFound();
 
   const d = row.deliverable;
-  const [predecessors, successors, comments, timeEntries, openTimer, projectDeliverables, phases, rateCents, origin] =
+  const [predecessors, successors, comments, timeEntries, openTimer, projectDeliverables, phases, rateCents, origin, attachments] =
     await Promise.all([
       listPredecessors(ctx, deliverableId),
       listSuccessors(ctx, deliverableId),
@@ -87,6 +89,7 @@ export default async function DeliverableDetailPage({
       listPhases(ctx, id),
       getCurrentUserRateCents(ctx),
       getDeliverableOrigin(ctx, deliverableId),
+      listDeliverableAttachments(ctx, deliverableId),
     ]);
 
   const acceptance = (await listDeliverableAcceptances(deliverableId))[0] ?? null;
@@ -183,6 +186,13 @@ export default async function DeliverableDetailPage({
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{d.description}</p>
             </Block>
           )}
+
+          <Block title="Anexos" aside={attachments.length === 0 ? undefined : attachments.length === 1 ? "1 arquivo" : `${attachments.length} arquivos`}>
+            <DeliverableAttachments deliverableId={deliverableId} attachments={attachments} readOnly={Boolean(project.project.archivedAt)} />
+            {!d.visibleToClient && attachments.length > 0 && (
+              <p className="type-micro mt-2 text-faint">A entrega está interna: o cliente só vê os anexos quando ela for compartilhada no portal.</p>
+            )}
+          </Block>
 
           <Block title="Horas">
             <div className="flex flex-col gap-4">
