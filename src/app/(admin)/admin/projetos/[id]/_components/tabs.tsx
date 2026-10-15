@@ -14,6 +14,7 @@ export function ProjectTabs({ projectId }: { projectId: string }) {
     { href: `${base}/calendario`, label: "Calendário", match: (p: string) => p.startsWith(`${base}/calendario`) },
     { href: `${base}/burndown`, label: "Burndown", match: (p: string) => p.startsWith(`${base}/burndown`) },
     { href: `${base}/atas`, label: "Atas", match: (p: string) => p.startsWith(`${base}/atas`) },
+    { href: `${base}/documentos`, label: "Documentos", match: (p: string) => p.startsWith(`${base}/documentos`) },
     { href: `${base}/financeiro`, label: "Financeiro", match: (p: string) => p.startsWith(`${base}/financeiro`) },
     { href: `${base}/relatorio`, label: "Relatório", match: (p: string) => p.startsWith(`${base}/relatorio`) },
   ];

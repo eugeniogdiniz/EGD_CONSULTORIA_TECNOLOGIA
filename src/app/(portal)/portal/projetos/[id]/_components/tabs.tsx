@@ -11,6 +11,7 @@ export function PortalProjectTabs({ projectId }: { projectId: string }) {
     { href: base, label: "Visão geral", match: (p: string) => p === base || p.startsWith(`${base}/entregas`) },
     { href: `${base}/gantt`, label: "Linha do tempo", match: (p: string) => p.startsWith(`${base}/gantt`) },
     { href: `${base}/calendario`, label: "Calendário", match: (p: string) => p.startsWith(`${base}/calendario`) },
+    { href: `${base}/documentos`, label: "Documentos", match: (p: string) => p.startsWith(`${base}/documentos`) },
     { href: `${base}/relatorio`, label: "Relatório", match: (p: string) => p.startsWith(`${base}/relatorio`) },
   ];
   return (

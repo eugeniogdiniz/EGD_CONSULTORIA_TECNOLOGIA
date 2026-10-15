@@ -32,6 +32,7 @@ import {
   deletePhase,
   deleteTemplate,
   deleteTimeEntry,
+  enableClientPortal,
   logManualTime,
   movePhase,
   reorderDeliverable,
@@ -105,6 +106,13 @@ export async function changeProjectStatusForm(fd: FormData): Promise<void> {
   await changeProjectStatus(ctx, id, { to });
   revalidatePath(`/admin/projetos/${id}`);
   revalidatePath("/admin/projetos");
+}
+
+export async function enableClientPortalForm(fd: FormData): Promise<void> {
+  const ctx = await requireAdmin();
+  const id = String(fd.get("id") ?? "");
+  await enableClientPortal(ctx, id);
+  revalidatePath(`/admin/projetos/${id}`);
 }
 
 export async function toggleProjectArchivedForm(fd: FormData): Promise<void> {
