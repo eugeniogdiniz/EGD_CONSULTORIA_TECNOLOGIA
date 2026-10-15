@@ -176,6 +176,13 @@
       "when": 1792024439277,
       "tag": "0024_ged_projeto",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792026887867,
+      "tag": "0025_recebimento_real",
+      "breakpoints": true
     }
   ]
 }

@@ -4,7 +4,8 @@ import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { auditLog, crmCompany, crmOpportunity, notification, project, projectDeliverable, projectInvoice, projectTimeEntry, users } from "@/db/schema";
 import type { AdminContext } from "@/modules/auth/context";
-import { cancelInvoice, createInvoice, logManualTime, markInvoicePaid, setProjectRate, updateInvoice } from "@/modules/projects/actions";
+import { cancelInvoice, createInvoice, logManualTime, markInvoicePaid, reopenInvoice, setProjectRate, updateInvoice, updateInvoiceReceipt } from "@/modules/projects/actions";
+import { summarizeInvoices } from "@/modules/projects/invoices";
 import { getProjectFinancials, listHoursByPerson, listInvoices, listProjectRates, listTimeCostsByDeliverable, resolveRateForDeliverable } from "@/modules/projects/queries";
 import { loadDailyDigestInput, buildDailyDigest } from "@/modules/jobs/digests/daily";
 import { getJob } from "@/modules/jobs/registry";
@@ -49,6 +50,36 @@ describe("parcelas", () => {
     for (const x of ["project.invoice.created", "project.invoice.updated", "project.invoice.paid", "project.invoice.cancelled"]) expect(acts).toContain(x);
     const c = await mk("Terceira", "2027-01-01");
     expect((await listInvoices(admin, projectId)).find((i) => i.id === (c.ok && c.data.id))?.number).toBe(3);
+  });
+
+  it("recebimento guarda valor e data reais; corrige e desfaz", async () => {
+    const r = await mk("Entrada real", "2026-10-07", 165_240);
+    const id = (r.ok && r.data.id) as string;
+    // sem valor: assume o da parcela
+    const plain = await mk("Sem valor", "2026-10-07", 10_000);
+    expect((await markInvoicePaid(admin, (plain.ok && plain.data.id) as string, "2026-10-08")).ok).toBe(true);
+    expect((await listInvoices(admin, projectId)).find((i) => i.id === (plain.ok && plain.data.id))?.receivedCents).toBe(10_000);
+
+    expect((await markInvoicePaid(admin, id, "2026-10-09", "0")).ok).toBe(false);
+    expect((await markInvoicePaid(admin, id, "2026-10-09", "163000")).ok).toBe(true);
+    let inv = (await listInvoices(admin, projectId)).find((i) => i.id === id)!;
+    expect(inv.receivedCents).toBe(163_000);
+    expect(inv.paidAt).toBe("2026-10-09");
+
+    expect((await updateInvoiceReceipt(admin, id, { paidAt: "2026-10-10", receivedCents: "165240" })).ok).toBe(true);
+    inv = (await listInvoices(admin, projectId)).find((i) => i.id === id)!;
+    expect([inv.paidAt, inv.receivedCents]).toEqual(["2026-10-10", 165_240]);
+
+    expect((await reopenInvoice(admin, id)).ok).toBe(true);
+    inv = (await listInvoices(admin, projectId)).find((i) => i.id === id)!;
+    expect([inv.status, inv.paidAt, inv.receivedCents]).toEqual(["pending", null, null]);
+    expect((await updateInvoiceReceipt(admin, id, { paidAt: "2026-10-10", receivedCents: "1" })).ok).toBe(false);
+
+    await markInvoicePaid(admin, id, "2026-10-11", "160000");
+    const s = summarizeInvoices(await listInvoices(admin, projectId), "2026-10-14");
+    expect(s.paidCents).toBeGreaterThanOrEqual(160_000 + 10_000);
+    const acts = (await db.select({ a: auditLog.action }).from(auditLog).where(eq(auditLog.entityId, id))).map((x) => x.a);
+    for (const x of ["project.invoice.paid", "project.invoice.receipt_updated", "project.invoice.reopened"]) expect(acts).toContain(x);
   });
 
   it("automação e resumo diário: vencida vira uma notificação ao dono e entra na seção Financeiro", async () => {

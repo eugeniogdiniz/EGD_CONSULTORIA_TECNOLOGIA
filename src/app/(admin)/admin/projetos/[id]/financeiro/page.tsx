@@ -13,7 +13,9 @@ import {
 } from "@/modules/projects/queries";
 import { InvoiceFormDialog } from "@/modules/projects/components/invoice-form";
 import { ConfirmAction } from "@/components/shell/confirm-action";
-import { cancelExpenseForm, cancelInvoiceForm, markExpensePaidForm, markInvoicePaidForm, setProjectRateForm } from "@/modules/projects/form-actions";
+import { cancelExpenseForm, cancelInvoiceForm, markExpensePaidForm, reopenInvoiceForm, setProjectRateForm } from "@/modules/projects/form-actions";
+import { ReceiptDialog } from "@/modules/projects/components/receipt-dialog";
+import { InvoiceAmountCell } from "@/modules/projects/components/receipt-cell";
 import { EXPENSE_KIND_LABEL, EXPENSE_STATE_LABEL, EXPENSE_STATE_STYLE, expenseState } from "@/modules/projects/payables";
 import { INVOICE_STATE_LABEL, INVOICE_STATE_STYLE, invoiceState, summarizeInvoices } from "@/modules/projects/invoices";
 import { formatHours } from "@/modules/projects/burndown";
@@ -142,19 +144,13 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
                   <tr key={inv.id} className="border-t border-border" data-testid={`parcela-${inv.number}`}>
                     <td className="type-data px-4 py-2">{inv.number}</td>
                     <td className="px-4 py-2">{inv.description}{inv.notes && <span className="type-micro block text-faint">{inv.notes}</span>}</td>
-                    <td className="type-data px-4 py-2 whitespace-nowrap">{formatIsoDate(inv.dueAt)}{st === "paid" && inv.paidAt && <span className="type-micro block text-success">paga em {formatIsoDate(inv.paidAt)}</span>}</td>
-                    <td className="type-data px-4 py-2 text-right">{formatBrlCents(inv.amountCents)}</td>
+                    <td className="type-data px-4 py-2 whitespace-nowrap">{formatIsoDate(inv.dueAt)}</td>
+                    <td className="px-4 py-2 text-right whitespace-nowrap"><InvoiceAmountCell inv={inv} /></td>
                     <td className="px-4 py-2"><span className={cn("inline-flex h-[22px] items-center rounded-sm border px-2 text-xs font-medium", INVOICE_STATE_STYLE[st])}>{INVOICE_STATE_LABEL[st]}</span></td>
                     <td className="px-4 py-2">
                       {inv.status === "pending" && (
                         <div className="flex flex-wrap gap-1.5">
-                          <form action={markInvoicePaidForm} className="flex items-center gap-1">
-                            <input type="hidden" name="id" value={inv.id} />
-                            <input type="hidden" name="projectId" value={id} />
-                            <label className="sr-only" htmlFor={`paid-${inv.id}`}>Data do recebimento</label>
-                            <input id={`paid-${inv.id}`} name="paidAt" type="date" defaultValue={today} className="h-8 rounded-sm border border-input bg-card px-2 text-xs" />
-                            <Button type="submit" size="sm" variant="outline">Marcar paga</Button>
-                          </form>
+                          <ReceiptDialog invoice={{ ...inv, projectId: id }} today={today} trigger={<Button type="button" size="sm" variant="outline">Registrar recebimento</Button>} />
                           <InvoiceFormDialog projectId={id} invoice={{ id: inv.id, description: inv.description, amountCents: inv.amountCents, dueAt: inv.dueAt, notes: inv.notes }} trigger={<Button variant="ghost" size="sm" type="button">Editar</Button>} />
                           <ConfirmAction
                             trigger={<Button variant="ghost" size="sm">Cancelar</Button>}
@@ -163,6 +159,20 @@ export default async function FinanceiroPage({ params }: PageProps<"/admin/proje
                             confirmLabel="Cancelar parcela"
                             action={cancelInvoiceForm}
                             fields={{ id: inv.id, projectId: id }}
+                          />
+                        </div>
+                      )}
+                      {inv.status === "paid" && (
+                        <div className="flex flex-wrap gap-1.5">
+                          <ReceiptDialog invoice={{ ...inv, projectId: id }} today={today} trigger={<Button type="button" size="sm" variant="ghost">Corrigir recebimento</Button>} />
+                          <ConfirmAction
+                            trigger={<Button variant="ghost" size="sm">Desfazer</Button>}
+                            title={`Desfazer o recebimento da parcela ${inv.number}?`}
+                            description="A parcela volta a pendente e o valor sai do recebido. Use se o recebimento foi lançado por engano."
+                            confirmLabel="Desfazer recebimento"
+                            action={reopenInvoiceForm}
+                            fields={{ id: inv.id, projectId: id }}
+                            destructive={false}
                           />
                         </div>
                       )}

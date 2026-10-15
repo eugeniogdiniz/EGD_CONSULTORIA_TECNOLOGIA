@@ -170,6 +170,8 @@ export const projectInvoice = pgTable(
     dueAt: date().notNull(),
     status: projectInvoiceStatus().default("pending").notNull(),
     paidAt: date(),
+    /** valor que de fato entrou na conta; pode diferir do da parcela (taxas, descontos, juros). Nulo enquanto pendente */
+    receivedCents: bigint({ mode: "number" }),
     notes: text(),
     createdBy: uuid()
       .notNull()

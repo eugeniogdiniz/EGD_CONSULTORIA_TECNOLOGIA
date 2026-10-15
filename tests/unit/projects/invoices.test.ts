@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { invoiceState, summarizeInvoices } from "@/modules/projects/invoices";
+import { invoiceState, receiptDifference, receivedInPeriod, receivedOf, summarizeInvoices } from "@/modules/projects/invoices";
 
 const today = "2026-10-03";
 describe("parcelas", () => {
@@ -21,5 +21,19 @@ describe("parcelas", () => {
       today,
     );
     expect(s).toEqual({ invoicedCents: 10000, paidCents: 1000, receivableCents: 9000, overdueCents: 2000, overdueCount: 1, dueSoonCount: 1 });
+  });
+  it("recebido usa o valor real; sem registro antigo, o da parcela", () => {
+    expect(receivedOf({ amountCents: 1000, receivedCents: 950 })).toBe(950);
+    expect(receivedOf({ amountCents: 1000, receivedCents: null })).toBe(1000);
+    expect(receiptDifference({ amountCents: 1000, receivedCents: 950, status: "paid" })).toBe(-50);
+    expect(receiptDifference({ amountCents: 1000, receivedCents: null, status: "pending" })).toBe(0);
+    const list = [
+      { amountCents: 1000, receivedCents: 950, dueAt: "2026-10-01", status: "paid" as const, paidAt: "2026-10-02" },
+      { amountCents: 2000, receivedCents: null, dueAt: "2026-09-01", status: "paid" as const, paidAt: "2026-09-05" },
+      { amountCents: 5000, dueAt: "2026-10-01", status: "pending" as const },
+    ];
+    expect(summarizeInvoices(list, today)).toMatchObject({ invoicedCents: 8000, paidCents: 2950, receivableCents: 5000 });
+    expect(receivedInPeriod(list, "2026-10-01", "2026-10-31")).toBe(950);
+    expect(receivedInPeriod(list, null, null)).toBe(2950);
   });
 });

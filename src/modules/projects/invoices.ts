@@ -1,5 +1,25 @@
 /** Parcelas do projeto: estado derivado e totais. Puro: `today` em 'YYYY-MM-DD'. */
-export type InvoiceLike = { amountCents: number; dueAt: string; status: "pending" | "paid" | "cancelled"; paidAt?: string | null };
+export type InvoiceLike = { amountCents: number; dueAt: string; status: "pending" | "paid" | "cancelled"; paidAt?: string | null; receivedCents?: number | null };
+
+/** Quanto de fato entrou por uma parcela paga; sem registro (dado antigo), vale o valor da parcela. */
+export function receivedOf(inv: Pick<InvoiceLike, "amountCents" | "receivedCents">): number {
+  return inv.receivedCents ?? inv.amountCents;
+}
+
+/** Diferença entre o recebido e o valor da parcela (negativo = entrou menos). Zero se pendente ou cancelada. */
+export function receiptDifference(inv: Pick<InvoiceLike, "amountCents" | "receivedCents" | "status">): number {
+  return inv.status === "paid" ? receivedOf(inv) - inv.amountCents : 0;
+}
+
+/** Recebido dentro de [from, to] (datas ISO, inclusivas) pela data e pelo valor efetivos do recebimento. */
+export function receivedInPeriod(list: InvoiceLike[], from: string | null, to: string | null): number {
+  return list.reduce((sum, inv) => {
+    if (inv.status !== "paid" || !inv.paidAt) return sum;
+    if (from && inv.paidAt < from) return sum;
+    if (to && inv.paidAt > to) return sum;
+    return sum + receivedOf(inv);
+  }, 0);
+}
 export type InvoiceState = "pending" | "overdue" | "paid" | "cancelled";
 
 export function invoiceState(inv: Pick<InvoiceLike, "status" | "dueAt">, today: string): InvoiceState {
@@ -25,7 +45,8 @@ export function summarizeInvoices(list: InvoiceLike[], today: string, horizonDay
     const st = invoiceState(inv, today);
     if (st === "cancelled") continue;
     out.invoicedCents += inv.amountCents;
-    if (st === "paid") out.paidCents += inv.amountCents;
+    // faturado segue o valor da parcela; recebido segue o que de fato entrou
+    if (st === "paid") out.paidCents += receivedOf(inv);
     else {
       out.receivableCents += inv.amountCents;
       if (st === "overdue") {

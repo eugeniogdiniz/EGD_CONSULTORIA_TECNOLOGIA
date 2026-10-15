@@ -24,7 +24,7 @@ import { audit } from "@/modules/audit/log";
 import { notifyDeliverableAssigned, notifyDeliverableDone, notifyTeamComment } from "@/modules/notifications/events";
 import { resolveRateForDeliverable } from "./queries";
 import { enqueueWebhook } from "@/modules/webhooks/queue";
-import { invoiceSchema, markPaidSchema, projectRateSchema, type InvoiceInput, type ProjectRateInput } from "./validation";
+import { invoiceSchema, markPaidSchema, projectRateSchema, receiptSchema, type InvoiceInput, type ProjectRateInput, type ReceiptInput } from "./validation";
 import type { AdminContext } from "@/modules/auth/context";
 import { isUuid } from "@/lib/uuid";
 import { uploadFile } from "@/modules/files/actions";
@@ -1628,18 +1628,52 @@ export async function updateInvoice(ctx: AdminContext, id: string, input: Invoic
   return ok(null);
 }
 
-export async function markInvoicePaid(ctx: AdminContext, id: string, paidAt: string): Promise<ActionResult<null>> {
+/**
+ * Registra o recebimento de uma parcela pendente: a data e quanto de fato
+ * entrou. Sem valor informado, vale o valor da parcela.
+ */
+export async function markInvoicePaid(ctx: AdminContext, id: string, paidAt: string, receivedCents?: number | string | null): Promise<ActionResult<null>> {
   if (!isUuid(id)) return fail("Parcela não encontrada.");
-  const parsed = markPaidSchema.safeParse({ paidAt });
+  const existing = await db.query.projectInvoice.findFirst({ where: eq(projectInvoice.id, id), columns: { amountCents: true } });
+  if (!existing) return fail("Parcela não encontrada.");
+  const parsed = receiptSchema.safeParse({ paidAt, receivedCents: receivedCents === undefined || receivedCents === null || receivedCents === "" ? existing.amountCents : receivedCents });
   if (!parsed.success) return fromZod(parsed.error);
   const [row] = await db
     .update(projectInvoice)
-    .set({ status: "paid", paidAt: parsed.data.paidAt })
+    .set({ status: "paid", paidAt: parsed.data.paidAt, receivedCents: parsed.data.receivedCents })
     .where(and(eq(projectInvoice.id, id), eq(projectInvoice.status, "pending")))
     .returning({ id: projectInvoice.id, amountCents: projectInvoice.amountCents });
   if (!row) return fail("Parcela não encontrada ou já decidida.");
-  await audit({ actorId: ctx.user.id, action: "project.invoice.paid", entityType: "project_invoice", entityId: id, metadata: { paidAt: parsed.data.paidAt, amountCents: row.amountCents } });
-  await enqueueWebhook("invoice.paid", { id, amountCents: row.amountCents, paidAt: parsed.data.paidAt });
+  await audit({ actorId: ctx.user.id, action: "project.invoice.paid", entityType: "project_invoice", entityId: id, metadata: { paidAt: parsed.data.paidAt, amountCents: row.amountCents, receivedCents: parsed.data.receivedCents } });
+  await enqueueWebhook("invoice.paid", { id, amountCents: row.amountCents, receivedCents: parsed.data.receivedCents, paidAt: parsed.data.paidAt });
+  return ok(null);
+}
+
+/** Corrige data ou valor de um recebimento já registrado. */
+export async function updateInvoiceReceipt(ctx: AdminContext, id: string, input: ReceiptInput): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Parcela não encontrada.");
+  const parsed = receiptSchema.safeParse(input);
+  if (!parsed.success) return fromZod(parsed.error);
+  const [row] = await db
+    .update(projectInvoice)
+    .set({ paidAt: parsed.data.paidAt, receivedCents: parsed.data.receivedCents })
+    .where(and(eq(projectInvoice.id, id), eq(projectInvoice.status, "paid")))
+    .returning({ id: projectInvoice.id });
+  if (!row) return fail("Parcela não encontrada ou ainda não recebida.");
+  await audit({ actorId: ctx.user.id, action: "project.invoice.receipt_updated", entityType: "project_invoice", entityId: id, metadata: { paidAt: parsed.data.paidAt, receivedCents: parsed.data.receivedCents } });
+  return ok(null);
+}
+
+/** Desfaz um recebimento lançado por engano: a parcela volta a pendente. */
+export async function reopenInvoice(ctx: AdminContext, id: string): Promise<ActionResult<null>> {
+  if (!isUuid(id)) return fail("Parcela não encontrada.");
+  const [row] = await db
+    .update(projectInvoice)
+    .set({ status: "pending", paidAt: null, receivedCents: null })
+    .where(and(eq(projectInvoice.id, id), eq(projectInvoice.status, "paid")))
+    .returning({ id: projectInvoice.id });
+  if (!row) return fail("Parcela não encontrada ou ainda não recebida.");
+  await audit({ actorId: ctx.user.id, action: "project.invoice.reopened", entityType: "project_invoice", entityId: id });
   return ok(null);
 }
 

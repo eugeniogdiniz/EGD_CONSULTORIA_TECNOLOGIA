@@ -229,6 +229,16 @@ export type InvoiceInput = z.input<typeof invoiceSchema>;
 
 export const markPaidSchema = z.object({ paidAt: isoDateRequired });
 
+/** Recebimento de uma parcela: data e valor que de fato entrou (centavos). */
+export const receiptSchema = z.object({
+  paidAt: isoDateRequired,
+  receivedCents: z.coerce
+    .number({ error: "Informe o valor recebido." })
+    .int("Somente valor inteiro em centavos.")
+    .min(1, "Informe o valor recebido."),
+});
+export type ReceiptInput = z.input<typeof receiptSchema>;
+
 export const projectRateSchema = z.object({
   projectId: z.uuid(),
   userId: z.uuid(),
